@@ -1,0 +1,126 @@
+<?php
+
+if ( ! defined( 'WPINC' ) ) {
+	die;
+}
+
+class {{className}}_Admin {
+
+	private $plugin_name;
+	private $version;
+
+	public function __construct( $plugin_name, $version ) {
+		$this->plugin_name = $plugin_name;
+		$this->version     = $version;
+	}
+
+	public function register_admin_pages() {
+		{{#each adminPages}}
+		{{#if parentSlug}}
+		add_submenu_page(
+			'{{parentSlug}}',
+			'{{pageTitle}}',
+			'{{menuTitle}}',
+			'{{capability}}',
+			'{{menuSlug}}',
+			array( $this, 'render_admin_page' )
+		);
+		{{else}}
+		add_menu_page(
+			'{{pageTitle}}',
+			'{{menuTitle}}',
+			'{{capability}}',
+			'{{menuSlug}}',
+			array( $this, 'render_admin_page' ),
+			'{{iconUrl}}',
+			{{#if position}}{{position}}{{else}}null{{/if}}
+		);
+		{{/if}}
+		{{/each}}
+	}
+
+	public function render_admin_page() {
+		$screen = get_current_screen();
+		echo '<div id="wpts-admin-app" data-page="' . esc_attr( $screen->id ) . '"></div>';
+	}
+
+	public function enqueue_admin_assets( $hook_suffix ) {
+		$admin_pages = array(
+			{{#each adminPages}}
+			{{#if parentSlug}}
+			'{{../textDomain}}_page_{{menuSlug}}',
+			{{else}}
+			'toplevel_page_{{menuSlug}}',
+			{{/if}}
+			{{/each}}
+		);
+
+		if ( ! in_array( $hook_suffix, $admin_pages, true ) ) {
+			return;
+		}
+
+		$asset_file = {{constantPrefix}}PLUGIN_DIR . 'admin/js/build/index.asset.php';
+
+		if ( ! file_exists( $asset_file ) ) {
+			return;
+		}
+
+		$asset = require $asset_file;
+
+		wp_enqueue_script(
+			'{{textDomain}}-admin',
+			{{constantPrefix}}PLUGIN_URL . 'admin/js/build/index.js',
+			$asset['dependencies'],
+			$asset['version'],
+			true
+		);
+
+		if ( file_exists( {{constantPrefix}}PLUGIN_DIR . 'admin/js/build/index.css' ) ) {
+			wp_enqueue_style(
+				'{{textDomain}}-admin',
+				{{constantPrefix}}PLUGIN_URL . 'admin/js/build/index.css',
+				array( 'wp-components' ),
+				$asset['version']
+			);
+		}
+
+		wp_enqueue_style( 'wp-components' );
+	}
+
+	{{#if hasSettings}}
+	public function register_settings() {
+		{{#each settings}}
+		register_setting(
+			'{{../textDomain}}_options',
+			'{{../functionPrefix}}{{key}}',
+			array(
+				'type'    => '{{type}}',
+				'default' => {{{phpDefault}}},
+				{{#if sanitize}}
+				'sanitize_callback' => '{{sanitize}}',
+				{{/if}}
+			)
+		);
+		{{/each}}
+	}
+	{{/if}}
+
+	{{#each adminActions}}
+	public function {{phpMethodName}}() {
+{{{body.phpCode}}}
+	}
+
+	{{/each}}
+	{{#each ajaxHandlers}}
+	public function {{phpMethodName}}() {
+		{{#if nonce}}
+		check_ajax_referer( '{{../functionPrefix}}nonce', 'nonce' );
+		{{/if}}
+		if ( ! current_user_can( '{{capability}}' ) ) {
+			wp_die( __( 'Unauthorized', '{{../textDomain}}' ) );
+		}
+{{{body.phpCode}}}
+	}
+
+	{{/each}}
+}

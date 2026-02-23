@@ -1,0 +1,88 @@
+<?php
+
+if ( ! defined( 'WPINC' ) ) {
+	die;
+}
+
+class {{className}}_Rest_Api {
+
+	private $namespace;
+
+	public function __construct( $plugin_slug ) {
+		$this->namespace = $plugin_slug . '/v1';
+	}
+
+	public function register_routes() {
+		{{#if hasSettings}}
+		register_rest_route(
+			$this->namespace,
+			'/settings',
+			array(
+				array(
+					'methods'             => 'GET',
+					'callback'            => array( $this, 'get_settings' ),
+					'permission_callback' => array( $this, 'check_permissions' ),
+				),
+				array(
+					'methods'             => 'POST',
+					'callback'            => array( $this, 'update_settings' ),
+					'permission_callback' => array( $this, 'check_permissions' ),
+				),
+			)
+		);
+		{{/if}}
+		{{#each restRoutes}}
+		register_rest_route(
+			$this->namespace,
+			'{{route}}',
+			array(
+				'methods'             => '{{method}}',
+				'callback'            => array( $this, '{{phpMethodName}}' ),
+				'permission_callback' => function() {
+					return current_user_can( '{{capability}}' );
+				},
+			)
+		);
+		{{/each}}
+	}
+
+	{{#if hasSettings}}
+	public function check_permissions() {
+		return current_user_can( 'manage_options' );
+	}
+
+	public function get_settings( $request ) {
+		$settings = array(
+			{{#each settings}}
+			'{{key}}' => get_option( '{{../functionPrefix}}{{key}}', {{{phpDefault}}} ),
+			{{/each}}
+		);
+
+		return rest_ensure_response( $settings );
+	}
+
+	public function update_settings( $request ) {
+		$params = $request->get_json_params();
+
+		{{#each settings}}
+		if ( isset( $params['{{key}}'] ) ) {
+			{{#if sanitize}}
+			$value = {{sanitize}}( $params['{{key}}'] );
+			{{else}}
+			$value = $params['{{key}}'];
+			{{/if}}
+			update_option( '{{../functionPrefix}}{{key}}', $value );
+		}
+		{{/each}}
+
+		return rest_ensure_response( array( 'success' => true ) );
+	}
+	{{/if}}
+
+	{{#each restRoutes}}
+	public function {{phpMethodName}}( $request ) {
+{{{body.phpCode}}}
+	}
+
+	{{/each}}
+}

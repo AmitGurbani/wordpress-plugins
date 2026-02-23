@@ -1,0 +1,16 @@
+<?php
+
+if ( ! defined( 'WPINC' ) ) {
+	die;
+}
+
+class {{className}}_Activator {
+
+	public static function activate() {
+		{{#if activationCode}}
+{{{activationCode}}}
+		{{else}}
+		// Activation tasks go here.
+		{{/if}}
+	}
+}

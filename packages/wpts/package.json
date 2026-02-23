@@ -1,0 +1,43 @@
+{
+  "name": "wpts",
+  "version": "0.1.0",
+  "description": "TypeScript-to-WordPress-Plugin transpiler",
+  "type": "module",
+  "main": "dist/src/index.js",
+  "types": "dist/src/index.d.ts",
+  "bin": {
+    "wpts": "dist/bin/wpts.js"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json && rm -rf dist/src/templates && cp -r src/templates dist/src/templates",
+    "dev": "tsc -p tsconfig.build.json --watch",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "lint": "eslint src/ tests/"
+  },
+  "keywords": [
+    "wordpress",
+    "typescript",
+    "transpiler",
+    "plugin",
+    "php"
+  ],
+  "license": "MIT",
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "dependencies": {
+    "chalk": "^5.6.2",
+    "chokidar": "^5.0.0",
+    "commander": "^14.0.3",
+    "fs-extra": "^11.3.0",
+    "handlebars": "^4.7.8",
+    "typescript": "^5.9.3"
+  },
+  "devDependencies": {
+    "@types/fs-extra": "^11.0.4",
+    "@types/node": "^25.3.0",
+    "@types/react": "^19.2.14",
+    "vitest": "^4.0.18"
+  }
+}

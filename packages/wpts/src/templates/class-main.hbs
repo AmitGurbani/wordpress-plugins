@@ -1,0 +1,85 @@
+<?php
+
+if ( ! defined( 'WPINC' ) ) {
+	die;
+}
+
+class {{className}} {
+
+	protected $loader;
+	protected $plugin_name;
+	protected $version;
+
+	public function __construct() {
+		$this->version     = {{constantPrefix}}VERSION;
+		$this->plugin_name = '{{textDomain}}';
+		$this->load_dependencies();
+		$this->define_admin_hooks();
+		$this->define_public_hooks();
+	}
+
+	private function load_dependencies() {
+		require_once {{constantPrefix}}PLUGIN_DIR . 'includes/class-{{filePrefix}}-loader.php';
+		require_once {{constantPrefix}}PLUGIN_DIR . 'admin/class-{{filePrefix}}-admin.php';
+		require_once {{constantPrefix}}PLUGIN_DIR . 'public/class-{{filePrefix}}-public.php';
+		{{#if hasCustomRestApi}}
+		require_once {{constantPrefix}}PLUGIN_DIR . 'includes/class-{{filePrefix}}-rest-api.php';
+		{{/if}}
+		$this->loader = new {{className}}_Loader();
+	}
+
+	private function define_admin_hooks() {
+		$admin = new {{className}}_Admin( $this->plugin_name, $this->version );
+		{{#if hasAdminPages}}
+		$this->loader->add_action( 'admin_menu', $admin, 'register_admin_pages' );
+		$this->loader->add_action( 'admin_enqueue_scripts', $admin, 'enqueue_admin_assets' );
+		{{/if}}
+		{{#if hasCustomRestApi}}
+		$rest_api = new {{className}}_Rest_Api( '{{textDomain}}' );
+		$this->loader->add_action( 'rest_api_init', $rest_api, 'register_routes' );
+		{{/if}}
+		{{#if hasSettings}}
+		$this->loader->add_action( 'admin_init', $admin, 'register_settings' );
+		{{/if}}
+		{{#each adminActions}}
+		$this->loader->add_action( '{{hookName}}', $admin, '{{phpMethodName}}', {{priority}} );
+		{{/each}}
+		{{#each ajaxHandlers}}
+		$this->loader->add_action( 'wp_ajax_{{action}}', $admin, '{{phpMethodName}}' );
+		{{#if public}}
+		$this->loader->add_action( 'wp_ajax_nopriv_{{action}}', $admin, '{{phpMethodName}}' );
+		{{/if}}
+		{{/each}}
+	}
+
+	private function define_public_hooks() {
+		$public = new {{className}}_Public( $this->plugin_name, $this->version );
+		{{#each publicActions}}
+		$this->loader->add_action( '{{hookName}}', $public, '{{phpMethodName}}', {{priority}} );
+		{{/each}}
+		{{#each publicFilters}}
+		$this->loader->add_filter( '{{hookName}}', $public, '{{phpMethodName}}', {{priority}}, {{acceptedArgs}} );
+		{{/each}}
+		{{#if hasShortcodes}}
+		$this->loader->add_action( 'init', $public, 'register_shortcodes' );
+		{{/if}}
+		{{#if hasCustomPostTypes}}
+		$this->loader->add_action( 'init', $public, 'register_custom_post_types' );
+		{{/if}}
+		{{#if hasCustomTaxonomies}}
+		$this->loader->add_action( 'init', $public, 'register_custom_taxonomies' );
+		{{/if}}
+	}
+
+	public function run() {
+		$this->loader->run();
+	}
+
+	public function get_plugin_name() {
+		return $this->plugin_name;
+	}
+
+	public function get_version() {
+		return $this->version;
+	}
+}

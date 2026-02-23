@@ -1,0 +1,57 @@
+<?php
+/**
+ * Plugin Name:       {{name}}
+ * Plugin URI:        {{uri}}
+ * Description:       {{description}}
+ * Version:           {{version}}
+ * Author:            {{author}}
+ * Author URI:        {{authorUri}}
+ * License:           {{license}}
+ * License URI:       {{licenseUri}}
+ * Text Domain:       {{textDomain}}
+ * Domain Path:       {{domainPath}}
+ * Requires at least: {{requiresWP}}
+ * Requires PHP:      {{requiresPHP}}
+ */
+
+// If this file is called directly, abort.
+if ( ! defined( 'WPINC' ) ) {
+	die;
+}
+
+define( '{{constantPrefix}}VERSION', '{{version}}' );
+define( '{{constantPrefix}}PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
+define( '{{constantPrefix}}PLUGIN_URL', plugin_dir_url( __FILE__ ) );
+
+/**
+ * Plugin activation.
+ */
+function activate_{{functionPrefix}}() {
+	require_once {{constantPrefix}}PLUGIN_DIR . 'includes/class-{{filePrefix}}-activator.php';
+	{{className}}_Activator::activate();
+}
+
+/**
+ * Plugin deactivation.
+ */
+function deactivate_{{functionPrefix}}() {
+	require_once {{constantPrefix}}PLUGIN_DIR . 'includes/class-{{filePrefix}}-deactivator.php';
+	{{className}}_Deactivator::deactivate();
+}
+
+register_activation_hook( __FILE__, 'activate_{{functionPrefix}}' );
+register_deactivation_hook( __FILE__, 'deactivate_{{functionPrefix}}' );
+
+/**
+ * Core plugin class.
+ */
+require_once {{constantPrefix}}PLUGIN_DIR . 'includes/class-{{filePrefix}}.php';
+
+/**
+ * Begin plugin execution.
+ */
+function run_{{functionPrefix}}() {
+	$plugin = new {{className}}();
+	$plugin->run();
+}
+run_{{functionPrefix}}();

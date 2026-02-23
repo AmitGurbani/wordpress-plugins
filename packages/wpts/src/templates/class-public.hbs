@@ -1,0 +1,109 @@
+<?php
+
+if ( ! defined( 'WPINC' ) ) {
+	die;
+}
+
+class {{className}}_Public {
+
+	private $plugin_name;
+	private $version;
+
+	public function __construct( $plugin_name, $version ) {
+		$this->plugin_name = $plugin_name;
+		$this->version     = $version;
+	}
+
+	{{#each publicActions}}
+	public function {{phpMethodName}}() {
+{{{body.phpCode}}}
+	}
+
+	{{/each}}
+	{{#each publicFilters}}
+	public function {{phpMethodName}}( {{#each parameters}}${{name}}{{#unless @last}}, {{/unless}}{{/each}} ) {
+{{{body.phpCode}}}
+	}
+
+	{{/each}}
+	{{#if hasShortcodes}}
+	public function register_shortcodes() {
+		{{#each shortcodes}}
+		add_shortcode( '{{tag}}', array( $this, '{{phpMethodName}}' ) );
+		{{/each}}
+	}
+
+	{{#each shortcodes}}
+	public function {{phpMethodName}}( $atts ) {
+		$atts = shortcode_atts( array(), $atts, '{{tag}}' );
+{{{body.phpCode}}}
+	}
+
+	{{/each}}
+	{{/if}}
+	{{#if hasCustomPostTypes}}
+	public function register_custom_post_types() {
+		{{#each customPostTypes}}
+		register_post_type( '{{slug}}', array(
+			'labels' => array(
+				'name'               => __( '{{pluralName}}', '{{../textDomain}}' ),
+				'singular_name'      => __( '{{singularName}}', '{{../textDomain}}' ),
+				'add_new'            => __( 'Add New', '{{../textDomain}}' ),
+				'add_new_item'       => __( 'Add New {{singularName}}', '{{../textDomain}}' ),
+				'edit_item'          => __( 'Edit {{singularName}}', '{{../textDomain}}' ),
+				'new_item'           => __( 'New {{singularName}}', '{{../textDomain}}' ),
+				'view_item'          => __( 'View {{singularName}}', '{{../textDomain}}' ),
+				'search_items'       => __( 'Search {{pluralName}}', '{{../textDomain}}' ),
+				'not_found'          => __( 'No {{pluralName}} found', '{{../textDomain}}' ),
+				'not_found_in_trash' => __( 'No {{pluralName}} found in Trash', '{{../textDomain}}' ),
+				'all_items'          => __( 'All {{pluralName}}', '{{../textDomain}}' ),
+				'menu_name'          => __( '{{pluralName}}', '{{../textDomain}}' ),
+			),
+			{{#if description}}'description'     => __( '{{description}}', '{{../textDomain}}' ),
+			{{/if}}'public'          => {{#if public}}true{{else}}false{{/if}},
+			'show_in_rest'    => {{#if showInRest}}true{{else}}false{{/if}},
+			'has_archive'     => {{#if hasArchive}}true{{else}}false{{/if}},
+			'supports'        => array( {{#each supports}}'{{this}}'{{#unless @last}}, {{/unless}}{{/each}} ),
+			'menu_icon'       => '{{menuIcon}}',
+			{{#if menuPosition}}'menu_position'   => {{menuPosition}},
+			{{/if}}{{#if rewriteSlug}}'rewrite'         => array( 'slug' => '{{rewriteSlug}}' ),
+			{{/if}}'capability_type'  => '{{capabilityType}}',
+			{{#if taxonomies.length}}'taxonomies'      => array( {{#each taxonomies}}'{{this}}'{{#unless @last}}, {{/unless}}{{/each}} ),
+			{{/if}}
+		) );
+		{{/each}}
+	}
+
+	{{/if}}
+	{{#if hasCustomTaxonomies}}
+	public function register_custom_taxonomies() {
+		{{#each customTaxonomies}}
+		register_taxonomy( '{{slug}}', array( {{#each postTypes}}'{{this}}'{{#unless @last}}, {{/unless}}{{/each}} ), array(
+			'labels' => array(
+				'name'              => __( '{{pluralName}}', '{{../textDomain}}' ),
+				'singular_name'     => __( '{{singularName}}', '{{../textDomain}}' ),
+				'search_items'      => __( 'Search {{pluralName}}', '{{../textDomain}}' ),
+				'all_items'         => __( 'All {{pluralName}}', '{{../textDomain}}' ),
+				'edit_item'         => __( 'Edit {{singularName}}', '{{../textDomain}}' ),
+				'update_item'       => __( 'Update {{singularName}}', '{{../textDomain}}' ),
+				'add_new_item'      => __( 'Add New {{singularName}}', '{{../textDomain}}' ),
+				'new_item_name'     => __( 'New {{singularName}} Name', '{{../textDomain}}' ),
+				'menu_name'         => __( '{{pluralName}}', '{{../textDomain}}' ),
+				{{#if hierarchical}}
+				'parent_item'       => __( 'Parent {{singularName}}', '{{../textDomain}}' ),
+				'parent_item_colon' => __( 'Parent {{singularName}}:', '{{../textDomain}}' ),
+				{{/if}}
+			),
+			{{#if description}}'description'      => __( '{{description}}', '{{../textDomain}}' ),
+			{{/if}}'public'            => {{#if public}}true{{else}}false{{/if}},
+			'show_in_rest'      => {{#if showInRest}}true{{else}}false{{/if}},
+			'hierarchical'      => {{#if hierarchical}}true{{else}}false{{/if}},
+			'show_admin_column' => {{#if showAdminColumn}}true{{else}}false{{/if}},
+			{{#if rewriteSlug}}'rewrite'           => array( 'slug' => '{{rewriteSlug}}' ),
+			{{/if}}
+		) );
+		{{/each}}
+	}
+
+	{{/if}}
+}

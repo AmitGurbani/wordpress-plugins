@@ -1,0 +1,16 @@
+<?php
+
+if ( ! defined( 'WPINC' ) ) {
+	die;
+}
+
+class {{className}}_Deactivator {
+
+	public static function deactivate() {
+		{{#if deactivationCode}}
+{{{deactivationCode}}}
+		{{else}}
+		// Deactivation tasks go here.
+		{{/if}}
+	}
+}

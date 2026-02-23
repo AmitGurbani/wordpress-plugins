@@ -1,0 +1,252 @@
+import path from 'node:path';
+import type { PluginIR, PluginMetadata } from '../ir/plugin-ir.js';
+import { parseSourceFile, parseSourceString, type ParseResult } from './parser.js';
+import { extractDecorators } from './decorator-extractor.js';
+import { DiagnosticCollection } from './diagnostics.js';
+import { transpileMethodBody, transpileParameters } from '../transpiler/function-transpiler.js';
+import { generatePlugin, type GeneratedFile } from '../generator/index.js';
+import { writeFile, cleanDir, ensureDir, pathExists, copyPath } from '../utils/fs-utils.js';
+import {
+  toSlugCase, toWPClassName, toConstantPrefix,
+  toFunctionPrefix, toFilePrefix, toTextDomain, toSnakeCase,
+} from '../utils/naming.js';
+
+export interface BuildOptions {
+  entry: string;
+  outDir: string;
+  clean?: boolean;
+  adminSrcDir?: string;
+}
+
+export interface BuildResult {
+  files: GeneratedFile[];
+  diagnostics: DiagnosticCollection;
+  success: boolean;
+}
+
+/**
+ * Run the full build pipeline: Parse → Extract → Transpile → Generate → Write.
+ */
+export async function build(options: BuildOptions): Promise<BuildResult> {
+  const diagnostics = new DiagnosticCollection();
+
+  // Stage 1: Parse
+  let parsed: ParseResult;
+  try {
+    parsed = parseSourceFile(options.entry);
+  } catch (err: any) {
+    diagnostics.error('WPTS100', `Failed to parse source file: ${err.message}`, { file: options.entry });
+    return { files: [], diagnostics, success: false };
+  }
+
+  // Check for TS compilation errors (warnings only — don't block generation)
+  for (const diag of parsed.diagnostics) {
+    if (diag.category === 0 /* Error */) {
+      const message = typeof diag.messageText === 'string' ? diag.messageText : diag.messageText.messageText;
+      diagnostics.warning('WPTS101', `TypeScript: ${message}`, { file: options.entry });
+    }
+  }
+
+  // Stage 2: Extract decorators
+  const rawData = extractDecorators(parsed.sourceFile, parsed.typeChecker, diagnostics);
+
+  if (diagnostics.hasErrors()) {
+    return { files: [], diagnostics, success: false };
+  }
+
+  if (!rawData.plugin) {
+    return { files: [], diagnostics, success: false };
+  }
+
+  // Stage 3: Build IR (transform raw data + transpile function bodies)
+  const ir = buildIR(rawData, parsed, diagnostics);
+
+  if (diagnostics.hasErrors()) {
+    return { files: [], diagnostics, success: false };
+  }
+
+  // Stage 4: Generate files
+  const files = generatePlugin(ir);
+
+  // Stage 5: Write files to disk
+  if (options.clean) {
+    await cleanDir(options.outDir);
+  }
+  await ensureDir(options.outDir);
+
+  for (const file of files) {
+    const fullPath = path.join(options.outDir, file.relativePath);
+    await writeFile(fullPath, file.content);
+  }
+
+  // Copy admin React source if it exists
+  const adminSrcDir = options.adminSrcDir ?? path.join(path.dirname(options.entry), 'admin');
+  if (await pathExists(adminSrcDir)) {
+    const destAdminSrc = path.join(options.outDir, ir.metadata.filePrefix, 'admin', 'js', 'src');
+    await copyPath(adminSrcDir, destAdminSrc);
+  }
+
+  return { files, diagnostics, success: true };
+}
+
+/**
+ * Build the full PluginIR from raw extracted data.
+ */
+function buildIR(
+  rawData: ReturnType<typeof extractDecorators>,
+  parsed: ParseResult,
+  diagnostics: DiagnosticCollection,
+): PluginIR {
+  const raw = rawData.plugin!;
+  const slug = raw.slug ?? toSlugCase(raw.name);
+
+  const metadata: PluginMetadata = {
+    name: raw.name,
+    slug,
+    uri: raw.uri ?? '',
+    description: raw.description,
+    version: raw.version,
+    author: raw.author,
+    authorUri: raw.authorUri ?? '',
+    license: raw.license,
+    licenseUri: raw.licenseUri ?? 'http://www.gnu.org/licenses/gpl-2.0.txt',
+    textDomain: raw.textDomain ?? toTextDomain(raw.name),
+    domainPath: raw.domainPath ?? '/languages',
+    requiresWP: raw.requiresWP ?? '6.7',
+    requiresPHP: raw.requiresPHP ?? '8.2',
+    className: toWPClassName(raw.name),
+    constantPrefix: toConstantPrefix(raw.name),
+    functionPrefix: toFunctionPrefix(raw.name),
+    filePrefix: toFilePrefix(raw.name),
+  };
+
+  // Warn for array settings without explicit sanitize
+  for (const s of rawData.settings) {
+    if (s.type === 'array' && !s.sanitize) {
+      diagnostics.warning(
+        'WPTS043',
+        `@Setting "${s.key}" has type "array" with no sanitize function. Consider adding a sanitize callback.`,
+        { file: '' },
+      );
+    }
+  }
+
+  const ir: PluginIR = {
+    metadata,
+    settings: rawData.settings.map(s => ({
+      propertyName: s.propertyName,
+      key: s.key,
+      optionName: `${metadata.functionPrefix}${s.key}`,
+      type: s.type,
+      default: s.default,
+      label: s.label,
+      description: s.description ?? '',
+      sanitize: s.sanitize ?? getDefaultSanitizer(s.type),
+    })),
+    actions: rawData.actions.map(a => ({
+      hookName: a.hookName,
+      methodName: a.methodName,
+      phpMethodName: toSnakeCase(a.methodName),
+      priority: a.priority ?? 10,
+      acceptedArgs: a.acceptedArgs ?? 1,
+      body: transpileMethodBody(a.bodyNode, parsed.typeChecker),
+      context: 'public' as const,
+    })),
+    filters: rawData.filters.map(f => ({
+      hookName: f.hookName,
+      methodName: f.methodName,
+      phpMethodName: toSnakeCase(f.methodName),
+      priority: f.priority ?? 10,
+      acceptedArgs: f.acceptedArgs ?? f.parameters.length,
+      parameters: transpileParameters(f.parameters),
+      body: transpileMethodBody(f.bodyNode, parsed.typeChecker),
+      context: 'public' as const,
+    })),
+    adminPages: rawData.adminPages.map(p => ({
+      pageTitle: p.pageTitle,
+      menuTitle: p.menuTitle,
+      capability: p.capability,
+      menuSlug: p.menuSlug,
+      iconUrl: p.iconUrl ?? 'dashicons-admin-generic',
+      position: p.position ?? null,
+      parentSlug: p.parentSlug ?? null,
+    })),
+    shortcodes: rawData.shortcodes.map(s => ({
+      tag: s.tag,
+      methodName: s.methodName,
+      phpMethodName: toSnakeCase(s.methodName),
+      parameters: transpileParameters(s.parameters),
+      body: transpileMethodBody(s.bodyNode, parsed.typeChecker),
+    })),
+    customPostTypes: rawData.customPostTypes.map(cpt => {
+      // Auto-wire taxonomies that reference this CPT
+      const associatedTaxonomies = rawData.customTaxonomies
+        .filter(t => t.postTypes.includes(cpt.slug))
+        .map(t => t.slug);
+      return {
+        slug: cpt.slug,
+        singularName: cpt.singularName,
+        pluralName: cpt.pluralName,
+        description: cpt.description ?? '',
+        public: cpt.public ?? true,
+        showInRest: cpt.showInRest ?? true,
+        hasArchive: cpt.hasArchive ?? true,
+        supports: cpt.supports ?? ['title', 'editor', 'thumbnail'],
+        menuIcon: cpt.menuIcon ?? 'dashicons-admin-post',
+        menuPosition: cpt.menuPosition ?? null,
+        rewriteSlug: cpt.rewriteSlug ?? null,
+        capabilityType: cpt.capabilityType ?? 'post',
+        taxonomies: associatedTaxonomies,
+      };
+    }),
+    customTaxonomies: rawData.customTaxonomies.map(tax => ({
+      slug: tax.slug,
+      singularName: tax.singularName,
+      pluralName: tax.pluralName,
+      postTypes: tax.postTypes,
+      description: tax.description ?? '',
+      public: tax.public ?? true,
+      showInRest: tax.showInRest ?? true,
+      hierarchical: tax.hierarchical ?? false,
+      showAdminColumn: tax.showAdminColumn ?? true,
+      rewriteSlug: tax.rewriteSlug ?? null,
+    })),
+    restRoutes: rawData.restRoutes.map(r => ({
+      route: r.route,
+      method: r.method,
+      capability: r.capability,
+      methodName: r.methodName,
+      phpMethodName: toSnakeCase(r.methodName),
+      body: transpileMethodBody(r.bodyNode, parsed.typeChecker),
+    })),
+    ajaxHandlers: rawData.ajaxHandlers.map(a => ({
+      action: a.action,
+      public: a.public,
+      capability: a.capability,
+      nonce: a.nonce,
+      methodName: a.methodName,
+      phpMethodName: 'handle_ajax_' + a.action,
+      body: transpileMethodBody(a.bodyNode, parsed.typeChecker),
+    })),
+    activation: rawData.activation
+      ? transpileMethodBody(rawData.activation.bodyNode, parsed.typeChecker)
+      : null,
+    deactivation: rawData.deactivation
+      ? transpileMethodBody(rawData.deactivation.bodyNode, parsed.typeChecker)
+      : null,
+  };
+
+  return ir;
+}
+
+/**
+ * Return a sensible default PHP sanitizer for the given setting type.
+ */
+function getDefaultSanitizer(type: string): string | null {
+  switch (type) {
+    case 'string':  return 'sanitize_text_field';
+    case 'number':  return 'absint';
+    case 'boolean': return 'absint';
+    default:        return null;
+  }
+}
