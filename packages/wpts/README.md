@@ -522,7 +522,9 @@ All functions are written in camelCase in TypeScript and transpiled to snake_cas
 | **Sanitization** | `sanitizeTextField`, `sanitizeTextareaField`, `sanitizeTitle`, `sanitizeEmail`, `sanitizeFileName`, `sanitizeKey` |
 | **Enqueueing** | `wpEnqueueStyle`, `wpEnqueueScript`, `wpRegisterStyle`, `wpRegisterScript`, `wpLocalizeScript` |
 | **Hooks** | `addAction`, `addFilter`, `doAction`, `applyFilters`, `removeAction`, `removeFilter`, `addShortcode` |
-| **Conditionals** | `isSingle`, `isPage`, `isAdmin`, `isFrontPage`, `isHome`, `isArchive`, `isCategory`, `isTag` |
+| **Settings API** | `registerSetting`, `addSettingsSection`, `addSettingsField`, `settingsFields`, `doSettingsSections`, `submitButton` |
+| **Admin Pages** | `addMenuPage`, `addSubmenuPage`, `addOptionsPage` |
+| **Conditionals** | `isSingle`, `isPage`, `isAdmin`, `isFrontPage`, `isHome`, `isArchive`, `isCategory`, `isTag`, `isSingular` |
 | **User** | `currentUserCan`, `getCurrentUserId`, `isUserLoggedIn` |
 | **Nonces** | `wpCreateNonce`, `wpVerifyNonce`, `wpNonceField`, `checkAdminReferer` |
 | **Transients** | `getTransient`, `setTransient`, `deleteTransient` |
