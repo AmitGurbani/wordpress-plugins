@@ -1,4 +1,8 @@
 import path from 'node:path';
+import { promisify } from 'node:util';
+import { execFile } from 'node:child_process';
+
+const execFileAsync = promisify(execFile);
 import type { PluginIR, PluginMetadata } from '../ir/plugin-ir.js';
 import { parseSourceFile, parseSourceString, type ParseResult } from './parser.js';
 import { extractDecorators } from './decorator-extractor.js';
@@ -16,6 +20,7 @@ export interface BuildOptions {
   outDir: string;
   clean?: boolean;
   adminSrcDir?: string;
+  skipAdminBuild?: boolean;
 }
 
 export interface BuildResult {
@@ -84,6 +89,14 @@ export async function build(options: BuildOptions): Promise<BuildResult> {
   if (await pathExists(adminSrcDir)) {
     const destAdminSrc = path.join(options.outDir, ir.metadata.filePrefix, 'admin', 'js', 'src');
     await copyPath(adminSrcDir, destAdminSrc);
+  }
+
+  // Stage 6: Build admin React app if admin pages exist
+  if (!options.skipAdminBuild) {
+    const adminJsDir = path.join(options.outDir, ir.metadata.filePrefix, 'admin', 'js');
+    if (ir.adminPages.length > 0 && await pathExists(path.join(adminJsDir, 'package.json'))) {
+      await buildAdminApp(adminJsDir);
+    }
   }
 
   return { files, diagnostics, success: true };
@@ -248,5 +261,19 @@ function getDefaultSanitizer(type: string): string | null {
     case 'number':  return 'absint';
     case 'boolean': return 'absint';
     default:        return null;
+  }
+}
+
+/**
+ * Install dependencies and build the admin React app using pnpm + wp-scripts.
+ */
+async function buildAdminApp(adminJsDir: string): Promise<void> {
+  console.log('\nBuilding admin React app...');
+  try {
+    await execFileAsync('pnpm', ['--ignore-workspace', 'install'], { cwd: adminJsDir });
+    await execFileAsync('pnpm', ['--ignore-workspace', 'run', 'build'], { cwd: adminJsDir });
+    console.log('Admin React app built successfully.');
+  } catch {
+    console.warn('Warning: Failed to build admin React app. Run manually: cd admin/js && pnpm install && pnpm run build');
   }
 }

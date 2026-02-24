@@ -11,7 +11,7 @@ Transpiles decorator-annotated TypeScript into WordPress plugins with PHP backen
 
 ## Architecture
 
-Pipeline: Parse → Extract Decorators → Build IR → Generate PHP (via Handlebars templates)
+Pipeline: Parse → Extract Decorators → Build IR → Generate PHP → Build Admin React (if @AdminPage)
 
 Key paths:
 - `src/compiler/` — Parser, decorator extractor, pipeline, diagnostics
@@ -42,4 +42,8 @@ To add a new WordPress function mapping:
 - Test pattern: `transpile('tsCode', 'declarations')` → expected PHP string
 - Diagnostic codes: WPTS### (e.g., WPTS001 for missing @Plugin)
 - Settings auto-sanitize: string→sanitize_text_field, number→absint, boolean→absint
+- REST API sanitize null guard: returns `WP_Error` with 400 when sanitize callback returns null
+- Admin template: `get_current_screen()` null-guarded with ternary
+- Admin auto-build: pipeline runs `pnpm --ignore-workspace install && run build` in admin/js/
+- Integration tests use `skipAdminBuild: true` to avoid timeouts
 - Decorators: @Plugin, @Action, @Filter, @Setting, @AdminPage, @Shortcode, @Activate, @Deactivate, @CustomPostType, @CustomTaxonomy, @RestRoute, @AjaxHandler

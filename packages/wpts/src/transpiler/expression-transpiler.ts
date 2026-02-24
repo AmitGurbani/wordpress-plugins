@@ -131,8 +131,8 @@ export function transpileExpression(node: ts.Expression, typeChecker: ts.TypeChe
     case ts.SyntaxKind.NewExpression: {
       const newExpr = node as ts.NewExpression;
       const className = transpileExpression(newExpr.expression, typeChecker);
-      const newArgs = newExpr.arguments ? newExpr.arguments.map(a => transpileExpression(a, typeChecker)).join(', ') : '';
-      return `new ${className}( ${newArgs} )`;
+      const newArgs = newExpr.arguments ? newExpr.arguments.map(a => transpileExpression(a, typeChecker)) : [];
+      return `new ${phpCall(className, newArgs)}`;
     }
 
     default:
@@ -160,8 +160,8 @@ function transpileIdentifier(node: ts.Identifier): string {
   if (name === 'Infinity') return 'INF';
   if (name === '__FILE__') return '__FILE__';
 
-  // Regular variable — add $ prefix
-  return `$${name}`;
+  // Regular variable — add $ prefix and convert to snake_case
+  return `$${toSnakeCase(name)}`;
 }
 
 function transpileBinaryExpression(node: ts.BinaryExpression, typeChecker: ts.TypeChecker): string {
@@ -213,7 +213,7 @@ function tryTranspileTypeofComparison(node: ts.BinaryExpression, typeChecker: ts
   if (!phpFunc) return null;
 
   const call = `${phpFunc}( ${operand} )`;
-  return negate ? `!${call}` : call;
+  return negate ? `! ${call}` : call;
 }
 
 function transpileBinaryOperator(
@@ -252,7 +252,7 @@ function transpileBinaryOperator(
 
     // Logical
     case ts.SyntaxKind.AmpersandAmpersandToken: return '&&';
-    case ts.SyntaxKind.BarBarToken: return '||';
+    case ts.SyntaxKind.BarBarToken: return '?:';
     case ts.SyntaxKind.QuestionQuestionToken: return '??'; // Nullish coalescing
 
     // Bitwise
@@ -279,7 +279,7 @@ function transpileBinaryOperator(
 function transpilePrefixUnary(node: ts.PrefixUnaryExpression, typeChecker: ts.TypeChecker): string {
   const operand = transpileExpression(node.operand, typeChecker);
   switch (node.operator) {
-    case ts.SyntaxKind.ExclamationToken: return `!${operand}`;
+    case ts.SyntaxKind.ExclamationToken: return `! ${operand}`;
     case ts.SyntaxKind.MinusToken: return `-${operand}`;
     case ts.SyntaxKind.PlusToken: return `+${operand}`;
     case ts.SyntaxKind.TildeToken: return `~${operand}`;
@@ -309,20 +309,27 @@ function transpileCallExpression(node: ts.CallExpression, typeChecker: ts.TypeCh
     // Optional chaining: obj?.method(args)
     if (node.expression.questionDotToken) {
       const objStr = transpileExpression(obj, typeChecker);
-      return `(${objStr} !== null ? ${objStr}->${toSnakeCase(methodName)}( ${args.join(', ')} ) : null)`;
+      return `(${objStr} !== null ? ${objStr}->${phpCall(toSnakeCase(methodName), args)} : null)`;
     }
 
     // console.log -> error_log
     if (ts.isIdentifier(obj) && obj.text === 'console') {
       if (methodName === 'log' || methodName === 'warn' || methodName === 'error') {
-        return `error_log( ${args.join(', ')} )`;
+        return phpCall('error_log', args);
       }
+    }
+
+    // Date methods -> PHP time functions
+    if (ts.isIdentifier(obj) && obj.text === 'Date') {
+      if (methodName === 'now') return 'time()';
+      if (methodName === 'parse') return phpCall('strtotime', args);
+      if (methodName === 'UTC') return phpCall('gmmktime', args);
     }
 
     // JSON.stringify -> json_encode, JSON.parse -> json_decode
     if (ts.isIdentifier(obj) && obj.text === 'JSON') {
-      if (methodName === 'stringify') return `json_encode( ${args.join(', ')} )`;
-      if (methodName === 'parse') return `json_decode( ${args[0]}, true )`;
+      if (methodName === 'stringify') return phpCall('json_encode', args);
+      if (methodName === 'parse') return phpCall('json_decode', [args[0], 'true']);
     }
 
     // Math methods
@@ -333,16 +340,16 @@ function transpileCallExpression(node: ts.CallExpression, typeChecker: ts.TypeCh
         sqrt: 'sqrt', log: 'log', sin: 'sin', cos: 'cos', tan: 'tan',
       };
       if (mathMap[methodName]) {
-        return `${mathMap[methodName]}( ${args.join(', ')} )`;
+        return phpCall(mathMap[methodName], args);
       }
     }
 
     // Object.keys / Object.values
     if (ts.isIdentifier(obj) && obj.text === 'Object') {
-      if (methodName === 'keys') return `array_keys( ${args[0]} )`;
-      if (methodName === 'values') return `array_values( ${args[0]} )`;
-      if (methodName === 'assign') return `array_merge( ${args.join(', ')} )`;
-      if (methodName === 'entries') return `array_map( null, array_keys( ${args[0]} ), array_values( ${args[0]} ) )`;
+      if (methodName === 'keys') return phpCall('array_keys', [args[0]]);
+      if (methodName === 'values') return phpCall('array_values', [args[0]]);
+      if (methodName === 'assign') return phpCall('array_merge', args);
+      if (methodName === 'entries') return phpCall('array_map', ['null', phpCall('array_keys', [args[0]]), phpCall('array_values', [args[0]])]);
     }
 
     // Type-ambiguous methods: different PHP function for strings vs arrays
@@ -396,22 +403,22 @@ function transpileCallExpression(node: ts.CallExpression, typeChecker: ts.TypeCh
 
       switch (mapping.objectPosition) {
         case 'first':
-          return `${mapping.phpFunc}( ${[objStr, ...args].join(', ')} )`;
+          return phpCall(mapping.phpFunc, [objStr, ...args]);
         case 'last':
-          return `${mapping.phpFunc}( ${[...args, objStr].join(', ')} )`;
+          return phpCall(mapping.phpFunc, [...args, objStr]);
         case 'swap':
-          return `${mapping.phpFunc}( ${[...args, objStr].join(', ')} )`;
+          return phpCall(mapping.phpFunc, [...args, objStr]);
       }
     }
 
     // this.method(args) -> $this->method(args)
     if (obj.kind === ts.SyntaxKind.ThisKeyword) {
-      return `$this->${toSnakeCase(methodName)}( ${args.join(', ')} )`;
+      return `$this->${phpCall(toSnakeCase(methodName), args)}`;
     }
 
     // General method call: $obj->method(args)
     const objStr = transpileExpression(obj, typeChecker);
-    return `${objStr}->${toSnakeCase(methodName)}( ${args.join(', ')} )`;
+    return `${objStr}->${phpCall(toSnakeCase(methodName), args)}`;
   }
 
   // Direct function call
@@ -425,26 +432,26 @@ function transpileCallExpression(node: ts.CallExpression, typeChecker: ts.TypeCh
       if (phpFunc === 'echo') {
         return `echo ${args.join(', ')}`;
       }
-      return `${phpFunc}( ${args.join(', ')} )`;
+      return phpCall(phpFunc, args);
     }
 
     // parseInt / parseFloat
-    if (funcName === 'parseInt') return `intval( ${args[0]} )`;
-    if (funcName === 'parseFloat') return `floatval( ${args[0]} )`;
-    if (funcName === 'String') return `strval( ${args[0]} )`;
-    if (funcName === 'Number') return `intval( ${args[0]} )`;
-    if (funcName === 'Boolean') return `boolval( ${args[0]} )`;
-    if (funcName === 'Array' && args.length > 0) return `array_fill( 0, ${args[0]}, null )`;
-    if (funcName === 'isNaN') return `is_nan( ${args[0]} )`;
-    if (funcName === 'isFinite') return `is_finite( ${args[0]} )`;
+    if (funcName === 'parseInt') return phpCall('intval', [args[0]]);
+    if (funcName === 'parseFloat') return phpCall('floatval', [args[0]]);
+    if (funcName === 'String') return phpCall('strval', [args[0]]);
+    if (funcName === 'Number') return phpCall('intval', [args[0]]);
+    if (funcName === 'Boolean') return phpCall('boolval', [args[0]]);
+    if (funcName === 'Array' && args.length > 0) return phpCall('array_fill', ['0', args[0], 'null']);
+    if (funcName === 'isNaN') return phpCall('is_nan', [args[0]]);
+    if (funcName === 'isFinite') return phpCall('is_finite', [args[0]]);
 
     // General function — convert to snake_case
-    return `${toSnakeCase(funcName)}( ${args.join(', ')} )`;
+    return phpCall(toSnakeCase(funcName), args);
   }
 
   // Fallback
   const callee = transpileExpression(node.expression, typeChecker);
-  return `${callee}( ${args.join(', ')} )`;
+  return phpCall(callee, args);
 }
 
 function transpilePropertyAccess(node: ts.PropertyAccessExpression, typeChecker: ts.TypeChecker): string {
@@ -616,7 +623,7 @@ function transpileObjectProperty(prop: ts.ObjectLiteralElementLike, typeChecker:
 
 function transpileArrowFunction(node: ts.ArrowFunction, typeChecker: ts.TypeChecker): string {
   const params = node.parameters.map(p => {
-    const name = ts.isIdentifier(p.name) ? `$${p.name.text}` : '$param';
+    const name = ts.isIdentifier(p.name) ? `$${toSnakeCase(p.name.text)}` : '$param';
     return name;
   });
 
@@ -628,8 +635,8 @@ function transpileArrowFunction(node: ts.ArrowFunction, typeChecker: ts.TypeChec
 
   // Block body — transpile each statement using the statement transpiler
   const block = node.body as ts.Block;
-  const bodyCode = transpileBlockStmts(block, typeChecker, '        ');
-  return `function( ${params.join(', ')} ) {\n${bodyCode}\n    }`;
+  const bodyCode = transpileBlockStmts(block, typeChecker, '\t\t');
+  return `function( ${params.join(', ')} ) {\n${bodyCode}\n\t}`;
 }
 
 function transpileTypeOf(node: ts.TypeOfExpression, typeChecker: ts.TypeChecker): string {
@@ -637,6 +644,15 @@ function transpileTypeOf(node: ts.TypeOfExpression, typeChecker: ts.TypeChecker)
   // typeof in PHP comparisons are usually done with is_* functions
   // This returns gettype() which can be compared
   return `gettype( ${operand} )`;
+}
+
+/**
+ * Format a PHP function call with proper spacing.
+ * No args: `func()`, with args: `func( arg1, arg2 )`.
+ */
+function phpCall(name: string, args: string[]): string {
+  if (args.length === 0) return `${name}()`;
+  return `${name}( ${args.join(', ')} )`;
 }
 
 /**

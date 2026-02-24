@@ -22,6 +22,7 @@ declare function deleteOption(k: string): void;
 declare function loadPluginTextdomain(d: string, b: boolean, p: string): void;
 declare function isSingle(): boolean;
 declare function escHtml(s: string): string;
+declare function escAttr(s: string): string;
 
 @Plugin({
   name: 'Hello World',
@@ -80,14 +81,14 @@ class HelloWorld {
     const message: string = getOption('hello_world_greeting', 'Hello, World!');
     const color: string = getOption('hello_world_color', '#333333');
     if (isSingle()) {
-      return content + '<p style="color: ' + escHtml(color) + ';">' + escHtml(message) + '</p>';
+      return content + '<p style="color: ' + escAttr(color) + ';">' + escHtml(message) + '</p>';
     }
     return content;
   }
 
   @Shortcode('hello')
   helloShortcode(atts: Record<string, string>): string {
-    const message: string = atts['message'] || getOption('hello_world_greeting', 'Hello, World!');
+    const message: string = getOption('hello_world_greeting', 'Hello, World!');
     return '<span class="hello-greeting">' + escHtml(message) + '</span>';
   }
 }

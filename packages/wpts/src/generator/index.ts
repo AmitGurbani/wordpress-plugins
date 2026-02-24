@@ -3,6 +3,7 @@ import path from 'node:path';
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import type { PluginIR, SettingIR, HookContext } from '../ir/plugin-ir.js';
+import { toSnakeCase } from '../utils/naming.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const TEMPLATES_DIR = path.resolve(__dirname, '..', 'templates');
@@ -93,6 +94,7 @@ export function generatePlugin(ir: PluginIR): GeneratedFile[] {
   // Common template data
   const data = {
     ...metadata,
+    pluginSlug: toSnakeCase(metadata.slug),
     adminPages: ir.adminPages,
     adminActions,
     publicActions,

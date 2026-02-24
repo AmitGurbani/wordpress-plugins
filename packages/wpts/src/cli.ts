@@ -67,8 +67,7 @@ program
       }
       console.log('\nNext steps:');
       console.log('  1. Copy the plugin directory to wp-content/plugins/');
-      console.log('  2. If using admin React pages, run: cd admin/js && npm install && npm run build');
-      console.log('  3. Activate the plugin in WordPress admin');
+      console.log('  2. Activate the plugin in WordPress admin');
     } else {
       console.error('\nBuild failed. Fix the errors above and try again.');
       process.exit(1);

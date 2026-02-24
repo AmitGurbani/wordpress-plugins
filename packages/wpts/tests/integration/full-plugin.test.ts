@@ -91,7 +91,7 @@ class TestPlugin {
     await fs.writeFile(inputFile, pluginTs);
 
     const outDir = path.join(tmpDir, 'dist');
-    const result = await build({ entry: inputFile, outDir, clean: true });
+    const result = await build({ entry: inputFile, outDir, clean: true, skipAdminBuild: true });
 
     // Build should succeed
     expect(result.success).toBe(true);
@@ -225,7 +225,7 @@ class PortfolioManager {
     await fs.writeFile(inputFile, pluginTs);
 
     const outDir = path.join(tmpDir, 'dist');
-    const result = await build({ entry: inputFile, outDir, clean: true });
+    const result = await build({ entry: inputFile, outDir, clean: true, skipAdminBuild: true });
 
     expect(result.success).toBe(true);
     expect(result.files.length).toBeGreaterThan(0);

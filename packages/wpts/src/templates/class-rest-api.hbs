@@ -68,6 +68,13 @@ class {{className}}_Rest_Api {
 		if ( isset( $params['{{key}}'] ) ) {
 			{{#if sanitize}}
 			$value = {{sanitize}}( $params['{{key}}'] );
+			if ( null === $value ) {
+				return new \WP_Error(
+					'invalid_{{key}}',
+					'Invalid value for {{key}}.',
+					array( 'status' => 400 )
+				);
+			}
 			{{else}}
 			$value = $params['{{key}}'];
 			{{/if}}

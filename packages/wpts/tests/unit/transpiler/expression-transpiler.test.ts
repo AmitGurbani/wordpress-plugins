@@ -79,8 +79,8 @@ describe('transpileExpression', () => {
       expect(transpile('true && false')).toBe('true && false');
     });
 
-    it('transpiles logical OR', () => {
-      expect(transpile('true || false')).toBe('true || false');
+    it('transpiles logical OR to Elvis operator', () => {
+      expect(transpile('true || false')).toBe('true ?: false');
     });
 
     it('transpiles nullish coalescing', () => {
@@ -96,8 +96,8 @@ describe('transpileExpression', () => {
   });
 
   describe('unary expressions', () => {
-    it('transpiles negation', () => {
-      expect(transpile('!true')).toBe('!true');
+    it('transpiles negation with WP spacing', () => {
+      expect(transpile('!true')).toBe('! true');
     });
 
     it('transpiles numeric negation', () => {
@@ -225,6 +225,14 @@ describe('transpileExpression', () => {
 
     it('maps console.log to error_log', () => {
       expect(transpile('console.log("test")')).toBe("error_log( 'test' )");
+    });
+
+    it('maps Date.now() to time()', () => {
+      expect(transpile('Date.now()')).toBe('time()');
+    });
+
+    it('maps Date.parse() to strtotime()', () => {
+      expect(transpile('Date.parse("2024-01-01")')).toBe("strtotime( '2024-01-01' )");
     });
 
     it('maps JSON.stringify', () => {
@@ -374,7 +382,7 @@ describe('transpileExpression', () => {
 
     it('transpiles obj?.method() to null check', () => {
       const result = transpile('obj?.toString()', 'const obj: any = {};');
-      expect(result).toBe('($obj !== null ? $obj->to_string(  ) : null)');
+      expect(result).toBe('($obj !== null ? $obj->to_string() : null)');
     });
 
     it('transpiles arr?.[0] to null check', () => {
@@ -524,9 +532,9 @@ describe('transpileExpression', () => {
       expect(result).toBe('is_bool( $x )');
     });
 
-    it('transpiles typeof x !== "string" to !is_string', () => {
+    it('transpiles typeof x !== "string" to ! is_string', () => {
       const result = transpile('typeof x !== "string"', 'const x: any = "";');
-      expect(result).toBe('!is_string( $x )');
+      expect(result).toBe('! is_string( $x )');
     });
 
     it('transpiles reversed "string" === typeof x', () => {

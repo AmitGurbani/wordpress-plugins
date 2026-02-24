@@ -39,12 +39,7 @@ my-plugin/
 └── readme.txt
 ```
 
-To build the React admin UI:
-
-```bash
-cd dist/my-plugin/admin/js
-npm install && npm run build
-```
+The React admin UI is **auto-built** during `wpts build` when `@AdminPage` is used. For development mode with hot reload, run `pnpm run start` inside `admin/js/`.
 
 ## How It Works
 
@@ -187,6 +182,7 @@ greeting: string = 'Hello!';
 Each `@Setting` generates:
 - `register_setting()` call with sanitization
 - REST API GET/POST at `/{text-domain}/v1/settings`
+- If a sanitize callback returns null (invalid input), the REST API returns HTTP 400 with a `WP_Error`
 
 ### `@Action(hookName, options?)`
 
@@ -366,6 +362,8 @@ greetingShortcode(atts: Record<string, string>): string {
 ```
 
 Usage in posts: `[greeting name="Alice"]`
+
+The generated PHP wraps attributes with `shortcode_atts()` and includes TODO guidance for defining attribute defaults.
 
 ### `@Activate()` / `@Deactivate()`
 

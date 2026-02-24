@@ -119,7 +119,7 @@ describe('transpileStatement', () => {
 
     it('transpiles for-of with destructuring rename', () => {
       const result = transpileBody('const items: any[] = []; for (const { id: userId } of items) { }');
-      expect(result).toContain("$userId = $__item['id'];");
+      expect(result).toContain("$user_id = $__item['id'];");
     });
   });
 

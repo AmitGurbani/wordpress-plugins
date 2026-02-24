@@ -26,7 +26,7 @@ define( '{{constantPrefix}}PLUGIN_URL', plugin_dir_url( __FILE__ ) );
 /**
  * Plugin activation.
  */
-function activate_{{functionPrefix}}() {
+function activate_{{pluginSlug}}() {
 	require_once {{constantPrefix}}PLUGIN_DIR . 'includes/class-{{filePrefix}}-activator.php';
 	{{className}}_Activator::activate();
 }
@@ -34,13 +34,13 @@ function activate_{{functionPrefix}}() {
 /**
  * Plugin deactivation.
  */
-function deactivate_{{functionPrefix}}() {
+function deactivate_{{pluginSlug}}() {
 	require_once {{constantPrefix}}PLUGIN_DIR . 'includes/class-{{filePrefix}}-deactivator.php';
 	{{className}}_Deactivator::deactivate();
 }
 
-register_activation_hook( __FILE__, 'activate_{{functionPrefix}}' );
-register_deactivation_hook( __FILE__, 'deactivate_{{functionPrefix}}' );
+register_activation_hook( __FILE__, 'activate_{{pluginSlug}}' );
+register_deactivation_hook( __FILE__, 'deactivate_{{pluginSlug}}' );
 
 /**
  * Core plugin class.
@@ -50,8 +50,8 @@ require_once {{constantPrefix}}PLUGIN_DIR . 'includes/class-{{filePrefix}}.php';
 /**
  * Begin plugin execution.
  */
-function run_{{functionPrefix}}() {
+function run_{{pluginSlug}}() {
 	$plugin = new {{className}}();
 	$plugin->run();
 }
-run_{{functionPrefix}}();
+run_{{pluginSlug}}();
