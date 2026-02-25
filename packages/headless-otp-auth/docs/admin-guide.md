@@ -68,7 +68,7 @@ Access settings via the **OTP Auth** menu in WordPress admin. Settings are organ
 | Access Token Expiry | 3600s (1 hr) | 900–3600s | JWT access token lifetime. Shorter = more secure |
 | Refresh Token Expiry | 604800s (7 days) | 604800s | JWT refresh token lifetime |
 | Enable Registration | On | As needed | Allow new users to register via OTP |
-| Default User Role | Subscriber | Subscriber or Customer | WordPress role assigned to new users |
+| Default User Role | Subscriber (Customer if WooCommerce active) | Subscriber or Customer | WordPress role assigned to new users |
 
 ### Advanced Tab
 
@@ -82,6 +82,17 @@ Access settings via the **OTP Auth** menu in WordPress admin. Settings are organ
 - Local development: `http://localhost:3000`
 
 Origins must be exact matches — no wildcards. Native mobile apps don't need CORS configuration.
+
+## WooCommerce Integration
+
+The plugin automatically detects WooCommerce and adapts its behavior:
+
+- **Default role**: New users are assigned the `customer` role instead of `subscriber` (overridable via the Default User Role setting)
+- **Phone lookup fallback**: When looking up users by phone, falls back to the `billing_phone` meta field if `phone_number` is not found — this matches existing WooCommerce customers who registered through checkout
+- **Billing meta sync**: On registration, `billing_phone`, `billing_first_name`, and `billing_last_name` are populated so WooCommerce checkout forms are pre-filled
+- **Username generation**: Usernames are derived from the display name (e.g., `john_doe`) instead of random strings, with phone suffix appended if the name is taken
+
+No configuration is required — WooCommerce support activates automatically when WooCommerce is installed and active.
 
 ## Security Recommendations
 

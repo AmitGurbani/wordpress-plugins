@@ -572,13 +572,13 @@ All functions are written in camelCase in TypeScript and transpiled to snake_cas
 |----------|-----------|
 | **Options** | `addOption`, `getOption`, `updateOption`, `deleteOption` |
 | **Escaping** | `escHtml`, `escAttr`, `escUrl`, `escJs`, `escTextarea`, `wpKses`, `wpKsesPost` |
-| **Sanitization** | `sanitizeTextField`, `sanitizeTextareaField`, `sanitizeTitle`, `sanitizeEmail`, `sanitizeFileName`, `sanitizeKey` |
+| **Sanitization** | `sanitizeUser`, `sanitizeTextField`, `sanitizeTextareaField`, `sanitizeTitle`, `sanitizeEmail`, `sanitizeFileName`, `sanitizeKey` |
 | **Enqueueing** | `wpEnqueueStyle`, `wpEnqueueScript`, `wpRegisterStyle`, `wpRegisterScript`, `wpLocalizeScript` |
 | **Hooks** | `addAction`, `addFilter`, `doAction`, `applyFilters`, `removeAction`, `removeFilter`, `addShortcode` |
 | **Settings API** | `registerSetting`, `addSettingsSection`, `addSettingsField`, `settingsFields`, `doSettingsSections`, `submitButton` |
 | **Admin Pages** | `addMenuPage`, `addSubmenuPage`, `addOptionsPage` |
 | **Conditionals** | `isSingle`, `isPage`, `isAdmin`, `isFrontPage`, `isHome`, `isArchive`, `isCategory`, `isTag`, `isSingular` |
-| **User** | `currentUserCan`, `getCurrentUserId`, `isUserLoggedIn`, `getUserBy`, `getUsers`, `wpInsertUser`, `wpGetCurrentUser`, `wpGeneratePassword`, `wpHashPassword`, `wpCheckPassword`, `wpSetCurrentUser`, `getTheAuthorMeta` |
+| **User** | `currentUserCan`, `getCurrentUserId`, `isUserLoggedIn`, `getUserBy`, `getUsers`, `usernameExists`, `wpInsertUser`, `wpGetCurrentUser`, `wpGeneratePassword`, `wpHashPassword`, `wpCheckPassword`, `wpSetCurrentUser`, `getTheAuthorMeta` |
 | **Nonces** | `wpCreateNonce`, `wpVerifyNonce`, `wpNonceField`, `checkAdminReferer` |
 | **Transients** | `getTransient`, `setTransient`, `deleteTransient` |
 | **Posts** | `getPost`, `getPosts`, `getTheId`, `getTheTitle`, `getTheContent`, `getPermalink` |
@@ -592,7 +592,7 @@ All functions are written in camelCase in TypeScript and transpiled to snake_cas
 | **JSON Response** | `wpSendJson`, `wpSendJsonSuccess`, `wpSendJsonError` |
 | **REST API** | `restEnsureResponse` |
 | **Utility** | `wpRand` |
-| **PHP Built-ins** | `jsonEncode`, `jsonDecode`, `base64Encode`, `base64Decode`, `hashHmac`, `hashEquals`, `md5`, `intval`, `strval`, `strtr`, `rtrim`, `time`, `getallheaders`, `header` |
+| **PHP Built-ins** | `classExists`, `functionExists`, `jsonEncode`, `jsonDecode`, `base64Encode`, `base64Decode`, `hashHmac`, `hashEquals`, `md5`, `intval`, `strval`, `strtolower`, `strtr`, `rtrim`, `time`, `getallheaders`, `header` |
 | **Misc** | `wpDie`, `wpRedirect`, `wpSafeRedirect`, `absint`, `wpUnslash`, `echo` |
 | **WooCommerce Conditionals** | `isWoocommerce`, `isShop`, `isProduct`, `isCart`, `isCheckout`, `isAccountPage`, `isWcEndpointUrl` |
 | **WooCommerce Products** | `wcGetProduct`, `wcGetProducts`, `wcGetProductIdBySku` |

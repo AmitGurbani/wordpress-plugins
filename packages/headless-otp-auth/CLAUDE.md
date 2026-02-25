@@ -33,8 +33,8 @@ Multi-file wpts plugin with 4 source files:
 
 - **Transient keys**: `hoa_otp_<hash>`, `hoa_attempts_<hash>`, `hoa_reg_<hash>`, `hoa_cooldown_<hash>`, `hoa_verify_<hash>` (phone hash is `md5(phone)`), `hoa_test_otp_latest` (test mode OTP display)
 - **Option keys**: `headless_otp_auth_` prefix (e.g., `headless_otp_auth_jwt_secret_key` — hidden option, not a @Setting)
-- **User meta**: `phone_number`, `hoa_refresh_token_hash`, `hoa_refresh_token_expiry`
+- **User meta**: `phone_number`, `hoa_refresh_token_hash`, `hoa_refresh_token_expiry`. When WooCommerce is active: `billing_phone`, `billing_first_name`, `billing_last_name`
 - **JWT**: HS256, base64url-encoded, issued by `siteUrl()`, types: `access` and `refresh`
 - **Rate limiting**: Transient-based per phone hash. Send rate limit window (default 900s) is separate from OTP expiry (300s). Resend cooldown (60s) prevents rapid re-sends. Verify attempts (max 3) protect against brute-force — lockout deletes the OTP.
-- **Registration**: Toggleable via `enable_registration` setting. Default user role configurable via `default_user_role`.
+- **Registration**: Toggleable via `enable_registration` setting. Default user role configurable via `default_user_role` (defaults to `customer` when WooCommerce is active, `subscriber` otherwise). Username derived from display name (not random). Existing WooCommerce users are matched by `billing_phone` fallback if `phone_number` meta is missing.
 - **Test mode**: `otp_test_mode` setting skips external OTP delivery, stores plain OTP in `hoa_test_otp_latest` transient for admin display. Rate limiting still applies.
