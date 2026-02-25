@@ -1,15 +1,16 @@
 import path from 'node:path';
+import { createHash } from 'node:crypto';
 import { promisify } from 'node:util';
 import { execFile } from 'node:child_process';
 
 const execFileAsync = promisify(execFile);
-import type { PluginIR, PluginMetadata } from '../ir/plugin-ir.js';
-import { parseSourceFile, parseSourceString, type ParseResult } from './parser.js';
-import { extractDecorators } from './decorator-extractor.js';
+import type { PluginIR, PluginMetadata, RawPluginData } from '../ir/plugin-ir.js';
+import { parseSourceFile, parseSourceString, getUserSourceFiles, type ParseResult } from './parser.js';
+import { extractDecoratorsFromFiles } from './decorator-extractor.js';
 import { DiagnosticCollection } from './diagnostics.js';
 import { transpileMethodBody, transpileParameters } from '../transpiler/function-transpiler.js';
 import { generatePlugin, type GeneratedFile } from '../generator/index.js';
-import { writeFile, cleanDir, ensureDir, pathExists, copyPath } from '../utils/fs-utils.js';
+import { writeFile, readFile, cleanDir, ensureDir, pathExists, copyPath, movePath, zipDir } from '../utils/fs-utils.js';
 import {
   toSlugCase, toWPClassName, toConstantPrefix,
   toFunctionPrefix, toFilePrefix, toTextDomain, toSnakeCase,
@@ -21,12 +22,14 @@ export interface BuildOptions {
   clean?: boolean;
   adminSrcDir?: string;
   skipAdminBuild?: boolean;
+  zip?: boolean;
 }
 
 export interface BuildResult {
   files: GeneratedFile[];
   diagnostics: DiagnosticCollection;
   success: boolean;
+  zipPath?: string;
 }
 
 /**
@@ -52,8 +55,9 @@ export async function build(options: BuildOptions): Promise<BuildResult> {
     }
   }
 
-  // Stage 2: Extract decorators
-  const rawData = extractDecorators(parsed.sourceFile, parsed.typeChecker, diagnostics);
+  // Stage 2: Extract decorators (from all user source files resolved by the program)
+  const userFiles = getUserSourceFiles(parsed.program);
+  const rawData = extractDecoratorsFromFiles(userFiles, parsed.typeChecker, diagnostics);
 
   if (diagnostics.hasErrors()) {
     return { files: [], diagnostics, success: false };
@@ -95,18 +99,27 @@ export async function build(options: BuildOptions): Promise<BuildResult> {
   if (!options.skipAdminBuild) {
     const adminJsDir = path.join(options.outDir, ir.metadata.filePrefix, 'admin', 'js');
     if (ir.adminPages.length > 0 && await pathExists(path.join(adminJsDir, 'package.json'))) {
-      await buildAdminApp(adminJsDir);
+      const cacheDir = path.join(options.outDir, '..', '.wpts-cache');
+      await buildAdminApp(adminJsDir, cacheDir);
     }
   }
 
-  return { files, diagnostics, success: true };
+  // Stage 7: Generate zip for WordPress upload
+  let zipPath: string | undefined;
+  if (options.zip) {
+    const pluginDir = path.join(options.outDir, ir.metadata.filePrefix);
+    zipPath = path.join(options.outDir, `${ir.metadata.filePrefix}.zip`);
+    await zipDir(pluginDir, zipPath, ir.metadata.filePrefix);
+  }
+
+  return { files, diagnostics, success: true, zipPath };
 }
 
 /**
  * Build the full PluginIR from raw extracted data.
  */
 function buildIR(
-  rawData: ReturnType<typeof extractDecorators>,
+  rawData: RawPluginData,
   parsed: ParseResult,
   diagnostics: DiagnosticCollection,
 ): PluginIR {
@@ -228,6 +241,7 @@ function buildIR(
       route: r.route,
       method: r.method,
       capability: r.capability,
+      public: r.public,
       methodName: r.methodName,
       phpMethodName: toSnakeCase(r.methodName),
       body: transpileMethodBody(r.bodyNode, parsed.typeChecker),
@@ -259,21 +273,73 @@ function getDefaultSanitizer(type: string): string | null {
   switch (type) {
     case 'string':  return 'sanitize_text_field';
     case 'number':  return 'absint';
-    case 'boolean': return 'absint';
+    case 'boolean': return 'rest_sanitize_boolean';
     default:        return null;
   }
 }
 
 /**
  * Install dependencies and build the admin React app using pnpm + wp-scripts.
+ * Caches node_modules in a .wpts-cache/ directory to skip install on subsequent builds.
  */
-async function buildAdminApp(adminJsDir: string): Promise<void> {
+async function buildAdminApp(adminJsDir: string, cacheDir: string): Promise<void> {
   console.log('\nBuilding admin React app...');
+  const nodeModulesDir = path.join(adminJsDir, 'node_modules');
+
   try {
-    await execFileAsync('pnpm', ['--ignore-workspace', 'install'], { cwd: adminJsDir });
+    // Hash dependencies to detect changes
+    const packageJsonContent = await readFile(path.join(adminJsDir, 'package.json'));
+    const parsed = JSON.parse(packageJsonContent);
+    const depsFingerprint = JSON.stringify({
+      dependencies: parsed.dependencies ?? {},
+      devDependencies: parsed.devDependencies ?? {},
+    });
+    const currentHash = createHash('sha256').update(depsFingerprint).digest('hex');
+
+    const cachedModulesDir = path.join(cacheDir, 'admin-node-modules');
+    const cachedHashFile = path.join(cacheDir, 'admin-deps-hash');
+
+    let needsInstall = true;
+
+    if (await pathExists(cachedModulesDir) && await pathExists(cachedHashFile)) {
+      const cachedHash = (await readFile(cachedHashFile)).trim();
+      if (cachedHash === currentHash) {
+        console.log('  Using cached node_modules (dependencies unchanged).');
+        await movePath(cachedModulesDir, nodeModulesDir);
+        needsInstall = false;
+      }
+    }
+
+    if (needsInstall) {
+      console.log('  Installing dependencies...');
+      await execFileAsync('pnpm', ['--ignore-workspace', 'install'], { cwd: adminJsDir });
+    }
+
     await execFileAsync('pnpm', ['--ignore-workspace', 'run', 'build'], { cwd: adminJsDir });
+
+    // Cache node_modules for next build
+    await ensureDir(cacheDir);
+    if (await pathExists(cachedModulesDir)) {
+      await cleanDir(cachedModulesDir);
+    }
+    await movePath(nodeModulesDir, cachedModulesDir);
+    await writeFile(cachedHashFile, currentHash);
+
+    // Clean up remaining build artifacts (only build/ is needed in dist)
+    await cleanDir(path.join(adminJsDir, 'src'));
+    const fsExtra = await import('fs-extra');
+    for (const file of ['pnpm-lock.yaml', 'package.json']) {
+      const filePath = path.join(adminJsDir, file);
+      if (await pathExists(filePath)) {
+        await fsExtra.remove(filePath);
+      }
+    }
     console.log('Admin React app built successfully.');
   } catch {
+    // Ensure node_modules doesn't linger in dist on failure
+    if (await pathExists(nodeModulesDir)) {
+      await cleanDir(nodeModulesDir);
+    }
     console.warn('Warning: Failed to build admin React app. Run manually: cd admin/js && pnpm install && pnpm run build');
   }
 }

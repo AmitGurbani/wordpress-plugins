@@ -79,8 +79,8 @@ describe('transpileExpression', () => {
       expect(transpile('true && false')).toBe('true && false');
     });
 
-    it('transpiles logical OR to Elvis operator', () => {
-      expect(transpile('true || false')).toBe('true ?: false');
+    it('transpiles logical OR', () => {
+      expect(transpile('true || false')).toBe('true || false');
     });
 
     it('transpiles nullish coalescing', () => {
@@ -221,6 +221,66 @@ describe('transpileExpression', () => {
         .toBe("wp_remote_retrieve_cookies( $response )");
       expect(transpile('isWpError(result)', 'declare function isWpError(t: any): boolean; const result: any = null;'))
         .toBe("is_wp_error( $result )");
+    });
+
+    it('maps user management and auth functions', () => {
+      expect(transpile('getUserBy("email", "test@example.com")', 'declare function getUserBy(f: string, v: any): any;'))
+        .toBe("get_user_by( 'email', 'test@example.com' )");
+      expect(transpile('getUsers({ meta_key: "phone" })', 'declare function getUsers(a?: any): any[];'))
+        .toBe("get_users( array( 'meta_key' => 'phone' ) )");
+      expect(transpile('wpInsertUser({ user_login: "john" })', 'declare function wpInsertUser(d: any): any;'))
+        .toBe("wp_insert_user( array( 'user_login' => 'john' ) )");
+      expect(transpile('wpGetCurrentUser()', 'declare function wpGetCurrentUser(): any;'))
+        .toBe('wp_get_current_user()');
+      expect(transpile('wpGeneratePassword(12, true)', 'declare function wpGeneratePassword(l?: number, s?: boolean): string;'))
+        .toBe('wp_generate_password( 12, true )');
+      expect(transpile('wpHashPassword("secret")', 'declare function wpHashPassword(p: string): string;'))
+        .toBe("wp_hash_password( 'secret' )");
+      expect(transpile('wpCheckPassword("secret", hash)', 'declare function wpCheckPassword(p: string, h: string): boolean; const hash: string = "";'))
+        .toBe("wp_check_password( 'secret', $hash )");
+      expect(transpile('wpSetCurrentUser(1)', 'declare function wpSetCurrentUser(id: number): any;'))
+        .toBe('wp_set_current_user( 1 )');
+    });
+
+    it('maps JWT and encoding built-in functions', () => {
+      expect(transpile('jsonEncode({ key: "value" })', 'declare function jsonEncode(v: any): string;'))
+        .toBe("json_encode( array( 'key' => 'value' ) )");
+      expect(transpile('jsonDecode(data, true)', 'declare function jsonDecode(j: string, a?: boolean): any; const data: string = "";'))
+        .toBe('json_decode( $data, true )');
+      expect(transpile('base64Encode("hello")', 'declare function base64Encode(d: string): string;'))
+        .toBe("base64_encode( 'hello' )");
+      expect(transpile('base64Decode("aGVsbG8=")', 'declare function base64Decode(d: string): string;'))
+        .toBe("base64_decode( 'aGVsbG8=' )");
+      expect(transpile('hashHmac("sha256", data, key, true)', 'declare function hashHmac(a: string, d: string, k: string, r?: boolean): string; const data: string = ""; const key: string = "";'))
+        .toBe("hash_hmac( 'sha256', $data, $key, true )");
+      expect(transpile('hashEquals(expected, actual)', 'declare function hashEquals(k: string, u: string): boolean; const expected: string = ""; const actual: string = "";'))
+        .toBe('hash_equals( $expected, $actual )');
+    });
+
+    it('maps general PHP built-in functions', () => {
+      expect(transpile('md5("test")', 'declare function md5(s: string): string;'))
+        .toBe("md5( 'test' )");
+      expect(transpile('intval(val)', 'declare function intval(v: any): number; const val: any = "42";'))
+        .toBe('intval( $val )');
+      expect(transpile('strval(num)', 'declare function strval(v: any): string; const num: number = 1;'))
+        .toBe('strval( $num )');
+      expect(transpile('strtr(str, "+/", "-_")', 'declare function strtr(s: string, f: string, t: string): string; const str: string = "";'))
+        .toBe("strtr( $str, '+/', '-_' )");
+      expect(transpile('rtrim(str, "=")', 'declare function rtrim(s: string, c?: string): string; const str: string = "";'))
+        .toBe("rtrim( $str, '=' )");
+      expect(transpile('time()', 'declare function time(): number;'))
+        .toBe('time()');
+      expect(transpile('getallheaders()', 'declare function getallheaders(): Record<string, string>;'))
+        .toBe('getallheaders()');
+      expect(transpile('header("Content-Type: application/json")', 'declare function header(h: string): void;'))
+        .toBe("header( 'Content-Type: application/json' )");
+    });
+
+    it('maps utility and REST functions', () => {
+      expect(transpile('wpRand(0, 9)', 'declare function wpRand(min?: number, max?: number): number;'))
+        .toBe('wp_rand( 0, 9 )');
+      expect(transpile('restEnsureResponse(data)', 'declare function restEnsureResponse(r: any): any; const data: any = null;'))
+        .toBe('rest_ensure_response( $data )');
     });
 
     it('maps console.log to error_log', () => {
@@ -550,6 +610,18 @@ describe('transpileExpression', () => {
     it('transpiles typeof x === "function" to is_callable', () => {
       const result = transpile('typeof x === "function"', 'const x: any = null;');
       expect(result).toBe('is_callable( $x )');
+    });
+  });
+
+  describe('new expressions', () => {
+    it('transpiles new ClassName without $ prefix', () => {
+      const result = transpile('new WP_Error("code", "message")', 'declare class WP_Error { constructor(code: string, msg: string); }');
+      expect(result).toBe("new WP_Error( 'code', 'message' )");
+    });
+
+    it('preserves class name casing verbatim', () => {
+      const result = transpile('new MyCustomClass()', 'declare class MyCustomClass { constructor(); }');
+      expect(result).toBe('new MyCustomClass()');
     });
   });
 });

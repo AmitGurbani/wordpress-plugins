@@ -1,4 +1,4 @@
-import { render, useState, useEffect } from '@wordpress/element';
+import { createRoot, useState, useEffect } from '@wordpress/element';
 import {
   Panel,
   PanelBody,
@@ -151,7 +151,7 @@ function SettingsPage() {
   );
 }
 
-const root = document.getElementById('wpts-admin-app');
-if (root) {
-  render(<SettingsPage />, root);
+const rootElement = document.getElementById('wpts-admin-app');
+if (rootElement) {
+  createRoot(rootElement).render(<SettingsPage />);
 }

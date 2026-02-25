@@ -145,6 +145,8 @@ class TestPlugin {
     const uninstallContent = await fs.readFile(uninstall, 'utf-8');
     expect(uninstallContent).toContain('WP_UNINSTALL_PLUGIN');
     expect(uninstallContent).toContain("delete_option( 'test_plugin_greeting' )");
+    expect(uninstallContent).toContain("delete_option( 'test_plugin_version' )");
+    expect(uninstallContent).not.toContain('TODO');
   });
 
   it('builds a plugin with CPT, taxonomy, REST routes, and AJAX handlers', async () => {
@@ -207,6 +209,12 @@ class PortfolioManager {
     return posts;
   }
 
+  @RestRoute('/projects/public', { method: 'GET', public: true })
+  listPublicProjects(request: any): any {
+    const posts = getPosts({ post_type: 'project' });
+    return posts;
+  }
+
   @AjaxHandler('delete_project', { capability: 'delete_posts' })
   handleDeleteProject(): void {
     const id = absint($_POST['project_id']);
@@ -254,6 +262,10 @@ class PortfolioManager {
     expect(restContent).toContain("current_user_can( 'read' )");
     expect(restContent).toContain('function list_projects');
     expect(restContent).toContain('get_posts');
+    // Verify public route generates __return_true
+    expect(restContent).toContain("'/projects/public'");
+    expect(restContent).toContain("'__return_true'");
+    expect(restContent).toContain('function list_public_projects');
 
     // Verify admin class has AJAX handlers
     const adminClass = path.join(outDir, 'portfolio-manager', 'admin', 'class-portfolio-manager-admin.php');
@@ -276,6 +288,101 @@ class PortfolioManager {
     expect(mainContent).toContain("'wp_ajax_nopriv_load_more_projects'");
     expect(mainContent).not.toContain('wp_ajax_nopriv_delete_project');
     expect(mainContent).toContain('rest_api_init');
+  });
+
+  it('builds a multi-file plugin from entry + imported source files', async () => {
+    // Entry file with @Plugin and settings
+    const entryTs = `
+function Plugin(opts: any): ClassDecorator { return (t) => {}; }
+function Action(hook: string, opts?: any): MethodDecorator { return (t, p, d) => {}; }
+function Setting(opts: any): PropertyDecorator { return (t, p) => {}; }
+function AdminPage(opts: any): any { return (t: any, p?: any, d?: any) => {}; }
+
+declare function loadPluginTextdomain(d: string, b: boolean, p: string): void;
+
+import './routes.js';
+
+@Plugin({
+  name: 'Multi File Plugin',
+  description: 'A plugin split across files.',
+  version: '2.0.0',
+  author: 'Tester',
+  license: 'GPL-2.0+',
+  textDomain: 'multi-file-plugin',
+})
+@AdminPage({
+  pageTitle: 'Multi File Settings',
+  menuTitle: 'Multi File',
+  capability: 'manage_options',
+  menuSlug: 'multi-file-settings',
+})
+class MultiFilePlugin {
+  @Setting({
+    key: 'api_key',
+    type: 'string',
+    default: '',
+    label: 'API Key',
+    sanitize: 'sanitize_text_field',
+  })
+  apiKey: string = '';
+
+  @Action('init')
+  initialize(): void {
+    loadPluginTextdomain('multi-file-plugin', false, 'multi-file-plugin/languages');
+  }
+}
+`;
+
+    // Separate routes file with REST routes
+    const routesTs = `
+function RestRoute(route: string, opts: any): MethodDecorator { return (t, p, d) => {}; }
+
+declare function getPosts(args?: Record<string, any>): any[];
+
+class PluginRoutes {
+  @RestRoute('/items', { method: 'GET', capability: 'read' })
+  listItems(request: any): any {
+    const posts = getPosts({ post_type: 'item' });
+    return posts;
+  }
+
+  @RestRoute('/items', { method: 'POST', capability: 'edit_posts' })
+  createItem(request: any): any {
+    return { id: 1 };
+  }
+}
+`;
+
+    await fs.writeFile(path.join(fixtureDir, 'plugin.ts'), entryTs);
+    await fs.writeFile(path.join(fixtureDir, 'routes.ts'), routesTs);
+
+    const outDir = path.join(tmpDir, 'dist');
+    const result = await build({
+      entry: path.join(fixtureDir, 'plugin.ts'),
+      outDir,
+      clean: true,
+      skipAdminBuild: true,
+    });
+
+    expect(result.success).toBe(true);
+
+    // Verify plugin metadata from entry file
+    const mainPlugin = path.join(outDir, 'multi-file-plugin', 'multi-file-plugin.php');
+    const mainContent = await fs.readFile(mainPlugin, 'utf-8');
+    expect(mainContent).toContain('Plugin Name:       Multi File Plugin');
+
+    // Verify settings from entry file
+    const restApi = path.join(outDir, 'multi-file-plugin', 'includes', 'class-multi-file-plugin-rest-api.php');
+    const restContent = await fs.readFile(restApi, 'utf-8');
+    expect(restContent).toContain("'api_key'");
+
+    // Verify REST routes from routes.ts were included
+    expect(restContent).toContain("'/items'");
+    expect(restContent).toContain("'GET'");
+    expect(restContent).toContain("'POST'");
+    expect(restContent).toContain('function list_items');
+    expect(restContent).toContain('function create_item');
+    expect(restContent).toContain('get_posts');
   });
 
   it('reports error for missing @Plugin decorator', async () => {

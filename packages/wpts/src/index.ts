@@ -54,3 +54,6 @@ export type { Diagnostic, DiagnosticLevel } from './compiler/index.js';
 // Config
 export { loadConfig } from './config.js';
 export type { WptsConfig } from './config.js';
+
+// WordPress API global declarations (activates declare global when imported)
+export type { WPGlobals } from './runtime/wp-types.js';

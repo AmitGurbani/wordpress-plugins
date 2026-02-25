@@ -9,6 +9,17 @@ export interface ParseResult {
 }
 
 /**
+ * Return all user source files from a compiled program,
+ * excluding declaration files (.d.ts) and node_modules.
+ */
+export function getUserSourceFiles(program: ts.Program): ts.SourceFile[] {
+  return program.getSourceFiles().filter(sf =>
+    !sf.isDeclarationFile &&
+    !sf.fileName.includes('node_modules'),
+  );
+}
+
+/**
  * Parse a TypeScript source file using the TypeScript Compiler API.
  */
 export function parseSourceFile(filePath: string): ParseResult {

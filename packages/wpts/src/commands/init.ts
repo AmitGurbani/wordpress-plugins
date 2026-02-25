@@ -76,7 +76,7 @@ class MyPlugin {
   await writeFile(path.join(projectDir, 'src', 'plugin.ts'), pluginTs);
 
   // Create admin/index.tsx
-  const adminTsx = `import { render, useState, useEffect } from '@wordpress/element';
+  const adminTsx = `import { createRoot, useState, useEffect } from '@wordpress/element';
 import { Panel, PanelBody, TextControl, Button, Spinner } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import apiFetch from '@wordpress/api-fetch';
@@ -124,9 +124,9 @@ function SettingsPage() {
   );
 }
 
-const root = document.getElementById('wpts-admin-app');
-if (root) {
-  render(<SettingsPage />, root);
+const rootElement = document.getElementById('wpts-admin-app');
+if (rootElement) {
+  createRoot(rootElement).render(<SettingsPage />);
 }
 `;
 

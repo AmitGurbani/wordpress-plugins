@@ -66,6 +66,23 @@ function formatPhpDefault(setting: SettingIR): string {
 }
 
 /**
+ * Extract option names from transpiled PHP activation code that aren't already
+ * covered by @Setting declarations. Returns option names for uninstall cleanup.
+ */
+function extractActivationOptions(phpCode: string, settingOptionNames: string[]): string[] {
+  const optionNames = new Set<string>();
+  const regex = /(?:add_option|update_option)\s*\(\s*'([^']+)'/g;
+  let match;
+  while ((match = regex.exec(phpCode)) !== null) {
+    optionNames.add(match[1]);
+  }
+  for (const name of settingOptionNames) {
+    optionNames.delete(name);
+  }
+  return [...optionNames];
+}
+
+/**
  * Generate all PHP files for a WordPress plugin from the IR.
  */
 export function generatePlugin(ir: PluginIR): GeneratedFile[] {
@@ -89,6 +106,7 @@ export function generatePlugin(ir: PluginIR): GeneratedFile[] {
   const settingsWithDefaults = ir.settings.map(s => ({
     ...s,
     phpDefault: formatPhpDefault(s),
+    isBoolean: s.type === 'boolean',
   }));
 
   // Common template data
@@ -114,6 +132,12 @@ export function generatePlugin(ir: PluginIR): GeneratedFile[] {
     hasAjaxHandlers,
     hasCustomRestApi,
     activationCode: ir.activation?.phpCode ?? null,
+    activationOptions: ir.activation?.phpCode
+      ? extractActivationOptions(
+          ir.activation.phpCode,
+          settingsWithDefaults.map(s => `${metadata.functionPrefix}${s.key}`),
+        )
+      : [],
     deactivationCode: ir.deactivation?.phpCode ?? null,
   };
 

@@ -13,6 +13,7 @@ declare module '@wordpress/element' {
   import type { ReactNode } from 'react';
   export { useState, useEffect } from 'react';
   export function render(element: ReactNode, container: Element | null): void;
+  export function createRoot(container: Element): { render: (element: ReactNode) => void };
 }
 
 // ---------------------------------------------------------------------------

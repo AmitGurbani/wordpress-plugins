@@ -81,6 +81,8 @@ wpts build --clean                      # Clean output directory first
 | `-o, --outDir <dir>` | Output directory | `./dist` |
 | `--clean` | Clean output before build | `false` |
 
+Admin React builds cache `node_modules` in `.wpts-cache/` to avoid reinstalling dependencies on every build. The cache invalidates automatically when `package.json` dependencies change. Delete `.wpts-cache/` to force a fresh install.
+
 ### `wpts validate [file]`
 
 Check source for errors without generating output.
@@ -118,6 +120,58 @@ Create `wpts.config.json` (or `wpts.config.js`) in your project root. CLI flags 
 | `outDir` | `string` | Output directory | `./dist` |
 | `clean` | `boolean` | Clean output before build | `false` |
 | `adminSrcDir` | `string` | Admin React source directory | `src/admin` |
+
+## Multi-File Plugins
+
+Split large plugins across multiple TypeScript files. Use standard `import` statements — the transpiler resolves all imported files and merges decorators from every file into a single plugin.
+
+```
+src/
+├── plugin.ts          # Entry file with @Plugin decorator
+├── routes.ts          # REST routes (@RestRoute)
+├── hooks.ts           # Actions and filters (@Action, @Filter)
+└── admin/index.tsx    # React admin UI (not transpiled)
+```
+
+**Entry file** (`plugin.ts`): Must contain exactly one `@Plugin` decorator. Import other files:
+
+```typescript
+import './routes.js';
+import './hooks.js';
+
+@Plugin({ name: 'My Plugin', ... })
+class MyPlugin {
+  @Setting({ key: 'api_key', type: 'string', default: '', label: 'API Key' })
+  apiKey: string = '';
+}
+```
+
+**Other files** (`routes.ts`): Contain decorated classes — no `@Plugin` needed:
+
+```typescript
+@RestRoute('/items', { method: 'GET', capability: 'read' })
+listItems(request: any): any {
+  return getPosts({ post_type: 'item' });
+}
+```
+
+All decorators (`@Action`, `@Filter`, `@Setting`, `@RestRoute`, `@AjaxHandler`, etc.) work in any file. The transpiler merges everything into the same generated plugin output.
+
+> See [`headless-otp-auth`](../headless-otp-auth/) for a real-world example using multi-file structure.
+
+## WordPress API Types
+
+Importing from `wpts` automatically makes all WordPress functions available as global types in your TypeScript code — no manual `declare function` statements needed.
+
+```typescript
+import { Plugin, Action, Setting } from 'wpts';
+
+// WordPress functions are available globally:
+const val = getOption('my_key', 'default');
+wpEnqueueStyle('my-style', pluginDirUrl(__FILE__) + 'style.css');
+```
+
+This works via TypeScript's `declare global` pattern in `src/runtime/wp-types.ts`. Over 200 WordPress, WooCommerce, and PHP built-in functions have full type signatures for IDE autocompletion and type checking.
 
 ## Decorator API
 
@@ -381,6 +435,8 @@ onDeactivation(): void {
 }
 ```
 
+Options created via `addOption()` or `updateOption()` in `@Activate()` methods are automatically detected and added to the generated `uninstall.php` cleanup. Options already covered by `@Setting` are excluded to avoid duplicates.
+
 ## Admin Pages (React)
 
 Admin page UI is written as React using `@wordpress/components`. It stays as TypeScript/JSX and is bundled by `@wordpress/scripts` — it is **not** transpiled to PHP.
@@ -388,7 +444,7 @@ Admin page UI is written as React using `@wordpress/components`. It stays as Typ
 Create `src/admin/index.tsx`:
 
 ```tsx
-import { render, useState, useEffect } from '@wordpress/element';
+import { createRoot, useState, useEffect } from '@wordpress/element';
 import { Panel, PanelBody, TextControl, Button, Spinner } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import apiFetch from '@wordpress/api-fetch';
@@ -437,9 +493,9 @@ function SettingsPage() {
   );
 }
 
-const root = document.getElementById('wpts-admin-app');
-if (root) {
-  render(<SettingsPage />, root);
+const rootElement = document.getElementById('wpts-admin-app');
+if (rootElement) {
+  createRoot(rootElement).render(<SettingsPage />);
 }
 ```
 
@@ -499,7 +555,6 @@ WordPress API functions are automatically mapped from camelCase to snake_case PH
 
 - `async/await`, Promises
 - `class` declarations (use `@Plugin` class)
-- `import/export` (decorator system handles structure)
 - Nested destructuring (`const { a: { b } } = obj`), rest elements (`const [first, ...rest] = arr`)
 - Regular expressions
 - Generics
@@ -523,7 +578,7 @@ All functions are written in camelCase in TypeScript and transpiled to snake_cas
 | **Settings API** | `registerSetting`, `addSettingsSection`, `addSettingsField`, `settingsFields`, `doSettingsSections`, `submitButton` |
 | **Admin Pages** | `addMenuPage`, `addSubmenuPage`, `addOptionsPage` |
 | **Conditionals** | `isSingle`, `isPage`, `isAdmin`, `isFrontPage`, `isHome`, `isArchive`, `isCategory`, `isTag`, `isSingular` |
-| **User** | `currentUserCan`, `getCurrentUserId`, `isUserLoggedIn` |
+| **User** | `currentUserCan`, `getCurrentUserId`, `isUserLoggedIn`, `getUserBy`, `getUsers`, `wpInsertUser`, `wpGetCurrentUser`, `wpGeneratePassword`, `wpHashPassword`, `wpCheckPassword`, `wpSetCurrentUser`, `getTheAuthorMeta` |
 | **Nonces** | `wpCreateNonce`, `wpVerifyNonce`, `wpNonceField`, `checkAdminReferer` |
 | **Transients** | `getTransient`, `setTransient`, `deleteTransient` |
 | **Posts** | `getPost`, `getPosts`, `getTheId`, `getTheTitle`, `getTheContent`, `getPermalink` |
@@ -535,6 +590,9 @@ All functions are written in camelCase in TypeScript and transpiled to snake_cas
 | **CPT / Taxonomy** | `registerPostType`, `registerTaxonomy`, `wpDeletePost`, `wpCountPosts` |
 | **AJAX** | `checkAjaxReferer`, `$_POST`, `$_GET`, `$_REQUEST` |
 | **JSON Response** | `wpSendJson`, `wpSendJsonSuccess`, `wpSendJsonError` |
+| **REST API** | `restEnsureResponse` |
+| **Utility** | `wpRand` |
+| **PHP Built-ins** | `jsonEncode`, `jsonDecode`, `base64Encode`, `base64Decode`, `hashHmac`, `hashEquals`, `md5`, `intval`, `strval`, `strtr`, `rtrim`, `time`, `getallheaders`, `header` |
 | **Misc** | `wpDie`, `wpRedirect`, `wpSafeRedirect`, `absint`, `wpUnslash`, `echo` |
 | **WooCommerce Conditionals** | `isWoocommerce`, `isShop`, `isProduct`, `isCart`, `isCheckout`, `isAccountPage`, `isWcEndpointUrl` |
 | **WooCommerce Products** | `wcGetProduct`, `wcGetProducts`, `wcGetProductIdBySku` |

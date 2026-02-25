@@ -1,5 +1,6 @@
 import fs from 'fs-extra';
 import path from 'node:path';
+import archiver from 'archiver';
 
 /**
  * Ensure a directory exists, creating it recursively if needed.
@@ -31,8 +32,46 @@ export async function cleanDir(dirPath: string): Promise<void> {
 }
 
 /**
+ * Read a file as UTF-8 string.
+ */
+export async function readFile(filePath: string): Promise<string> {
+  return fs.readFile(filePath, 'utf-8');
+}
+
+/**
+ * Move a file or directory (uses rename on same filesystem, falls back to copy).
+ */
+export async function movePath(src: string, dest: string): Promise<void> {
+  await fs.move(src, dest, { overwrite: true });
+}
+
+/**
  * Check if a path exists.
  */
 export async function pathExists(filePath: string): Promise<boolean> {
   return fs.pathExists(filePath);
+}
+
+/**
+ * Zip a directory into a .zip file.
+ * @param sourceDir - Absolute path to the directory to zip
+ * @param outPath - Absolute path for the output .zip file
+ * @param dirName - Name of the root folder inside the zip
+ */
+export async function zipDir(sourceDir: string, outPath: string, dirName: string): Promise<void> {
+  return new Promise((resolve, reject) => {
+    const output = fs.createWriteStream(outPath);
+    const archive = archiver('zip', { zlib: { level: 9 } });
+
+    output.on('close', () => resolve());
+    output.on('error', (err) => reject(err));
+    archive.on('warning', (err) => {
+      if (err.code !== 'ENOENT') reject(err);
+    });
+    archive.on('error', (err) => reject(err));
+
+    archive.pipe(output);
+    archive.directory(sourceDir, dirName);
+    archive.finalize();
+  });
 }

@@ -1,0 +1,9 @@
+{
+	"core": null,
+	"phpVersion": "8.2",
+	"plugins": ["./dist/headless-otp-auth"],
+	"config": {
+		"WP_DEBUG": true,
+		"WP_DEBUG_LOG": true
+	}
+}

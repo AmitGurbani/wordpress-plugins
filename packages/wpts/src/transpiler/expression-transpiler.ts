@@ -130,7 +130,13 @@ export function transpileExpression(node: ts.Expression, typeChecker: ts.TypeChe
 
     case ts.SyntaxKind.NewExpression: {
       const newExpr = node as ts.NewExpression;
-      const className = transpileExpression(newExpr.expression, typeChecker);
+      // Class names in `new` expressions should NOT get $ prefix — they are class references, not variables
+      let className: string;
+      if (ts.isIdentifier(newExpr.expression)) {
+        className = newExpr.expression.text;
+      } else {
+        className = transpileExpression(newExpr.expression, typeChecker);
+      }
       const newArgs = newExpr.arguments ? newExpr.arguments.map(a => transpileExpression(a, typeChecker)) : [];
       return `new ${phpCall(className, newArgs)}`;
     }
@@ -252,7 +258,7 @@ function transpileBinaryOperator(
 
     // Logical
     case ts.SyntaxKind.AmpersandAmpersandToken: return '&&';
-    case ts.SyntaxKind.BarBarToken: return '?:';
+    case ts.SyntaxKind.BarBarToken: return '||';
     case ts.SyntaxKind.QuestionQuestionToken: return '??'; // Nullish coalescing
 
     // Bitwise

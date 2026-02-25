@@ -15,15 +15,8 @@ import type {
 } from '../ir/plugin-ir.js';
 import { DiagnosticCollection } from './diagnostics.js';
 
-/**
- * Extract all decorator metadata from a parsed TypeScript source file.
- */
-export function extractDecorators(
-  sourceFile: ts.SourceFile,
-  typeChecker: ts.TypeChecker,
-  diagnostics: DiagnosticCollection,
-): RawPluginData {
-  const result: RawPluginData = {
+function createEmptyRawData(): RawPluginData {
+  return {
     plugin: null,
     settings: [],
     actions: [],
@@ -37,18 +30,71 @@ export function extractDecorators(
     activation: null,
     deactivation: null,
   };
+}
 
+/**
+ * Walk a single source file and accumulate decorator data into result.
+ * Does NOT check for @Plugin presence — that's the caller's responsibility.
+ */
+function walkFileDecorators(
+  sourceFile: ts.SourceFile,
+  result: RawPluginData,
+  typeChecker: ts.TypeChecker,
+  diagnostics: DiagnosticCollection,
+): void {
   ts.forEachChild(sourceFile, (node) => {
     if (ts.isClassDeclaration(node)) {
       extractClassDecorators(node, result, typeChecker, diagnostics, sourceFile);
     }
   });
+}
+
+/**
+ * Extract all decorator metadata from a parsed TypeScript source file.
+ */
+export function extractDecorators(
+  sourceFile: ts.SourceFile,
+  typeChecker: ts.TypeChecker,
+  diagnostics: DiagnosticCollection,
+): RawPluginData {
+  const result = createEmptyRawData();
+
+  walkFileDecorators(sourceFile, result, typeChecker, diagnostics);
 
   if (!result.plugin) {
     diagnostics.error(
       'WPTS001',
       'No @Plugin decorator found. One class must be decorated with @Plugin.',
       { file: sourceFile.fileName },
+      'Add @Plugin({ name: "My Plugin", ... }) to your plugin class.',
+    );
+  }
+
+  return result;
+}
+
+/**
+ * Extract decorator metadata from multiple source files.
+ * Merges all decorators into a single RawPluginData and validates
+ * that exactly one @Plugin decorator exists across all files.
+ */
+export function extractDecoratorsFromFiles(
+  sourceFiles: ts.SourceFile[],
+  typeChecker: ts.TypeChecker,
+  diagnostics: DiagnosticCollection,
+): RawPluginData {
+  const result = createEmptyRawData();
+
+  for (const sf of sourceFiles) {
+    walkFileDecorators(sf, result, typeChecker, diagnostics);
+  }
+
+  if (!result.plugin) {
+    const fileNames = sourceFiles.map(sf => sf.fileName).join(', ');
+    diagnostics.error(
+      'WPTS001',
+      'No @Plugin decorator found. One class must be decorated with @Plugin.',
+      { file: fileNames },
       'Add @Plugin({ name: "My Plugin", ... }) to your plugin class.',
     );
   }
@@ -537,6 +583,7 @@ function extractRestRouteDecorator(
     route,
     method: httpMethod,
     capability: getStringProp(obj, 'capability') ?? 'manage_options',
+    public: getBooleanProp(obj, 'public') ?? false,
     methodName,
     bodyNode: method.body ?? method,
   };

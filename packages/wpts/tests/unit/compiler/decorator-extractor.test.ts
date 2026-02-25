@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
+import ts from 'typescript';
 import { parseSourceString } from '../../../src/compiler/parser.js';
-import { extractDecorators } from '../../../src/compiler/decorator-extractor.js';
+import { extractDecorators, extractDecoratorsFromFiles } from '../../../src/compiler/decorator-extractor.js';
 import { DiagnosticCollection } from '../../../src/compiler/diagnostics.js';
 
 function extract(source: string) {
@@ -581,6 +582,127 @@ describe('extractDecorators', () => {
 
       expect(diagnostics.hasErrors()).toBe(true);
       expect(diagnostics.getErrors().some(e => e.code === 'WPTS095')).toBe(true);
+    });
+  });
+
+  describe('extractDecoratorsFromFiles (multi-file)', () => {
+    function parseMultipleFiles(files: Record<string, string>) {
+      const compilerOptions: ts.CompilerOptions = {
+        target: ts.ScriptTarget.ES2022,
+        module: ts.ModuleKind.ES2022,
+        strict: true,
+        esModuleInterop: true,
+        experimentalDecorators: true,
+        emitDecoratorMetadata: true,
+        skipLibCheck: true,
+        noEmit: true,
+      };
+
+      const fileNames = Object.keys(files);
+      const host = ts.createCompilerHost(compilerOptions);
+      const originalGetSourceFile = host.getSourceFile.bind(host);
+
+      host.getSourceFile = (name, languageVersion, onError, shouldCreate) => {
+        if (files[name]) {
+          return ts.createSourceFile(name, files[name], languageVersion, true);
+        }
+        return originalGetSourceFile(name, languageVersion, onError, shouldCreate);
+      };
+
+      host.fileExists = (name) => {
+        if (files[name]) return true;
+        return ts.sys.fileExists(name);
+      };
+
+      host.readFile = (name) => {
+        if (files[name]) return files[name];
+        return ts.sys.readFile(name);
+      };
+
+      const program = ts.createProgram(fileNames, compilerOptions, host);
+      const sourceFiles = fileNames.map(name => program.getSourceFile(name)!);
+      return { sourceFiles, typeChecker: program.getTypeChecker() };
+    }
+
+    it('merges decorators from multiple files', () => {
+      const { sourceFiles, typeChecker } = parseMultipleFiles({
+        'entry.ts': `
+          ${decoratorDefs}
+          function RestRoute(route: string, opts: any): MethodDecorator { return (t, p, d) => {}; }
+
+          @Plugin({ name: 'Multi File', description: '', version: '1.0.0', author: '', license: 'GPL' })
+          class MyPlugin {
+            @Setting({ key: 'greeting', type: 'string', default: 'Hi', label: 'Greeting' })
+            greeting: string = 'Hi';
+
+            @Action('init')
+            onInit(): void {}
+          }
+        `,
+        'routes.ts': `
+          ${decoratorDefs}
+          function RestRoute(route: string, opts: any): MethodDecorator { return (t, p, d) => {}; }
+
+          class Routes {
+            @RestRoute('/items', { method: 'GET', capability: 'read' })
+            listItems(request: any): any { return []; }
+          }
+        `,
+      });
+
+      const diagnostics = new DiagnosticCollection();
+      const result = extractDecoratorsFromFiles(sourceFiles, typeChecker, diagnostics);
+
+      expect(diagnostics.hasErrors()).toBe(false);
+      expect(result.plugin).not.toBeNull();
+      expect(result.plugin!.name).toBe('Multi File');
+      expect(result.settings).toHaveLength(1);
+      expect(result.actions).toHaveLength(1);
+      expect(result.restRoutes).toHaveLength(1);
+      expect(result.restRoutes[0].route).toBe('/items');
+    });
+
+    it('reports WPTS002 for duplicate @Plugin across files', () => {
+      const { sourceFiles, typeChecker } = parseMultipleFiles({
+        'entry.ts': `
+          ${decoratorDefs}
+          @Plugin({ name: 'Plugin A', description: '', version: '1.0.0', author: '', license: 'GPL' })
+          class PluginA {}
+        `,
+        'other.ts': `
+          ${decoratorDefs}
+          @Plugin({ name: 'Plugin B', description: '', version: '1.0.0', author: '', license: 'GPL' })
+          class PluginB {}
+        `,
+      });
+
+      const diagnostics = new DiagnosticCollection();
+      extractDecoratorsFromFiles(sourceFiles, typeChecker, diagnostics);
+
+      expect(diagnostics.hasErrors()).toBe(true);
+      expect(diagnostics.getErrors().some(e => e.code === 'WPTS002')).toBe(true);
+    });
+
+    it('reports WPTS001 when no file has @Plugin', () => {
+      const { sourceFiles, typeChecker } = parseMultipleFiles({
+        'a.ts': `
+          ${decoratorDefs}
+          class Foo {
+            @Action('init')
+            onInit(): void {}
+          }
+        `,
+        'b.ts': `
+          ${decoratorDefs}
+          class Bar {}
+        `,
+      });
+
+      const diagnostics = new DiagnosticCollection();
+      extractDecoratorsFromFiles(sourceFiles, typeChecker, diagnostics);
+
+      expect(diagnostics.hasErrors()).toBe(true);
+      expect(diagnostics.getErrors().some(e => e.code === 'WPTS001')).toBe(true);
     });
   });
 

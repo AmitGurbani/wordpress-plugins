@@ -5,321 +5,373 @@
  * plugin source files (.ts). They are NOT executed at runtime — the transpiler
  * maps each camelCase function to its snake_case PHP equivalent.
  *
- * Usage: These are automatically available in wpts projects. No import needed.
+ * Usage: Automatically available in any project that imports from 'wpts'.
+ * The `declare global` block augments the global scope when the module is loaded.
  */
 
-// ---------------------------------------------------------------------------
-// Options API
-// ---------------------------------------------------------------------------
-declare function addOption(key: string, value: any, deprecated?: string, autoload?: boolean): boolean;
-declare function getOption(key: string, defaultValue?: any): any;
-declare function updateOption(key: string, value: any, autoload?: boolean): boolean;
-declare function deleteOption(key: string): boolean;
+declare global {
 
-// ---------------------------------------------------------------------------
-// Escaping
-// ---------------------------------------------------------------------------
-declare function escHtml(text: string): string;
-declare function escAttr(text: string): string;
-declare function escUrl(url: string, protocols?: string[]): string;
-declare function escJs(text: string): string;
-declare function escTextarea(text: string): string;
-declare function wpKses(content: string, allowedHtml: Record<string, any>, allowedProtocols?: string[]): string;
-declare function wpKsesPost(content: string): string;
+  // ---------------------------------------------------------------------------
+  // Options API
+  // ---------------------------------------------------------------------------
+  function addOption(key: string, value: any, deprecated?: string, autoload?: boolean): boolean;
+  function getOption(key: string, defaultValue?: any): any;
+  function updateOption(key: string, value: any, autoload?: boolean): boolean;
+  function deleteOption(key: string): boolean;
 
-// ---------------------------------------------------------------------------
-// Sanitization
-// ---------------------------------------------------------------------------
-declare function sanitizeTextField(str: string): string;
-declare function sanitizeTextareaField(str: string): string;
-declare function sanitizeTitle(title: string, fallbackTitle?: string, context?: string): string;
-declare function sanitizeEmail(email: string): string;
-declare function sanitizeFileName(filename: string): string;
-declare function sanitizeKey(key: string): string;
+  // ---------------------------------------------------------------------------
+  // Escaping
+  // ---------------------------------------------------------------------------
+  function escHtml(text: string): string;
+  function escAttr(text: string): string;
+  function escUrl(url: string, protocols?: string[]): string;
+  function escJs(text: string): string;
+  function escTextarea(text: string): string;
+  function wpKses(content: string, allowedHtml: Record<string, any>, allowedProtocols?: string[]): string;
+  function wpKsesPost(content: string): string;
 
-// ---------------------------------------------------------------------------
-// Output
-// ---------------------------------------------------------------------------
-declare function echo(output: string): void;
+  // ---------------------------------------------------------------------------
+  // Sanitization
+  // ---------------------------------------------------------------------------
+  function sanitizeTextField(str: string): string;
+  function sanitizeTextareaField(str: string): string;
+  function sanitizeTitle(title: string, fallbackTitle?: string, context?: string): string;
+  function sanitizeEmail(email: string): string;
+  function sanitizeFileName(filename: string): string;
+  function sanitizeKey(key: string): string;
 
-// ---------------------------------------------------------------------------
-// Enqueueing
-// ---------------------------------------------------------------------------
-declare function wpEnqueueStyle(handle: string, src?: string, deps?: string[], ver?: string | false, media?: string): void;
-declare function wpEnqueueScript(handle: string, src?: string, deps?: string[], ver?: string | false, inFooter?: boolean): void;
-declare function wpRegisterStyle(handle: string, src: string, deps?: string[], ver?: string | false, media?: string): boolean;
-declare function wpRegisterScript(handle: string, src: string, deps?: string[], ver?: string | false, inFooter?: boolean): boolean;
-declare function wpLocalizeScript(handle: string, objectName: string, data: Record<string, any>): boolean;
+  // ---------------------------------------------------------------------------
+  // Output
+  // ---------------------------------------------------------------------------
+  function echo(output: string): void;
 
-// ---------------------------------------------------------------------------
-// Plugin Utilities
-// ---------------------------------------------------------------------------
-declare function pluginDirUrl(file: string): string;
-declare function pluginDirPath(file: string): string;
-declare function pluginBasename(file: string): string;
+  // ---------------------------------------------------------------------------
+  // Enqueueing
+  // ---------------------------------------------------------------------------
+  function wpEnqueueStyle(handle: string, src?: string, deps?: string[], ver?: string | false, media?: string): void;
+  function wpEnqueueScript(handle: string, src?: string, deps?: string[], ver?: string | false, inFooter?: boolean): void;
+  function wpRegisterStyle(handle: string, src: string, deps?: string[], ver?: string | false, media?: string): boolean;
+  function wpRegisterScript(handle: string, src: string, deps?: string[], ver?: string | false, inFooter?: boolean): boolean;
+  function wpLocalizeScript(handle: string, objectName: string, data: Record<string, any>): boolean;
 
-// ---------------------------------------------------------------------------
-// i18n / Text Domain
-// ---------------------------------------------------------------------------
-declare function loadPluginTextdomain(domain: string, deprecated?: boolean, pluginRelPath?: string): boolean;
+  // ---------------------------------------------------------------------------
+  // Plugin Utilities
+  // ---------------------------------------------------------------------------
+  function pluginDirUrl(file: string): string;
+  function pluginDirPath(file: string): string;
+  function pluginBasename(file: string): string;
 
-// ---------------------------------------------------------------------------
-// i18n — Translation
-// ---------------------------------------------------------------------------
-declare function __(text: string, domain: string): string;
-declare function _e(text: string, domain: string): void;
-declare function _x(text: string, context: string, domain: string): string;
-declare function _ex(text: string, context: string, domain: string): void;
-declare function _n(single: string, plural: string, number: number, domain: string): string;
-declare function _nx(single: string, plural: string, number: number, context: string, domain: string): string;
+  // ---------------------------------------------------------------------------
+  // i18n / Text Domain
+  // ---------------------------------------------------------------------------
+  function loadPluginTextdomain(domain: string, deprecated?: boolean, pluginRelPath?: string): boolean;
 
-// ---------------------------------------------------------------------------
-// i18n — Escaped Translation
-// ---------------------------------------------------------------------------
-declare function escHtml__(text: string, domain: string): string;
-declare function escHtmlE(text: string, domain: string): void;
-declare function escHtmlX(text: string, context: string, domain: string): string;
-declare function escAttr__(text: string, domain: string): string;
-declare function escAttrE(text: string, domain: string): void;
-declare function escAttrX(text: string, context: string, domain: string): string;
+  // ---------------------------------------------------------------------------
+  // i18n — Translation
+  // ---------------------------------------------------------------------------
+  function __(text: string, domain: string): string;
+  function _e(text: string, domain: string): void;
+  function _x(text: string, context: string, domain: string): string;
+  function _ex(text: string, context: string, domain: string): void;
+  function _n(single: string, plural: string, number: number, domain: string): string;
+  function _nx(single: string, plural: string, number: number, context: string, domain: string): string;
 
-// ---------------------------------------------------------------------------
-// Settings API
-// ---------------------------------------------------------------------------
-declare function settingsFields(optionGroup: string): void;
-declare function doSettingsSections(page: string): void;
-declare function submitButton(text?: string, type?: string, name?: string, wrap?: boolean, otherAttributes?: Record<string, any>): void;
-declare function registerSetting(optionGroup: string, optionName: string, args?: Record<string, any>): void;
-declare function addSettingsSection(id: string, title: string, callback: () => void, page: string): void;
-declare function addSettingsField(id: string, title: string, callback: () => void, page: string, section?: string, args?: Record<string, any>): void;
+  // ---------------------------------------------------------------------------
+  // i18n — Escaped Translation
+  // ---------------------------------------------------------------------------
+  function escHtml__(text: string, domain: string): string;
+  function escHtmlE(text: string, domain: string): void;
+  function escHtmlX(text: string, context: string, domain: string): string;
+  function escAttr__(text: string, domain: string): string;
+  function escAttrE(text: string, domain: string): void;
+  function escAttrX(text: string, context: string, domain: string): string;
 
-// ---------------------------------------------------------------------------
-// Admin Pages
-// ---------------------------------------------------------------------------
-declare function addMenuPage(pageTitle: string, menuTitle: string, capability: string, menuSlug: string, callback?: () => void, iconUrl?: string, position?: number): string;
-declare function addSubmenuPage(parentSlug: string, pageTitle: string, menuTitle: string, capability: string, menuSlug: string, callback?: () => void, position?: number): string | false;
-declare function addOptionsPage(pageTitle: string, menuTitle: string, capability: string, menuSlug: string, callback?: () => void, position?: number): string;
+  // ---------------------------------------------------------------------------
+  // Settings API
+  // ---------------------------------------------------------------------------
+  function settingsFields(optionGroup: string): void;
+  function doSettingsSections(page: string): void;
+  function submitButton(text?: string, type?: string, name?: string, wrap?: boolean, otherAttributes?: Record<string, any>): void;
+  function registerSetting(optionGroup: string, optionName: string, args?: Record<string, any>): void;
+  function addSettingsSection(id: string, title: string, callback: () => void, page: string): void;
+  function addSettingsField(id: string, title: string, callback: () => void, page: string, section?: string, args?: Record<string, any>): void;
 
-// ---------------------------------------------------------------------------
-// Conditionals
-// ---------------------------------------------------------------------------
-declare function isSingle(post?: number | string | number[]): boolean;
-declare function isPage(page?: number | string | number[]): boolean;
-declare function isAdmin(): boolean;
-declare function isFrontPage(): boolean;
-declare function isHome(): boolean;
-declare function isArchive(): boolean;
-declare function isCategory(category?: number | string | number[]): boolean;
-declare function isTag(tag?: number | string | number[]): boolean;
-declare function isSingular(postTypes?: string | string[]): boolean;
+  // ---------------------------------------------------------------------------
+  // Admin Pages
+  // ---------------------------------------------------------------------------
+  function addMenuPage(pageTitle: string, menuTitle: string, capability: string, menuSlug: string, callback?: () => void, iconUrl?: string, position?: number): string;
+  function addSubmenuPage(parentSlug: string, pageTitle: string, menuTitle: string, capability: string, menuSlug: string, callback?: () => void, position?: number): string | false;
+  function addOptionsPage(pageTitle: string, menuTitle: string, capability: string, menuSlug: string, callback?: () => void, position?: number): string;
 
-// ---------------------------------------------------------------------------
-// User
-// ---------------------------------------------------------------------------
-declare function currentUserCan(capability: string, ...args: any[]): boolean;
-declare function getCurrentUserId(): number;
-declare function isUserLoggedIn(): boolean;
+  // ---------------------------------------------------------------------------
+  // Conditionals
+  // ---------------------------------------------------------------------------
+  function isSingle(post?: number | string | number[]): boolean;
+  function isPage(page?: number | string | number[]): boolean;
+  function isAdmin(): boolean;
+  function isFrontPage(): boolean;
+  function isHome(): boolean;
+  function isArchive(): boolean;
+  function isCategory(category?: number | string | number[]): boolean;
+  function isTag(tag?: number | string | number[]): boolean;
+  function isSingular(postTypes?: string | string[]): boolean;
 
-// ---------------------------------------------------------------------------
-// Nonces
-// ---------------------------------------------------------------------------
-declare function wpCreateNonce(action?: string): string;
-declare function wpVerifyNonce(nonce: string, action?: string): number | false;
-declare function wpNonceField(action?: string, name?: string, referer?: boolean, echo?: boolean): string;
-declare function checkAdminReferer(action?: string, queryArg?: string): number | false;
+  // ---------------------------------------------------------------------------
+  // User
+  // ---------------------------------------------------------------------------
+  function currentUserCan(capability: string, ...args: any[]): boolean;
+  function getCurrentUserId(): number;
+  function isUserLoggedIn(): boolean;
+  function getUserBy(field: string, value: string | number): any;
+  function getUsers(args?: Record<string, any>): any[];
+  function wpInsertUser(userdata: Record<string, any>): number | any;
+  function wpGetCurrentUser(): any;
+  function wpGeneratePassword(length?: number, specialChars?: boolean, extraSpecialChars?: boolean): string;
+  function wpHashPassword(password: string): string;
+  function wpCheckPassword(password: string, hash: string, userId?: number): boolean;
+  function wpSetCurrentUser(id: number, name?: string): any;
+  function getTheAuthorMeta(field: string, userId?: number): string;
 
-// ---------------------------------------------------------------------------
-// Hooks
-// ---------------------------------------------------------------------------
-declare function addAction(hookName: string, callback: (...args: any[]) => void, priority?: number, acceptedArgs?: number): boolean;
-declare function addFilter(hookName: string, callback: (...args: any[]) => any, priority?: number, acceptedArgs?: number): boolean;
-declare function doAction(hookName: string, ...args: any[]): void;
-declare function applyFilters(hookName: string, value: any, ...args: any[]): any;
-declare function removeAction(hookName: string, callback: (...args: any[]) => void, priority?: number): boolean;
-declare function removeFilter(hookName: string, callback: (...args: any[]) => any, priority?: number): boolean;
-declare function addShortcode(tag: string, callback: (atts: Record<string, string>, content?: string) => string): void;
+  // ---------------------------------------------------------------------------
+  // Nonces
+  // ---------------------------------------------------------------------------
+  function wpCreateNonce(action?: string): string;
+  function wpVerifyNonce(nonce: string, action?: string): number | false;
+  function wpNonceField(action?: string, name?: string, referer?: boolean, echo?: boolean): string;
+  function checkAdminReferer(action?: string, queryArg?: string): number | false;
 
-// ---------------------------------------------------------------------------
-// Transients
-// ---------------------------------------------------------------------------
-declare function getTransient(key: string): any;
-declare function setTransient(key: string, value: any, expiration?: number): boolean;
-declare function deleteTransient(key: string): boolean;
+  // ---------------------------------------------------------------------------
+  // Hooks
+  // ---------------------------------------------------------------------------
+  function addAction(hookName: string, callback: (...args: any[]) => void, priority?: number, acceptedArgs?: number): boolean;
+  function addFilter(hookName: string, callback: (...args: any[]) => any, priority?: number, acceptedArgs?: number): boolean;
+  function doAction(hookName: string, ...args: any[]): void;
+  function applyFilters(hookName: string, value: any, ...args: any[]): any;
+  function removeAction(hookName: string, callback: (...args: any[]) => void, priority?: number): boolean;
+  function removeFilter(hookName: string, callback: (...args: any[]) => any, priority?: number): boolean;
+  function addShortcode(tag: string, callback: (atts: Record<string, string>, content?: string) => string): void;
 
-// ---------------------------------------------------------------------------
-// Posts
-// ---------------------------------------------------------------------------
-declare function getPost(postId?: number, output?: string, filter?: string): any;
-declare function getPosts(args?: Record<string, any>): any[];
-declare function getTheId(): number | false;
-declare function getTheTitle(postId?: number): string;
-declare function getTheContent(moreLinkText?: string, stripTeaser?: boolean): string;
-declare function getPermalink(postId?: number, leavename?: boolean): string | false;
+  // ---------------------------------------------------------------------------
+  // Transients
+  // ---------------------------------------------------------------------------
+  function getTransient(key: string): any;
+  function setTransient(key: string, value: any, expiration?: number): boolean;
+  function deleteTransient(key: string): boolean;
 
-// ---------------------------------------------------------------------------
-// Metadata — Post
-// ---------------------------------------------------------------------------
-declare function getPostMeta(postId: number, key?: string, single?: boolean): any;
-declare function addPostMeta(postId: number, metaKey: string, metaValue: any, unique?: boolean): number | false;
-declare function updatePostMeta(postId: number, metaKey: string, metaValue: any, prevValue?: any): number | boolean;
-declare function deletePostMeta(postId: number, metaKey: string, metaValue?: any): boolean;
+  // ---------------------------------------------------------------------------
+  // Posts
+  // ---------------------------------------------------------------------------
+  function getPost(postId?: number, output?: string, filter?: string): any;
+  function getPosts(args?: Record<string, any>): any[];
+  function getTheId(): number | false;
+  function getTheTitle(postId?: number): string;
+  function getTheContent(moreLinkText?: string, stripTeaser?: boolean): string;
+  function getPermalink(postId?: number, leavename?: boolean): string | false;
 
-// ---------------------------------------------------------------------------
-// Metadata — User
-// ---------------------------------------------------------------------------
-declare function getUserMeta(userId: number, key?: string, single?: boolean): any;
-declare function addUserMeta(userId: number, metaKey: string, metaValue: any, unique?: boolean): number | false;
-declare function updateUserMeta(userId: number, metaKey: string, metaValue: any, prevValue?: any): number | boolean;
-declare function deleteUserMeta(userId: number, metaKey: string, metaValue?: any): boolean;
+  // ---------------------------------------------------------------------------
+  // Metadata — Post
+  // ---------------------------------------------------------------------------
+  function getPostMeta(postId: number, key?: string, single?: boolean): any;
+  function addPostMeta(postId: number, metaKey: string, metaValue: any, unique?: boolean): number | false;
+  function updatePostMeta(postId: number, metaKey: string, metaValue: any, prevValue?: any): number | boolean;
+  function deletePostMeta(postId: number, metaKey: string, metaValue?: any): boolean;
 
-// ---------------------------------------------------------------------------
-// Metadata — Term
-// ---------------------------------------------------------------------------
-declare function getTermMeta(termId: number, key?: string, single?: boolean): any;
-declare function addTermMeta(termId: number, metaKey: string, metaValue: any, unique?: boolean): number | false;
-declare function updateTermMeta(termId: number, metaKey: string, metaValue: any, prevValue?: any): number | boolean;
-declare function deleteTermMeta(termId: number, metaKey: string, metaValue?: any): boolean;
+  // ---------------------------------------------------------------------------
+  // Metadata — User
+  // ---------------------------------------------------------------------------
+  function getUserMeta(userId: number, key?: string, single?: boolean): any;
+  function addUserMeta(userId: number, metaKey: string, metaValue: any, unique?: boolean): number | false;
+  function updateUserMeta(userId: number, metaKey: string, metaValue: any, prevValue?: any): number | boolean;
+  function deleteUserMeta(userId: number, metaKey: string, metaValue?: any): boolean;
 
-// ---------------------------------------------------------------------------
-// Metadata — Comment
-// ---------------------------------------------------------------------------
-declare function getCommentMeta(commentId: number, key?: string, single?: boolean): any;
-declare function addCommentMeta(commentId: number, metaKey: string, metaValue: any, unique?: boolean): number | false;
-declare function updateCommentMeta(commentId: number, metaKey: string, metaValue: any, prevValue?: any): number | boolean;
-declare function deleteCommentMeta(commentId: number, metaKey: string, metaValue?: any): boolean;
+  // ---------------------------------------------------------------------------
+  // Metadata — Term
+  // ---------------------------------------------------------------------------
+  function getTermMeta(termId: number, key?: string, single?: boolean): any;
+  function addTermMeta(termId: number, metaKey: string, metaValue: any, unique?: boolean): number | false;
+  function updateTermMeta(termId: number, metaKey: string, metaValue: any, prevValue?: any): number | boolean;
+  function deleteTermMeta(termId: number, metaKey: string, metaValue?: any): boolean;
 
-// ---------------------------------------------------------------------------
-// Metadata — Generic
-// ---------------------------------------------------------------------------
-declare function getMetadata(metaType: string, objectId: number, metaKey?: string, single?: boolean): any;
-declare function addMetadata(metaType: string, objectId: number, metaKey: string, metaValue: any, unique?: boolean): number | false;
-declare function updateMetadata(metaType: string, objectId: number, metaKey: string, metaValue: any, prevValue?: any): number | boolean;
-declare function deleteMetadata(metaType: string, objectId: number, metaKey: string, metaValue?: any): boolean;
+  // ---------------------------------------------------------------------------
+  // Metadata — Comment
+  // ---------------------------------------------------------------------------
+  function getCommentMeta(commentId: number, key?: string, single?: boolean): any;
+  function addCommentMeta(commentId: number, metaKey: string, metaValue: any, unique?: boolean): number | false;
+  function updateCommentMeta(commentId: number, metaKey: string, metaValue: any, prevValue?: any): number | boolean;
+  function deleteCommentMeta(commentId: number, metaKey: string, metaValue?: any): boolean;
 
-// ---------------------------------------------------------------------------
-// HTTP API — Requests
-// ---------------------------------------------------------------------------
-declare function wpRemoteGet(url: string, args?: Record<string, any>): any;
-declare function wpRemotePost(url: string, args?: Record<string, any>): any;
-declare function wpRemoteHead(url: string, args?: Record<string, any>): any;
-declare function wpRemoteRequest(url: string, args?: Record<string, any>): any;
+  // ---------------------------------------------------------------------------
+  // Metadata — Generic
+  // ---------------------------------------------------------------------------
+  function getMetadata(metaType: string, objectId: number, metaKey?: string, single?: boolean): any;
+  function addMetadata(metaType: string, objectId: number, metaKey: string, metaValue: any, unique?: boolean): number | false;
+  function updateMetadata(metaType: string, objectId: number, metaKey: string, metaValue: any, prevValue?: any): number | boolean;
+  function deleteMetadata(metaType: string, objectId: number, metaKey: string, metaValue?: any): boolean;
 
-// ---------------------------------------------------------------------------
-// HTTP API — Safe Requests
-// ---------------------------------------------------------------------------
-declare function wpSafeRemoteGet(url: string, args?: Record<string, any>): any;
-declare function wpSafeRemotePost(url: string, args?: Record<string, any>): any;
-declare function wpSafeRemoteHead(url: string, args?: Record<string, any>): any;
-declare function wpSafeRemoteRequest(url: string, args?: Record<string, any>): any;
+  // ---------------------------------------------------------------------------
+  // HTTP API — Requests
+  // ---------------------------------------------------------------------------
+  function wpRemoteGet(url: string, args?: Record<string, any>): any;
+  function wpRemotePost(url: string, args?: Record<string, any>): any;
+  function wpRemoteHead(url: string, args?: Record<string, any>): any;
+  function wpRemoteRequest(url: string, args?: Record<string, any>): any;
 
-// ---------------------------------------------------------------------------
-// HTTP API — Response
-// ---------------------------------------------------------------------------
-declare function wpRemoteRetrieveBody(response: any): string;
-declare function wpRemoteRetrieveResponseCode(response: any): number | string;
-declare function wpRemoteRetrieveResponseMessage(response: any): string;
-declare function wpRemoteRetrieveHeader(response: any, header: string): string | string[];
-declare function wpRemoteRetrieveHeaders(response: any): any;
-declare function wpRemoteRetrieveCookies(response: any): any[];
+  // ---------------------------------------------------------------------------
+  // HTTP API — Safe Requests
+  // ---------------------------------------------------------------------------
+  function wpSafeRemoteGet(url: string, args?: Record<string, any>): any;
+  function wpSafeRemotePost(url: string, args?: Record<string, any>): any;
+  function wpSafeRemoteHead(url: string, args?: Record<string, any>): any;
+  function wpSafeRemoteRequest(url: string, args?: Record<string, any>): any;
 
-// ---------------------------------------------------------------------------
-// HTTP API — Error
-// ---------------------------------------------------------------------------
-declare function isWpError(thing: any): boolean;
+  // ---------------------------------------------------------------------------
+  // HTTP API — Response
+  // ---------------------------------------------------------------------------
+  function wpRemoteRetrieveBody(response: any): string;
+  function wpRemoteRetrieveResponseCode(response: any): number | string;
+  function wpRemoteRetrieveResponseMessage(response: any): string;
+  function wpRemoteRetrieveHeader(response: any, header: string): string | string[];
+  function wpRemoteRetrieveHeaders(response: any): any;
+  function wpRemoteRetrieveCookies(response: any): any[];
 
-// ---------------------------------------------------------------------------
-// URLs
-// ---------------------------------------------------------------------------
-declare function adminUrl(path?: string, scheme?: string): string;
-declare function homeUrl(path?: string, scheme?: string): string;
-declare function siteUrl(path?: string, scheme?: string): string;
-declare function contentUrl(path?: string): string;
+  // ---------------------------------------------------------------------------
+  // HTTP API — Error
+  // ---------------------------------------------------------------------------
+  function isWpError(thing: any): boolean;
 
-// ---------------------------------------------------------------------------
-// WooCommerce — Conditionals
-// ---------------------------------------------------------------------------
-declare function isWoocommerce(): boolean;
-declare function isShop(): boolean;
-declare function isProduct(): boolean;
-declare function isCart(): boolean;
-declare function isCheckout(): boolean;
-declare function isAccountPage(): boolean;
-declare function isWcEndpointUrl(endpoint?: string): boolean;
+  // ---------------------------------------------------------------------------
+  // URLs
+  // ---------------------------------------------------------------------------
+  function adminUrl(path?: string, scheme?: string): string;
+  function homeUrl(path?: string, scheme?: string): string;
+  function siteUrl(path?: string, scheme?: string): string;
+  function contentUrl(path?: string): string;
 
-// ---------------------------------------------------------------------------
-// WooCommerce — Products
-// ---------------------------------------------------------------------------
-declare function wcGetProduct(productId: number | object): any;
-declare function wcGetProducts(args?: Record<string, any>): any[];
-declare function wcGetProductIdBySku(sku: string): number;
+  // ---------------------------------------------------------------------------
+  // WooCommerce — Conditionals
+  // ---------------------------------------------------------------------------
+  function isWoocommerce(): boolean;
+  function isShop(): boolean;
+  function isProduct(): boolean;
+  function isCart(): boolean;
+  function isCheckout(): boolean;
+  function isAccountPage(): boolean;
+  function isWcEndpointUrl(endpoint?: string): boolean;
 
-// ---------------------------------------------------------------------------
-// WooCommerce — Orders
-// ---------------------------------------------------------------------------
-declare function wcGetOrder(orderId: number | object): any;
-declare function wcGetOrders(args?: Record<string, any>): any[];
-declare function wcCreateOrder(args?: Record<string, any>): any;
+  // ---------------------------------------------------------------------------
+  // WooCommerce — Products
+  // ---------------------------------------------------------------------------
+  function wcGetProduct(productId: number | object): any;
+  function wcGetProducts(args?: Record<string, any>): any[];
+  function wcGetProductIdBySku(sku: string): number;
 
-// ---------------------------------------------------------------------------
-// WooCommerce — Formatting & Helpers
-// ---------------------------------------------------------------------------
-declare function wcPrice(price: number | string, args?: Record<string, any>): string;
-declare function wcClean(value: string | string[]): string | string[];
-declare function wcGetPageId(page: string): number;
-declare function wcGetPagePermalink(page: string): string;
-declare function wcGetEndpointUrl(endpoint: string, value?: string, permalink?: string): string;
-declare function wcGetCheckoutUrl(): string;
-declare function wcGetCartUrl(): string;
+  // ---------------------------------------------------------------------------
+  // WooCommerce — Orders
+  // ---------------------------------------------------------------------------
+  function wcGetOrder(orderId: number | object): any;
+  function wcGetOrders(args?: Record<string, any>): any[];
+  function wcCreateOrder(args?: Record<string, any>): any;
 
-// ---------------------------------------------------------------------------
-// WooCommerce — Customer
-// ---------------------------------------------------------------------------
-declare function wcCustomerBoughtProduct(customerEmail: string, userId: number, productId: number): boolean;
-declare function wcGetCustomerOrderCount(userId: number): number;
+  // ---------------------------------------------------------------------------
+  // WooCommerce — Formatting & Helpers
+  // ---------------------------------------------------------------------------
+  function wcPrice(price: number | string, args?: Record<string, any>): string;
+  function wcClean(value: string | string[]): string | string[];
+  function wcGetPageId(page: string): number;
+  function wcGetPagePermalink(page: string): string;
+  function wcGetEndpointUrl(endpoint: string, value?: string, permalink?: string): string;
+  function wcGetCheckoutUrl(): string;
+  function wcGetCartUrl(): string;
 
-// ---------------------------------------------------------------------------
-// WooCommerce — Notices
-// ---------------------------------------------------------------------------
-declare function wcAddNotice(message: string, noticeType?: string, data?: Record<string, any>): void;
-declare function wcPrintNotices(noticeType?: string): void;
-declare function wcHasNotice(message: string, noticeType?: string): boolean;
+  // ---------------------------------------------------------------------------
+  // WooCommerce — Customer
+  // ---------------------------------------------------------------------------
+  function wcCustomerBoughtProduct(customerEmail: string, userId: number, productId: number): boolean;
+  function wcGetCustomerOrderCount(userId: number): number;
 
-// ---------------------------------------------------------------------------
-// WooCommerce — Taxonomy/Attributes
-// ---------------------------------------------------------------------------
-declare function wcGetAttributeTaxonomies(): any[];
-declare function wcGetProductTerms(productId: number, attribute: string, args?: Record<string, any>): any[];
+  // ---------------------------------------------------------------------------
+  // WooCommerce — Notices
+  // ---------------------------------------------------------------------------
+  function wcAddNotice(message: string, noticeType?: string, data?: Record<string, any>): void;
+  function wcPrintNotices(noticeType?: string): void;
+  function wcHasNotice(message: string, noticeType?: string): boolean;
 
-// ---------------------------------------------------------------------------
-// WooCommerce — Templates
-// ---------------------------------------------------------------------------
-declare function wcGetTemplatePart(slug: string, name?: string): void;
-declare function wcGetTemplate(templateName: string, args?: Record<string, any>, templatePath?: string, defaultPath?: string): void;
+  // ---------------------------------------------------------------------------
+  // WooCommerce — Taxonomy/Attributes
+  // ---------------------------------------------------------------------------
+  function wcGetAttributeTaxonomies(): any[];
+  function wcGetProductTerms(productId: number, attribute: string, args?: Record<string, any>): any[];
 
-// ---------------------------------------------------------------------------
-// Misc
-// ---------------------------------------------------------------------------
-declare function wpDie(message?: string, title?: string, args?: Record<string, any>): never;
-declare function wpRedirect(location: string, status?: number, xRedirectBy?: string): boolean;
-declare function wpSafeRedirect(location: string, status?: number, xRedirectBy?: string): boolean;
-declare function wpSendJson(response: any, statusCode?: number): never;
-declare function wpSendJsonSuccess(data?: any, statusCode?: number): never;
-declare function wpSendJsonError(data?: any, statusCode?: number): never;
-declare function absint(value: any): number;
-declare function wpUnslash(value: string | string[]): string | string[];
+  // ---------------------------------------------------------------------------
+  // WooCommerce — Templates
+  // ---------------------------------------------------------------------------
+  function wcGetTemplatePart(slug: string, name?: string): void;
+  function wcGetTemplate(templateName: string, args?: Record<string, any>, templatePath?: string, defaultPath?: string): void;
 
-// ---------------------------------------------------------------------------
-// Custom Post Types & Taxonomies
-// ---------------------------------------------------------------------------
-declare function registerPostType(postType: string, args?: Record<string, any>): any;
-declare function registerTaxonomy(taxonomy: string, objectType: string | string[], args?: Record<string, any>): any;
-declare function wpDeletePost(postId: number, forceDelete?: boolean): any;
-declare function wpCountPosts(type?: string, perm?: string): Record<string, number>;
+  // ---------------------------------------------------------------------------
+  // REST API
+  // ---------------------------------------------------------------------------
+  function restEnsureResponse(response: any): any;
 
-// ---------------------------------------------------------------------------
-// AJAX
-// ---------------------------------------------------------------------------
-declare function checkAjaxReferer(action?: string, queryArg?: string, die?: boolean): number | false;
-declare var $_POST: Record<string, any>;
-declare var $_GET: Record<string, any>;
-declare var $_REQUEST: Record<string, any>;
+  // ---------------------------------------------------------------------------
+  // Utility
+  // ---------------------------------------------------------------------------
+  function wpRand(min?: number, max?: number): number;
+
+  // ---------------------------------------------------------------------------
+  // PHP Built-ins (for JWT / encoding)
+  // ---------------------------------------------------------------------------
+  function jsonEncode(value: any, options?: number, depth?: number): string;
+  function jsonDecode(json: string, assoc?: boolean, depth?: number, options?: number): any;
+  function base64Encode(data: string): string;
+  function base64Decode(data: string, strict?: boolean): string;
+  function hashHmac(algo: string, data: string, key: string, rawOutput?: boolean): string;
+  function hashEquals(knownString: string, userString: string): boolean;
+
+  // ---------------------------------------------------------------------------
+  // PHP Built-ins (general)
+  // ---------------------------------------------------------------------------
+  function md5(str: string): string;
+  function intval(value: any): number;
+  function strval(value: any): string;
+  function strtr(str: string, from: string, to: string): string;
+  function rtrim(str: string, chars?: string): string;
+  function time(): number;
+  function getallheaders(): Record<string, string>;
+  function header(headerStr: string): void;
+
+  // ---------------------------------------------------------------------------
+  // Misc
+  // ---------------------------------------------------------------------------
+  function wpDie(message?: string, title?: string, args?: Record<string, any>): never;
+  function wpRedirect(location: string, status?: number, xRedirectBy?: string): boolean;
+  function wpSafeRedirect(location: string, status?: number, xRedirectBy?: string): boolean;
+  function wpSendJson(response: any, statusCode?: number): never;
+  function wpSendJsonSuccess(data?: any, statusCode?: number): never;
+  function wpSendJsonError(data?: any, statusCode?: number): never;
+  function absint(value: any): number;
+  function wpUnslash(value: string | string[]): string | string[];
+
+  // ---------------------------------------------------------------------------
+  // Custom Post Types & Taxonomies
+  // ---------------------------------------------------------------------------
+  function registerPostType(postType: string, args?: Record<string, any>): any;
+  function registerTaxonomy(taxonomy: string, objectType: string | string[], args?: Record<string, any>): any;
+  function wpDeletePost(postId: number, forceDelete?: boolean): any;
+  function wpCountPosts(type?: string, perm?: string): Record<string, number>;
+
+  // ---------------------------------------------------------------------------
+  // AJAX
+  // ---------------------------------------------------------------------------
+  function checkAjaxReferer(action?: string, queryArg?: string, die?: boolean): number | false;
+  var $_POST: Record<string, any>;
+  var $_GET: Record<string, any>;
+  var $_REQUEST: Record<string, any>;
+
+  // ---------------------------------------------------------------------------
+  // WordPress Classes
+  // ---------------------------------------------------------------------------
+  var WP_Error: any;
+}
+
+export type WPGlobals = true;

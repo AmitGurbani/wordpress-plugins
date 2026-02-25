@@ -124,6 +124,7 @@ export interface RestRouteIR {
   route: string;
   method: string;
   capability: string;
+  public: boolean;
   methodName: string;
   phpMethodName: string;
   body: FunctionBodyIR;
@@ -268,6 +269,7 @@ export interface RawRestRouteDecorator {
   route: string;
   method: string;
   capability: string;
+  public: boolean;
   methodName: string;
   bodyNode: ts.Node;
 }

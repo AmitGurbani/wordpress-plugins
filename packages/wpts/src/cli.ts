@@ -33,7 +33,8 @@ program
   .argument('[file]', 'Entry TypeScript file')
   .option('-o, --outDir <dir>', 'Output directory')
   .option('--clean', 'Clean output directory before build')
-  .action(async (file: string | undefined, options: { outDir?: string; clean?: boolean }) => {
+  .option('--zip', 'Generate a .zip file for WordPress upload')
+  .action(async (file: string | undefined, options: { outDir?: string; clean?: boolean; zip?: boolean }) => {
     const config = await loadConfig(process.cwd()) ?? {};
 
     const entryPath = resolve(file ?? config.entry ?? 'src/plugin.ts');
@@ -47,6 +48,7 @@ program
       outDir,
       clean,
       adminSrcDir: config.adminSrcDir,
+      zip: options.zip,
     });
 
     // Print diagnostics
@@ -64,6 +66,9 @@ program
       console.log('\nGenerated files:');
       for (const f of result.files) {
         console.log(`  ${f.relativePath}`);
+      }
+      if (result.zipPath) {
+        console.log(`\nPlugin zip: ${result.zipPath}`);
       }
       console.log('\nNext steps:');
       console.log('  1. Copy the plugin directory to wp-content/plugins/');

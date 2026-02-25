@@ -7,7 +7,6 @@ if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
 {{#each settings}}
 delete_option( '{{../functionPrefix}}{{key}}' );
 {{/each}}
-{{#if activationCode}}
-// TODO: Add cleanup for any options created during plugin activation.
-// Review your activate() method and delete any options created there.
-{{/if}}
+{{#each activationOptions}}
+delete_option( '{{this}}' );
+{{/each}}

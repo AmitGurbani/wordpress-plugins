@@ -21,7 +21,7 @@ class {{className}}_Public {
 
 	{{/each}}
 	{{#each publicFilters}}
-	public function {{phpMethodName}}( {{#each parameters}}${{name}}{{#unless @last}}, {{/unless}}{{/each}} ) {
+	public function {{phpMethodName}}( {{#each parameters}}{{phpName}}{{#unless @last}}, {{/unless}}{{/each}} ) {
 {{{body.phpCode}}}
 	}
 

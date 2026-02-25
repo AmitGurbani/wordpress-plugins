@@ -42,7 +42,7 @@ export function transpileParameters(
 ): ParameterIR[] {
   return params.map(p => ({
     name: p.name,
-    phpName: `$${p.name}`,
+    phpName: `$${toSnakeCase(p.name)}`,
     type: mapType(p.type),
     defaultValue: p.defaultValue ?? null,
   }));

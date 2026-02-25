@@ -89,6 +89,15 @@ export const WP_FUNCTION_MAP: Record<string, string> = {
   currentUserCan: 'current_user_can',
   getCurrentUserId: 'get_current_user_id',
   isUserLoggedIn: 'is_user_logged_in',
+  getUserBy: 'get_user_by',
+  getUsers: 'get_users',
+  wpInsertUser: 'wp_insert_user',
+  wpGetCurrentUser: 'wp_get_current_user',
+  wpGeneratePassword: 'wp_generate_password',
+  wpHashPassword: 'wp_hash_password',
+  wpCheckPassword: 'wp_check_password',
+  wpSetCurrentUser: 'wp_set_current_user',
+  getTheAuthorMeta: 'get_the_author_meta',
 
   // Nonces
   wpCreateNonce: 'wp_create_nonce',
@@ -230,6 +239,30 @@ export const WP_FUNCTION_MAP: Record<string, string> = {
 
   // AJAX
   checkAjaxReferer: 'check_ajax_referer',
+
+  // REST API
+  restEnsureResponse: 'rest_ensure_response',
+
+  // Utility
+  wpRand: 'wp_rand',
+
+  // PHP Built-ins (for JWT / encoding)
+  jsonEncode: 'json_encode',
+  jsonDecode: 'json_decode',
+  base64Encode: 'base64_encode',
+  base64Decode: 'base64_decode',
+  hashHmac: 'hash_hmac',
+  hashEquals: 'hash_equals',
+
+  // PHP Built-ins (general)
+  md5: 'md5',
+  intval: 'intval',
+  strval: 'strval',
+  strtr: 'strtr',
+  rtrim: 'rtrim',
+  time: 'time',
+  getallheaders: 'getallheaders',
+  header: 'header',
 
   // Misc
   wpDie: 'wp_die',

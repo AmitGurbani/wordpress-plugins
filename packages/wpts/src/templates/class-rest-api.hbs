@@ -38,9 +38,13 @@ class {{className}}_Rest_Api {
 			array(
 				'methods'             => '{{method}}',
 				'callback'            => array( $this, '{{phpMethodName}}' ),
+				{{#if public}}
+				'permission_callback' => '__return_true',
+				{{else}}
 				'permission_callback' => function() {
 					return current_user_can( '{{capability}}' );
 				},
+				{{/if}}
 			)
 		);
 		{{/each}}
@@ -54,7 +58,11 @@ class {{className}}_Rest_Api {
 	public function get_settings( $request ) {
 		$settings = array(
 			{{#each settings}}
+			{{#if isBoolean}}
+			'{{key}}' => (bool) get_option( '{{../functionPrefix}}{{key}}', {{{phpDefault}}} ),
+			{{else}}
 			'{{key}}' => get_option( '{{../functionPrefix}}{{key}}', {{{phpDefault}}} ),
+			{{/if}}
 			{{/each}}
 		);
 
