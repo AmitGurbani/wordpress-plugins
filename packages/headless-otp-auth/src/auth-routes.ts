@@ -24,7 +24,7 @@ class AuthRoutes {
     }
 
     const regTokenHash: string = md5(regToken);
-    const phone: any = getTransient('hoa_reg_' + regTokenHash);
+    const phone: string = getTransient('hoa_reg_' + regTokenHash);
 
     if (!phone) {
       return new WP_Error('invalid_token', 'Registration token is invalid or expired.', { status: 400 });
@@ -48,7 +48,7 @@ class AuthRoutes {
     }
 
     // Generate username from display name
-    let baseUsername: string = sanitizeUser(strtolower(name), true);
+    let baseUsername: string = sanitizeUser(strtolower(name).replace(' ', ''), true);
     if (!baseUsername) {
       baseUsername = 'user';
     }
@@ -70,13 +70,13 @@ class AuthRoutes {
     const firstName: string = nameParts[0];
     const lastName: string = nameParts.length > 1 ? nameParts.slice(1).join(' ') : '';
 
-    const defaultRole: string = classExists('WooCommerce') ? 'customer' : 'subscriber';
-    const userRole: string = getOption('headless_otp_auth_default_user_role', defaultRole);
+    const userRole: string = getOption('headless_otp_auth_default_user_role', 'subscriber');
 
     const newUserId: any = wpInsertUser({
       user_login: username,
       user_pass: password,
       display_name: name,
+      nickname: firstName,
       first_name: firstName,
       last_name: lastName,
       role: userRole,

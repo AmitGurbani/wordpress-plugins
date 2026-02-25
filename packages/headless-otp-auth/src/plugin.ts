@@ -7,7 +7,7 @@
  * Build: npx wpts build src/plugin.ts -o dist --clean
  */
 
-import { Plugin, Setting, AdminPage, Activate, Deactivate, Action } from 'wpts';
+import { Plugin, Setting, AdminPage, Activate, Deactivate, Action, Filter } from 'wpts';
 import './jwt.js';
 import './otp-routes.js';
 import './auth-routes.js';
@@ -171,6 +171,16 @@ class HeadlessOtpAuth {
       echo(escHtml__('Test Mode is enabled. OTPs will not be delivered to users.', 'headless-otp-auth'));
       echo('</p></div>');
     }
+  }
+
+  // ── Dynamic Defaults ─────────────────────────────────────────────────
+
+  @Filter('default_option_headless_otp_auth_default_user_role', { priority: 11 })
+  filterDefaultUserRole(defaultValue: string): string {
+    if (classExists('WooCommerce')) {
+      return 'customer';
+    }
+    return defaultValue;
   }
 
   // ── Lifecycle ─────────────────────────────────────────────────────────
