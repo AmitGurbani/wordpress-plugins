@@ -33,6 +33,7 @@ declare global {
   // ---------------------------------------------------------------------------
   // Sanitization
   // ---------------------------------------------------------------------------
+  function sanitizeUser(username: string, strict?: boolean): string;
   function sanitizeTextField(str: string): string;
   function sanitizeTextareaField(str: string): string;
   function sanitizeTitle(title: string, fallbackTitle?: string, context?: string): string;
@@ -124,6 +125,7 @@ declare global {
   function isUserLoggedIn(): boolean;
   function getUserBy(field: string, value: string | number): any;
   function getUsers(args?: Record<string, any>): any[];
+  function usernameExists(username: string): number | false;
   function wpInsertUser(userdata: Record<string, any>): number | any;
   function wpGetCurrentUser(): any;
   function wpGeneratePassword(length?: number, specialChars?: boolean, extraSpecialChars?: boolean): string;
@@ -331,9 +333,12 @@ declare global {
   // ---------------------------------------------------------------------------
   // PHP Built-ins (general)
   // ---------------------------------------------------------------------------
+  function classExists(className: string): boolean;
+  function functionExists(functionName: string): boolean;
   function md5(str: string): string;
   function intval(value: any): number;
   function strval(value: any): string;
+  function strtolower(str: string): string;
   function strtr(str: string, from: string, to: string): string;
   function rtrim(str: string, chars?: string): string;
   function time(): number;

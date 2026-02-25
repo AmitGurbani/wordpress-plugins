@@ -20,6 +20,7 @@ export const WP_FUNCTION_MAP: Record<string, string> = {
   wpKsesPost: 'wp_kses_post',
 
   // Sanitization
+  sanitizeUser: 'sanitize_user',
   sanitizeTextField: 'sanitize_text_field',
   sanitizeTextareaField: 'sanitize_textarea_field',
   sanitizeTitle: 'sanitize_title',
@@ -91,6 +92,7 @@ export const WP_FUNCTION_MAP: Record<string, string> = {
   isUserLoggedIn: 'is_user_logged_in',
   getUserBy: 'get_user_by',
   getUsers: 'get_users',
+  usernameExists: 'username_exists',
   wpInsertUser: 'wp_insert_user',
   wpGetCurrentUser: 'wp_get_current_user',
   wpGeneratePassword: 'wp_generate_password',
@@ -255,9 +257,12 @@ export const WP_FUNCTION_MAP: Record<string, string> = {
   hashEquals: 'hash_equals',
 
   // PHP Built-ins (general)
+  classExists: 'class_exists',
+  functionExists: 'function_exists',
   md5: 'md5',
   intval: 'intval',
   strval: 'strval',
+  strtolower: 'strtolower',
   strtr: 'strtr',
   rtrim: 'rtrim',
   time: 'time',

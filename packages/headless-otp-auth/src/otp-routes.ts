@@ -134,7 +134,17 @@ class OtpRoutes {
     deleteTransient('hoa_verify_' + phoneHash);
 
     // Look up existing user by phone (use fields:'ids' to avoid WP_User objects)
-    const userIds: any[] = getUsers({ meta_key: 'phone_number', meta_value: phone, number: 1, fields: 'ids' });
+    let userIds: any[] = getUsers({ meta_key: 'phone_number', meta_value: phone, number: 1, fields: 'ids' });
+
+    // Fallback: check WooCommerce billing_phone if no match
+    if (userIds.length === 0 && classExists('WooCommerce')) {
+      const wcIds: any[] = getUsers({ meta_key: 'billing_phone', meta_value: phone, number: 1, fields: 'ids' });
+      if (wcIds.length > 0) {
+        // Upgrade: save phone_number for future lookups
+        updateUserMeta(intval(wcIds[0]), 'phone_number', phone);
+        userIds = wcIds;
+      }
+    }
 
     if (userIds.length > 0) {
       const existingUserId: number = intval(userIds[0]);
@@ -150,6 +160,11 @@ class OtpRoutes {
 
       updateUserMeta(existingUserId, 'hoa_refresh_token_hash', wpHashPassword(refreshToken));
       updateUserMeta(existingUserId, 'hoa_refresh_token_expiry', strval(time() + refreshExpiry));
+
+      // Sync to WooCommerce billing_phone
+      if (classExists('WooCommerce')) {
+        updateUserMeta(existingUserId, 'billing_phone', phone);
+      }
 
       const displayName: string = getTheAuthorMeta('display_name', existingUserId);
 

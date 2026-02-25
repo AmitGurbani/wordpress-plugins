@@ -31,22 +31,54 @@ class AuthRoutes {
     }
 
     // Check if user already exists (use fields:'ids' to avoid WP_User objects)
-    const existingIds: any[] = getUsers({ meta_key: 'phone_number', meta_value: phone, number: 1, fields: 'ids' });
+    let existingIds: any[] = getUsers({ meta_key: 'phone_number', meta_value: phone, number: 1, fields: 'ids' });
+
+    // Fallback: check WooCommerce billing_phone
+    if (existingIds.length === 0 && classExists('WooCommerce')) {
+      const wcIds: any[] = getUsers({ meta_key: 'billing_phone', meta_value: phone, number: 1, fields: 'ids' });
+      if (wcIds.length > 0) {
+        updateUserMeta(intval(wcIds[0]), 'phone_number', phone);
+        existingIds = wcIds;
+      }
+    }
+
     if (existingIds.length > 0) {
       deleteTransient('hoa_reg_' + regTokenHash);
       return new WP_Error('user_exists', 'An account with this phone number already exists.', { status: 409 });
     }
 
-    // Create user
-    const username: string = 'user_' + wpGeneratePassword(8, false, false);
+    // Generate username from display name
+    let baseUsername: string = sanitizeUser(strtolower(name), true);
+    if (!baseUsername) {
+      baseUsername = 'user';
+    }
+    let username: string = baseUsername;
+    if (usernameExists(username)) {
+      const phoneSuffix: string = phone.length >= 4 ? phone.substring(phone.length - 4) : phone;
+      username = baseUsername + phoneSuffix;
+      let counter: number = 2;
+      while (usernameExists(username)) {
+        username = baseUsername + phoneSuffix + strval(counter);
+        counter = counter + 1;
+      }
+    }
+
     const password: string = wpGeneratePassword(24, true, true);
 
-    const userRole: string = getOption('headless_otp_auth_default_user_role', 'subscriber');
+    // Split name into first/last
+    const nameParts: string[] = name.split(' ');
+    const firstName: string = nameParts[0];
+    const lastName: string = nameParts.length > 1 ? nameParts.slice(1).join(' ') : '';
+
+    const defaultRole: string = classExists('WooCommerce') ? 'customer' : 'subscriber';
+    const userRole: string = getOption('headless_otp_auth_default_user_role', defaultRole);
 
     const newUserId: any = wpInsertUser({
       user_login: username,
       user_pass: password,
       display_name: name,
+      first_name: firstName,
+      last_name: lastName,
       role: userRole,
     });
 
@@ -56,6 +88,11 @@ class AuthRoutes {
 
     const userId: number = intval(newUserId);
     updateUserMeta(userId, 'phone_number', phone);
+    if (classExists('WooCommerce')) {
+      updateUserMeta(userId, 'billing_phone', phone);
+      updateUserMeta(userId, 'billing_first_name', firstName);
+      updateUserMeta(userId, 'billing_last_name', lastName);
+    }
     deleteTransient('hoa_reg_' + regTokenHash);
 
     // Generate tokens
