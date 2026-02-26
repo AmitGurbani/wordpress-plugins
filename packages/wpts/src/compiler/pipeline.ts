@@ -174,7 +174,8 @@ function buildIR(
       methodName: a.methodName,
       phpMethodName: toSnakeCase(a.methodName),
       priority: a.priority ?? 10,
-      acceptedArgs: a.acceptedArgs ?? 1,
+      acceptedArgs: a.acceptedArgs ?? a.parameters.length,
+      parameters: transpileParameters(a.parameters),
       body: transpileMethodBody(a.bodyNode, parsed.typeChecker),
       context: 'public' as const,
     })),
@@ -254,6 +255,13 @@ function buildIR(
       methodName: a.methodName,
       phpMethodName: 'handle_ajax_' + a.action,
       body: transpileMethodBody(a.bodyNode, parsed.typeChecker),
+    })),
+    helperMethods: rawData.helperMethods.map(m => ({
+      methodName: m.methodName,
+      phpMethodName: toSnakeCase(m.methodName),
+      parameters: transpileParameters(m.parameters),
+      body: transpileMethodBody(m.bodyNode, parsed.typeChecker),
+      context: (m.context === 'rest' ? 'rest' : 'public') as 'public' | 'rest',
     })),
     activation: rawData.activation
       ? transpileMethodBody(rawData.activation.bodyNode, parsed.typeChecker)

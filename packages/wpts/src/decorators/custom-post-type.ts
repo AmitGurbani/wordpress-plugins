@@ -16,8 +16,8 @@ export interface CustomPostTypeOptions {
  * Registers a WordPress Custom Post Type.
  * The generated PHP calls `register_post_type()` on the `init` hook.
  */
-export function CustomPostType(slug: string, options: CustomPostTypeOptions): ClassDecorator {
-  return function (_target) {
+export function CustomPostType(slug: string, options: CustomPostTypeOptions): (...args: any[]) => any {
+  return function (..._args: any[]) {
     // No-op at runtime — metadata is extracted at compile time by the transpiler.
   };
 }

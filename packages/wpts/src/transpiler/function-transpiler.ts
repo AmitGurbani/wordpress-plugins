@@ -5,6 +5,16 @@ import type { FunctionBodyIR, ParameterIR } from '../ir/plugin-ir.js';
 import { toSnakeCase } from '../utils/naming.js';
 
 /**
+ * Inject `global $wpdb;` at the start of a PHP method body if $wpdb is used.
+ */
+function injectGlobalWpdb(phpCode: string): string {
+  if (/\$wpdb\b/.test(phpCode)) {
+    return '\t\tglobal $wpdb;\n' + phpCode;
+  }
+  return phpCode;
+}
+
+/**
  * Transpile a method's body to a PHP code string.
  */
 export function transpileMethodBody(
@@ -12,7 +22,7 @@ export function transpileMethodBody(
   typeChecker: ts.TypeChecker,
 ): FunctionBodyIR {
   if (ts.isBlock(bodyNode)) {
-    const phpCode = transpileFunctionBody(bodyNode, typeChecker);
+    const phpCode = injectGlobalWpdb(transpileFunctionBody(bodyNode, typeChecker));
     return {
       phpCode,
       sourceText: bodyNode.getText(),
@@ -21,7 +31,7 @@ export function transpileMethodBody(
 
   // If the node is the method itself, get its body
   if (ts.isMethodDeclaration(bodyNode) && bodyNode.body) {
-    const phpCode = transpileFunctionBody(bodyNode.body, typeChecker);
+    const phpCode = injectGlobalWpdb(transpileFunctionBody(bodyNode.body, typeChecker));
     return {
       phpCode,
       sourceText: bodyNode.body.getText(),

@@ -1,0 +1,10 @@
+{
+  "extends": "wpts/tsconfig.json",
+  "compilerOptions": {
+    "jsx": "react-jsx",
+    "lib": ["ES2022", "DOM"],
+    "outDir": "./dist-ts",
+    "rootDir": "./src"
+  },
+  "include": ["src"]
+}

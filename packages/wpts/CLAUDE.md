@@ -49,3 +49,6 @@ To add a new WordPress function mapping:
 - Admin auto-build: pipeline runs `pnpm --ignore-workspace install && run build` in admin/js/
 - Integration tests use `skipAdminBuild: true` to avoid timeouts
 - Decorators: @Plugin, @Action, @Filter, @Setting, @AdminPage, @Shortcode, @Activate, @Deactivate, @CustomPostType, @CustomTaxonomy, @RestRoute, @AjaxHandler
+- Helper methods: non-decorated class methods are auto-captured; placed in public class by default, or REST API class if the class has @RestRoute
+- `global $wpdb;`: auto-injected by `injectGlobalWpdb()` in `function-transpiler.ts` when transpiled PHP contains `$wpdb`
+- Action parameters: extracted same as filter parameters; `acceptedArgs` defaults to method parameter count

@@ -252,12 +252,17 @@ initialize(): void {
 enqueueAssets(): void {
   wpEnqueueStyle('my-plugin-style');
 }
+
+@Action('woocommerce_update_product', { priority: 20 })
+onProductUpdate(productId: number): void {
+  this.indexProduct(productId);
+}
 ```
 
 | Option | Type | Default | Description |
 |--------|------|---------|-------------|
 | `priority` | `number` | `10` | Hook priority |
-| `acceptedArgs` | `number` | `1` | Number of arguments |
+| `acceptedArgs` | `number` | method parameter count | Number of arguments |
 
 ### `@Filter(hookName, options?)`
 
@@ -437,6 +442,37 @@ onDeactivation(): void {
 
 Options created via `addOption()` or `updateOption()` in `@Activate()` methods are automatically detected and added to the generated `uninstall.php` cleanup. Options already covered by `@Setting` are excluded to avoid duplicates.
 
+### Helper Methods
+
+Methods without decorators are automatically included in the generated PHP as helper methods. By default they are placed in the public class. If the source class contains any `@RestRoute` decorator, helpers from that class are placed in the REST API class instead.
+
+```typescript
+import { Filter } from 'wpts';
+
+class FfSearch {
+  @Filter('posts_clauses', { priority: 20, acceptedArgs: 2 })
+  modifySearchClauses(clauses: any, query: any): any {
+    const boolQuery = this.buildBooleanQuery(searchTerm);
+    // ...
+    return clauses;
+  }
+
+  // No decorator — auto-included as helper method
+  buildBooleanQuery(searchTerm: string): string {
+    const words = searchTerm.trim().split(' ');
+    let parts: string[] = [];
+    for (const word of words) {
+      if (word.length > 0) {
+        parts.push('+' + word + '*');
+      }
+    }
+    return parts.join(' ');
+  }
+}
+```
+
+Both `modifySearchClauses` and `buildBooleanQuery` end up in the same generated PHP class, so `$this->build_boolean_query()` calls work as expected.
+
 ## Admin Pages (React)
 
 Admin page UI is written as React using `@wordpress/components`. It stays as TypeScript/JSX and is bundled by `@wordpress/scripts` — it is **not** transpiled to PHP.
@@ -521,6 +557,7 @@ The generated PHP admin class automatically:
 | `a + b` (strings) | `$a . $b` |
 | `a + b` (numbers) | `$a + $b` |
 | `` `hello ${name}` `` | `'hello ' . $name` |
+| `x \|\| y` | `$x \|\| $y` (boolean result — use `??` for default values) |
 | `x ?? y` | `$x ?? $y` |
 | `{ key: val }` | `array( 'key' => $val )` |
 | `this.prop` | `$this->prop` |
@@ -602,8 +639,11 @@ All functions are written in camelCase in TypeScript and transpiled to snake_cas
 | **WooCommerce Notices** | `wcAddNotice`, `wcPrintNotices`, `wcHasNotice` |
 | **WooCommerce Taxonomy** | `wcGetAttributeTaxonomies`, `wcGetProductTerms` |
 | **WooCommerce Templates** | `wcGetTemplatePart`, `wcGetTemplate` |
+| **Database** | `wpdb.prefix`, `wpdb.posts`, `wpdb.prepare()`, `wpdb.query()`, `wpdb.getVar()`, `wpdb.getRow()`, `wpdb.getResults()`, `wpdb.insert()`, `wpdb.update()`, `wpdb.delete()`, `wpdb.escLike()` |
 
 Full type declarations are in `src/runtime/wp-types.ts` for IDE autocompletion.
+
+When you use `wpdb` in TypeScript, the transpiler automatically injects `global $wpdb;` at the start of the generated PHP method.
 
 WooCommerce functions are only available at runtime when WooCommerce is active. Guard usage with `isWoocommerce()` or check `is_plugin_active('woocommerce/woocommerce.php')` in your activation hook.
 

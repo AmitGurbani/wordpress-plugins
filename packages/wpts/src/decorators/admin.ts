@@ -13,8 +13,8 @@ export interface AdminPageOptions {
  * The generated PHP registers the page with `add_menu_page()` and enqueues
  * the React admin bundle to render the UI.
  */
-export function AdminPage(options: AdminPageOptions): ClassDecorator {
-  return function (_target) {
+export function AdminPage(options: AdminPageOptions): (...args: any[]) => any {
+  return function (..._args: any[]) {
     // No-op at runtime — metadata is extracted at compile time by the transpiler.
   };
 }

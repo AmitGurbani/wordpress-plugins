@@ -16,6 +16,7 @@ export interface PluginIR {
   customTaxonomies: CustomTaxonomyIR[];
   restRoutes: RestRouteIR[];
   ajaxHandlers: AjaxHandlerIR[];
+  helperMethods: HelperMethodIR[];
   activation: FunctionBodyIR | null;
   deactivation: FunctionBodyIR | null;
 }
@@ -47,6 +48,7 @@ export interface ActionIR {
   phpMethodName: string;
   priority: number;
   acceptedArgs: number;
+  parameters: ParameterIR[];
   body: FunctionBodyIR;
   context: HookContext;
 }
@@ -140,6 +142,14 @@ export interface AjaxHandlerIR {
   body: FunctionBodyIR;
 }
 
+export interface HelperMethodIR {
+  methodName: string;
+  phpMethodName: string;
+  parameters: ParameterIR[];
+  body: FunctionBodyIR;
+  context: 'public' | 'rest';
+}
+
 export interface FunctionBodyIR {
   phpCode: string;
   sourceText: string;
@@ -168,8 +178,16 @@ export interface RawPluginData {
   customTaxonomies: RawCustomTaxonomyDecorator[];
   restRoutes: RawRestRouteDecorator[];
   ajaxHandlers: RawAjaxHandlerDecorator[];
+  helperMethods: RawHelperMethod[];
   activation: RawLifecycleDecorator | null;
   deactivation: RawLifecycleDecorator | null;
+}
+
+export interface RawHelperMethod {
+  methodName: string;
+  parameters: { name: string; type: string; defaultValue?: string }[];
+  bodyNode: ts.Node;
+  context?: string;
 }
 
 export interface RawPluginDecorator {
@@ -193,6 +211,7 @@ export interface RawActionDecorator {
   priority?: number;
   acceptedArgs?: number;
   methodName: string;
+  parameters: { name: string; type: string; defaultValue?: string }[];
   bodyNode: ts.Node;
 }
 

@@ -239,6 +239,30 @@ export const WP_FUNCTION_MAP: Record<string, string> = {
   wpDeletePost: 'wp_delete_post',
   wpCountPosts: 'wp_count_posts',
 
+  // Database
+  dbDelta: 'dbDelta',
+  requireOnce: 'require_once',
+
+  // Constants (used as identifiers, not function calls)
+  ABSPATH: 'ABSPATH',
+
+  // Content
+  wpStripAllTags: 'wp_strip_all_tags',
+
+  // Media
+  wpGetAttachmentImageSrc: 'wp_get_attachment_image_src',
+  wpGetAttachmentUrl: 'wp_get_attachment_url',
+
+  // Cron / Scheduling
+  wpScheduleSingleEvent: 'wp_schedule_single_event',
+  wpNextScheduled: 'wp_next_scheduled',
+  wpUnscheduleEvent: 'wp_unschedule_event',
+
+  // Taxonomy
+  getTerms: 'get_terms',
+  wpGetObjectTerms: 'wp_get_object_terms',
+  getTheTerms: 'get_the_terms',
+
   // AJAX
   checkAjaxReferer: 'check_ajax_referer',
 

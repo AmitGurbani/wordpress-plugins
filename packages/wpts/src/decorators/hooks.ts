@@ -7,8 +7,8 @@ export interface HookOptions {
  * Registers a WordPress action hook.
  * The decorated method becomes the callback for the hook.
  */
-export function Action(hookName: string, options?: HookOptions): (target: any, propertyKey: string | symbol, descriptor: PropertyDescriptor) => void {
-  return function (_target, _propertyKey, _descriptor) {
+export function Action(hookName: string, options?: HookOptions): (...args: any[]) => any {
+  return function (..._args: any[]) {
     // No-op at runtime — metadata is extracted at compile time by the transpiler.
   };
 }
@@ -17,8 +17,8 @@ export function Action(hookName: string, options?: HookOptions): (target: any, p
  * Registers a WordPress filter hook.
  * The decorated method becomes the callback for the filter.
  */
-export function Filter(hookName: string, options?: HookOptions): (target: any, propertyKey: string | symbol, descriptor: PropertyDescriptor) => void {
-  return function (_target, _propertyKey, _descriptor) {
+export function Filter(hookName: string, options?: HookOptions): (...args: any[]) => any {
+  return function (..._args: any[]) {
     // No-op at runtime — metadata is extracted at compile time by the transpiler.
   };
 }

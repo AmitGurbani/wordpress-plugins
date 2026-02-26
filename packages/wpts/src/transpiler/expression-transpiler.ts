@@ -510,6 +510,11 @@ function transpilePropertyAccess(node: ts.PropertyAccessExpression, typeChecker:
     if (prop === 'E') return 'M_E';
   }
 
+  // $wpdb property access -> object property (not array key)
+  if (ts.isIdentifier(node.expression) && node.expression.text === 'wpdb') {
+    return `$wpdb->${prop}`;
+  }
+
   // General property access -> array key access (WordPress convention)
   return `${obj}['${prop}']`;
 }

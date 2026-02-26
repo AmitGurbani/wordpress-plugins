@@ -9,8 +9,8 @@ export interface AjaxHandlerOptions {
  * The decorated method becomes the AJAX callback, transpiled to PHP.
  * Nonce verification and capability checks are auto-injected.
  */
-export function AjaxHandler(action: string, options?: AjaxHandlerOptions): (target: any, propertyKey: string | symbol, descriptor: PropertyDescriptor) => void {
-  return function (_target, _propertyKey, _descriptor) {
+export function AjaxHandler(action: string, options?: AjaxHandlerOptions): (...args: any[]) => any {
+  return function (..._args: any[]) {
     // No-op at runtime — metadata is extracted at compile time by the transpiler.
   };
 }

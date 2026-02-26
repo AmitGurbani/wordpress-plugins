@@ -42,7 +42,7 @@ class {{className}} {
 		$this->loader->add_action( 'admin_init', $admin, 'register_settings' );
 		{{/if}}
 		{{#each adminActions}}
-		$this->loader->add_action( '{{hookName}}', $admin, '{{phpMethodName}}', {{priority}} );
+		$this->loader->add_action( '{{hookName}}', $admin, '{{phpMethodName}}', {{priority}}, {{acceptedArgs}} );
 		{{/each}}
 		{{#each ajaxHandlers}}
 		$this->loader->add_action( 'wp_ajax_{{action}}', $admin, '{{phpMethodName}}' );
@@ -55,7 +55,7 @@ class {{className}} {
 	private function define_public_hooks() {
 		$public = new {{className}}_Public( $this->plugin_name, $this->version );
 		{{#each publicActions}}
-		$this->loader->add_action( '{{hookName}}', $public, '{{phpMethodName}}', {{priority}} );
+		$this->loader->add_action( '{{hookName}}', $public, '{{phpMethodName}}', {{priority}}, {{acceptedArgs}} );
 		{{/each}}
 		{{#each publicFilters}}
 		$this->loader->add_filter( '{{hookName}}', $public, '{{phpMethodName}}', {{priority}}, {{acceptedArgs}} );

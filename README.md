@@ -8,6 +8,7 @@ Turborepo monorepo for WordPress plugins and tooling, using pnpm workspaces.
 |---------|-------------|
 | [wpts](packages/wpts/) | TypeScript-to-WordPress-Plugin transpiler |
 | [headless-otp-auth](packages/headless-otp-auth/) | Mobile OTP authentication with JWT for headless WordPress |
+| [fuzzyfind](packages/fuzzyfind/) | Weighted, fuzzy WooCommerce product search with autocomplete (built with wpts) |
 
 ## Getting Started
 

@@ -15,12 +15,18 @@ class {{className}}_Public {
 	}
 
 	{{#each publicActions}}
-	public function {{phpMethodName}}() {
+	public function {{phpMethodName}}({{#if parameters.length}} {{#each parameters}}{{phpName}}{{#unless @last}}, {{/unless}}{{/each}} {{/if}}) {
 {{{body.phpCode}}}
 	}
 
 	{{/each}}
 	{{#each publicFilters}}
+	public function {{phpMethodName}}( {{#each parameters}}{{phpName}}{{#unless @last}}, {{/unless}}{{/each}} ) {
+{{{body.phpCode}}}
+	}
+
+	{{/each}}
+	{{#each publicHelperMethods}}
 	public function {{phpMethodName}}( {{#each parameters}}{{phpName}}{{#unless @last}}, {{/unless}}{{/each}} ) {
 {{{body.phpCode}}}
 	}

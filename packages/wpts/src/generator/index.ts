@@ -94,6 +94,8 @@ export function generatePlugin(ir: PluginIR): GeneratedFile[] {
   const adminActions = ir.actions.filter(a => classifyHook(a.hookName) === 'admin');
   const publicActions = ir.actions.filter(a => classifyHook(a.hookName) !== 'admin');
   const publicFilters = ir.filters; // Filters are almost always public in MVP
+  const publicHelperMethods = ir.helperMethods.filter(m => m.context !== 'rest');
+  const restHelperMethods = ir.helperMethods.filter(m => m.context === 'rest');
   const hasSettings = ir.settings.length > 0;
   const hasShortcodes = ir.shortcodes.length > 0;
   const hasCustomPostTypes = ir.customPostTypes.length > 0;
@@ -117,6 +119,8 @@ export function generatePlugin(ir: PluginIR): GeneratedFile[] {
     adminActions,
     publicActions,
     publicFilters,
+    publicHelperMethods,
+    restHelperMethods,
     settings: settingsWithDefaults,
     shortcodes: ir.shortcodes,
     hasSettings,

@@ -52,6 +52,7 @@ function createTestIR(): PluginIR {
         phpMethodName: 'initialize',
         priority: 10,
         acceptedArgs: 1,
+        parameters: [],
         body: {
           phpCode: "        load_plugin_textdomain( 'hello-greeter', false, 'hello-greeter/languages' );",
           sourceText: '',
@@ -101,6 +102,7 @@ function createTestIR(): PluginIR {
     customTaxonomies: [],
     restRoutes: [],
     ajaxHandlers: [],
+    helperMethods: [],
     activation: {
       phpCode: "        add_option( 'hello_greeter_version', '1.0.0' );",
       sourceText: '',
@@ -418,6 +420,7 @@ describe('generatePlugin', () => {
         route: '/products',
         method: 'GET',
         capability: 'read',
+        public: false,
         methodName: 'listProducts',
         phpMethodName: 'list_products',
         body: { phpCode: "\t\treturn array();", sourceText: '' },
@@ -444,6 +447,7 @@ describe('generatePlugin', () => {
         route: '/items',
         method: 'POST',
         capability: 'edit_posts',
+        public: false,
         methodName: 'createItem',
         phpMethodName: 'create_item',
         body: { phpCode: "\t\treturn array();", sourceText: '' },

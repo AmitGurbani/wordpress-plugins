@@ -366,6 +366,64 @@ declare global {
   function wpCountPosts(type?: string, perm?: string): Record<string, number>;
 
   // ---------------------------------------------------------------------------
+  // Database
+  // ---------------------------------------------------------------------------
+  function dbDelta(queries: string | string[], execute?: boolean): any[];
+  function requireOnce(file: string): void;
+
+  /** WordPress ABSPATH constant — path to WordPress installation directory. */
+  const ABSPATH: string;
+
+  /** WordPress database object ($wpdb). Use wpdb.prepare(), wpdb.query(), wpdb.getResults(), etc. */
+  var wpdb: {
+    prefix: string;
+    posts: string;
+    postmeta: string;
+    terms: string;
+    term_taxonomy: string;
+    term_relationships: string;
+    prepare(query: string, ...args: any[]): string;
+    query(query: string): number | false;
+    getResults(query: string, output?: string): any[];
+    getRow(query: string, output?: string, y?: number): any;
+    getVar(query: string, x?: number, y?: number): string | null;
+    getCol(query: string, x?: number): string[];
+    insert(table: string, data: Record<string, any>, format?: string[]): number | false;
+    update(table: string, data: Record<string, any>, where: Record<string, any>, format?: string[], whereFormat?: string[]): number | false;
+    delete(table: string, where: Record<string, any>, whereFormat?: string[]): number | false;
+    replace(table: string, data: Record<string, any>, format?: string[]): number | false;
+    escLike(text: string): string;
+    lastError: string;
+    insertId: number;
+    numRows: number;
+  };
+
+  // ---------------------------------------------------------------------------
+  // Content
+  // ---------------------------------------------------------------------------
+  function wpStripAllTags(str: string, removeBreaks?: boolean): string;
+
+  // ---------------------------------------------------------------------------
+  // Media
+  // ---------------------------------------------------------------------------
+  function wpGetAttachmentImageSrc(attachmentId: number, size?: string | number[], iconForMimeType?: boolean): any[] | false;
+  function wpGetAttachmentUrl(attachmentId: number): string | false;
+
+  // ---------------------------------------------------------------------------
+  // Cron / Scheduling
+  // ---------------------------------------------------------------------------
+  function wpScheduleSingleEvent(timestamp: number, hook: string, args?: any[]): boolean;
+  function wpNextScheduled(hook: string, args?: any[]): number | false;
+  function wpUnscheduleEvent(timestamp: number, hook: string, args?: any[]): boolean;
+
+  // ---------------------------------------------------------------------------
+  // Taxonomy
+  // ---------------------------------------------------------------------------
+  function getTerms(args?: Record<string, any>): any[];
+  function wpGetObjectTerms(objectIds: number | number[], taxonomies: string | string[], args?: Record<string, any>): any[];
+  function getTheTerms(post: number | any, taxonomy: string): any[] | false;
+
+  // ---------------------------------------------------------------------------
   // AJAX
   // ---------------------------------------------------------------------------
   function checkAjaxReferer(action?: string, queryArg?: string, die?: boolean): number | false;

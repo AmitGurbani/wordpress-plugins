@@ -27,6 +27,7 @@ function createEmptyRawData(): RawPluginData {
     customTaxonomies: [],
     restRoutes: [],
     ajaxHandlers: [],
+    helperMethods: [],
     activation: null,
     deactivation: null,
   };
@@ -132,13 +133,31 @@ function extractClassDecorators(
     }
   }
 
+  // Track helper methods count before this class, to tag them with context after
+  const helperCountBefore = result.helperMethods.length;
+  let hasRestRoutes = false;
+
   // Walk class members
   for (const member of classNode.members) {
     if (ts.isMethodDeclaration(member)) {
+      // Check if this method has @RestRoute to determine class context
+      const memberDecorators = getDecorators(member);
+      for (const d of memberDecorators) {
+        if (getDecoratorName(d) === 'RestRoute') {
+          hasRestRoutes = true;
+        }
+      }
       extractMethodDecorators(member, result, typeChecker, diagnostics, sourceFile);
     } else if (ts.isPropertyDeclaration(member)) {
       extractPropertyDecorators(member, result, diagnostics, sourceFile);
     }
+  }
+
+  // Tag newly added helper methods with the correct context
+  // If the class has @RestRoute methods, helpers belong to the REST API class
+  const context = hasRestRoutes ? 'rest' : 'public';
+  for (let i = helperCountBefore; i < result.helperMethods.length; i++) {
+    (result.helperMethods[i] as any).context = context;
   }
 }
 
@@ -152,12 +171,25 @@ function extractMethodDecorators(
   const decorators = getDecorators(method);
   const methodName = method.name && ts.isIdentifier(method.name) ? method.name.text : '';
 
+  // If method has no decorators, capture it as a helper method
+  if (decorators.length === 0) {
+    if (methodName && method.body) {
+      const parameters = extractParameters(method, typeChecker);
+      result.helperMethods.push({
+        methodName,
+        parameters,
+        bodyNode: method.body ?? method,
+      });
+    }
+    return;
+  }
+
   for (const decorator of decorators) {
     const name = getDecoratorName(decorator);
 
     switch (name) {
       case 'Action': {
-        const action = extractActionDecorator(decorator, methodName, method, diagnostics, sourceFile);
+        const action = extractActionDecorator(decorator, methodName, method, typeChecker, diagnostics, sourceFile);
         if (action) result.actions.push(action);
         break;
       }
@@ -269,6 +301,7 @@ function extractActionDecorator(
   decorator: ts.Decorator,
   methodName: string,
   method: ts.MethodDeclaration,
+  typeChecker: ts.TypeChecker,
   diagnostics: DiagnosticCollection,
   sourceFile: ts.SourceFile,
 ): RawActionDecorator | null {
@@ -285,21 +318,24 @@ function extractActionDecorator(
   }
 
   let priority = 10;
-  let acceptedArgs = 1;
+  let acceptedArgs: number | undefined;
 
   if (args.length > 1) {
     const opts = extractObjectLiteral(args[1]);
     if (opts) {
       priority = getNumberProp(opts, 'priority') ?? 10;
-      acceptedArgs = getNumberProp(opts, 'acceptedArgs') ?? 1;
+      acceptedArgs = getNumberProp(opts, 'acceptedArgs') ?? undefined;
     }
   }
+
+  const parameters = extractParameters(method, typeChecker);
 
   return {
     hookName,
     priority,
-    acceptedArgs,
+    acceptedArgs: acceptedArgs ?? parameters.length,
     methodName,
+    parameters,
     bodyNode: method.body ?? method,
   };
 }
