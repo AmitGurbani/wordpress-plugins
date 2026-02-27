@@ -2,6 +2,11 @@
 
 Weighted FULLTEXT WooCommerce product search with autocomplete and analytics. Built with [wpts](../wpts/).
 
+## Documentation
+
+- [Integration Guide](./docs/integration-guide.md) — For frontend developers: autocomplete API, response format, code examples
+- [Admin Guide](./docs/admin-guide.md) — For WordPress admins: installation, search weights, analytics, troubleshooting
+
 ## Requirements
 
 - WordPress 6.0+
@@ -86,9 +91,22 @@ All endpoints are under `/fuzzyfind/v1`.
 ```bash
 pnpm dev              # Watch mode — rebuild on changes
 pnpm build            # Build plugin + zip
-pnpm wp-env:start     # Start local WordPress environment
-pnpm wp-env:stop      # Stop local WordPress environment
 ```
+
+### Local Testing with wp-env
+
+Requires [Docker](https://www.docker.com/products/docker-desktop/).
+
+```bash
+pnpm build                # Build first
+pnpm wp-env:start         # Start WordPress at http://localhost:8888
+pnpm wp-env:stop          # Stop the environment
+pnpm wp-env:clean         # Reset everything (database, uploads, etc.)
+```
+
+Default credentials: `admin` / `password`
+
+The plugin is auto-mounted from `dist/fuzzy-find-for-woo-commerce/`. WooCommerce is auto-installed. Rebuild with `pnpm build` after code changes (or use `pnpm dev` in a separate terminal).
 
 ## License
 
