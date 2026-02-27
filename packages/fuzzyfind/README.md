@@ -30,6 +30,7 @@ On activation the plugin creates two database tables (`wp_ff_search_index` and `
 - **FULLTEXT index** — MySQL FULLTEXT with boolean mode for fast, relevance-sorted results
 - **Fuzzy matching** — SOUNDEX phonetic matching for misspellings and typos
 - **Autocomplete** — public REST endpoint for search-as-you-type UI
+- **Headless support** — automatically enhances WooCommerce REST API and WPGraphQL product searches
 - **"Did you mean" suggestions** — suggests alternatives when results are few
 - **Search analytics** — tracks popular searches and zero-result queries
 - **Admin settings page** — React UI for configuring weights, feature toggles, and viewing analytics

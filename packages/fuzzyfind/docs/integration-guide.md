@@ -4,11 +4,13 @@ FuzzyFind enhances WooCommerce product search with weighted FULLTEXT matching, f
 
 ## Overview
 
-FuzzyFind works at two levels:
+FuzzyFind works at three levels:
 
-1. **Automatic search enhancement** — hooks into `WP_Query` via the `posts_clauses` filter. Any standard WooCommerce product search (search widget, `?s=` URL param, `WP_Query` with `'s'`) is automatically enhanced. No code changes needed.
+1. **Automatic search enhancement** — hooks into `WP_Query` via the `posts_clauses` filter. Frontend product searches, WooCommerce REST API product searches (`/wc/v3/products?search=...`), and WPGraphQL product queries are all automatically enhanced. No code changes needed.
 
 2. **Autocomplete REST endpoint** — a public `GET` endpoint that returns lightweight product suggestions for search-as-you-type UIs.
+
+3. **Headless support** — WooCommerce REST API and WPGraphQL/WooGraphQL product searches use the same weighted FULLTEXT engine as frontend search.
 
 **Base URL:** `https://your-site.com/wp-json/fuzzyfind/v1`
 
@@ -19,12 +21,51 @@ If the site uses plain permalinks:
 
 Once the plugin is activated and the index is built, WooCommerce product searches are automatically enhanced:
 
-- Standard search queries are intercepted on the main query
+- Standard search queries are intercepted via `posts_clauses`
 - Results are matched against a FULLTEXT index covering title, SKU, description, attributes, categories, tags, and variation SKUs
 - Results are ranked by a weighted relevance score (configurable in admin)
 - Search terms are logged for analytics (if enabled)
 
-**No frontend code changes are needed.** Existing search forms, search widgets, and theme search templates will automatically return better results.
+**No code changes are needed.** Existing search forms, search widgets, and theme search templates will automatically return better results.
+
+### WooCommerce Store API
+
+Product searches via the public Store API (used by WooCommerce Blocks and headless storefronts) are automatically enhanced. No authentication required.
+
+```bash
+curl "https://your-site.com/wp-json/wc/store/v1/products?search=shirt"
+```
+
+Requires WooCommerce 9.0+.
+
+### WooCommerce REST API
+
+Product searches via the WooCommerce REST API v3 are automatically enhanced:
+
+```bash
+curl "https://your-site.com/wp-json/wc/v3/products?search=shirt" \
+  -u consumer_key:consumer_secret
+```
+
+The same weighted FULLTEXT search, fuzzy matching, and analytics apply. Response format is standard WooCommerce — only the search ranking changes.
+
+### WPGraphQL
+
+If [WPGraphQL](https://www.wpgraphql.com/) and [WooGraphQL](https://github.com/wp-graphql/wp-graphql-woocommerce) are installed, product search queries are automatically enhanced:
+
+```graphql
+{
+  products(where: { search: "shirt" }) {
+    nodes {
+      id
+      name
+      sku
+    }
+  }
+}
+```
+
+No additional configuration is required. If WPGraphQL/WooGraphQL are not installed, the plugin simply skips GraphQL integration with no side effects.
 
 ## Autocomplete Endpoint
 

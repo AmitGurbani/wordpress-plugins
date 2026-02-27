@@ -27,6 +27,17 @@ If WooCommerce is not active, the plugin displays an admin notice and search enh
 
 New products are automatically indexed when created or updated. Deleted products are automatically removed from the index.
 
+### Headless & API Support
+
+Search enhancement applies automatically to all WooCommerce search interfaces:
+
+- **Frontend search** — standard WooCommerce product search
+- **WooCommerce Store API** — `/wc/store/v1/products?search=...` (public, no auth — WooCommerce 9.0+)
+- **WooCommerce REST API** — `/wc/v3/products?search=...` (requires API keys)
+- **WPGraphQL** — product queries with `search` in `where` (requires [WPGraphQL](https://www.wpgraphql.com/) + [WooGraphQL](https://github.com/wp-graphql/wp-graphql-woocommerce))
+
+No additional configuration is needed. Search analytics captures queries from all sources.
+
 ## Search Weights
 
 Search weights control how much each field contributes to the relevance score. Higher weight means matches in that field rank higher in results.

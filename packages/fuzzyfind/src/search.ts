@@ -9,6 +9,33 @@ import { Filter } from 'wpts';
 
 class FfSearch {
 
+  // ── Query Tagging ────────────────────────────────────────────────────
+
+  @Filter('woocommerce_rest_product_object_query', { priority: 10, acceptedArgs: 2 })
+  tagRestSearch(args: any, request: any): any {
+    if (request.get_param('search')) {
+      args['ff_search'] = true;
+    }
+    return args;
+  }
+
+  @Filter('woocommerce_store_api_product_query_args', { priority: 10, acceptedArgs: 2 })
+  tagStoreApiSearch(args: any, request: any): any {
+    if (request.get_param('search')) {
+      args['ff_search'] = true;
+    }
+    return args;
+  }
+
+  @Filter('graphql_product_connection_query_args', { priority: 10, acceptedArgs: 5 })
+  tagGraphqlSearch(queryArgs: any, source: any, args: any, context: any, info: any): any {
+    const where: any = args['where'] ?? null;
+    if (where && where['search']) {
+      queryArgs['ff_search'] = true;
+    }
+    return queryArgs;
+  }
+
   // ── WP_Query Interception ───────────────────────────────────────────
 
   @Filter('posts_clauses', { priority: 20, acceptedArgs: 2 })
@@ -17,8 +44,9 @@ class FfSearch {
       return clauses;
     }
 
-    // Only modify main product search queries
-    if (isAdmin() || !query.is_search() || !query.is_main_query()) {
+    // Enhance main product search queries + tagged REST/GraphQL searches
+    const isFfSearch: boolean = !!query.get('ff_search');
+    if (isAdmin() || !query.is_search() || (!query.is_main_query() && !isFfSearch)) {
       return clauses;
     }
 
