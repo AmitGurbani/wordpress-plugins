@@ -164,7 +164,9 @@ declare global {
   // Posts
   // ---------------------------------------------------------------------------
   function getPost(postId?: number, output?: string, filter?: string): any;
+  function getPostType(postId?: number): string | false;
   function getPosts(args?: Record<string, any>): any[];
+  function wpGetPostParentId(postId?: number): number | false;
   function getTheId(): number | false;
   function getTheTitle(postId?: number): string;
   function getTheContent(moreLinkText?: string, stripTeaser?: boolean): string;
@@ -344,6 +346,10 @@ declare global {
   function time(): number;
   function getallheaders(): Record<string, string>;
   function header(headerStr: string): void;
+  function isArray(value: any): boolean;
+  function levenshtein(s1: string, s2: string): number;
+  function arrayUnique(arr: any[]): any[];
+  function arrayValues(arr: any[]): any[];
 
   // ---------------------------------------------------------------------------
   // Misc
@@ -393,6 +399,7 @@ declare global {
     delete(table: string, where: Record<string, any>, whereFormat?: string[]): number | false;
     replace(table: string, data: Record<string, any>, format?: string[]): number | false;
     escLike(text: string): string;
+    getCharsetCollate(): string;
     lastError: string;
     insertId: number;
     numRows: number;

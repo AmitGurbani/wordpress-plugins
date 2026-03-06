@@ -11,6 +11,14 @@ class FfIndexer {
 
   // ── Real-time Indexing ──────────────────────────────────────────────
 
+  @Action('woocommerce_new_product', { priority: 20 })
+  onProductCreate(productId: number): void {
+    if (!classExists('WooCommerce')) {
+      return;
+    }
+    this.indexProduct(productId);
+  }
+
   @Action('woocommerce_update_product', { priority: 20 })
   onProductUpdate(productId: number): void {
     if (!classExists('WooCommerce')) {
@@ -19,10 +27,25 @@ class FfIndexer {
     this.indexProduct(productId);
   }
 
+  @Action('woocommerce_new_product_variation')
+  onVariationCreate(variationId: number): void {
+    const parentId: number | false = wpGetPostParentId(variationId);
+    if (parentId) {
+      this.indexProduct(parentId);
+    }
+  }
+
+  @Action('woocommerce_update_product_variation')
+  onVariationUpdate(variationId: number): void {
+    const parentId: number | false = wpGetPostParentId(variationId);
+    if (parentId) {
+      this.indexProduct(parentId);
+    }
+  }
+
   @Action('before_delete_post')
   onProductDelete(postId: number): void {
-    const post: any = getPost(postId);
-    if (!post || post['post_type'] !== 'product') {
+    if (getPostType(postId) !== 'product') {
       return;
     }
     const tableName: string = getOption('fuzzyfind_index_table', '');
@@ -30,6 +53,26 @@ class FfIndexer {
       return;
     }
     wpdb.delete(tableName, { product_id: postId });
+  }
+
+  @Action('wp_trash_post')
+  onProductTrash(postId: number): void {
+    if (getPostType(postId) !== 'product') {
+      return;
+    }
+    const tableName: string = getOption('fuzzyfind_index_table', '');
+    if (!tableName) {
+      return;
+    }
+    wpdb.delete(tableName, { product_id: postId });
+  }
+
+  @Action('untrashed_post')
+  onProductUntrash(postId: number): void {
+    if (getPostType(postId) !== 'product') {
+      return;
+    }
+    this.indexProduct(postId);
   }
 
   // ── Batch Reindex (called by WP-Cron or admin) ─────────────────────
@@ -44,9 +87,6 @@ class FfIndexer {
     if (!tableName) {
       return;
     }
-
-    // Mark reindex as in progress
-    updateOption('fuzzyfind_reindex_in_progress', '1');
 
     let page: number = 1;
     const batchSize: number = 50;
@@ -99,18 +139,18 @@ class FfIndexer {
       return;
     }
 
-    // Skip hidden products
+    // Skip products excluded from search (hidden = neither, catalog = shop only)
     const visibility: string = product.get_catalog_visibility();
-    if (visibility === 'hidden') {
+    if (visibility === 'hidden' || visibility === 'catalog') {
       wpdb.delete(tableName, { product_id: productId });
       return;
     }
 
     // Extract product data
-    const title: string = product.get_name() || '';
-    const sku: string = product.get_sku() || '';
-    const content: string = wpStripAllTags(product.get_description() || '');
-    const shortDesc: string = wpStripAllTags(product.get_short_description() || '');
+    const title: string = product.get_name() ?? '';
+    const sku: string = product.get_sku() ?? '';
+    const content: string = wpStripAllTags(product.get_description() ?? '');
+    const shortDesc: string = wpStripAllTags(product.get_short_description() ?? '');
 
     // Extract attributes
     const attributes: any = product.get_attributes();
@@ -118,12 +158,13 @@ class FfIndexer {
     if (attributes) {
       for (const key in attributes) {
         const attr: any = attributes[key];
-        if (attr && attr.is_taxonomy && typeof attr.is_taxonomy === 'function' && attr.is_taxonomy()) {
+        if (!attr) { continue; }
+        if (attr.is_taxonomy()) {
           const terms: any[] = wcGetProductTerms(productId, attr.get_name(), { fields: 'names' });
           if (terms && terms.length > 0) {
             attrValues = attrValues.concat(terms);
           }
-        } else if (attr && attr.get_options && typeof attr.get_options === 'function') {
+        } else {
           const opts: any[] = attr.get_options();
           if (opts && opts.length > 0) {
             attrValues = attrValues.concat(opts);
@@ -134,23 +175,11 @@ class FfIndexer {
     const attributeStr: string = attrValues.join(' ');
 
     // Extract categories
-    const catTerms: any[] = getTheTerms(productId, 'product_cat');
-    let categoryNames: string[] = [];
-    if (catTerms && catTerms.length > 0) {
-      for (const term of catTerms) {
-        categoryNames.push(term['name']);
-      }
-    }
+    const categoryNames: string[] = wcGetProductTerms(productId, 'product_cat', { fields: 'names' }) ?? [];
     const categoriesStr: string = categoryNames.join(' ');
 
     // Extract tags
-    const tagTerms: any[] = getTheTerms(productId, 'product_tag');
-    let tagNames: string[] = [];
-    if (tagTerms && tagTerms.length > 0) {
-      for (const term of tagTerms) {
-        tagNames.push(term['name']);
-      }
-    }
+    const tagNames: string[] = wcGetProductTerms(productId, 'product_tag', { fields: 'names' }) ?? [];
     const tagsStr: string = tagNames.join(' ');
 
     // Extract variation SKUs for variable products
@@ -162,7 +191,7 @@ class FfIndexer {
         for (const childId of childIds) {
           const variation: any = wcGetProduct(childId);
           if (variation) {
-            const varSku: string = variation.get_sku() || '';
+            const varSku: string = variation.get_sku() ?? '';
             if (varSku) {
               variationSkus.push(varSku);
             }

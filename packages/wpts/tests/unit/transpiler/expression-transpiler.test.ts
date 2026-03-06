@@ -111,6 +111,11 @@ describe('transpileExpression', () => {
         .toBe("get_option( 'key', 'default' )");
     });
 
+    it('maps PHP built-in isArray', () => {
+      expect(transpile('isArray(value)', 'declare function isArray(v: any): boolean; declare const value: any;'))
+        .toBe('is_array( $value )');
+    });
+
     it('maps i18n translation functions', () => {
       expect(transpile('__("Hello", "my-plugin")', 'declare function __(t: string, d: string): string;'))
         .toBe("__( 'Hello', 'my-plugin' )");
@@ -158,6 +163,11 @@ describe('transpileExpression', () => {
         .toBe("update_user_meta( 5, 'nickname', 'jane' )");
       expect(transpile('deleteUserMeta(5, "nickname")', 'declare function deleteUserMeta(u: number, k: string): boolean;'))
         .toBe("delete_user_meta( 5, 'nickname' )");
+    });
+
+    it('maps post parent function', () => {
+      expect(transpile('wpGetPostParentId(42)', 'declare function wpGetPostParentId(p?: number): number | false;'))
+        .toBe('wp_get_post_parent_id( 42 )');
     });
 
     it('maps term, comment, and generic metadata functions', () => {

@@ -123,7 +123,9 @@ export const WP_FUNCTION_MAP: Record<string, string> = {
 
   // Posts
   getPost: 'get_post',
+  getPostType: 'get_post_type',
   getPosts: 'get_posts',
+  wpGetPostParentId: 'wp_get_post_parent_id',
   getTheId: 'get_the_ID',
   getTheTitle: 'get_the_title',
   getTheContent: 'get_the_content',
@@ -292,6 +294,10 @@ export const WP_FUNCTION_MAP: Record<string, string> = {
   time: 'time',
   getallheaders: 'getallheaders',
   header: 'header',
+  isArray: 'is_array',
+  levenshtein: 'levenshtein',
+  arrayUnique: 'array_unique',
+  arrayValues: 'array_values',
 
   // Misc
   wpDie: 'wp_die',

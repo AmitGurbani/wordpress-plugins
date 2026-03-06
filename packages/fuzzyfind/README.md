@@ -26,25 +26,24 @@ On activation the plugin creates two database tables (`wp_ff_search_index` and `
 
 ## Features
 
-- **Weighted search** — configurable relevance weights for title, SKU, categories, attributes, tags, and content
+- **Weighted search** — configurable relevance weights for title, SKU, and content
 - **FULLTEXT index** — MySQL FULLTEXT with boolean mode for fast, relevance-sorted results
-- **Fuzzy matching** — SOUNDEX phonetic matching for misspellings and typos
-- **Autocomplete** — public REST endpoint for search-as-you-type UI
-- **Headless support** — automatically enhances WooCommerce REST API and WPGraphQL product searches
+- **Fuzzy matching** — Levenshtein distance correction for misspellings and typos
+- **Custom REST endpoints** — paginated search and autocomplete endpoints for headless storefronts
+- **Synonym support** — configurable synonym groups for search term expansion
 - **"Did you mean" suggestions** — suggests alternatives when results are few
 - **Search analytics** — tracks popular searches and zero-result queries
 - **Admin settings page** — React UI for configuring weights, feature toggles, and viewing analytics
 
 ## Architecture
 
-5 TypeScript source files transpiled to a WordPress plugin via wpts:
+4 TypeScript source files transpiled to a WordPress plugin via wpts:
 
 | File | Purpose |
-|------|---------|
+| ---- | ------- |
 | `src/plugin.ts` | Plugin entry — settings, lifecycle, admin page |
-| `src/search.ts` | WP_Query integration — hooks into `posts_clauses` |
+| `src/search-routes.ts` | Public REST endpoints — search and autocomplete |
 | `src/indexer.ts` | Product indexer — builds/maintains FULLTEXT index |
-| `src/autocomplete.ts` | Public REST endpoint for autocomplete |
 | `src/admin-routes.ts` | Admin REST endpoints for settings page |
 
 ## Settings
@@ -54,19 +53,16 @@ All settings are managed via the admin page and REST API.
 ### Search Weights (1-10)
 
 | Setting | Default | Description |
-|---------|---------|-------------|
+| ------- | ------- | ----------- |
 | Title Weight | 10 | Relevance weight for product title matches |
 | SKU Weight | 8 | Relevance weight for SKU matches |
-| Category Weight | 6 | Relevance weight for category name matches |
-| Attribute Weight | 5 | Relevance weight for product attribute matches |
-| Tag Weight | 4 | Relevance weight for product tag matches |
 | Content Weight | 2 | Relevance weight for product description matches |
 
 ### Feature Toggles
 
 | Setting | Default | Description |
-|---------|---------|-------------|
-| Fuzzy Matching | On | SOUNDEX phonetic matching for typos |
+| ------- | ------- | ----------- |
+| Fuzzy Matching | On | Levenshtein distance correction for typos |
 | Autocomplete | On | REST API autocomplete endpoint |
 | Search Analytics | On | Track popular and zero-result searches |
 | Min Query Length | 2 | Minimum characters to trigger search |
@@ -78,7 +74,8 @@ All settings are managed via the admin page and REST API.
 All endpoints are under `/fuzzyfind/v1`.
 
 | Endpoint | Method | Auth | Description |
-|----------|--------|------|-------------|
+| -------- | ------ | ---- | ----------- |
+| `/search?query=...&page=1&per_page=10&orderby=relevance` | GET | Public | Paginated product search with relevance scoring |
 | `/autocomplete?query=...&limit=8` | GET | Public | Search-as-you-type suggestions |
 | `/settings` | GET | `manage_options` | Read all settings |
 | `/settings` | POST | `manage_options` | Update settings |

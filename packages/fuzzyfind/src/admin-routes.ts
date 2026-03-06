@@ -26,10 +26,10 @@ class FfAdminRoutes {
 
     let totalProducts: number = 0;
     if (classExists('WooCommerce')) {
-      const counts: any = wpCountPosts('product');
-      if (counts && counts['publish']) {
-        totalProducts = intval(counts['publish']);
-      }
+      const count: string | null = wpdb.getVar(
+        wpdb.prepare("SELECT COUNT(*) FROM %i WHERE post_type = 'product' AND post_status = 'publish'", wpdb.posts)
+      );
+      totalProducts = count ? intval(count) : 0;
     }
 
     return restEnsureResponse({
@@ -50,12 +50,22 @@ class FfAdminRoutes {
 
     const isIndexing: string = getOption('fuzzyfind_reindex_in_progress', '');
     if (isIndexing === '1') {
-      return new WP_Error('already_indexing', 'A reindex is already in progress.', { status: 409 });
+      // Allow override if flag is stale (>10 minutes old)
+      const flagTime: number = intval(getOption('fuzzyfind_reindex_started', '0'));
+      if (flagTime > 0 && (time() - flagTime) < 600) {
+        return new WP_Error('already_indexing', 'A reindex is already in progress.', { status: 409 });
+      }
     }
 
+    // Set flag immediately to prevent concurrent reindexes (TOCTOU guard)
+    updateOption('fuzzyfind_reindex_in_progress', '1');
+    updateOption('fuzzyfind_reindex_started', time());
+
     // For small stores, run synchronously
-    const counts: any = wpCountPosts('product');
-    const totalProducts: number = counts && counts['publish'] ? intval(counts['publish']) : 0;
+    const count: string | null = wpdb.getVar(
+      wpdb.prepare("SELECT COUNT(*) FROM %i WHERE post_type = 'product' AND post_status = 'publish'", wpdb.posts)
+    );
+    const totalProducts: number = count ? intval(count) : 0;
 
     if (totalProducts <= 500) {
       // Run synchronously

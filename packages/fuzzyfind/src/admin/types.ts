@@ -3,9 +3,6 @@ import { __ } from '@wordpress/i18n';
 export interface Settings {
   weight_title: number;
   weight_sku: number;
-  weight_categories: number;
-  weight_attributes: number;
-  weight_tags: number;
   weight_content: number;
   fuzzy_enabled: boolean;
   autocomplete_enabled: boolean;
@@ -13,6 +10,7 @@ export interface Settings {
   min_query_length: number;
   autocomplete_limit: number;
   did_you_mean_threshold: number;
+  synonyms: string;
 }
 
 export interface TabProps {
@@ -35,9 +33,6 @@ export interface AnalyticsData {
 export const DEFAULTS: Settings = {
   weight_title: 10,
   weight_sku: 8,
-  weight_categories: 6,
-  weight_attributes: 5,
-  weight_tags: 4,
   weight_content: 2,
   fuzzy_enabled: true,
   autocomplete_enabled: true,
@@ -45,6 +40,7 @@ export const DEFAULTS: Settings = {
   min_query_length: 2,
   autocomplete_limit: 8,
   did_you_mean_threshold: 3,
+  synonyms: '',
 };
 
 export const TABS = [

@@ -3,3 +3,4 @@ node_modules/
 .wpts-cache/
 dist/
 .claude/settings.local.json
+.playwright-mcp/

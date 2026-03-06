@@ -27,46 +27,42 @@ If WooCommerce is not active, the plugin displays an admin notice and search enh
 
 New products are automatically indexed when created or updated. Deleted products are automatically removed from the index.
 
-### Headless & API Support
+### REST API Endpoints
 
-Search enhancement applies automatically to all WooCommerce search interfaces:
+FuzzyFind provides custom REST endpoints for search:
 
-- **Frontend search** — standard WooCommerce product search
-- **WooCommerce Store API** — `/wc/store/v1/products?search=...` (public, no auth — WooCommerce 9.0+)
-- **WooCommerce REST API** — `/wc/v3/products?search=...` (requires API keys)
-- **WPGraphQL** — product queries with `search` in `where` (requires [WPGraphQL](https://www.wpgraphql.com/) + [WooGraphQL](https://github.com/wp-graphql/wp-graphql-woocommerce))
+- **Search** — `GET /wp-json/fuzzyfind/v1/search?query=...` (public, paginated, weighted relevance scoring)
+- **Autocomplete** — `GET /wp-json/fuzzyfind/v1/autocomplete?query=...` (public, lightweight suggestions for search-as-you-type)
 
-No additional configuration is needed. Search analytics captures queries from all sources.
+See the [Integration Guide](./integration-guide.md) for full endpoint documentation and frontend examples.
 
 ## Search Weights
 
 Search weights control how much each field contributes to the relevance score. Higher weight means matches in that field rank higher in results.
 
 | Setting | Default | What It Matches |
-|---------|---------|-----------------|
+| ------- | ------- | --------------- |
 | Title Weight | 10 | Product name |
 | SKU Weight | 8 | Product SKU and variation SKUs |
-| Category Weight | 6 | Product category names |
-| Attribute Weight | 5 | Product attribute values (color, size, etc.) |
-| Tag Weight | 4 | Product tag names |
 | Content Weight | 2 | Product description |
+
+The index covers all product fields (title, SKU, description, attributes, categories, tags, variation SKUs) for matching. The weights above control the relevance ranking of results.
 
 ### Common Configurations
 
 **Parts/industrial store** (customers search by part number):
+
 - SKU Weight: 10, Title Weight: 8
 
-**Fashion/apparel store** (customers search by style):
-- Title Weight: 10, Category Weight: 8, Attribute Weight: 7
-
 **General store** (balanced):
+
 - Keep defaults — title and SKU are prioritized, descriptions contribute less noise
 
 ## Feature Settings
 
 | Setting | Default | Description |
-|---------|---------|-------------|
-| Enable Fuzzy Matching | On | SOUNDEX phonetic matching for typos and misspellings. "shrt" finds "shirt" |
+| ------- | ------- | ----------- |
+| Enable Fuzzy Matching | On | Levenshtein distance matching for typos and misspellings. "shrt" finds "shirt" |
 | Enable Autocomplete | On | Public REST endpoint for search-as-you-type UIs |
 | Enable Search Analytics | On | Track popular searches and zero-result queries |
 | Minimum Query Length | 2 | Characters required before search kicks in |
@@ -78,9 +74,9 @@ Search weights control how much each field contributes to the relevance score. H
 ### Automatic Indexing
 
 The index stays in sync automatically:
-- **Product created/updated** — indexed immediately via `woocommerce_update_product` hook
+- **Product created/updated** — indexed immediately via `woocommerce_new_product` and `woocommerce_update_product` hooks
 - **Product deleted** — removed from index via `before_delete_post` hook
-- **Product unpublished or hidden** — removed from index
+- **Product unpublished, hidden, or set to "Catalog only" visibility** — removed from index
 
 ### Manual Rebuild
 
@@ -140,15 +136,16 @@ Click **Clear Analytics** to reset all search data. This is useful when:
 
 ### New products not appearing in search
 
-Products are indexed on the `woocommerce_update_product` hook. Check that:
+Products are indexed on the `woocommerce_new_product` and `woocommerce_update_product` hooks. Check that:
 - The product is **published** (draft/pending products are not indexed)
-- The product is not **hidden** (catalog visibility set to "Hidden")
+- The product's catalog visibility is not set to **"Hidden"** or **"Catalog"** (shop only, excluded from search)
 - WooCommerce is active when saving the product
+- Product variations are automatically indexed via the parent product — when a variation is created or updated, the parent product is re-indexed
 
 If products are still missing, click **Rebuild Index** to force a full reindex.
 
 ### Fuzzy matching not finding misspellings
 
 - Verify "Enable Fuzzy Matching" is on
-- SOUNDEX works best for English words. It may not work well for product codes or non-English terms
-- Very short words (1-2 characters) are not matched phonetically
+- Levenshtein matching corrects words within edit distance 2. Very different spellings may not be corrected
+- Very short words (under 3 characters) are not corrected

@@ -1,71 +1,84 @@
 # Integration Guide
 
-FuzzyFind enhances WooCommerce product search with weighted FULLTEXT matching, fuzzy phonetic search, and a real-time autocomplete endpoint. This guide covers everything you need to integrate the search API into your storefront.
+FuzzyFind provides custom REST API endpoints for WooCommerce product search with weighted FULLTEXT matching, fuzzy correction, and autocomplete. This guide covers everything you need to integrate the search API into your storefront.
 
 ## Overview
 
-FuzzyFind works at three levels:
+FuzzyFind provides two public REST endpoints:
 
-1. **Automatic search enhancement** — hooks into `WP_Query` via the `posts_clauses` filter. Frontend product searches, WooCommerce REST API product searches (`/wc/v3/products?search=...`), and WPGraphQL product queries are all automatically enhanced. No code changes needed.
+1. **Search** — paginated product search with weighted relevance scoring, fuzzy correction, and "did you mean" suggestions.
+2. **Autocomplete** — lightweight product suggestions for search-as-you-type UIs.
 
-2. **Autocomplete REST endpoint** — a public `GET` endpoint that returns lightweight product suggestions for search-as-you-type UIs.
-
-3. **Headless support** — WooCommerce REST API and WPGraphQL/WooGraphQL product searches use the same weighted FULLTEXT engine as frontend search.
+Both endpoints query a FULLTEXT index directly — they do not hook into WP_Query or modify default WooCommerce search behavior.
 
 **Base URL:** `https://your-site.com/wp-json/fuzzyfind/v1`
 
 If the site uses plain permalinks:
 `https://your-site.com/?rest_route=/fuzzyfind/v1`
 
-## Automatic Search Enhancement
+## Search Endpoint
 
-Once the plugin is activated and the index is built, WooCommerce product searches are automatically enhanced:
+### Request
 
-- Standard search queries are intercepted via `posts_clauses`
-- Results are matched against a FULLTEXT index covering title, SKU, description, attributes, categories, tags, and variation SKUs
-- Results are ranked by a weighted relevance score (configurable in admin)
-- Search terms are logged for analytics (if enabled)
-
-**No code changes are needed.** Existing search forms, search widgets, and theme search templates will automatically return better results.
-
-### WooCommerce Store API
-
-Product searches via the public Store API (used by WooCommerce Blocks and headless storefronts) are automatically enhanced. No authentication required.
-
-```bash
-curl "https://your-site.com/wp-json/wc/store/v1/products?search=shirt"
+```http
+GET /wp-json/fuzzyfind/v1/search?query=shirt&page=1&per_page=10&orderby=relevance
 ```
 
-Requires WooCommerce 9.0+.
-
-### WooCommerce REST API
-
-Product searches via the WooCommerce REST API v3 are automatically enhanced:
-
 ```bash
-curl "https://your-site.com/wp-json/wc/v3/products?search=shirt" \
-  -u consumer_key:consumer_secret
+curl "https://your-site.com/wp-json/fuzzyfind/v1/search?query=shirt&page=1&per_page=10"
 ```
 
-The same weighted FULLTEXT search, fuzzy matching, and analytics apply. Response format is standard WooCommerce — only the search ranking changes.
+### Parameters
 
-### WPGraphQL
+| Param | Type | Default | Description |
+| ----- | ---- | ------- | ----------- |
+| `query` | string | required | Search term (minimum 2 characters by default) |
+| `page` | number | 1 | Page number for pagination |
+| `per_page` | number | 10 | Results per page (max 100) |
+| `orderby` | string | `relevance` | Sort order: `relevance` or `title` |
 
-If [WPGraphQL](https://www.wpgraphql.com/) and [WooGraphQL](https://github.com/wp-graphql/wp-graphql-woocommerce) are installed, product search queries are automatically enhanced:
+### Response
 
-```graphql
+```json
 {
-  products(where: { search: "shirt" }) {
-    nodes {
-      id
-      name
-      sku
+  "results": [
+    {
+      "id": 42,
+      "title": "Blue Oxford Shirt",
+      "sku": "SHIRT-001",
+      "price": "29.99",
+      "price_html": "<span class=\"woocommerce-Price-amount amount\">...</span>",
+      "permalink": "https://your-site.com/product/blue-oxford-shirt/",
+      "image": "https://your-site.com/wp-content/uploads/shirt-150x150.jpg",
+      "short_description": "A classic blue oxford shirt.",
+      "relevance_score": 18.5
     }
-  }
+  ],
+  "total": 15,
+  "total_pages": 2,
+  "page": 1,
+  "per_page": 10,
+  "did_you_mean": []
 }
 ```
 
-No additional configuration is required. If WPGraphQL/WooGraphQL are not installed, the plugin simply skips GraphQL integration with no side effects.
+| Field | Type | Description |
+| ----- | ---- | ----------- |
+| `results` | array | Array of product objects |
+| `results[].id` | number | WooCommerce product ID |
+| `results[].title` | string | Product title |
+| `results[].sku` | string | Product SKU (empty string if not set) |
+| `results[].price` | string | Raw price value |
+| `results[].price_html` | string | Formatted price HTML from WooCommerce (pre-sanitized server-side) |
+| `results[].permalink` | string | Full URL to the product page |
+| `results[].image` | string | Thumbnail image URL (empty string if no image) |
+| `results[].short_description` | string | Product short description (HTML stripped) |
+| `results[].relevance_score` | number | Weighted relevance score (only present when `orderby=relevance`) |
+| `total` | number | Total matching products |
+| `total_pages` | number | Total pages available |
+| `page` | number | Current page number |
+| `per_page` | number | Results per page |
+| `did_you_mean` | array | Suggested product titles when results are few or zero |
 
 ## Autocomplete Endpoint
 
@@ -82,53 +95,49 @@ curl "https://your-site.com/wp-json/fuzzyfind/v1/autocomplete?query=shirt&limit=
 ### Parameters
 
 | Param | Type | Default | Description |
-|-------|------|---------|-------------|
+| ----- | ---- | ------- | ----------- |
 | `query` | string | required | Search term (minimum 2 characters by default) |
-| `limit` | number | 8 | Maximum number of suggestions (configurable in admin) |
+| `limit` | number | 8 | Maximum number of suggestions (max 50, configurable default in admin) |
 
 ### Response
 
 ```json
-[
-  {
-    "id": 42,
-    "title": "Blue Oxford Shirt",
-    "sku": "SHIRT-001",
-    "price": "29.99",
-    "price_html": "<span class=\"woocommerce-Price-amount amount\">...</span>",
-    "permalink": "https://your-site.com/product/blue-oxford-shirt/",
-    "image": "https://your-site.com/wp-content/uploads/shirt-150x150.jpg"
-  },
-  {
-    "id": 87,
-    "title": "Red Flannel Shirt",
-    "sku": "SHIRT-042",
-    "price": "34.99",
-    "price_html": "...",
-    "permalink": "https://your-site.com/product/red-flannel-shirt/",
-    "image": "https://your-site.com/wp-content/uploads/flannel-150x150.jpg"
-  }
-]
+{
+  "results": [
+    {
+      "id": 42,
+      "title": "Blue Oxford Shirt",
+      "sku": "SHIRT-001",
+      "price": "29.99",
+      "price_html": "<span class=\"woocommerce-Price-amount amount\">...</span>",
+      "permalink": "https://your-site.com/product/blue-oxford-shirt/",
+      "image": "https://your-site.com/wp-content/uploads/shirt-150x150.jpg"
+    }
+  ],
+  "did_you_mean": []
+}
 ```
 
 | Field | Type | Description |
-|-------|------|-------------|
-| `id` | number | WooCommerce product ID |
-| `title` | string | Product title |
-| `sku` | string | Product SKU (empty string if not set) |
-| `price` | string | Raw price value |
-| `price_html` | string | Formatted price HTML from WooCommerce (pre-sanitized server-side) |
-| `permalink` | string | Full URL to the product page |
-| `image` | string | Thumbnail image URL (empty string if no image) |
+| ----- | ---- | ----------- |
+| `results` | array | Array of product suggestion objects |
+| `results[].id` | number | WooCommerce product ID |
+| `results[].title` | string | Product title |
+| `results[].sku` | string | Product SKU (empty string if not set) |
+| `results[].price` | string | Raw price value |
+| `results[].price_html` | string | Formatted price HTML from WooCommerce (pre-sanitized server-side) |
+| `results[].permalink` | string | Full URL to the product page |
+| `results[].image` | string | Thumbnail image URL (empty string if no image) |
+| `did_you_mean` | array | Suggested product titles when results are few or zero |
 
-Returns an empty array `[]` when there are no results or the query is too short.
+## Error Responses
 
-### Error Responses
+Both endpoints return standard WordPress REST API errors:
 
 | Code | Status | Condition |
-|------|--------|-----------|
+| ---- | ------ | --------- |
 | `woocommerce_required` | 400 | WooCommerce is not active |
-| `autocomplete_disabled` | 403 | Autocomplete is turned off in admin settings |
+| `autocomplete_disabled` | 403 | Autocomplete is turned off in admin settings (autocomplete only) |
 
 Error format:
 
@@ -167,8 +176,8 @@ input.addEventListener('input', function () {
   debounceTimer = setTimeout(() => {
     fetch(`/wp-json/fuzzyfind/v1/autocomplete?query=${encodeURIComponent(query)}&limit=5`)
       .then(res => res.json())
-      .then(items => {
-        if (items.length === 0) {
+      .then(data => {
+        if (data.results.length === 0) {
           resultsEl.style.display = 'none';
           return;
         }
@@ -176,7 +185,7 @@ input.addEventListener('input', function () {
         // Clear previous results
         resultsEl.textContent = '';
 
-        items.forEach(item => {
+        data.results.forEach(item => {
           const link = document.createElement('a');
           link.href = item.permalink;
           link.className = 'ff-result';
@@ -229,6 +238,11 @@ interface Product {
   image: string;
 }
 
+interface AutocompleteResponse {
+  results: Product[];
+  did_you_mean: string[];
+}
+
 function ProductSearch() {
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<Product[]>([]);
@@ -246,9 +260,9 @@ function ProductSearch() {
     timerRef.current = setTimeout(() => {
       fetch(`/wp-json/fuzzyfind/v1/autocomplete?query=${encodeURIComponent(query)}&limit=5`)
         .then(res => res.json())
-        .then(items => {
-          setResults(items);
-          setOpen(items.length > 0);
+        .then((data: AutocompleteResponse) => {
+          setResults(data.results);
+          setOpen(data.results.length > 0);
         });
     }, 300);
 
@@ -290,21 +304,33 @@ function ProductSearch() {
 Search terms are converted to MySQL FULLTEXT boolean mode queries:
 
 | Input | Boolean Query | Matches |
-|-------|---------------|---------|
+| ----- | ------------- | ------- |
 | `shirt` | `+shirt*` | "Blue **Shirt**", "**Shirt**s for Men" |
 | `blue shirt` | `+blue* +shirt*` | Products matching both "blue" AND "shirt" |
 | `BDJ-001` | `+bdj-001*` | Exact SKU match |
 
+### Synonym Expansion
+
+If synonyms are configured (e.g., `tee, t-shirt, tshirt`), matching words are expanded:
+
+| Input | Boolean Query |
+| ----- | ------------- |
+| `tee` | `+(tee* t-shirt* tshirt*)` |
+
 ### Search Fallback
 
 For short words (under 3 characters, below MySQL's default `ft_min_word_len`), FULLTEXT may not match. FuzzyFind automatically falls back to `LIKE` pattern matching to ensure results.
+
+### Fuzzy Correction
+
+When a search returns zero results, FuzzyFind uses Levenshtein distance matching to correct misspelled words (edit distance ≤ 2) and retries the search with the corrected query.
 
 ### Indexed Fields
 
 The FULLTEXT index covers these product fields:
 
 | Field | Source |
-|-------|--------|
+| ----- | ------ |
 | `title` | Product name |
 | `sku` | Product SKU |
 | `short_desc` | Short description (HTML stripped) |

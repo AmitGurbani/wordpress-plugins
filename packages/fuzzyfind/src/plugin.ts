@@ -2,15 +2,14 @@
  * FuzzyFind for WooCommerce — wpts Plugin
  *
  * Weighted, fuzzy WooCommerce product search with autocomplete and analytics.
- * Enhances default WP_Query search with a MySQL FULLTEXT index for relevance-sorted results.
+ * Custom REST API search endpoints powered by a MySQL FULLTEXT index for relevance-sorted results.
  *
  * Build: npx wpts build src/plugin.ts -o dist --clean
  */
 
 import { Plugin, Setting, AdminPage, Activate, Deactivate, Action } from 'wpts';
 import './indexer.js';
-import './search.js';
-import './autocomplete.js';
+import './search-routes.js';
 import './admin-routes.js';
 
 @Plugin({
@@ -53,33 +52,6 @@ class FuzzyFind {
   weightSku: number = 8;
 
   @Setting({
-    key: 'weight_categories',
-    type: 'number',
-    default: 6,
-    label: 'Category Weight',
-    description: 'Relevance weight for category name matches (1-10).',
-  })
-  weightCategories: number = 6;
-
-  @Setting({
-    key: 'weight_attributes',
-    type: 'number',
-    default: 5,
-    label: 'Attribute Weight',
-    description: 'Relevance weight for product attribute matches (1-10).',
-  })
-  weightAttributes: number = 5;
-
-  @Setting({
-    key: 'weight_tags',
-    type: 'number',
-    default: 4,
-    label: 'Tag Weight',
-    description: 'Relevance weight for product tag matches (1-10).',
-  })
-  weightTags: number = 4;
-
-  @Setting({
     key: 'weight_content',
     type: 'number',
     default: 2,
@@ -95,7 +67,7 @@ class FuzzyFind {
     type: 'boolean',
     default: true,
     label: 'Enable Fuzzy Matching',
-    description: 'Use SOUNDEX phonetic matching to handle misspellings and typos.',
+    description: 'Use levenshtein-based matching to handle misspellings and typos.',
   })
   fuzzyEnabled: boolean = true;
 
@@ -144,6 +116,16 @@ class FuzzyFind {
   })
   didYouMeanThreshold: number = 3;
 
+  @Setting({
+    key: 'synonyms',
+    type: 'string',
+    default: '',
+    label: 'Search Synonyms',
+    description: 'Define synonym groups, one per line, comma-separated. All terms in a group match interchangeably.',
+    sanitize: 'sanitize_textarea_field',
+  })
+  synonyms: string = '';
+
   // ── Admin Notices ───────────────────────────────────────────────────
 
   @Action('admin_notices')
@@ -165,7 +147,7 @@ class FuzzyFind {
 
     requireOnce(ABSPATH + 'wp-admin/includes/upgrade.php');
 
-    const charsetCollate: string = wpdb.getVar('SELECT @@character_set_database') ?? 'utf8mb4';
+    const charsetCollate: string = wpdb.getCharsetCollate();
     const prefix: string = wpdb.prefix;
     const indexTable: string = prefix + 'ff_search_index';
     const logTable: string = prefix + 'ff_search_log';
@@ -187,7 +169,7 @@ class FuzzyFind {
       + 'FULLTEXT KEY ft_title (title), '
       + 'FULLTEXT KEY ft_sku (sku), '
       + 'FULLTEXT KEY ft_all (title, sku, short_desc, attributes, categories, tags, variation_skus)'
-      + ') ENGINE=InnoDB DEFAULT CHARSET=' + charsetCollate + ';';
+      + ') ENGINE=InnoDB ' + charsetCollate + ';';
 
     const sqlLog: string = 'CREATE TABLE ' + logTable + ' ('
       + 'id bigint(20) unsigned NOT NULL AUTO_INCREMENT, '
@@ -198,7 +180,7 @@ class FuzzyFind {
       + 'PRIMARY KEY  (id), '
       + 'UNIQUE KEY query_unique (query), '
       + 'KEY result_count (result_count)'
-      + ') ENGINE=InnoDB DEFAULT CHARSET=' + charsetCollate + ';';
+      + ') ENGINE=InnoDB ' + charsetCollate + ';';
 
     dbDelta(sqlIndex);
     dbDelta(sqlLog);

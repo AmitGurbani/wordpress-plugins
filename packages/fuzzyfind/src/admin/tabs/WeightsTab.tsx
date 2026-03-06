@@ -25,30 +25,6 @@ export function WeightsTab({ settings, update }: TabProps) {
         max={10}
       />
       <NumberControl
-        label={__('Category Weight', 'fuzzyfind')}
-        help={__('Weight for product category name matches. Default: 6.', 'fuzzyfind')}
-        value={settings.weight_categories}
-        onChange={(v: string | undefined) => update('weight_categories', v ? parseInt(v, 10) : 6)}
-        min={1}
-        max={10}
-      />
-      <NumberControl
-        label={__('Attribute Weight', 'fuzzyfind')}
-        help={__('Weight for product attribute matches (color, size, etc.). Default: 5.', 'fuzzyfind')}
-        value={settings.weight_attributes}
-        onChange={(v: string | undefined) => update('weight_attributes', v ? parseInt(v, 10) : 5)}
-        min={1}
-        max={10}
-      />
-      <NumberControl
-        label={__('Tag Weight', 'fuzzyfind')}
-        help={__('Weight for product tag matches. Default: 4.', 'fuzzyfind')}
-        value={settings.weight_tags}
-        onChange={(v: string | undefined) => update('weight_tags', v ? parseInt(v, 10) : 4)}
-        min={1}
-        max={10}
-      />
-      <NumberControl
         label={__('Content Weight', 'fuzzyfind')}
         help={__('Weight for product description matches. Default: 2.', 'fuzzyfind')}
         value={settings.weight_content}

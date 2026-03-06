@@ -1,4 +1,4 @@
-import { ToggleControl, __experimentalNumberControl as NumberControl } from '@wordpress/components';
+import { ToggleControl, TextareaControl, __experimentalNumberControl as NumberControl } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import type { TabProps } from '../types';
 
@@ -8,8 +8,8 @@ export function FeaturesTab({ settings, update }: TabProps) {
       <ToggleControl
         label={__('Enable Fuzzy Matching', 'fuzzyfind')}
         help={settings.fuzzy_enabled
-          ? __('Fuzzy matching is ON. Misspellings will be handled with SOUNDEX phonetic matching.', 'fuzzyfind')
-          : __('Enable to handle misspellings and typos using phonetic matching.', 'fuzzyfind')
+          ? __('Fuzzy matching is ON. Misspellings will be corrected automatically.', 'fuzzyfind')
+          : __('Enable to handle misspellings and typos using edit-distance matching.', 'fuzzyfind')
         }
         checked={settings.fuzzy_enabled}
         onChange={(v: boolean) => update('fuzzy_enabled', v)}
@@ -55,6 +55,13 @@ export function FeaturesTab({ settings, update }: TabProps) {
         onChange={(v: string | undefined) => update('did_you_mean_threshold', v ? parseInt(v, 10) : 3)}
         min={0}
         max={10}
+      />
+      <TextareaControl
+        label={__('Search Synonyms', 'fuzzyfind')}
+        help={__('One group per line, comma-separated. Example:\nsneakers, shoes, trainers\ntee, t-shirt, top', 'fuzzyfind')}
+        value={settings.synonyms}
+        onChange={(v: string) => update('synonyms', v)}
+        rows={6}
       />
     </div>
   );
