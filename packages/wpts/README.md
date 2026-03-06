@@ -618,7 +618,7 @@ All functions are written in camelCase in TypeScript and transpiled to snake_cas
 | **User** | `currentUserCan`, `getCurrentUserId`, `isUserLoggedIn`, `getUserBy`, `getUsers`, `usernameExists`, `wpInsertUser`, `wpGetCurrentUser`, `wpGeneratePassword`, `wpHashPassword`, `wpCheckPassword`, `wpSetCurrentUser`, `getTheAuthorMeta` |
 | **Nonces** | `wpCreateNonce`, `wpVerifyNonce`, `wpNonceField`, `checkAdminReferer` |
 | **Transients** | `getTransient`, `setTransient`, `deleteTransient` |
-| **Posts** | `getPost`, `getPosts`, `getTheId`, `getTheTitle`, `getTheContent`, `getPermalink` |
+| **Posts** | `getPost`, `getPosts`, `getTheId`, `getTheTitle`, `getTheContent`, `getPermalink`, `wpGetPostParentId` |
 | **URLs** | `adminUrl`, `homeUrl`, `siteUrl`, `contentUrl` |
 | **Plugin** | `pluginDirUrl`, `pluginDirPath`, `pluginBasename` |
 | **i18n** | `__`, `_e`, `_x`, `_ex`, `_n`, `_nx`, `escHtml__`, `escHtmlE`, `escHtmlX`, `escAttr__`, `escAttrE`, `escAttrX`, `loadPluginTextdomain` |
