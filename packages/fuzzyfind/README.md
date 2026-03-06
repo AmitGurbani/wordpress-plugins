@@ -81,6 +81,7 @@ All endpoints are under `/fuzzyfind/v1`.
 | `/settings` | POST | `manage_options` | Update settings |
 | `/index/status` | GET | `manage_options` | Index stats (total indexed, last indexed) |
 | `/index/rebuild` | POST | `manage_options` | Trigger reindex (sync for <=500 products, WP-Cron for larger stores) |
+| `/index/delete` | POST | `manage_options` | Clear all indexed data |
 | `/analytics` | GET | `manage_options` | Popular searches and zero-result queries |
 | `/analytics/clear` | POST | `manage_options` | Clear analytics data |
 

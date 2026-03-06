@@ -8,6 +8,7 @@ export function IndexTab() {
   const [status, setStatus] = useState<IndexStatus | null>(null);
   const [loading, setLoading] = useState(true);
   const [rebuilding, setRebuilding] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const [message, setMessage] = useState('');
 
   const fetchStatus = () => {
@@ -37,6 +38,25 @@ export function IndexTab() {
       setMessage(__('Failed to trigger reindex.', 'fuzzyfind'));
     }
     setRebuilding(false);
+  };
+
+  const handleDelete = async () => {
+    if (!confirm(__('Are you sure? This will clear the search index. Search will be unavailable until you rebuild.', 'fuzzyfind'))) {
+      return;
+    }
+    setDeleting(true);
+    setMessage('');
+    try {
+      const result: any = await apiFetch({
+        path: '/fuzzyfind/v1/index/delete',
+        method: 'POST',
+      });
+      setMessage(result.message || __('Index cleared.', 'fuzzyfind'));
+      fetchStatus();
+    } catch {
+      setMessage(__('Failed to delete index.', 'fuzzyfind'));
+    }
+    setDeleting(false);
   };
 
   if (loading) return <Spinner />;
@@ -81,9 +101,17 @@ export function IndexTab() {
           variant="secondary"
           onClick={handleReindex}
           isBusy={rebuilding}
-          disabled={rebuilding || (status?.is_indexing ?? false)}
+          disabled={rebuilding || deleting || (status?.is_indexing ?? false)}
         >
           {rebuilding ? <Spinner /> : __('Rebuild Index', 'fuzzyfind')}
+        </Button>
+        <Button
+          isDestructive
+          onClick={handleDelete}
+          isBusy={deleting}
+          disabled={rebuilding || deleting || (status?.is_indexing ?? false)}
+        >
+          {deleting ? <Spinner /> : __('Delete Index', 'fuzzyfind')}
         </Button>
         {message && (
           <span style={{ color: '#00a32a' }}>{message}</span>

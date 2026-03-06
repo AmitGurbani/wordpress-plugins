@@ -88,6 +88,22 @@ class FfAdminRoutes {
     });
   }
 
+  // ── Delete Index ───────────────────────────────────────────────────
+
+  @RestRoute('/index/delete', { method: 'POST', capability: 'manage_options' })
+  deleteIndex(request: any): any {
+    const tableName: string = getOption('fuzzyfind_index_table', '');
+    if (tableName) {
+      wpdb.query(wpdb.prepare('TRUNCATE TABLE %i', tableName));
+    }
+    deleteOption('fuzzyfind_last_indexed');
+    deleteOption('fuzzyfind_reindex_in_progress');
+
+    return restEnsureResponse({
+      message: 'Index cleared.',
+    });
+  }
+
   // ── Analytics ───────────────────────────────────────────────────────
 
   @RestRoute('/analytics', { method: 'GET', capability: 'manage_options' })

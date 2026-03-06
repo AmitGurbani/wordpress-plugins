@@ -85,9 +85,19 @@ Use **Rebuild Index** in the admin page when:
 - You suspect the index is out of sync
 - You've made bulk changes to products
 
+Rebuild re-indexes all current products and removes stale entries for deleted products.
+
 Rebuild behavior:
 - **500 products or fewer** — runs immediately (synchronous)
 - **More than 500 products** — scheduled via WP-Cron (runs in the background within a few seconds)
+
+### Delete Index
+
+Use **Delete Index** to clear all indexed data without rebuilding. This is useful for:
+- Troubleshooting search issues
+- Preparing to uninstall the plugin
+
+Search will be unavailable until you rebuild the index. A confirmation prompt is shown before deleting.
 
 The admin page shows index status: total products indexed, total products in store, and last indexed timestamp.
 

@@ -114,6 +114,12 @@ class FfIndexer {
       }
     }
 
+    // Clean up stale entries for deleted/unpublished products
+    wpdb.query(wpdb.prepare(
+      "DELETE FROM %i WHERE product_id NOT IN (SELECT ID FROM %i WHERE post_type = 'product' AND post_status = 'publish')",
+      tableName, wpdb.posts
+    ));
+
     updateOption('fuzzyfind_last_indexed', time());
     deleteOption('fuzzyfind_reindex_in_progress');
   }
