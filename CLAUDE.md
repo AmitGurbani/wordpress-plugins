@@ -14,6 +14,7 @@ Turborepo monorepo with pnpm workspaces.
 - Package manager: pnpm (not npm or yarn)
 - All packages live in `packages/`
 - Use turbo for orchestrating build/test/lint across packages
+- Plugin packages track generated PHP output in `dist/` (via `!dist/` in their `.gitignore`). Rebuild plugins after wpts changes and commit the updated PHP so diffs are reviewable.
 
 ## Commits
 

@@ -153,11 +153,23 @@ if (rootElement) {
     JSON.stringify(tsconfig, null, 2) + '\n',
   );
 
+  // Create .gitignore to track generated PHP output
+  const gitignore = `# Track generated PHP plugin output (un-ignore dist from root rule)
+!dist/
+
+# Exclude non-PHP artifacts
+dist/*.zip
+dist/*/admin/js/
+`;
+
+  await writeFile(path.join(projectDir, '.gitignore'), gitignore);
+
   console.log('\nProject created successfully!');
   console.log('\nFiles created:');
   console.log('  src/plugin.ts       - Plugin backend (transpiled to PHP)');
   console.log('  src/admin/index.tsx  - Admin page (React, bundled with wp-scripts)');
   console.log('  tsconfig.json       - TypeScript configuration');
+  console.log('  .gitignore          - Track generated PHP in source control');
   console.log('\nNext steps:');
   console.log('  wpts build          - Build the plugin');
   console.log('  wpts validate       - Validate without building');
