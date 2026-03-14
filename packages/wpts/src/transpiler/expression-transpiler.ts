@@ -438,6 +438,10 @@ function transpileCallExpression(node: ts.CallExpression, typeChecker: ts.TypeCh
       if (phpFunc === 'echo') {
         return `echo ${args.join(', ')}`;
       }
+      // getallheaders() is unavailable in PHP CLI (WP-CLI) — guard with function_exists
+      if (phpFunc === 'getallheaders') {
+        return `function_exists( 'getallheaders' ) ? getallheaders() : array()`;
+      }
       return phpCall(phpFunc, args);
     }
 

@@ -34,7 +34,7 @@ class Headless_Otp_Auth_Public {
 		if ( ! $origins_str ) {
 			return $served;
 		}
-		$headers = getallheaders();
+		$headers = function_exists( 'getallheaders' ) ? getallheaders() : array();
 		$origin = $headers['Origin'] ?? '';
 		if ( ! $origin ) {
 			return $served;
@@ -59,7 +59,7 @@ class Headless_Otp_Auth_Public {
 		if ( $user_id ) {
 			return $user_id;
 		}
-		$headers = getallheaders();
+		$headers = function_exists( 'getallheaders' ) ? getallheaders() : array();
 		$auth_header = $headers['Authorization'] ?? $headers['authorization'] ?? '';
 		if ( ! $auth_header ) {
 			return $user_id;

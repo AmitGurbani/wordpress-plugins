@@ -281,7 +281,7 @@ describe('transpileExpression', () => {
       expect(transpile('time()', 'declare function time(): number;'))
         .toBe('time()');
       expect(transpile('getallheaders()', 'declare function getallheaders(): Record<string, string>;'))
-        .toBe('getallheaders()');
+        .toBe("function_exists( 'getallheaders' ) ? getallheaders() : array()");
       expect(transpile('header("Content-Type: application/json")', 'declare function header(h: string): void;'))
         .toBe("header( 'Content-Type: application/json' )");
     });
