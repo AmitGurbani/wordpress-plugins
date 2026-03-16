@@ -351,6 +351,7 @@ export const JS_METHOD_MAP: Record<string, MethodMapping> = {
   'split': { phpFunc: 'explode', objectPosition: 'last' },
   'replace': { phpFunc: 'str_replace', objectPosition: 'last' },
   'substring': { phpFunc: 'substr', objectPosition: 'first' },
+  'substr': { phpFunc: 'substr', objectPosition: 'first' },
   'startsWith': { phpFunc: 'str_starts_with', objectPosition: 'first' },
   'endsWith': { phpFunc: 'str_ends_with', objectPosition: 'first' },
   'repeat': { phpFunc: 'str_repeat', objectPosition: 'first' },

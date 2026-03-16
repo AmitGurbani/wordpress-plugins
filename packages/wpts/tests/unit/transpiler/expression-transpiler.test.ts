@@ -522,6 +522,11 @@ describe('transpileExpression', () => {
       expect(result).toBe('substr( $str, 1 )');
     });
 
+    it('maps str.substr to substr', () => {
+      const result = transpile('str.substr(1, 3)', 'const str: string = "hello";');
+      expect(result).toBe('substr( $str, 1, 3 )');
+    });
+
     it('maps str.concat to dot operator', () => {
       const result = transpile('str.concat("world")', 'const str: string = "hello";');
       expect(result).toBe("$str . 'world'");
