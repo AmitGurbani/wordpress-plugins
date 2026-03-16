@@ -3,7 +3,8 @@ import { __ } from '@wordpress/i18n';
 export interface Settings {
   otp_test_mode: boolean;
   otp_server_url: string;
-  otp_server_api_key: string;
+  otp_server_headers_template: string;
+  otp_server_payload_template: string;
   otp_length: number;
   otp_expiry: number;
   max_otp_attempts: number;
@@ -32,7 +33,8 @@ export interface TabProps {
 export const DEFAULTS: Settings = {
   otp_test_mode: false,
   otp_server_url: '',
-  otp_server_api_key: '',
+  otp_server_headers_template: '{}',
+  otp_server_payload_template: '{}',
   otp_length: 6,
   otp_expiry: 300,
   max_otp_attempts: 3,

@@ -6,7 +6,8 @@ if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
 
 delete_option( 'headless_otp_auth_otp_test_mode' );
 delete_option( 'headless_otp_auth_otp_server_url' );
-delete_option( 'headless_otp_auth_otp_server_api_key' );
+delete_option( 'headless_otp_auth_otp_server_headers_template' );
+delete_option( 'headless_otp_auth_otp_server_payload_template' );
 delete_option( 'headless_otp_auth_otp_length' );
 delete_option( 'headless_otp_auth_otp_expiry' );
 delete_option( 'headless_otp_auth_max_otp_attempts' );

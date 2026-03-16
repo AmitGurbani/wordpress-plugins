@@ -8,6 +8,15 @@ import { RestRoute } from 'wpts';
 
 class OtpRoutes {
 
+  escapeForJson(value: string): string {
+    const encoded: string = jsonEncode(value);
+    if (!encoded) {
+      return '';
+    }
+    const len: number = encoded.length;
+    return encoded.substr(1, len - 2);
+  }
+
   @RestRoute('/otp/send', { method: 'POST', public: true })
   sendOtp(request: any): any {
     const phone: string = sanitizeTextField(request.get_param('phone'));
@@ -72,14 +81,38 @@ class OtpRoutes {
       return new WP_Error('otp_not_configured', 'OTP delivery is not configured.', { status: 500 });
     }
 
-    // Send OTP via external server
-    const apiKey: string = getOption('headless_otp_auth_otp_server_api_key', '');
+    // Send OTP via external server — generic template-based request
+    const siteName: string = getOption('blogname', '');
+    const siteUrlVal: string = siteUrl();
+
+    // JSON-escape values to prevent injection
+    const safePhone: string = this.escapeForJson(phone);
+    const safeOtp: string = this.escapeForJson(otp);
+    const safeSiteName: string = this.escapeForJson(siteName);
+    const safeSiteUrl: string = this.escapeForJson(siteUrlVal);
+
+    // Build payload from template
+    const payloadTemplate: string = getOption('headless_otp_auth_otp_server_payload_template', '{}');
+    let payload: string = payloadTemplate;
+    payload = payload.replace('{{phone}}', safePhone);
+    payload = payload.replace('{{otp}}', safeOtp);
+    payload = payload.replace('{{siteName}}', safeSiteName);
+    payload = payload.replace('{{siteUrl}}', safeSiteUrl);
+
+    // Build headers from template
+    const headersTemplate: string = getOption('headless_otp_auth_otp_server_headers_template', '{}');
+    let headersJson: string = headersTemplate;
+    headersJson = headersJson.replace('{{phone}}', safePhone);
+    headersJson = headersJson.replace('{{otp}}', safeOtp);
+    headersJson = headersJson.replace('{{siteName}}', safeSiteName);
+    headersJson = headersJson.replace('{{siteUrl}}', safeSiteUrl);
+
+    const customHeaders: any = jsonDecode(headersJson, true);
+    const headers: any = Object.assign({ 'Content-Type': 'application/json' }, customHeaders);
+
     const response: any = wpRemotePost(serverUrl, {
-      body: jsonEncode({ phone: phone, otp: otp }),
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer ' + apiKey,
-      },
+      body: payload,
+      headers: headers,
       timeout: 15,
     });
 

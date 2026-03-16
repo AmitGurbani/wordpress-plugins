@@ -13,7 +13,7 @@ Mobile OTP authentication with JWT for headless WordPress. Built with [wpts](../
 
 Multi-file wpts plugin with 4 source files:
 
-- `src/plugin.ts` — Entry file: @Plugin, @AdminPage, 14 @Settings, @Activate/@Deactivate
+- `src/plugin.ts` — Entry file: @Plugin, @AdminPage, 15 @Settings, @Activate/@Deactivate
 - `src/jwt.ts` — JWT generation via `hoa_generate_jwt` filter, CORS headers, `determine_current_user` auth filter
 - `src/otp-routes.ts` — POST /otp/send, POST /otp/verify, GET /otp/test-otp (admin-only)
 - `src/auth-routes.ts` — POST /auth/register, POST /auth/refresh, GET /auth/me
@@ -21,7 +21,7 @@ Multi-file wpts plugin with 4 source files:
 
 ## Auth Flow
 
-1. Client sends phone number → `/otp/send` generates OTP, stores hashed in transient, sends via external server
+1. Client sends phone number → `/otp/send` generates OTP, stores hashed in transient, sends via configurable template-based request to external server
 2. Client submits OTP → `/otp/verify` checks hash
    - **Existing user**: returns JWT access + refresh tokens
    - **New user**: returns `registration_token` (valid 10 min)
@@ -38,3 +38,4 @@ Multi-file wpts plugin with 4 source files:
 - **Rate limiting**: Transient-based per phone hash. Send rate limit window (default 900s) is separate from OTP expiry (300s). Resend cooldown (60s) prevents rapid re-sends. Verify attempts (max 3) protect against brute-force — lockout deletes the OTP.
 - **Registration**: Toggleable via `enable_registration` setting. Default user role configurable via `default_user_role` (defaults to `customer` when WooCommerce is active, `subscriber` otherwise). Username derived from display name (not random). Existing WooCommerce users are matched by `billing_phone` fallback if `phone_number` meta is missing.
 - **Test mode**: `otp_test_mode` setting skips external OTP delivery, stores plain OTP in `hoa_test_otp_latest` transient for admin display. Rate limiting still applies.
+- **OTP server templates**: Headers and payload are fully generic JSON templates (`otp_server_headers_template`, `otp_server_payload_template`, both default to `{}`). Available placeholders: `{{phone}}` (phone number), `{{otp}}` (OTP code), `{{siteName}}` (WP site title), `{{siteUrl}}` (WP site URL). All values are JSON-escaped before substitution via `escapeForJson` helper (`json_encode` + strip outer quotes) to prevent JSON injection. Admin UI has info icon popovers with placeholder reference and examples.

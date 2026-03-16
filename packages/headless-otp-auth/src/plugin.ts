@@ -50,13 +50,22 @@ class HeadlessOtpAuth {
   otpServerUrl: string = '';
 
   @Setting({
-    key: 'otp_server_api_key',
+    key: 'otp_server_headers_template',
     type: 'string',
-    default: '',
-    label: 'OTP Server API Key',
-    description: 'API key for authenticating with the OTP delivery server.',
+    default: '{}',
+    label: 'OTP Server Headers Template',
+    description: 'JSON headers template. Placeholders: {{phone}}, {{otp}}, {{siteName}}, {{siteUrl}}.',
   })
-  otpServerApiKey: string = '';
+  otpServerHeadersTemplate: string = '{}';
+
+  @Setting({
+    key: 'otp_server_payload_template',
+    type: 'string',
+    default: '{}',
+    label: 'OTP Server Payload Template',
+    description: 'JSON body template. Placeholders: {{phone}}, {{otp}}, {{siteName}}, {{siteUrl}}.',
+  })
+  otpServerPayloadTemplate: string = '{}';
 
   @Setting({
     key: 'otp_length',

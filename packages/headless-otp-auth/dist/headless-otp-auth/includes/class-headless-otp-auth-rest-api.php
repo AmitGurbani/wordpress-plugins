@@ -97,7 +97,8 @@ class Headless_Otp_Auth_Rest_Api {
 		$settings = array(
 			'otp_test_mode' => (bool) get_option( 'headless_otp_auth_otp_test_mode', false ),
 			'otp_server_url' => get_option( 'headless_otp_auth_otp_server_url', '' ),
-			'otp_server_api_key' => get_option( 'headless_otp_auth_otp_server_api_key', '' ),
+			'otp_server_headers_template' => get_option( 'headless_otp_auth_otp_server_headers_template', '{}' ),
+			'otp_server_payload_template' => get_option( 'headless_otp_auth_otp_server_payload_template', '{}' ),
 			'otp_length' => get_option( 'headless_otp_auth_otp_length', 6 ),
 			'otp_expiry' => get_option( 'headless_otp_auth_otp_expiry', 300 ),
 			'max_otp_attempts' => get_option( 'headless_otp_auth_max_otp_attempts', 3 ),
@@ -139,16 +140,27 @@ class Headless_Otp_Auth_Rest_Api {
 			}
 			update_option( 'headless_otp_auth_otp_server_url', $value );
 		}
-		if ( isset( $params['otp_server_api_key'] ) ) {
-			$value = sanitize_text_field( $params['otp_server_api_key'] );
+		if ( isset( $params['otp_server_headers_template'] ) ) {
+			$value = sanitize_text_field( $params['otp_server_headers_template'] );
 			if ( null === $value ) {
 				return new \WP_Error(
-					'invalid_otp_server_api_key',
-					'Invalid value for otp_server_api_key.',
+					'invalid_otp_server_headers_template',
+					'Invalid value for otp_server_headers_template.',
 					array( 'status' => 400 )
 				);
 			}
-			update_option( 'headless_otp_auth_otp_server_api_key', $value );
+			update_option( 'headless_otp_auth_otp_server_headers_template', $value );
+		}
+		if ( isset( $params['otp_server_payload_template'] ) ) {
+			$value = sanitize_text_field( $params['otp_server_payload_template'] );
+			if ( null === $value ) {
+				return new \WP_Error(
+					'invalid_otp_server_payload_template',
+					'Invalid value for otp_server_payload_template.',
+					array( 'status' => 400 )
+				);
+			}
+			update_option( 'headless_otp_auth_otp_server_payload_template', $value );
 		}
 		if ( isset( $params['otp_length'] ) ) {
 			$value = absint( $params['otp_length'] );
@@ -315,8 +327,27 @@ class Headless_Otp_Auth_Rest_Api {
 		if ( ! $server_url ) {
 			return new WP_Error( 'otp_not_configured', 'OTP delivery is not configured.', array( 'status' => 500 ) );
 		}
-		$api_key = get_option( 'headless_otp_auth_otp_server_api_key', '' );
-		$response = wp_remote_post( $server_url, array( 'body' => json_encode( array( 'phone' => $phone, 'otp' => $otp ) ), 'headers' => array( 'Content-Type' => 'application/json', 'Authorization' => 'Bearer ' . $api_key ), 'timeout' => 15 ) );
+		$site_name = get_option( 'blogname', '' );
+		$site_url_val = site_url();
+		$safe_phone = $this->escape_for_json( $phone );
+		$safe_otp = $this->escape_for_json( $otp );
+		$safe_site_name = $this->escape_for_json( $site_name );
+		$safe_site_url = $this->escape_for_json( $site_url_val );
+		$payload_template = get_option( 'headless_otp_auth_otp_server_payload_template', '{}' );
+		$payload = $payload_template;
+		$payload = str_replace( '{{phone}}', $safe_phone, $payload );
+		$payload = str_replace( '{{otp}}', $safe_otp, $payload );
+		$payload = str_replace( '{{siteName}}', $safe_site_name, $payload );
+		$payload = str_replace( '{{siteUrl}}', $safe_site_url, $payload );
+		$headers_template = get_option( 'headless_otp_auth_otp_server_headers_template', '{}' );
+		$headers_json = $headers_template;
+		$headers_json = str_replace( '{{phone}}', $safe_phone, $headers_json );
+		$headers_json = str_replace( '{{otp}}', $safe_otp, $headers_json );
+		$headers_json = str_replace( '{{siteName}}', $safe_site_name, $headers_json );
+		$headers_json = str_replace( '{{siteUrl}}', $safe_site_url, $headers_json );
+		$custom_headers = json_decode( $headers_json, true );
+		$headers = array_merge( array( 'Content-Type' => 'application/json' ), $custom_headers );
+		$response = wp_remote_post( $server_url, array( 'body' => $payload, 'headers' => $headers, 'timeout' => 15 ) );
 		if ( is_wp_error( $response ) ) {
 			return new WP_Error( 'otp_send_failed', 'Failed to send OTP.', array( 'status' => 500 ) );
 		}
@@ -534,6 +565,15 @@ class Headless_Otp_Auth_Rest_Api {
 		$display_name = get_the_author_meta( 'display_name', $user_id );
 		$phone = get_user_meta( $user_id, 'phone_number', true );
 		return array( 'id' => $user_id, 'name' => $display_name, 'phone' => $phone );
+	}
+
+	public function escape_for_json( $value ) {
+		$encoded = json_encode( $value );
+		if ( ! $encoded ) {
+			return '';
+		}
+		$len = strlen( $encoded );
+		return substr( $encoded, 1, $len - 2 );
 	}
 
 }

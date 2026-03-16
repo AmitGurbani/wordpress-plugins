@@ -90,10 +90,19 @@ class Headless_Otp_Auth_Admin {
 		);
 		register_setting(
 			'headless-otp-auth_options',
-			'headless_otp_auth_otp_server_api_key',
+			'headless_otp_auth_otp_server_headers_template',
 			array(
 				'type'    => 'string',
-				'default' => '',
+				'default' => '{}',
+				'sanitize_callback' => 'sanitize_text_field',
+			)
+		);
+		register_setting(
+			'headless-otp-auth_options',
+			'headless_otp_auth_otp_server_payload_template',
+			array(
+				'type'    => 'string',
+				'default' => '{}',
 				'sanitize_callback' => 'sanitize_text_field',
 			)
 		);
