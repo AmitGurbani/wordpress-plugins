@@ -25,6 +25,7 @@ declare global {
   function escHtml(text: string): string;
   function escAttr(text: string): string;
   function escUrl(url: string, protocols?: string[]): string;
+  function escUrlRaw(url: string, protocols?: string[]): string;
   function escJs(text: string): string;
   function escTextarea(text: string): string;
   function wpKses(content: string, allowedHtml: Record<string, any>, allowedProtocols?: string[]): string;
@@ -116,6 +117,9 @@ declare global {
   function isCategory(category?: number | string | number[]): boolean;
   function isTag(tag?: number | string | number[]): boolean;
   function isSingular(postTypes?: string | string[]): boolean;
+  function isSearch(): boolean;
+  function getSearchQuery(): string;
+  function getQueriedObjectId(): number;
 
   // ---------------------------------------------------------------------------
   // User
@@ -329,8 +333,10 @@ declare global {
   function jsonDecode(json: string, assoc?: boolean, depth?: number, options?: number): any;
   function base64Encode(data: string): string;
   function base64Decode(data: string, strict?: boolean): string;
+  function hash(algo: string, data: string, rawOutput?: boolean): string;
   function hashHmac(algo: string, data: string, key: string, rawOutput?: boolean): string;
   function hashEquals(knownString: string, userString: string): boolean;
+  function uniqid(prefix?: string, moreEntropy?: boolean): string;
 
   // ---------------------------------------------------------------------------
   // PHP Built-ins (general)
@@ -347,6 +353,7 @@ declare global {
   function getallheaders(): Record<string, string>;
   function header(headerStr: string): void;
   function isArray(value: any): boolean;
+  function numberFormat(number: number, decimals?: number, decPoint?: string, thousandsSep?: string): string;
   function levenshtein(s1: string, s2: string): number;
   function arrayUnique(arr: any[]): any[];
   function arrayValues(arr: any[]): any[];
@@ -437,6 +444,7 @@ declare global {
   var $_POST: Record<string, any>;
   var $_GET: Record<string, any>;
   var $_REQUEST: Record<string, any>;
+  var $_SERVER: Record<string, any>;
 
   // ---------------------------------------------------------------------------
   // WordPress Classes

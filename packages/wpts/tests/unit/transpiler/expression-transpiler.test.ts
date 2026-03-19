@@ -286,6 +286,29 @@ describe('transpileExpression', () => {
         .toBe("header( 'Content-Type: application/json' )");
     });
 
+    it('maps escUrlRaw for non-display URL contexts', () => {
+      expect(transpile('escUrlRaw(url)', 'declare function escUrlRaw(url: string, protocols?: string[]): string; const url: string = "";'))
+        .toBe('esc_url_raw( $url )');
+    });
+
+    it('maps hash and uniqid built-in functions', () => {
+      expect(transpile('hash("sha256", data)', 'declare function hash(a: string, d: string, r?: boolean): string; const data: string = "";'))
+        .toBe("hash( 'sha256', $data )");
+      expect(transpile('uniqid("mp_")', 'declare function uniqid(p?: string, m?: boolean): string;'))
+        .toBe("uniqid( 'mp_' )");
+      expect(transpile('numberFormat(price, 2, ".", "")', 'declare function numberFormat(n: number, d?: number, dp?: string, ts?: string): string; const price: number = 0;'))
+        .toBe("number_format( $price, 2, '.', '' )");
+    });
+
+    it('maps search and query conditionals', () => {
+      expect(transpile('isSearch()', 'declare function isSearch(): boolean;'))
+        .toBe('is_search()');
+      expect(transpile('getSearchQuery()', 'declare function getSearchQuery(): string;'))
+        .toBe('get_search_query()');
+      expect(transpile('getQueriedObjectId()', 'declare function getQueriedObjectId(): number;'))
+        .toBe('get_queried_object_id()');
+    });
+
     it('maps utility and REST functions', () => {
       expect(transpile('wpRand(0, 9)', 'declare function wpRand(min?: number, max?: number): number;'))
         .toBe('wp_rand( 0, 9 )');

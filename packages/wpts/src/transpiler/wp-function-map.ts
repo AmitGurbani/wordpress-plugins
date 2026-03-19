@@ -14,6 +14,7 @@ export const WP_FUNCTION_MAP: Record<string, string> = {
   escHtml: 'esc_html',
   escAttr: 'esc_attr',
   escUrl: 'esc_url',
+  escUrlRaw: 'esc_url_raw',
   escJs: 'esc_js',
   escTextarea: 'esc_textarea',
   wpKses: 'wp_kses',
@@ -85,6 +86,9 @@ export const WP_FUNCTION_MAP: Record<string, string> = {
   isCategory: 'is_category',
   isTag: 'is_tag',
   isSingular: 'is_singular',
+  isSearch: 'is_search',
+  getSearchQuery: 'get_search_query',
+  getQueriedObjectId: 'get_queried_object_id',
 
   // User
   currentUserCan: 'current_user_can',
@@ -273,6 +277,13 @@ export const WP_FUNCTION_MAP: Record<string, string> = {
 
   // Utility
   wpRand: 'wp_rand',
+
+  // PHP Built-ins (hashing)
+  hash: 'hash',
+  uniqid: 'uniqid',
+
+  // PHP Built-ins (formatting)
+  numberFormat: 'number_format',
 
   // PHP Built-ins (for JWT / encoding)
   jsonEncode: 'json_encode',

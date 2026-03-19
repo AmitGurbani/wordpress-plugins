@@ -29,7 +29,7 @@ export function transpileExpression(node: ts.Expression, typeChecker: ts.TypeChe
 
     // Identifier (variable name)
     case ts.SyntaxKind.Identifier:
-      return transpileIdentifier(node as ts.Identifier);
+      return transpileIdentifier(node as ts.Identifier, typeChecker);
 
     // this
     case ts.SyntaxKind.ThisKeyword:
@@ -152,12 +152,25 @@ function transpileStringLiteral(node: ts.StringLiteral): string {
   return `'${text}'`;
 }
 
-function transpileIdentifier(node: ts.Identifier): string {
+function transpileIdentifier(node: ts.Identifier, typeChecker: ts.TypeChecker): string {
   const name = node.text;
 
   // WordPress API functions stay as-is (will be handled by call expression)
+  // But only if the identifier is NOT a local variable declaration.
   if (WP_FUNCTION_MAP[name]) {
-    return WP_FUNCTION_MAP[name];
+    const symbol = typeChecker.getSymbolAtLocation(node);
+    const isVariable = symbol?.declarations?.some(
+      d => ts.isVariableDeclaration(d) || ts.isParameter(d) || ts.isBindingElement(d)
+    );
+    if (!isVariable) {
+      return WP_FUNCTION_MAP[name];
+    }
+  }
+
+  // PHP superglobals — preserve verbatim (already include $ in the name)
+  if (name === '$_SERVER' || name === '$_POST' || name === '$_GET' || name === '$_REQUEST'
+      || name === '$_SESSION' || name === '$_COOKIE' || name === '$_FILES' || name === '$_ENV') {
+    return name;
   }
 
   // PHP superglobals and constants
