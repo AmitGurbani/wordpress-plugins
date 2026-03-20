@@ -1,0 +1,23 @@
+{
+  "name": "headless-meta-pixel",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Headless Meta Pixel with WooCommerce integration and Conversions API for headless WordPress",
+  "scripts": {
+    "build": "wpts build src/plugin.ts -o dist --clean --zip && cp readme.txt dist/headless-meta-pixel/readme.txt",
+    "dev": "wpts watch src/plugin.ts -o dist",
+    "wp-env:start": "wp-env start",
+    "wp-env:stop": "wp-env stop",
+    "wp-env:clean": "wp-env clean all"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.1",
+    "@types/react-dom": "^18.3.1",
+    "@wordpress/api-fetch": "^7.40.0",
+    "@wordpress/components": "^32.2.0",
+    "@wordpress/element": "^6.40.0",
+    "@wordpress/env": "^10.0.0",
+    "@wordpress/i18n": "^6.13.0",
+    "wpts": "workspace:*"
+  }
+}
