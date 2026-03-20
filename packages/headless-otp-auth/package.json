@@ -4,7 +4,7 @@
   "private": true,
   "description": "Mobile OTP authentication with JWT for headless WordPress",
   "scripts": {
-    "build": "wpts build src/plugin.ts -o dist --clean --zip",
+    "build": "wpts build src/plugin.ts -o dist --clean --zip && cp readme.txt dist/headless-otp-auth/readme.txt",
     "dev": "wpts watch src/plugin.ts -o dist",
     "wp-env:start": "wp-env start",
     "wp-env:stop": "wp-env stop",

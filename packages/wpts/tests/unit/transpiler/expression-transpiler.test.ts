@@ -55,6 +55,10 @@ describe('transpileExpression', () => {
     it('maps undefined to null', () => {
       expect(transpile('undefined')).toBe('null');
     });
+
+    it('emits ABSPATH as PHP constant (not $abspath)', () => {
+      expect(transpile('ABSPATH')).toBe('ABSPATH');
+    });
   });
 
   describe('binary expressions', () => {

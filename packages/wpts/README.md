@@ -618,19 +618,23 @@ All functions are written in camelCase in TypeScript and transpiled to snake_cas
 | **User** | `currentUserCan`, `getCurrentUserId`, `isUserLoggedIn`, `getUserBy`, `getUsers`, `usernameExists`, `wpInsertUser`, `wpGetCurrentUser`, `wpGeneratePassword`, `wpHashPassword`, `wpCheckPassword`, `wpSetCurrentUser`, `getTheAuthorMeta` |
 | **Nonces** | `wpCreateNonce`, `wpVerifyNonce`, `wpNonceField`, `checkAdminReferer` |
 | **Transients** | `getTransient`, `setTransient`, `deleteTransient` |
-| **Posts** | `getPost`, `getPosts`, `getTheId`, `getTheTitle`, `getTheContent`, `getPermalink`, `wpGetPostParentId` |
+| **Posts** | `getPost`, `getPostType`, `getPosts`, `getTheId`, `getTheTitle`, `getTheContent`, `getPermalink`, `wpGetPostParentId` |
 | **URLs** | `adminUrl`, `homeUrl`, `siteUrl`, `contentUrl` |
 | **Plugin** | `pluginDirUrl`, `pluginDirPath`, `pluginBasename` |
 | **i18n** | `__`, `_e`, `_x`, `_ex`, `_n`, `_nx`, `escHtml__`, `escHtmlE`, `escHtmlX`, `escAttr__`, `escAttrE`, `escAttrX`, `loadPluginTextdomain` |
 | **HTTP API** | `wpRemoteGet`, `wpRemotePost`, `wpRemoteHead`, `wpRemoteRequest`, `wpSafeRemoteGet`, `wpSafeRemotePost`, `wpSafeRemoteHead`, `wpSafeRemoteRequest`, `wpRemoteRetrieveBody`, `wpRemoteRetrieveResponseCode`, `wpRemoteRetrieveResponseMessage`, `wpRemoteRetrieveHeader`, `wpRemoteRetrieveHeaders`, `wpRemoteRetrieveCookies`, `isWpError` |
 | **Metadata** | `getPostMeta`, `addPostMeta`, `updatePostMeta`, `deletePostMeta`, `getUserMeta`, `addUserMeta`, `updateUserMeta`, `deleteUserMeta`, `getTermMeta`, `addTermMeta`, `updateTermMeta`, `deleteTermMeta`, `getCommentMeta`, `addCommentMeta`, `updateCommentMeta`, `deleteCommentMeta`, `getMetadata`, `addMetadata`, `updateMetadata`, `deleteMetadata` |
 | **CPT / Taxonomy** | `registerPostType`, `registerTaxonomy`, `wpDeletePost`, `wpCountPosts` |
-| **AJAX** | `checkAjaxReferer`, `$_POST`, `$_GET`, `$_REQUEST` |
+| **AJAX** | `checkAjaxReferer`, `$_POST`, `$_GET`, `$_REQUEST`, `$_SERVER` |
 | **JSON Response** | `wpSendJson`, `wpSendJsonSuccess`, `wpSendJsonError` |
 | **REST API** | `restEnsureResponse` |
 | **Utility** | `wpRand` |
-| **PHP Built-ins** | `classExists`, `functionExists`, `isArray`, `jsonEncode`, `jsonDecode`, `base64Encode`, `base64Decode`, `hashHmac`, `hashEquals`, `hash`, `md5`, `uniqid`, `numberFormat`, `intval`, `strval`, `strtolower`, `strtr`, `rtrim`, `time`, `getallheaders`, `header` |
-| **Misc** | `wpDie`, `wpRedirect`, `wpSafeRedirect`, `absint`, `wpUnslash`, `echo` |
+| **PHP Built-ins** | `classExists`, `functionExists`, `isArray`, `jsonEncode`, `jsonDecode`, `base64Encode`, `base64Decode`, `hashHmac`, `hashEquals`, `hash`, `md5`, `uniqid`, `numberFormat`, `intval`, `strval`, `strtolower`, `strtr`, `rtrim`, `time`, `getallheaders`, `header`, `levenshtein`, `arrayUnique`, `arrayValues`, `requireOnce` |
+| **Misc** | `wpDie`, `wpRedirect`, `wpSafeRedirect`, `absint`, `wpUnslash`, `echo`, `ABSPATH` |
+| **Content** | `wpStripAllTags` |
+| **Media** | `wpGetAttachmentImageSrc`, `wpGetAttachmentUrl` |
+| **Cron** | `wpScheduleSingleEvent`, `wpNextScheduled`, `wpUnscheduleEvent` |
+| **Taxonomy** | `getTerms`, `getTheTerms`, `wpGetObjectTerms` |
 | **WooCommerce Conditionals** | `isWoocommerce`, `isShop`, `isProduct`, `isCart`, `isCheckout`, `isAccountPage`, `isWcEndpointUrl` |
 | **WooCommerce Products** | `wcGetProduct`, `wcGetProducts`, `wcGetProductIdBySku` |
 | **WooCommerce Orders** | `wcGetOrder`, `wcGetOrders`, `wcCreateOrder` |
@@ -639,13 +643,65 @@ All functions are written in camelCase in TypeScript and transpiled to snake_cas
 | **WooCommerce Notices** | `wcAddNotice`, `wcPrintNotices`, `wcHasNotice` |
 | **WooCommerce Taxonomy** | `wcGetAttributeTaxonomies`, `wcGetProductTerms` |
 | **WooCommerce Templates** | `wcGetTemplatePart`, `wcGetTemplate` |
-| **Database** | `wpdb.prefix`, `wpdb.posts`, `wpdb.prepare()`, `wpdb.query()`, `wpdb.getVar()`, `wpdb.getRow()`, `wpdb.getResults()`, `wpdb.insert()`, `wpdb.update()`, `wpdb.delete()`, `wpdb.escLike()` |
+| **Database** | `wpdb.prefix`, `wpdb.posts`, `wpdb.prepare()`, `wpdb.query()`, `wpdb.getVar()`, `wpdb.getRow()`, `wpdb.getResults()`, `wpdb.insert()`, `wpdb.update()`, `wpdb.delete()`, `wpdb.escLike()`, `dbDelta` |
 
 Full type declarations are in `src/runtime/wp-types.ts` for IDE autocompletion.
 
 When you use `wpdb` in TypeScript, the transpiler automatically injects `global $wpdb;` at the start of the generated PHP method.
 
 WooCommerce functions are only available at runtime when WooCommerce is active. Guard usage with `isWoocommerce()` or check `is_plugin_active('woocommerce/woocommerce.php')` in your activation hook.
+
+## JavaScript Method Mappings
+
+Built-in JavaScript array and string methods are automatically transpiled to their PHP equivalents. You can call them directly on variables without importing anything.
+
+### Array Methods
+
+| TypeScript | PHP | Notes |
+|---|---|---|
+| `arr.push(x)` | `array_push($arr, $x)` | |
+| `arr.pop()` | `array_pop($arr)` | |
+| `arr.shift()` | `array_shift($arr)` | |
+| `arr.unshift(x)` | `array_unshift($arr, $x)` | |
+| `arr.indexOf(x)` | `array_search($x, $arr)` | |
+| `arr.includes(x)` | `in_array($x, $arr)` | |
+| `arr.join(sep)` | `implode($sep, $arr)` | |
+| `arr.reverse()` | `array_reverse($arr)` | |
+| `arr.slice(start, end)` | `array_slice($arr, $start, $end)` | |
+| `arr.splice(start, del)` | `array_splice($arr, $start, $del)` | |
+| `arr.map(fn)` | `array_map($fn, $arr)` | |
+| `arr.filter(fn)` | `array_filter($arr, $fn)` | |
+| `arr.keys()` | `array_keys($arr)` | |
+| `arr.values()` | `array_values($arr)` | |
+| `arr.concat(b)` | `array_merge($arr, $b)` | |
+| `arr.sort()` | `sort($arr)` | |
+| `arr.forEach(fn)` | `array_walk($arr, $fn)` | |
+| `arr.findIndex(fn)` | `array_search($fn, $arr)` | |
+| `arr.fill(val, start, end)` | `array_fill($start, $end, $val)` | |
+| `arr.length` | `count($arr)` | Property, not a method call |
+
+### String Methods
+
+| TypeScript | PHP | Notes |
+|---|---|---|
+| `str.trim()` | `trim($str)` | |
+| `str.trimStart()` | `ltrim($str)` | |
+| `str.trimEnd()` | `rtrim($str)` | |
+| `str.toLowerCase()` | `strtolower($str)` | |
+| `str.toUpperCase()` | `strtoupper($str)` | |
+| `str.split(sep)` | `explode($sep, $str)` | Args are swapped |
+| `str.replace(search, rep)` | `str_replace($search, $rep, $str)` | |
+| `str.replaceAll(search, rep)` | `str_replace($search, $rep, $str)` | |
+| `str.substring(start, end)` | `substr($str, $start, $end)` | |
+| `str.substr(start, len)` | `substr($str, $start, $len)` | |
+| `str.startsWith(prefix)` | `str_starts_with($str, $prefix)` | |
+| `str.endsWith(suffix)` | `str_ends_with($str, $suffix)` | |
+| `str.repeat(n)` | `str_repeat($str, $n)` | |
+| `str.padStart(len, pad)` | `str_pad($str, $len, $pad)` | |
+| `str.charAt(i)` | `substr($str, $i, 1)` | |
+| `str.indexOf(x)` | `strpos($str, $x)` | (via Supported Constructs) |
+| `str.includes(x)` | `str_contains($str, $x)` | (via Supported Constructs) |
+| `str.length` | `strlen($str)` | Property, not a method call |
 
 ## Examples
 

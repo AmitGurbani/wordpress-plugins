@@ -4,7 +4,7 @@
   "private": true,
   "description": "Meta Pixel with WooCommerce integration and Conversions API for headless WordPress",
   "scripts": {
-    "build": "wpts build src/plugin.ts -o dist --clean --zip",
+    "build": "wpts build src/plugin.ts -o dist --clean --zip && cp readme.txt dist/meta-pixel/readme.txt",
     "dev": "wpts watch src/plugin.ts -o dist",
     "wp-env:start": "wp-env start",
     "wp-env:stop": "wp-env stop",

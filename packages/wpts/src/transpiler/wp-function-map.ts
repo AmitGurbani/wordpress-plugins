@@ -249,9 +249,6 @@ export const WP_FUNCTION_MAP: Record<string, string> = {
   dbDelta: 'dbDelta',
   requireOnce: 'require_once',
 
-  // Constants (used as identifiers, not function calls)
-  ABSPATH: 'ABSPATH',
-
   // Content
   wpStripAllTags: 'wp_strip_all_tags',
 
@@ -319,6 +316,15 @@ export const WP_FUNCTION_MAP: Record<string, string> = {
   wpSendJsonError: 'wp_send_json_error',
   absint: 'absint',
   wpUnslash: 'wp_unslash',
+};
+
+/**
+ * PHP constants that appear as TypeScript `declare const` identifiers.
+ * These are always emitted verbatim (no `$` prefix), regardless of the
+ * TypeScript symbol being a VariableDeclaration.
+ */
+export const WP_CONST_MAP: Record<string, string> = {
+  ABSPATH: 'ABSPATH',
 };
 
 /**

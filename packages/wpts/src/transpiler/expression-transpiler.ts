@@ -1,5 +1,5 @@
 import ts from 'typescript';
-import { WP_FUNCTION_MAP, JS_METHOD_MAP } from './wp-function-map.js';
+import { WP_FUNCTION_MAP, JS_METHOD_MAP, WP_CONST_MAP } from './wp-function-map.js';
 import { toSnakeCase } from '../utils/naming.js';
 // Circular import with statement-transpiler is safe: both modules only call each other's
 // functions at runtime (not at module load time), so ESM live bindings resolve correctly.
@@ -154,6 +154,11 @@ function transpileStringLiteral(node: ts.StringLiteral): string {
 
 function transpileIdentifier(node: ts.Identifier, typeChecker: ts.TypeChecker): string {
   const name = node.text;
+
+  // PHP constants (e.g. ABSPATH) — always emit verbatim regardless of TS symbol kind
+  if (WP_CONST_MAP[name]) {
+    return WP_CONST_MAP[name];
+  }
 
   // WordPress API functions stay as-is (will be handled by call expression)
   // But only if the identifier is NOT a local variable declaration.
