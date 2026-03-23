@@ -8,8 +8,9 @@ Turborepo monorepo for WordPress plugins and tooling, using pnpm workspaces.
 |---------|-------------|------|
 | [wpts](packages/wpts/) | TypeScript-to-WordPress-Plugin transpiler | [README](packages/wpts/README.md) |
 | [headless-otp-auth](packages/headless-otp-auth/) | Mobile OTP authentication with JWT for headless WordPress | [Integration](packages/headless-otp-auth/docs/integration-guide.md) · [Admin](packages/headless-otp-auth/docs/admin-guide.md) |
-| [fuzzyfind](packages/fuzzyfind/) | Weighted, fuzzy WooCommerce product search with autocomplete (built with wpts) | [Integration](packages/fuzzyfind/docs/integration-guide.md) · [Admin](packages/fuzzyfind/docs/admin-guide.md) |
-| [meta-pixel](packages/meta-pixel/) | Meta Pixel with WooCommerce CAPI integration for headless WordPress (built with wpts) | [Integration](packages/meta-pixel/docs/integration-guide.md) · [Admin](packages/meta-pixel/docs/admin-guide.md) |
+| [headless-fuzzyfind](packages/headless-fuzzyfind/) | Weighted, fuzzy WooCommerce product search with autocomplete (built with wpts) | [Integration](packages/headless-fuzzyfind/docs/integration-guide.md) · [Admin](packages/headless-fuzzyfind/docs/admin-guide.md) |
+| [headless-meta-pixel](packages/headless-meta-pixel/) | Meta Pixel with WooCommerce CAPI integration for headless WordPress (built with wpts) | [Integration](packages/headless-meta-pixel/docs/integration-guide.md) · [Admin](packages/headless-meta-pixel/docs/admin-guide.md) |
+| [headless-umami](packages/headless-umami/) | Umami Analytics with WooCommerce purchase tracking for headless WordPress (built with wpts) | [README](packages/headless-umami/README.md) |
 
 ## Getting Started
 
