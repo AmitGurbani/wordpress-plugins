@@ -254,7 +254,20 @@ class Headless_Meta_Pixel_Rest_Api {
 		if ( $user_agent ) {
 			$user_data['client_user_agent'] = $user_agent;
 		}
-		$client_ip = $_SERVER['REMOTE_ADDR'] ?? '';
+		$client_ip = '';
+		$cf_ip = $headers['CF-Connecting-IP'] ?? '';
+		$forwarded_for = $headers['X-Forwarded-For'] ?? '';
+		$real_ip = $headers['X-Real-IP'] ?? '';
+		if ( $cf_ip ) {
+			$client_ip = trim( $cf_ip );
+		} elseif ( $forwarded_for ) {
+			$parts = explode( ',', $forwarded_for );
+			$client_ip = trim( $parts[0] );
+		} elseif ( $real_ip ) {
+			$client_ip = trim( $real_ip );
+		} else {
+			$client_ip = $_SERVER['REMOTE_ADDR'] ?? '';
+		}
 		if ( $client_ip ) {
 			$user_data['client_ip_address'] = $client_ip;
 		}

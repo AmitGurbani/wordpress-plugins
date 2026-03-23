@@ -126,7 +126,21 @@ class MetaPixelTrack {
       userData['client_user_agent'] = userAgent;
     }
 
-    const clientIp: string = $_SERVER['REMOTE_ADDR'] ?? '';
+    // Resolve real client IP behind proxies (for headless/reverse-proxy setups)
+    let clientIp: string = '';
+    const cfIp: string = headers['CF-Connecting-IP'] ?? '';
+    const forwardedFor: string = headers['X-Forwarded-For'] ?? '';
+    const realIp: string = headers['X-Real-IP'] ?? '';
+    if (cfIp) {
+      clientIp = cfIp.trim();
+    } else if (forwardedFor) {
+      const parts: string[] = forwardedFor.split(',');
+      clientIp = parts[0].trim();
+    } else if (realIp) {
+      clientIp = realIp.trim();
+    } else {
+      clientIp = $_SERVER['REMOTE_ADDR'] ?? '';
+    }
     if (clientIp) {
       userData['client_ip_address'] = clientIp;
     }
