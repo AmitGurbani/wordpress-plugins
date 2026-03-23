@@ -201,6 +201,11 @@ describe('transpileExpression', () => {
         .toBe("delete_metadata( 'post', 1, 'key' )");
     });
 
+    it('maps URL parsing functions', () => {
+      expect(transpile('wpParseUrl("https://example.com/path")', 'declare function wpParseUrl(u: string, c?: number): any;'))
+        .toBe("wp_parse_url( 'https://example.com/path' )");
+    });
+
     it('maps HTTP API request functions', () => {
       expect(transpile('wpRemoteGet("https://api.example.com")', 'declare function wpRemoteGet(u: string, a?: any): any;'))
         .toBe("wp_remote_get( 'https://api.example.com' )");

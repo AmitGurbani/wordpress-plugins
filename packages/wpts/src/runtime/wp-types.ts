@@ -254,6 +254,7 @@ declare global {
   function homeUrl(path?: string, scheme?: string): string;
   function siteUrl(path?: string, scheme?: string): string;
   function contentUrl(path?: string): string;
+  function wpParseUrl(url: string, component?: number): any;
 
   // ---------------------------------------------------------------------------
   // WooCommerce — Conditionals

@@ -193,6 +193,7 @@ export const WP_FUNCTION_MAP: Record<string, string> = {
   homeUrl: 'home_url',
   siteUrl: 'site_url',
   contentUrl: 'content_url',
+  wpParseUrl: 'wp_parse_url',
 
   // WooCommerce — Conditionals
   isWoocommerce: 'is_woocommerce',

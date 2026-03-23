@@ -619,7 +619,7 @@ All functions are written in camelCase in TypeScript and transpiled to snake_cas
 | **Nonces** | `wpCreateNonce`, `wpVerifyNonce`, `wpNonceField`, `checkAdminReferer` |
 | **Transients** | `getTransient`, `setTransient`, `deleteTransient` |
 | **Posts** | `getPost`, `getPostType`, `getPosts`, `getTheId`, `getTheTitle`, `getTheContent`, `getPermalink`, `wpGetPostParentId` |
-| **URLs** | `adminUrl`, `homeUrl`, `siteUrl`, `contentUrl` |
+| **URLs** | `adminUrl`, `homeUrl`, `siteUrl`, `contentUrl`, `wpParseUrl` |
 | **Plugin** | `pluginDirUrl`, `pluginDirPath`, `pluginBasename` |
 | **i18n** | `__`, `_e`, `_x`, `_ex`, `_n`, `_nx`, `escHtml__`, `escHtmlE`, `escHtmlX`, `escAttr__`, `escAttrE`, `escAttrX`, `loadPluginTextdomain` |
 | **HTTP API** | `wpRemoteGet`, `wpRemotePost`, `wpRemoteHead`, `wpRemoteRequest`, `wpSafeRemoteGet`, `wpSafeRemotePost`, `wpSafeRemoteHead`, `wpSafeRemoteRequest`, `wpRemoteRetrieveBody`, `wpRemoteRetrieveResponseCode`, `wpRemoteRetrieveResponseMessage`, `wpRemoteRetrieveHeader`, `wpRemoteRetrieveHeaders`, `wpRemoteRetrieveCookies`, `isWpError` |
