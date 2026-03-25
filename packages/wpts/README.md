@@ -629,7 +629,7 @@ All functions are written in camelCase in TypeScript and transpiled to snake_cas
 | **JSON Response** | `wpSendJson`, `wpSendJsonSuccess`, `wpSendJsonError` |
 | **REST API** | `restEnsureResponse` |
 | **Utility** | `wpRand` |
-| **PHP Built-ins** | `classExists`, `functionExists`, `isArray`, `jsonEncode`, `jsonDecode`, `base64Encode`, `base64Decode`, `hashHmac`, `hashEquals`, `hash`, `md5`, `uniqid`, `numberFormat`, `intval`, `strval`, `strtolower`, `strtr`, `rtrim`, `time`, `getallheaders`, `header`, `levenshtein`, `arrayUnique`, `arrayValues`, `requireOnce` |
+| **PHP Built-ins** | `classExists`, `functionExists`, `isArray`, `jsonEncode`, `jsonDecode`, `base64Encode`, `base64Decode`, `hashHmac`, `hashEquals`, `hash`, `md5`, `uniqid`, `numberFormat`, `intval`, `strval`, `strtolower`, `strtr`, `rtrim`, `time`, `getallheaders`, `header`, `levenshtein`, `arrayUnique`, `arrayValues`, `requireOnce` · JS built-in `parseFloat()` → PHP `floatval()` |
 | **Misc** | `wpDie`, `wpRedirect`, `wpSafeRedirect`, `absint`, `wpUnslash`, `echo`, `ABSPATH` |
 | **Content** | `wpStripAllTags` |
 | **Media** | `wpGetAttachmentImageSrc`, `wpGetAttachmentUrl` |
