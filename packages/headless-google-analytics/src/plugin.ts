@@ -2,8 +2,8 @@
  * Headless Google Analytics — wpts Plugin
  *
  * Google Analytics (GA4) with WooCommerce integration and Measurement Protocol
- * for headless WordPress stores. Provides REST endpoints for frontend
- * gtag.js integration and server-side event forwarding.
+ * for headless WordPress stores. Provides the Measurement ID for frontend
+ * gtag.js initialization and server-side purchase event tracking.
  *
  * Build: npx wpts build src/plugin.ts -o dist --clean
  */
@@ -11,7 +11,6 @@
 import { Plugin, Setting, AdminPage, Activate, Deactivate, Action, Filter } from 'wpts';
 import './server-tracking.js';
 import './config-routes.js';
-import './track-routes.js';
 import './diagnostics-routes.js';
 
 @Plugin({
@@ -50,6 +49,7 @@ class GoogleAnalytics {
     default: '',
     label: 'API Secret',
     description: 'Measurement Protocol API secret from GA4 Admin > Data Streams.',
+    sensitive: true,
   })
   apiSecret: string = '';
 
@@ -62,34 +62,7 @@ class GoogleAnalytics {
   })
   currency: string = 'USD';
 
-  // ── Event Toggles ─────────────────────────────────────────────────────
-
-  @Setting({
-    key: 'enable_view_item',
-    type: 'boolean',
-    default: true,
-    label: 'Track view_item',
-    description: 'Accept view_item events via the /track endpoint.',
-  })
-  enableViewItem: boolean = true;
-
-  @Setting({
-    key: 'enable_add_to_cart',
-    type: 'boolean',
-    default: true,
-    label: 'Track add_to_cart',
-    description: 'Accept add_to_cart events via the /track endpoint.',
-  })
-  enableAddToCart: boolean = true;
-
-  @Setting({
-    key: 'enable_begin_checkout',
-    type: 'boolean',
-    default: true,
-    label: 'Track begin_checkout',
-    description: 'Accept begin_checkout events via the /track endpoint.',
-  })
-  enableBeginCheckout: boolean = true;
+  // ── WooCommerce Toggle ───────────────────────────────────────────────
 
   @Setting({
     key: 'enable_purchase',
@@ -99,15 +72,6 @@ class GoogleAnalytics {
     description: 'Auto-send purchase events via WooCommerce hooks.',
   })
   enablePurchase: boolean = true;
-
-  @Setting({
-    key: 'enable_search',
-    type: 'boolean',
-    default: true,
-    label: 'Track search',
-    description: 'Accept search events via the /track endpoint.',
-  })
-  enableSearch: boolean = true;
 
   // ── Admin Notices ────────────────────────────────────────────────────
 

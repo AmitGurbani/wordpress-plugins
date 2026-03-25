@@ -50,6 +50,7 @@ class MetaPixel {
     default: '',
     label: 'Conversions API Access Token',
     description: 'Server-side access token for Meta Conversions API.',
+    sensitive: true,
   })
   accessToken: string = '';
 

@@ -5,6 +5,7 @@ export interface SettingOptions {
   label: string;
   description?: string;
   sanitize?: string;
+  sensitive?: boolean;
 }
 
 /**

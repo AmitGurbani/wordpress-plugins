@@ -5,7 +5,6 @@ import apiFetch from '@wordpress/api-fetch';
 import { DEFAULTS, TABS } from './types';
 import type { Settings } from './types';
 import { GeneralTab } from './tabs/GeneralTab';
-import { EventsTab } from './tabs/EventsTab';
 import { DiagnosticsTab } from './tabs/DiagnosticsTab';
 
 export function SettingsPage() {
@@ -62,8 +61,6 @@ export function SettingsPage() {
           switch (tab.name) {
             case 'general':
               return <GeneralTab {...tabProps} />;
-            case 'events':
-              return <EventsTab {...tabProps} />;
             case 'diagnostics':
               return <DiagnosticsTab />;
             default:

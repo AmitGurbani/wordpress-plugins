@@ -73,6 +73,7 @@ export interface SettingIR {
   label: string;
   description: string;
   sanitize: string | null;
+  sensitive: boolean;
 }
 
 export interface AdminPageIR {
@@ -231,6 +232,7 @@ export interface RawSettingDecorator {
   label: string;
   description?: string;
   sanitize?: string;
+  sensitive?: boolean;
   propertyName: string;
 }
 

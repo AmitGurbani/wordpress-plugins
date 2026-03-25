@@ -78,10 +78,10 @@ class Headless_Meta_Pixel_Rest_Api {
 	public function get_settings( $request ) {
 		$settings = array(
 			'pixel_id' => get_option( 'headless_meta_pixel_pixel_id', '' ),
-			'access_token' => get_option( 'headless_meta_pixel_access_token', '' ),
+						'access_token' => get_option( 'headless_meta_pixel_access_token', '' ) ? '********' : '',
 			'test_event_code' => get_option( 'headless_meta_pixel_test_event_code', '' ),
-			'currency' => get_option( 'headless_meta_pixel_currency', 'USD' ),
-			'enable_view_content' => (bool) get_option( 'headless_meta_pixel_enable_view_content', true ),
+						'currency' => get_option( 'headless_meta_pixel_currency', 'USD' ),
+						'enable_view_content' => (bool) get_option( 'headless_meta_pixel_enable_view_content', true ),
 			'enable_add_to_cart' => (bool) get_option( 'headless_meta_pixel_enable_add_to_cart', true ),
 			'enable_initiate_checkout' => (bool) get_option( 'headless_meta_pixel_enable_initiate_checkout', true ),
 			'enable_purchase' => (bool) get_option( 'headless_meta_pixel_enable_purchase', true ),
@@ -215,6 +215,27 @@ class Headless_Meta_Pixel_Rest_Api {
 	}
 
 	public function track_event( $request ) {
+		$rl_headers = function_exists( 'getallheaders' ) ? getallheaders() : array();
+		$rl_ip = '';
+		$rl_cf_ip = $rl_headers['CF-Connecting-IP'] ?? '';
+		$rl_fwd_for = $rl_headers['X-Forwarded-For'] ?? '';
+		$rl_real_ip = $rl_headers['X-Real-IP'] ?? '';
+		if ( $rl_cf_ip ) {
+			$rl_ip = trim( $rl_cf_ip );
+		} elseif ( $rl_fwd_for ) {
+			$rl_parts = explode( ',', $rl_fwd_for );
+			$rl_ip = trim( $rl_parts[0] );
+		} elseif ( $rl_real_ip ) {
+			$rl_ip = trim( $rl_real_ip );
+		} else {
+			$rl_ip = $_SERVER['REMOTE_ADDR'] ?? '';
+		}
+		$rl_key = 'hmp_rl_' . md5( $rl_ip );
+		$rl_count = get_transient( $rl_key );
+		if ( $rl_count && intval( $rl_count ) >= 60 ) {
+			return new WP_Error( 'rate_limited', 'Too many requests. Please try again later.', array( 'status' => 429 ) );
+		}
+		set_transient( $rl_key, strval( $rl_count ? intval( $rl_count ) + 1 : 1 ), 60 );
 		if ( get_option( 'headless_meta_pixel_enable_capi', '1' ) !== '1' ) {
 			return new WP_Error( 'capi_disabled', 'Conversions API is disabled.', array( 'status' => 403 ) );
 		}
@@ -225,9 +246,16 @@ class Headless_Meta_Pixel_Rest_Api {
 		$custom_data = array();
 		$allowed_custom_data_keys = array( 'currency', 'value', 'content_type', 'contents', 'content_ids', 'search_string', 'num_items', 'order_id' );
 		foreach ( $allowed_custom_data_keys as $key ) {
-			if ( $raw_custom_data[$key] !== null ) {
-				$custom_data[$key] = $raw_custom_data[$key];
+			$val = $raw_custom_data[$key] ?? null;
+			if ( $val !== null ) {
+				$custom_data[$key] = $val;
 			}
+		}
+		if ( $custom_data['contents'] !== null && ! is_array( $custom_data['contents'] ) ) {
+			unset( $custom_data['contents'] );
+		}
+		if ( $custom_data['content_ids'] !== null && ! is_array( $custom_data['content_ids'] ) ) {
+			unset( $custom_data['content_ids'] );
 		}
 		if ( ! $event_name || ! $event_id ) {
 			return new WP_Error( 'missing_params', 'event_name and event_id are required.', array( 'status' => 400 ) );

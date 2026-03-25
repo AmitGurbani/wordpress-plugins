@@ -168,6 +168,7 @@ function buildIR(
       label: s.label,
       description: s.description ?? '',
       sanitize: s.sanitize ?? getDefaultSanitizer(s.type),
+      sensitive: s.sensitive ?? false,
     })),
     actions: rawData.actions.map(a => ({
       hookName: a.hookName,

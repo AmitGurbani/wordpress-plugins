@@ -40,15 +40,6 @@ class Headless_Google_Analytics_Rest_Api {
 		);
 		register_rest_route(
 			$this->namespace,
-			'/track',
-			array(
-				'methods'             => 'POST',
-				'callback'            => array( $this, 'track_event' ),
-				'permission_callback' => '__return_true',
-			)
-		);
-		register_rest_route(
-			$this->namespace,
 			'/diagnostics/test-event',
 			array(
 				'methods'             => 'POST',
@@ -78,13 +69,9 @@ class Headless_Google_Analytics_Rest_Api {
 	public function get_settings( $request ) {
 		$settings = array(
 			'measurement_id' => get_option( 'headless_google_analytics_measurement_id', '' ),
-			'api_secret' => get_option( 'headless_google_analytics_api_secret', '' ),
+						'api_secret' => get_option( 'headless_google_analytics_api_secret', '' ) ? '********' : '',
 			'currency' => get_option( 'headless_google_analytics_currency', 'USD' ),
-			'enable_view_item' => (bool) get_option( 'headless_google_analytics_enable_view_item', true ),
-			'enable_add_to_cart' => (bool) get_option( 'headless_google_analytics_enable_add_to_cart', true ),
-			'enable_begin_checkout' => (bool) get_option( 'headless_google_analytics_enable_begin_checkout', true ),
-			'enable_purchase' => (bool) get_option( 'headless_google_analytics_enable_purchase', true ),
-			'enable_search' => (bool) get_option( 'headless_google_analytics_enable_search', true ),
+						'enable_purchase' => (bool) get_option( 'headless_google_analytics_enable_purchase', true ),
 		);
 
 		return rest_ensure_response( $settings );
@@ -126,39 +113,6 @@ class Headless_Google_Analytics_Rest_Api {
 			}
 			update_option( 'headless_google_analytics_currency', $value );
 		}
-		if ( isset( $params['enable_view_item'] ) ) {
-			$value = rest_sanitize_boolean( $params['enable_view_item'] );
-			if ( null === $value ) {
-				return new \WP_Error(
-					'invalid_enable_view_item',
-					'Invalid value for enable_view_item.',
-					array( 'status' => 400 )
-				);
-			}
-			update_option( 'headless_google_analytics_enable_view_item', $value );
-		}
-		if ( isset( $params['enable_add_to_cart'] ) ) {
-			$value = rest_sanitize_boolean( $params['enable_add_to_cart'] );
-			if ( null === $value ) {
-				return new \WP_Error(
-					'invalid_enable_add_to_cart',
-					'Invalid value for enable_add_to_cart.',
-					array( 'status' => 400 )
-				);
-			}
-			update_option( 'headless_google_analytics_enable_add_to_cart', $value );
-		}
-		if ( isset( $params['enable_begin_checkout'] ) ) {
-			$value = rest_sanitize_boolean( $params['enable_begin_checkout'] );
-			if ( null === $value ) {
-				return new \WP_Error(
-					'invalid_enable_begin_checkout',
-					'Invalid value for enable_begin_checkout.',
-					array( 'status' => 400 )
-				);
-			}
-			update_option( 'headless_google_analytics_enable_begin_checkout', $value );
-		}
 		if ( isset( $params['enable_purchase'] ) ) {
 			$value = rest_sanitize_boolean( $params['enable_purchase'] );
 			if ( null === $value ) {
@@ -170,17 +124,6 @@ class Headless_Google_Analytics_Rest_Api {
 			}
 			update_option( 'headless_google_analytics_enable_purchase', $value );
 		}
-		if ( isset( $params['enable_search'] ) ) {
-			$value = rest_sanitize_boolean( $params['enable_search'] );
-			if ( null === $value ) {
-				return new \WP_Error(
-					'invalid_enable_search',
-					'Invalid value for enable_search.',
-					array( 'status' => 400 )
-				);
-			}
-			update_option( 'headless_google_analytics_enable_search', $value );
-		}
 
 		return rest_ensure_response( array( 'success' => true ) );
 	}
@@ -188,40 +131,6 @@ class Headless_Google_Analytics_Rest_Api {
 	public function get_config( $request ) {
 		$measurement_id = get_option( 'headless_google_analytics_measurement_id', '' );
 		return array( 'measurement_id' => $measurement_id );
-	}
-
-	public function track_event( $request ) {
-		$event_name = sanitize_text_field( $request->get_param( 'event_name' ) );
-		$client_id = sanitize_text_field( $request->get_param( 'client_id' ) );
-		if ( ! $client_id ) {
-			$client_id = strval( wp_rand( 1000000000, 9999999999 ) ) . '.' . strval( time() );
-		}
-		if ( ! $event_name ) {
-			return new WP_Error( 'missing_params', 'event_name is required.', array( 'status' => 400 ) );
-		}
-		$allowed_events = array( 'view_item' => 'enable_view_item', 'add_to_cart' => 'enable_add_to_cart', 'begin_checkout' => 'enable_begin_checkout', 'search' => 'enable_search' );
-		$setting_key = $allowed_events[$event_name];
-		if ( ! $setting_key ) {
-			return new WP_Error( 'invalid_event', 'Event name is not supported.', array( 'status' => 400 ) );
-		}
-		if ( get_option( 'headless_google_analytics_' . $setting_key, '1' ) !== '1' ) {
-			return new WP_Error( 'event_disabled', 'This event type is disabled.', array( 'status' => 403 ) );
-		}
-		$raw_params = $request->get_param( 'params' ) ?? array();
-		$params = array();
-		$allowed_param_keys = array( 'currency', 'value', 'transaction_id', 'items', 'search_term', 'item_list_id', 'item_list_name', 'session_id', 'engagement_time_msec' );
-		foreach ( $allowed_param_keys as $key ) {
-			$val = $raw_params[$key] ?? null;
-			if ( $val !== null ) {
-				$params[$key] = $val;
-			}
-		}
-		$user_id = '';
-		if ( is_user_logged_in() ) {
-			$user_id = strval( get_current_user_id() );
-		}
-		$result = $this->send_ga4_event( $event_name, $client_id, $user_id, $params );
-		return array( 'success' => $result['success'], 'event_name' => $event_name, 'client_id' => $client_id );
 	}
 
 	public function test_event( $request ) {
@@ -260,25 +169,6 @@ class Headless_Google_Analytics_Rest_Api {
 
 	public function get_last_error( $request ) {
 		return array( 'last_error' => get_option( 'headless_google_analytics_last_error', '' ) );
-	}
-
-	public function send_ga4_event( $event_name, $client_id, $user_id, $params ) {
-		$measurement_id = get_option( 'headless_google_analytics_measurement_id', '' );
-		$api_secret = get_option( 'headless_google_analytics_api_secret', '' );
-		if ( ! $measurement_id || ! $api_secret ) {
-			return array( 'success' => false, 'message' => 'Measurement ID or API Secret not configured.' );
-		}
-		$payload = array( 'client_id' => $client_id, 'events' => array( array( 'name' => $event_name, 'params' => $params ) ) );
-		if ( $user_id ) {
-			$payload['user_id'] = $user_id;
-		}
-		$url = 'https://www.google-analytics.com/mp/collect?measurement_id=' . $measurement_id . '&api_secret=' . $api_secret;
-		$response = wp_remote_post( $url, array( 'body' => json_encode( $payload ), 'headers' => array( 'Content-Type' => 'application/json' ), 'timeout' => 5 ) );
-		if ( is_wp_error( $response ) ) {
-			update_option( 'headless_google_analytics_last_error', $response->get_error_message() );
-			return array( 'success' => false, 'message' => $response->get_error_message() );
-		}
-		return array( 'success' => true );
 	}
 
 }

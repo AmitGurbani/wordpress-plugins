@@ -1,4 +1,4 @@
-import { TextControl } from '@wordpress/components';
+import { TextControl, ToggleControl } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import type { TabProps } from '../types';
 
@@ -25,6 +25,15 @@ export function GeneralTab({ settings, update }: TabProps) {
         value={settings.currency}
         onChange={(v) => update('currency', v)}
         placeholder="USD"
+      />
+
+      <hr style={{ margin: '16px 0' }} />
+
+      <ToggleControl
+        label={__('Track Purchases', 'headless-google-analytics')}
+        help={__('Automatically send purchase events to GA4 via WooCommerce order hooks. No frontend action required.', 'headless-google-analytics')}
+        checked={settings.enable_purchase}
+        onChange={(v) => update('enable_purchase', v)}
       />
     </div>
   );

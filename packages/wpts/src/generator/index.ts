@@ -109,6 +109,7 @@ export function generatePlugin(ir: PluginIR): GeneratedFile[] {
     ...s,
     phpDefault: formatPhpDefault(s),
     isBoolean: s.type === 'boolean',
+    isSensitive: s.sensitive,
   }));
 
   // Common template data

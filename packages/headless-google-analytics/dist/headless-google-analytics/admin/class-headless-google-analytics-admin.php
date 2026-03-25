@@ -99,43 +99,7 @@ class Headless_Google_Analytics_Admin {
 		);
 		register_setting(
 			'headless-google-analytics_options',
-			'headless_google_analytics_enable_view_item',
-			array(
-				'type'    => 'boolean',
-				'default' => true,
-				'sanitize_callback' => 'rest_sanitize_boolean',
-			)
-		);
-		register_setting(
-			'headless-google-analytics_options',
-			'headless_google_analytics_enable_add_to_cart',
-			array(
-				'type'    => 'boolean',
-				'default' => true,
-				'sanitize_callback' => 'rest_sanitize_boolean',
-			)
-		);
-		register_setting(
-			'headless-google-analytics_options',
-			'headless_google_analytics_enable_begin_checkout',
-			array(
-				'type'    => 'boolean',
-				'default' => true,
-				'sanitize_callback' => 'rest_sanitize_boolean',
-			)
-		);
-		register_setting(
-			'headless-google-analytics_options',
 			'headless_google_analytics_enable_purchase',
-			array(
-				'type'    => 'boolean',
-				'default' => true,
-				'sanitize_callback' => 'rest_sanitize_boolean',
-			)
-		);
-		register_setting(
-			'headless-google-analytics_options',
-			'headless_google_analytics_enable_search',
 			array(
 				'type'    => 'boolean',
 				'default' => true,

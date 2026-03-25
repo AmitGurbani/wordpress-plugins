@@ -52,3 +52,4 @@ To add a new WordPress function mapping:
 - Helper methods: non-decorated class methods are auto-captured; placed in public class by default, or REST API class if the class has @RestRoute
 - `global $wpdb;`: auto-injected by `injectGlobalWpdb()` in `function-transpiler.ts` when transpiled PHP contains `$wpdb`
 - Action parameters: extracted same as filter parameters; `acceptedArgs` defaults to method parameter count
+- `@Setting({ sensitive: true })`: masks value in auto-generated GET /settings response — returns `'********'` if set, `''` if empty. The raw value is still stored and used server-side; only the REST GET response is masked.

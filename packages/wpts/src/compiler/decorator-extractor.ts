@@ -416,6 +416,7 @@ function extractSettingDecorator(
     label: getStringProp(obj, 'label') ?? key,
     description: getStringProp(obj, 'description'),
     sanitize: getStringProp(obj, 'sanitize'),
+    sensitive: getBooleanProp(obj, 'sensitive') ?? false,
     propertyName,
   };
 }

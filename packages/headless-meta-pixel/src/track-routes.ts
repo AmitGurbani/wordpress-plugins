@@ -65,6 +65,29 @@ class MetaPixelTrack {
 
   @RestRoute('/track', { method: 'POST', public: true })
   trackEvent(request: any): any {
+    // Rate limit: 60 requests per minute per IP
+    const rlHeaders: any = getallheaders();
+    let rlIp: string = '';
+    const rlCfIp: string = rlHeaders['CF-Connecting-IP'] ?? '';
+    const rlFwdFor: string = rlHeaders['X-Forwarded-For'] ?? '';
+    const rlRealIp: string = rlHeaders['X-Real-IP'] ?? '';
+    if (rlCfIp) {
+      rlIp = rlCfIp.trim();
+    } else if (rlFwdFor) {
+      const rlParts: string[] = rlFwdFor.split(',');
+      rlIp = rlParts[0].trim();
+    } else if (rlRealIp) {
+      rlIp = rlRealIp.trim();
+    } else {
+      rlIp = $_SERVER['REMOTE_ADDR'] ?? '';
+    }
+    const rlKey: string = 'hmp_rl_' + md5(rlIp);
+    const rlCount: any = getTransient(rlKey);
+    if (rlCount && intval(rlCount) >= 60) {
+      return new WP_Error('rate_limited', 'Too many requests. Please try again later.', { status: 429 });
+    }
+    setTransient(rlKey, strval(rlCount ? intval(rlCount) + 1 : 1), 60);
+
     if (getOption('headless_meta_pixel_enable_capi', '1') !== '1') {
       return new WP_Error('capi_disabled', 'Conversions API is disabled.', { status: 403 });
     }
@@ -78,9 +101,18 @@ class MetaPixelTrack {
     const customData: any = {};
     const allowedCustomDataKeys: string[] = ['currency', 'value', 'content_type', 'contents', 'content_ids', 'search_string', 'num_items', 'order_id'];
     for (const key of allowedCustomDataKeys) {
-      if (rawCustomData[key] !== undefined) {
-        customData[key] = rawCustomData[key];
+      const val: any = rawCustomData[key] ?? null;
+      if (val !== null) {
+        customData[key] = val;
       }
+    }
+
+    // Type-check array fields to prevent malformed payloads
+    if (customData['contents'] !== undefined && !isArray(customData['contents'])) {
+      delete customData['contents'];
+    }
+    if (customData['content_ids'] !== undefined && !isArray(customData['content_ids'])) {
+      delete customData['content_ids'];
     }
 
     if (!eventName || !eventId) {

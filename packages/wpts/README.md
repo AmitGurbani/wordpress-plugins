@@ -232,6 +232,7 @@ greeting: string = 'Hello!';
 | `label` | `string` | Yes | Display label |
 | `description` | `string` | No | Setting description |
 | `sanitize` | `string` | No | PHP sanitization function |
+| `sensitive` | `boolean` | No | Mask value in GET /settings response (returns `'********'` when set, `''` when empty) |
 
 Each `@Setting` generates:
 - `register_setting()` call with sanitization
