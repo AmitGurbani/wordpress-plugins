@@ -14,8 +14,11 @@ export interface CustomTaxonomyOptions {
  * Registers a WordPress Custom Taxonomy.
  * The generated PHP calls `register_taxonomy()` on the `init` hook.
  */
-export function CustomTaxonomy(slug: string, options: CustomTaxonomyOptions): (...args: any[]) => any {
-  return function (..._args: any[]) {
+export function CustomTaxonomy(
+  slug: string,
+  options: CustomTaxonomyOptions,
+): (...args: any[]) => any {
+  return (..._args: any[]) => {
     // No-op at runtime — metadata is extracted at compile time by the transpiler.
   };
 }

@@ -7,7 +7,6 @@
 import { RestRoute } from 'wpts';
 
 class MetaPixelConfig {
-
   @RestRoute('/config', { method: 'GET', public: true })
   getConfig(request: any): any {
     const pixelId: string = getOption('headless_meta_pixel_pixel_id', '');

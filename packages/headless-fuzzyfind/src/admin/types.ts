@@ -24,7 +24,12 @@ export interface IndexStatus {
 }
 
 export interface AnalyticsData {
-  popular: Array<{ query: string; search_count: number; result_count: number; last_searched: string }>;
+  popular: Array<{
+    query: string;
+    search_count: number;
+    result_count: number;
+    last_searched: string;
+  }>;
   zero_results: Array<{ query: string; search_count: number; last_searched: string }>;
 }
 

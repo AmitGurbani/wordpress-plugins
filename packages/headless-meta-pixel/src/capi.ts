@@ -8,7 +8,6 @@
 import { Action } from 'wpts';
 
 class MetaPixelCapi {
-
   // ── Helper Methods ────────────────────────────────────────────────────
 
   hashForCapi(value: string): string {
@@ -70,7 +69,13 @@ class MetaPixelCapi {
     return userData;
   }
 
-  sendCapiEvent(eventName: string, eventId: string, sourceUrl: string, customData: any, userData: any): any {
+  sendCapiEvent(
+    eventName: string,
+    eventId: string,
+    sourceUrl: string,
+    customData: any,
+    userData: any,
+  ): any {
     const pixelId: string = getOption('headless_meta_pixel_pixel_id', '');
     const accessToken: string = getOption('headless_meta_pixel_access_token', '');
 
@@ -100,7 +105,8 @@ class MetaPixelCapi {
       payload['test_event_code'] = testEventCode;
     }
 
-    const url: string = 'https://graph.facebook.com/v25.0/' + pixelId + '/events?access_token=' + accessToken;
+    const url: string =
+      'https://graph.facebook.com/v25.0/' + pixelId + '/events?access_token=' + accessToken;
 
     const response: any = wpRemotePost(url, {
       body: jsonEncode(payload),

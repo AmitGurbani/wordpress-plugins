@@ -1,11 +1,11 @@
-export { useSettings } from './hooks/useSettings';
-export { SettingsShell } from './components/SettingsShell';
 export { DiagnosticsPanel } from './components/DiagnosticsPanel';
+export { SettingsShell } from './components/SettingsShell';
+export { useSettings } from './hooks/useSettings';
 export type {
-  SettingsConfig,
-  SettingsState,
-  TabProps,
-  TabDef,
-  SettingsShellProps,
   DiagnosticsConfig,
+  SettingsConfig,
+  SettingsShellProps,
+  SettingsState,
+  TabDef,
+  TabProps,
 } from './types';

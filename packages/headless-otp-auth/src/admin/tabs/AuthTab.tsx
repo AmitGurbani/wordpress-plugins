@@ -1,4 +1,8 @@
-import { SelectControl, ToggleControl, __experimentalNumberControl as NumberControl } from '@wordpress/components';
+import {
+  __experimentalNumberControl as NumberControl,
+  SelectControl,
+  ToggleControl,
+} from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import type { TabProps } from '../types';
 
@@ -9,7 +13,9 @@ export function AuthTab({ settings, update }: TabProps) {
         label={__('Access Token Expiry (seconds)', 'headless-otp-auth')}
         help={__('JWT access token lifetime. Default: 3600 (1 hour).', 'headless-otp-auth')}
         value={settings.jwt_access_expiry}
-        onChange={(v: string | undefined) => update('jwt_access_expiry', v ? parseInt(v, 10) : 3600)}
+        onChange={(v: string | undefined) =>
+          update('jwt_access_expiry', v ? parseInt(v, 10) : 3600)
+        }
         min={300}
         max={86400}
       />
@@ -17,13 +23,18 @@ export function AuthTab({ settings, update }: TabProps) {
         label={__('Refresh Token Expiry (seconds)', 'headless-otp-auth')}
         help={__('JWT refresh token lifetime. Default: 604800 (7 days).', 'headless-otp-auth')}
         value={settings.jwt_refresh_expiry}
-        onChange={(v: string | undefined) => update('jwt_refresh_expiry', v ? parseInt(v, 10) : 604800)}
+        onChange={(v: string | undefined) =>
+          update('jwt_refresh_expiry', v ? parseInt(v, 10) : 604800)
+        }
         min={3600}
         max={2592000}
       />
       <ToggleControl
         label={__('Enable New User Registration', 'headless-otp-auth')}
-        help={__('Allow new users to register via OTP. Disable to restrict to existing users only.', 'headless-otp-auth')}
+        help={__(
+          'Allow new users to register via OTP. Disable to restrict to existing users only.',
+          'headless-otp-auth',
+        )}
         checked={settings.enable_registration}
         onChange={(v: boolean) => update('enable_registration', v)}
       />

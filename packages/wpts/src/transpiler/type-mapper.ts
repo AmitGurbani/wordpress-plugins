@@ -3,16 +3,16 @@
  */
 
 const TYPE_MAP: Record<string, string> = {
-  'string': 'string',
-  'number': 'int',
-  'boolean': 'bool',
-  'void': 'void',
-  'null': 'null',
-  'undefined': 'null',
-  'any': 'mixed',
-  'unknown': 'mixed',
-  'never': 'never',
-  'object': 'array',
+  string: 'string',
+  number: 'int',
+  boolean: 'bool',
+  void: 'void',
+  null: 'null',
+  undefined: 'null',
+  any: 'mixed',
+  unknown: 'mixed',
+  never: 'never',
+  object: 'array',
 };
 
 /**
@@ -65,11 +65,16 @@ function mapSingleType(tsType: string): string {
  */
 export function mapDefaultValue(tsType: string): string {
   switch (tsType) {
-    case 'string': return "''";
-    case 'number': return '0';
-    case 'boolean': return 'false';
+    case 'string':
+      return "''";
+    case 'number':
+      return '0';
+    case 'boolean':
+      return 'false';
     case 'array':
-    case 'object': return 'array()';
-    default: return 'null';
+    case 'object':
+      return 'array()';
+    default:
+      return 'null';
   }
 }

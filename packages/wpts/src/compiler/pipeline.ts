@@ -1,19 +1,30 @@
+import { execFile } from 'node:child_process';
 import path from 'node:path';
 import { promisify } from 'node:util';
-import { execFile } from 'node:child_process';
 
 const execFileAsync = promisify(execFile);
+
+import { type GeneratedFile, generatePlugin } from '../generator/index.js';
 import type { PluginIR, PluginMetadata, RawPluginData } from '../ir/plugin-ir.js';
-import { parseSourceFile, parseSourceString, getUserSourceFiles, type ParseResult } from './parser.js';
+import { transpileMethodBody, transpileParameters } from '../transpiler/function-transpiler.js';
+import { cleanDir, ensureDir, pathExists, writeFile, zipDir } from '../utils/fs-utils.js';
+import {
+  toConstantPrefix,
+  toFilePrefix,
+  toFunctionPrefix,
+  toSlugCase,
+  toSnakeCase,
+  toTextDomain,
+  toWPClassName,
+} from '../utils/naming.js';
 import { extractDecoratorsFromFiles } from './decorator-extractor.js';
 import { DiagnosticCollection } from './diagnostics.js';
-import { transpileMethodBody, transpileParameters } from '../transpiler/function-transpiler.js';
-import { generatePlugin, type GeneratedFile } from '../generator/index.js';
-import { writeFile, cleanDir, ensureDir, pathExists, zipDir } from '../utils/fs-utils.js';
 import {
-  toSlugCase, toWPClassName, toConstantPrefix,
-  toFunctionPrefix, toFilePrefix, toTextDomain, toSnakeCase,
-} from '../utils/naming.js';
+  getUserSourceFiles,
+  type ParseResult,
+  parseSourceFile,
+  parseSourceString,
+} from './parser.js';
 
 export interface BuildOptions {
   entry: string;
@@ -42,14 +53,17 @@ export async function build(options: BuildOptions): Promise<BuildResult> {
   try {
     parsed = parseSourceFile(options.entry);
   } catch (err: any) {
-    diagnostics.error('WPTS100', `Failed to parse source file: ${err.message}`, { file: options.entry });
+    diagnostics.error('WPTS100', `Failed to parse source file: ${err.message}`, {
+      file: options.entry,
+    });
     return { files: [], diagnostics, success: false };
   }
 
   // Check for TS compilation errors (warnings only — don't block generation)
   for (const diag of parsed.diagnostics) {
     if (diag.category === 0 /* Error */) {
-      const message = typeof diag.messageText === 'string' ? diag.messageText : diag.messageText.messageText;
+      const message =
+        typeof diag.messageText === 'string' ? diag.messageText : diag.messageText.messageText;
       diagnostics.warning('WPTS101', `TypeScript: ${message}`, { file: options.entry });
     }
   }
@@ -91,7 +105,13 @@ export async function build(options: BuildOptions): Promise<BuildResult> {
   if (!options.skipAdminBuild && ir.adminPages.length > 0) {
     const adminSrcDir = options.adminSrcDir ?? path.join(path.dirname(options.entry), 'admin');
     const pluginDir = path.resolve(path.dirname(options.entry), '..');
-    const outputDir = path.join(path.resolve(options.outDir), ir.metadata.filePrefix, 'admin', 'js', 'build');
+    const outputDir = path.join(
+      path.resolve(options.outDir),
+      ir.metadata.filePrefix,
+      'admin',
+      'js',
+      'build',
+    );
     await buildAdminApp(pluginDir, adminSrcDir, outputDir);
   }
 
@@ -150,7 +170,7 @@ function buildIR(
 
   const ir: PluginIR = {
     metadata,
-    settings: rawData.settings.map(s => ({
+    settings: rawData.settings.map((s) => ({
       propertyName: s.propertyName,
       key: s.key,
       optionName: `${metadata.functionPrefix}${s.key}`,
@@ -161,7 +181,7 @@ function buildIR(
       sanitize: s.sanitize ?? getDefaultSanitizer(s.type),
       sensitive: s.sensitive ?? false,
     })),
-    actions: rawData.actions.map(a => ({
+    actions: rawData.actions.map((a) => ({
       hookName: a.hookName,
       methodName: a.methodName,
       phpMethodName: toSnakeCase(a.methodName),
@@ -171,7 +191,7 @@ function buildIR(
       body: transpileMethodBody(a.bodyNode, parsed.typeChecker),
       context: 'public' as const,
     })),
-    filters: rawData.filters.map(f => ({
+    filters: rawData.filters.map((f) => ({
       hookName: f.hookName,
       methodName: f.methodName,
       phpMethodName: toSnakeCase(f.methodName),
@@ -181,7 +201,7 @@ function buildIR(
       body: transpileMethodBody(f.bodyNode, parsed.typeChecker),
       context: 'public' as const,
     })),
-    adminPages: rawData.adminPages.map(p => ({
+    adminPages: rawData.adminPages.map((p) => ({
       pageTitle: p.pageTitle,
       menuTitle: p.menuTitle,
       capability: p.capability,
@@ -190,18 +210,18 @@ function buildIR(
       position: p.position ?? null,
       parentSlug: p.parentSlug ?? null,
     })),
-    shortcodes: rawData.shortcodes.map(s => ({
+    shortcodes: rawData.shortcodes.map((s) => ({
       tag: s.tag,
       methodName: s.methodName,
       phpMethodName: toSnakeCase(s.methodName),
       parameters: transpileParameters(s.parameters),
       body: transpileMethodBody(s.bodyNode, parsed.typeChecker),
     })),
-    customPostTypes: rawData.customPostTypes.map(cpt => {
+    customPostTypes: rawData.customPostTypes.map((cpt) => {
       // Auto-wire taxonomies that reference this CPT
       const associatedTaxonomies = rawData.customTaxonomies
-        .filter(t => t.postTypes.includes(cpt.slug))
-        .map(t => t.slug);
+        .filter((t) => t.postTypes.includes(cpt.slug))
+        .map((t) => t.slug);
       return {
         slug: cpt.slug,
         singularName: cpt.singularName,
@@ -218,7 +238,7 @@ function buildIR(
         taxonomies: associatedTaxonomies,
       };
     }),
-    customTaxonomies: rawData.customTaxonomies.map(tax => ({
+    customTaxonomies: rawData.customTaxonomies.map((tax) => ({
       slug: tax.slug,
       singularName: tax.singularName,
       pluralName: tax.pluralName,
@@ -230,7 +250,7 @@ function buildIR(
       showAdminColumn: tax.showAdminColumn ?? true,
       rewriteSlug: tax.rewriteSlug ?? null,
     })),
-    restRoutes: rawData.restRoutes.map(r => ({
+    restRoutes: rawData.restRoutes.map((r) => ({
       route: r.route,
       method: r.method,
       capability: r.capability,
@@ -239,7 +259,7 @@ function buildIR(
       phpMethodName: toSnakeCase(r.methodName),
       body: transpileMethodBody(r.bodyNode, parsed.typeChecker),
     })),
-    ajaxHandlers: rawData.ajaxHandlers.map(a => ({
+    ajaxHandlers: rawData.ajaxHandlers.map((a) => ({
       action: a.action,
       public: a.public,
       capability: a.capability,
@@ -248,7 +268,7 @@ function buildIR(
       phpMethodName: 'handle_ajax_' + a.action,
       body: transpileMethodBody(a.bodyNode, parsed.typeChecker),
     })),
-    helperMethods: rawData.helperMethods.map(m => ({
+    helperMethods: rawData.helperMethods.map((m) => ({
       methodName: m.methodName,
       phpMethodName: toSnakeCase(m.methodName),
       parameters: transpileParameters(m.parameters),
@@ -271,10 +291,14 @@ function buildIR(
  */
 function getDefaultSanitizer(type: string): string | null {
   switch (type) {
-    case 'string':  return 'sanitize_text_field';
-    case 'number':  return 'absint';
-    case 'boolean': return 'rest_sanitize_boolean';
-    default:        return null;
+    case 'string':
+      return 'sanitize_text_field';
+    case 'number':
+      return 'absint';
+    case 'boolean':
+      return 'rest_sanitize_boolean';
+    default:
+      return null;
   }
 }
 
@@ -282,19 +306,29 @@ function getDefaultSanitizer(type: string): string | null {
  * Build the admin React app using wp-scripts from the workspace.
  * Runs wp-scripts directly from the plugin directory — no isolated install needed.
  */
-async function buildAdminApp(pluginDir: string, adminSrcDir: string, outputDir: string): Promise<void> {
+async function buildAdminApp(
+  pluginDir: string,
+  adminSrcDir: string,
+  outputDir: string,
+): Promise<void> {
   console.log('\nBuilding admin React app...');
   const entry = path.join(adminSrcDir, 'index.tsx');
-  if (!await pathExists(entry)) {
+  if (!(await pathExists(entry))) {
     console.warn('  Warning: No admin entry point found at ' + entry);
     return;
   }
   try {
-    await execFileAsync('pnpm', [
-      'exec', 'wp-scripts', 'build',
-      'index=' + path.relative(pluginDir, entry),
-      '--output-path=' + path.relative(pluginDir, outputDir),
-    ], { cwd: pluginDir });
+    await execFileAsync(
+      'pnpm',
+      [
+        'exec',
+        'wp-scripts',
+        'build',
+        'index=' + path.relative(pluginDir, entry),
+        '--output-path=' + path.relative(pluginDir, outputDir),
+      ],
+      { cwd: pluginDir },
+    );
     console.log('Admin React app built successfully.');
   } catch (err: any) {
     const stderr = err?.stderr || err?.message || String(err);

@@ -46,7 +46,7 @@ export function toPascalCase(str: string): string {
     .replace(/[^a-zA-Z0-9\s_-]/g, '')
     .split(/[\s_-]+/)
     .filter(Boolean)
-    .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
     .join('');
 }
 
@@ -57,13 +57,9 @@ export function toPascalCase(str: string): string {
  */
 export function toWPClassName(str: string): string {
   // First normalize to PascalCase if needed
-  const pascal = /^[A-Z]/.test(str) && !/[\s_-]/.test(str)
-    ? str
-    : toPascalCase(str);
+  const pascal = /^[A-Z]/.test(str) && !/[\s_-]/.test(str) ? str : toPascalCase(str);
 
-  return pascal
-    .replace(/([a-z0-9])([A-Z])/g, '$1_$2')
-    .replace(/([A-Z])([A-Z][a-z])/g, '$1_$2');
+  return pascal.replace(/([a-z0-9])([A-Z])/g, '$1_$2').replace(/([A-Z])([A-Z][a-z])/g, '$1_$2');
 }
 
 /**

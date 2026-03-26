@@ -8,7 +8,6 @@
 import { RestRoute } from 'wpts';
 
 class UmamiConfig {
-
   @RestRoute('/config', { method: 'GET', public: true })
   getConfig(request: any): any {
     const umamiUrl: string = escUrlRaw(getOption('headless_umami_umami_url', ''));

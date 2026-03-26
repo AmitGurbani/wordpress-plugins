@@ -36,6 +36,6 @@ export function phpIndent(code: string, tabs: number = 1): string {
   const indent = '\t'.repeat(tabs);
   return code
     .split('\n')
-    .map(line => line.trim() ? `${indent}${line}` : '')
+    .map((line) => (line.trim() ? `${indent}${line}` : ''))
     .join('\n');
 }

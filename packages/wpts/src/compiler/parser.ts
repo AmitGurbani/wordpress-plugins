@@ -1,5 +1,5 @@
-import ts from 'typescript';
 import path from 'node:path';
+import ts from 'typescript';
 
 export interface ParseResult {
   program: ts.Program;
@@ -13,10 +13,9 @@ export interface ParseResult {
  * excluding declaration files (.d.ts) and node_modules.
  */
 export function getUserSourceFiles(program: ts.Program): ts.SourceFile[] {
-  return program.getSourceFiles().filter(sf =>
-    !sf.isDeclarationFile &&
-    !sf.fileName.includes('node_modules'),
-  );
+  return program
+    .getSourceFiles()
+    .filter((sf) => !sf.isDeclarationFile && !sf.fileName.includes('node_modules'));
 }
 
 /**

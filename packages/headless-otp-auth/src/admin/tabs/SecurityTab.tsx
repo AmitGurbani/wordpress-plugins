@@ -7,9 +7,14 @@ export function SecurityTab({ settings, update }: TabProps) {
     <div style={{ padding: '16px 0' }}>
       <NumberControl
         label={__('Max OTP Verify Attempts', 'headless-otp-auth')}
-        help={__('Maximum wrong OTP guesses before lockout. OWASP recommends 3.', 'headless-otp-auth')}
+        help={__(
+          'Maximum wrong OTP guesses before lockout. OWASP recommends 3.',
+          'headless-otp-auth',
+        )}
         value={settings.max_otp_verify_attempts}
-        onChange={(v: string | undefined) => update('max_otp_verify_attempts', v ? parseInt(v, 10) : 3)}
+        onChange={(v: string | undefined) =>
+          update('max_otp_verify_attempts', v ? parseInt(v, 10) : 3)
+        }
         min={1}
         max={10}
       />
@@ -17,13 +22,18 @@ export function SecurityTab({ settings, update }: TabProps) {
         label={__('OTP Resend Cooldown (seconds)', 'headless-otp-auth')}
         help={__('Minimum wait time between OTP resend requests.', 'headless-otp-auth')}
         value={settings.otp_resend_cooldown}
-        onChange={(v: string | undefined) => update('otp_resend_cooldown', v ? parseInt(v, 10) : 60)}
+        onChange={(v: string | undefined) =>
+          update('otp_resend_cooldown', v ? parseInt(v, 10) : 60)
+        }
         min={10}
         max={300}
       />
       <NumberControl
         label={__('Rate Limit Window (seconds)', 'headless-otp-auth')}
-        help={__('How long OTP send rate limits persist. Default: 900 (15 minutes).', 'headless-otp-auth')}
+        help={__(
+          'How long OTP send rate limits persist. Default: 900 (15 minutes).',
+          'headless-otp-auth',
+        )}
         value={settings.rate_limit_window}
         onChange={(v: string | undefined) => update('rate_limit_window', v ? parseInt(v, 10) : 900)}
         min={60}

@@ -13,20 +13,34 @@ export interface Diagnostic {
 export class DiagnosticCollection {
   private diagnostics: Diagnostic[] = [];
 
-  error(code: string, message: string, location?: { file?: string; line?: number; column?: number }, suggestion?: string): void {
+  error(
+    code: string,
+    message: string,
+    location?: { file?: string; line?: number; column?: number },
+    suggestion?: string,
+  ): void {
     this.diagnostics.push({ level: 'error', code, message, ...location, suggestion });
   }
 
-  warning(code: string, message: string, location?: { file?: string; line?: number; column?: number }, suggestion?: string): void {
+  warning(
+    code: string,
+    message: string,
+    location?: { file?: string; line?: number; column?: number },
+    suggestion?: string,
+  ): void {
     this.diagnostics.push({ level: 'warning', code, message, ...location, suggestion });
   }
 
-  info(code: string, message: string, location?: { file?: string; line?: number; column?: number }): void {
+  info(
+    code: string,
+    message: string,
+    location?: { file?: string; line?: number; column?: number },
+  ): void {
     this.diagnostics.push({ level: 'info', code, message, ...location });
   }
 
   hasErrors(): boolean {
-    return this.diagnostics.some(d => d.level === 'error');
+    return this.diagnostics.some((d) => d.level === 'error');
   }
 
   getAll(): readonly Diagnostic[] {
@@ -34,17 +48,19 @@ export class DiagnosticCollection {
   }
 
   getErrors(): Diagnostic[] {
-    return this.diagnostics.filter(d => d.level === 'error');
+    return this.diagnostics.filter((d) => d.level === 'error');
   }
 
   getWarnings(): Diagnostic[] {
-    return this.diagnostics.filter(d => d.level === 'warning');
+    return this.diagnostics.filter((d) => d.level === 'warning');
   }
 
   format(): string {
     return this.diagnostics
-      .map(d => {
-        const loc = d.file ? ` at ${d.file}${d.line ? `:${d.line}` : ''}${d.column ? `:${d.column}` : ''}` : '';
+      .map((d) => {
+        const loc = d.file
+          ? ` at ${d.file}${d.line ? `:${d.line}` : ''}${d.column ? `:${d.column}` : ''}`
+          : '';
         const sug = d.suggestion ? `\n  Suggestion: ${d.suggestion}` : '';
         return `[${d.level.toUpperCase()}] ${d.code}: ${d.message}${loc}${sug}`;
       })

@@ -6,21 +6,25 @@ export function EventsTab({ settings, update }: TabProps) {
   return (
     <div style={{ padding: '16px 0', maxWidth: '600px' }}>
       <p style={{ color: '#666', marginBottom: '16px' }}>
-        {__('Browser-side pixel events are handled by your frontend app. These toggles control which events the plugin accepts via the /track REST endpoint and forwards to Meta Conversions API.', 'headless-meta-pixel')}
+        {__(
+          'Browser-side pixel events are handled by your frontend app. These toggles control which events the plugin accepts via the /track REST endpoint and forwards to Meta Conversions API.',
+          'headless-meta-pixel',
+        )}
       </p>
 
       <ToggleControl
         label={__('Enable Conversions API', 'headless-meta-pixel')}
-        help={__('Master switch for server-side event sending via Meta Conversions API.', 'headless-meta-pixel')}
+        help={__(
+          'Master switch for server-side event sending via Meta Conversions API.',
+          'headless-meta-pixel',
+        )}
         checked={settings.enable_capi}
         onChange={(v) => update('enable_capi', v)}
       />
 
       <hr style={{ margin: '16px 0' }} />
 
-      <h3 style={{ marginBottom: '12px' }}>
-        {__('Event Types', 'headless-meta-pixel')}
-      </h3>
+      <h3 style={{ marginBottom: '12px' }}>{__('Event Types', 'headless-meta-pixel')}</h3>
 
       <ToggleControl
         label={__('ViewContent', 'headless-meta-pixel')}
@@ -42,7 +46,10 @@ export function EventsTab({ settings, update }: TabProps) {
       />
       <ToggleControl
         label={__('Purchase', 'headless-meta-pixel')}
-        help={__('Order completions. Automatically sent server-side via WooCommerce hooks.', 'headless-meta-pixel')}
+        help={__(
+          'Order completions. Automatically sent server-side via WooCommerce hooks.',
+          'headless-meta-pixel',
+        )}
         checked={settings.enable_purchase}
         onChange={(v) => update('enable_purchase', v)}
       />

@@ -1,5 +1,5 @@
-import path from 'node:path';
 import { readFileSync } from 'node:fs';
+import path from 'node:path';
 import { pathExists } from './utils/fs-utils.js';
 
 export interface WptsConfig {

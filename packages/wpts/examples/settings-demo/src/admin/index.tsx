@@ -1,18 +1,18 @@
-import { createRoot, useState, useEffect } from '@wordpress/element';
+import apiFetch from '@wordpress/api-fetch';
 import {
+  Button,
+  ColorPicker,
   Panel,
   PanelBody,
-  TextControl,
-  TextareaControl,
-  ToggleControl,
   RangeControl,
-  ColorPicker,
-  Button,
   Spinner,
   TabPanel,
+  TextareaControl,
+  TextControl,
+  ToggleControl,
 } from '@wordpress/components';
+import { createRoot, useEffect, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
-import apiFetch from '@wordpress/api-fetch';
 
 interface Settings {
   site_title: string;

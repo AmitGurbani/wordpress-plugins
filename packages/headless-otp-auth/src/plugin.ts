@@ -7,7 +7,7 @@
  * Build: npx wpts build src/plugin.ts -o dist --clean
  */
 
-import { Plugin, Setting, AdminPage, Activate, Deactivate, Action, Filter } from 'wpts';
+import { Action, Activate, AdminPage, Deactivate, Filter, Plugin, Setting } from 'wpts';
 import './jwt.js';
 import './otp-routes.js';
 import './auth-routes.js';
@@ -28,7 +28,6 @@ import './auth-routes.js';
   iconUrl: 'dashicons-smartphone',
 })
 class HeadlessOtpAuth {
-
   // ── Settings ──────────────────────────────────────────────────────────
 
   @Setting({
@@ -54,7 +53,8 @@ class HeadlessOtpAuth {
     type: 'string',
     default: '{}',
     label: 'OTP Server Headers Template',
-    description: 'JSON headers template. Placeholders: {{phone}}, {{otp}}, {{siteName}}, {{siteUrl}}.',
+    description:
+      'JSON headers template. Placeholders: {{phone}}, {{otp}}, {{siteName}}, {{siteUrl}}.',
   })
   otpServerHeadersTemplate: string = '{}';
 
@@ -177,7 +177,12 @@ class HeadlessOtpAuth {
     const testMode: string = getOption('headless_otp_auth_otp_test_mode', '');
     if (testMode === '1') {
       echo('<div class="notice notice-warning"><p><strong>Headless OTP Auth:</strong> ');
-      echo(escHtml__('Test Mode is enabled. OTPs will not be delivered to users.', 'headless-otp-auth'));
+      echo(
+        escHtml__(
+          'Test Mode is enabled. OTPs will not be delivered to users.',
+          'headless-otp-auth',
+        ),
+      );
       echo('</p></div>');
     }
   }

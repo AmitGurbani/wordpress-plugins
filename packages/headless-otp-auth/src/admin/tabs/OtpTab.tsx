@@ -1,4 +1,10 @@
-import { TextControl, Button, Popover, ToggleControl, __experimentalNumberControl as NumberControl } from '@wordpress/components';
+import {
+  Button,
+  __experimentalNumberControl as NumberControl,
+  Popover,
+  TextControl,
+  ToggleControl,
+} from '@wordpress/components';
 import { useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import type { TabProps, TestOtpData } from '../types';
@@ -25,15 +31,44 @@ function TemplateHelp({ example }: { example: string }) {
             <strong>{__('Available Placeholders', 'headless-otp-auth')}</strong>
             <table style={{ marginTop: '8px', borderCollapse: 'collapse', width: '100%' }}>
               <tbody>
-                <tr><td><code>{'{{phone}}'}</code></td><td>{__("User's phone number", 'headless-otp-auth')}</td></tr>
-                <tr><td><code>{'{{otp}}'}</code></td><td>{__('Generated OTP code', 'headless-otp-auth')}</td></tr>
-                <tr><td><code>{'{{siteName}}'}</code></td><td>{__('WordPress site title', 'headless-otp-auth')}</td></tr>
-                <tr><td><code>{'{{siteUrl}}'}</code></td><td>{__('WordPress site URL', 'headless-otp-auth')}</td></tr>
+                <tr>
+                  <td>
+                    <code>{'{{phone}}'}</code>
+                  </td>
+                  <td>{__("User's phone number", 'headless-otp-auth')}</td>
+                </tr>
+                <tr>
+                  <td>
+                    <code>{'{{otp}}'}</code>
+                  </td>
+                  <td>{__('Generated OTP code', 'headless-otp-auth')}</td>
+                </tr>
+                <tr>
+                  <td>
+                    <code>{'{{siteName}}'}</code>
+                  </td>
+                  <td>{__('WordPress site title', 'headless-otp-auth')}</td>
+                </tr>
+                <tr>
+                  <td>
+                    <code>{'{{siteUrl}}'}</code>
+                  </td>
+                  <td>{__('WordPress site URL', 'headless-otp-auth')}</td>
+                </tr>
               </tbody>
             </table>
             <div style={{ marginTop: '10px' }}>
               <strong>{__('Example:', 'headless-otp-auth')}</strong>
-              <code style={{ display: 'block', marginTop: '4px', padding: '6px 8px', background: '#f0f0f0', borderRadius: '3px', wordBreak: 'break-all' }}>
+              <code
+                style={{
+                  display: 'block',
+                  marginTop: '4px',
+                  padding: '6px 8px',
+                  background: '#f0f0f0',
+                  borderRadius: '3px',
+                  wordBreak: 'break-all',
+                }}
+              >
                 {example}
               </code>
             </div>
@@ -49,9 +84,16 @@ export function OtpTab({ settings, update, testOtp, fetchTestOtp }: OtpTabProps)
     <div style={{ padding: '16px 0' }}>
       <ToggleControl
         label={__('Test Mode', 'headless-otp-auth')}
-        help={settings.otp_test_mode
-          ? __('Test mode is ON. OTPs will not be delivered — check below for the generated code.', 'headless-otp-auth')
-          : __('Enable to skip OTP delivery and display the generated code here for testing.', 'headless-otp-auth')
+        help={
+          settings.otp_test_mode
+            ? __(
+                'Test mode is ON. OTPs will not be delivered — check below for the generated code.',
+                'headless-otp-auth',
+              )
+            : __(
+                'Enable to skip OTP delivery and display the generated code here for testing.',
+                'headless-otp-auth',
+              )
         }
         checked={settings.otp_test_mode}
         onChange={(v: boolean) => {
@@ -60,15 +102,39 @@ export function OtpTab({ settings, update, testOtp, fetchTestOtp }: OtpTabProps)
         }}
       />
       {settings.otp_test_mode && (
-        <div style={{ background: '#fff8e1', border: '1px solid #ffcc02', borderRadius: '4px', padding: '12px 16px', marginBottom: '16px' }}>
+        <div
+          style={{
+            background: '#fff8e1',
+            border: '1px solid #ffcc02',
+            borderRadius: '4px',
+            padding: '12px 16px',
+            marginBottom: '16px',
+          }}
+        >
           <strong>{__('Test Mode Active', 'headless-otp-auth')}</strong>
           {testOtp && testOtp.otp ? (
             <div style={{ marginTop: '8px' }}>
-              <div>{__('Phone:', 'headless-otp-auth')} <code>{testOtp.phone}</code></div>
-              <div style={{ fontSize: '24px', fontWeight: 'bold', letterSpacing: '4px', margin: '8px 0' }}>{testOtp.otp}</div>
+              <div>
+                {__('Phone:', 'headless-otp-auth')} <code>{testOtp.phone}</code>
+              </div>
+              <div
+                style={{
+                  fontSize: '24px',
+                  fontWeight: 'bold',
+                  letterSpacing: '4px',
+                  margin: '8px 0',
+                }}
+              >
+                {testOtp.otp}
+              </div>
             </div>
           ) : (
-            <p style={{ margin: '8px 0 0' }}>{__('No test OTP generated yet. Send an OTP via the API to see it here.', 'headless-otp-auth')}</p>
+            <p style={{ margin: '8px 0 0' }}>
+              {__(
+                'No test OTP generated yet. Send an OTP via the API to see it here.',
+                'headless-otp-auth',
+              )}
+            </p>
           )}
           <Button variant="secondary" onClick={fetchTestOtp} style={{ marginTop: '8px' }}>
             {__('Refresh', 'headless-otp-auth')}
@@ -77,18 +143,31 @@ export function OtpTab({ settings, update, testOtp, fetchTestOtp }: OtpTabProps)
       )}
       <TextControl
         label={__('OTP Server URL', 'headless-otp-auth')}
-        help={__('URL of your external server that delivers OTPs via SMS/WhatsApp.', 'headless-otp-auth')}
+        help={__(
+          'URL of your external server that delivers OTPs via SMS/WhatsApp.',
+          'headless-otp-auth',
+        )}
         value={settings.otp_server_url}
         onChange={(v) => update('otp_server_url', v)}
       />
       <TextControl
-        label={<>{__('OTP Server Headers Template', 'headless-otp-auth')}<TemplateHelp example='{"X-API-Key":"your-api-key","X-Store":"{{siteName}}"}' /></>}
+        label={
+          <>
+            {__('OTP Server Headers Template', 'headless-otp-auth')}
+            <TemplateHelp example='{"X-API-Key":"your-api-key","X-Store":"{{siteName}}"}' />
+          </>
+        }
         help={__('JSON template for custom HTTP headers.', 'headless-otp-auth')}
         value={settings.otp_server_headers_template}
         onChange={(v) => update('otp_server_headers_template', v)}
       />
       <TextControl
-        label={<>{__('OTP Server Payload Template', 'headless-otp-auth')}<TemplateHelp example='{"phoneNumber":"{{phone}}","var1":{{otp}},"var2":"{{siteName}}"}' /></>}
+        label={
+          <>
+            {__('OTP Server Payload Template', 'headless-otp-auth')}
+            <TemplateHelp example='{"phoneNumber":"{{phone}}","var1":{{otp}},"var2":"{{siteName}}"}' />
+          </>
+        }
         help={__('JSON template for the request body.', 'headless-otp-auth')}
         value={settings.otp_server_payload_template}
         onChange={(v) => update('otp_server_payload_template', v)}
@@ -111,7 +190,10 @@ export function OtpTab({ settings, update, testOtp, fetchTestOtp }: OtpTabProps)
       />
       <NumberControl
         label={__('Max OTP Attempts', 'headless-otp-auth')}
-        help={__('Maximum OTP send attempts per phone number before rate limiting.', 'headless-otp-auth')}
+        help={__(
+          'Maximum OTP send attempts per phone number before rate limiting.',
+          'headless-otp-auth',
+        )}
         value={settings.max_otp_attempts}
         onChange={(v: string | undefined) => update('max_otp_attempts', v ? parseInt(v, 10) : 3)}
         min={1}

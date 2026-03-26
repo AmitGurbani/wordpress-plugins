@@ -1,13 +1,13 @@
-import { useState } from '@wordpress/element';
-import { useSettings, SettingsShell } from 'admin-ui';
-import { __ } from '@wordpress/i18n';
 import apiFetch from '@wordpress/api-fetch';
-import { DEFAULTS, TABS } from './types';
-import type { Settings, TestOtpData } from './types';
+import { useState } from '@wordpress/element';
+import { __ } from '@wordpress/i18n';
+import { SettingsShell, useSettings } from 'admin-ui';
+import { AdvancedTab } from './tabs/AdvancedTab';
+import { AuthTab } from './tabs/AuthTab';
 import { OtpTab } from './tabs/OtpTab';
 import { SecurityTab } from './tabs/SecurityTab';
-import { AuthTab } from './tabs/AuthTab';
-import { AdvancedTab } from './tabs/AdvancedTab';
+import type { Settings, TestOtpData } from './types';
+import { DEFAULTS, TABS } from './types';
 
 export function SettingsPage() {
   const state = useSettings<Settings>({

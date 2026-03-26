@@ -1,7 +1,7 @@
-import { describe, it, expect } from 'vitest';
 import ts from 'typescript';
-import { transpileExpression } from '../../../src/transpiler/expression-transpiler.js';
+import { describe, expect, it } from 'vitest';
 import { parseSourceString } from '../../../src/compiler/parser.js';
+import { transpileExpression } from '../../../src/transpiler/expression-transpiler.js';
 
 /**
  * Helper: parse a TS expression and transpile it to PHP.
@@ -111,218 +111,488 @@ describe('transpileExpression', () => {
 
   describe('call expressions', () => {
     it('maps WordPress API calls', () => {
-      expect(transpile('getOption("key", "default")', 'declare function getOption(k: string, d?: any): any;'))
-        .toBe("get_option( 'key', 'default' )");
+      expect(
+        transpile(
+          'getOption("key", "default")',
+          'declare function getOption(k: string, d?: any): any;',
+        ),
+      ).toBe("get_option( 'key', 'default' )");
     });
 
     it('maps PHP built-in isArray', () => {
-      expect(transpile('isArray(value)', 'declare function isArray(v: any): boolean; declare const value: any;'))
-        .toBe('is_array( $value )');
+      expect(
+        transpile(
+          'isArray(value)',
+          'declare function isArray(v: any): boolean; declare const value: any;',
+        ),
+      ).toBe('is_array( $value )');
     });
 
     it('maps i18n translation functions', () => {
-      expect(transpile('__("Hello", "my-plugin")', 'declare function __(t: string, d: string): string;'))
-        .toBe("__( 'Hello', 'my-plugin' )");
-      expect(transpile('_e("Hello", "my-plugin")', 'declare function _e(t: string, d: string): void;'))
-        .toBe("_e( 'Hello', 'my-plugin' )");
-      expect(transpile('_x("Post", "noun", "my-plugin")', 'declare function _x(t: string, c: string, d: string): string;'))
-        .toBe("_x( 'Post', 'noun', 'my-plugin' )");
-      expect(transpile('_ex("Post", "noun", "my-plugin")', 'declare function _ex(t: string, c: string, d: string): void;'))
-        .toBe("_ex( 'Post', 'noun', 'my-plugin' )");
-      expect(transpile('_n("item", "items", count, "my-plugin")', 'declare function _n(s: string, p: string, n: number, d: string): string; const count = 5;'))
-        .toBe("_n( 'item', 'items', $count, 'my-plugin' )");
-      expect(transpile('_nx("item", "items", count, "context", "my-plugin")', 'declare function _nx(s: string, p: string, n: number, c: string, d: string): string; const count = 5;'))
-        .toBe("_nx( 'item', 'items', $count, 'context', 'my-plugin' )");
+      expect(
+        transpile('__("Hello", "my-plugin")', 'declare function __(t: string, d: string): string;'),
+      ).toBe("__( 'Hello', 'my-plugin' )");
+      expect(
+        transpile('_e("Hello", "my-plugin")', 'declare function _e(t: string, d: string): void;'),
+      ).toBe("_e( 'Hello', 'my-plugin' )");
+      expect(
+        transpile(
+          '_x("Post", "noun", "my-plugin")',
+          'declare function _x(t: string, c: string, d: string): string;',
+        ),
+      ).toBe("_x( 'Post', 'noun', 'my-plugin' )");
+      expect(
+        transpile(
+          '_ex("Post", "noun", "my-plugin")',
+          'declare function _ex(t: string, c: string, d: string): void;',
+        ),
+      ).toBe("_ex( 'Post', 'noun', 'my-plugin' )");
+      expect(
+        transpile(
+          '_n("item", "items", count, "my-plugin")',
+          'declare function _n(s: string, p: string, n: number, d: string): string; const count = 5;',
+        ),
+      ).toBe("_n( 'item', 'items', $count, 'my-plugin' )");
+      expect(
+        transpile(
+          '_nx("item", "items", count, "context", "my-plugin")',
+          'declare function _nx(s: string, p: string, n: number, c: string, d: string): string; const count = 5;',
+        ),
+      ).toBe("_nx( 'item', 'items', $count, 'context', 'my-plugin' )");
     });
 
     it('maps escaped i18n functions', () => {
-      expect(transpile('escHtml__("Hello", "my-plugin")', 'declare function escHtml__(t: string, d: string): string;'))
-        .toBe("esc_html__( 'Hello', 'my-plugin' )");
-      expect(transpile('escHtmlE("Hello", "my-plugin")', 'declare function escHtmlE(t: string, d: string): void;'))
-        .toBe("esc_html_e( 'Hello', 'my-plugin' )");
-      expect(transpile('escHtmlX("Post", "noun", "my-plugin")', 'declare function escHtmlX(t: string, c: string, d: string): string;'))
-        .toBe("esc_html_x( 'Post', 'noun', 'my-plugin' )");
-      expect(transpile('escAttr__("Hello", "my-plugin")', 'declare function escAttr__(t: string, d: string): string;'))
-        .toBe("esc_attr__( 'Hello', 'my-plugin' )");
-      expect(transpile('escAttrE("Hello", "my-plugin")', 'declare function escAttrE(t: string, d: string): void;'))
-        .toBe("esc_attr_e( 'Hello', 'my-plugin' )");
-      expect(transpile('escAttrX("Post", "noun", "my-plugin")', 'declare function escAttrX(t: string, c: string, d: string): string;'))
-        .toBe("esc_attr_x( 'Post', 'noun', 'my-plugin' )");
+      expect(
+        transpile(
+          'escHtml__("Hello", "my-plugin")',
+          'declare function escHtml__(t: string, d: string): string;',
+        ),
+      ).toBe("esc_html__( 'Hello', 'my-plugin' )");
+      expect(
+        transpile(
+          'escHtmlE("Hello", "my-plugin")',
+          'declare function escHtmlE(t: string, d: string): void;',
+        ),
+      ).toBe("esc_html_e( 'Hello', 'my-plugin' )");
+      expect(
+        transpile(
+          'escHtmlX("Post", "noun", "my-plugin")',
+          'declare function escHtmlX(t: string, c: string, d: string): string;',
+        ),
+      ).toBe("esc_html_x( 'Post', 'noun', 'my-plugin' )");
+      expect(
+        transpile(
+          'escAttr__("Hello", "my-plugin")',
+          'declare function escAttr__(t: string, d: string): string;',
+        ),
+      ).toBe("esc_attr__( 'Hello', 'my-plugin' )");
+      expect(
+        transpile(
+          'escAttrE("Hello", "my-plugin")',
+          'declare function escAttrE(t: string, d: string): void;',
+        ),
+      ).toBe("esc_attr_e( 'Hello', 'my-plugin' )");
+      expect(
+        transpile(
+          'escAttrX("Post", "noun", "my-plugin")',
+          'declare function escAttrX(t: string, c: string, d: string): string;',
+        ),
+      ).toBe("esc_attr_x( 'Post', 'noun', 'my-plugin' )");
     });
 
     it('maps post and user metadata functions', () => {
-      expect(transpile('getPostMeta(1, "color", true)', 'declare function getPostMeta(p: number, k?: string, s?: boolean): any;'))
-        .toBe("get_post_meta( 1, 'color', true )");
-      expect(transpile('addPostMeta(1, "color", "red")', 'declare function addPostMeta(p: number, k: string, v: any): any;'))
-        .toBe("add_post_meta( 1, 'color', 'red' )");
-      expect(transpile('updatePostMeta(1, "color", "blue")', 'declare function updatePostMeta(p: number, k: string, v: any): any;'))
-        .toBe("update_post_meta( 1, 'color', 'blue' )");
-      expect(transpile('deletePostMeta(1, "color")', 'declare function deletePostMeta(p: number, k: string): boolean;'))
-        .toBe("delete_post_meta( 1, 'color' )");
-      expect(transpile('getUserMeta(5, "nickname", true)', 'declare function getUserMeta(u: number, k?: string, s?: boolean): any;'))
-        .toBe("get_user_meta( 5, 'nickname', true )");
-      expect(transpile('addUserMeta(5, "nickname", "joe")', 'declare function addUserMeta(u: number, k: string, v: any): any;'))
-        .toBe("add_user_meta( 5, 'nickname', 'joe' )");
-      expect(transpile('updateUserMeta(5, "nickname", "jane")', 'declare function updateUserMeta(u: number, k: string, v: any): any;'))
-        .toBe("update_user_meta( 5, 'nickname', 'jane' )");
-      expect(transpile('deleteUserMeta(5, "nickname")', 'declare function deleteUserMeta(u: number, k: string): boolean;'))
-        .toBe("delete_user_meta( 5, 'nickname' )");
+      expect(
+        transpile(
+          'getPostMeta(1, "color", true)',
+          'declare function getPostMeta(p: number, k?: string, s?: boolean): any;',
+        ),
+      ).toBe("get_post_meta( 1, 'color', true )");
+      expect(
+        transpile(
+          'addPostMeta(1, "color", "red")',
+          'declare function addPostMeta(p: number, k: string, v: any): any;',
+        ),
+      ).toBe("add_post_meta( 1, 'color', 'red' )");
+      expect(
+        transpile(
+          'updatePostMeta(1, "color", "blue")',
+          'declare function updatePostMeta(p: number, k: string, v: any): any;',
+        ),
+      ).toBe("update_post_meta( 1, 'color', 'blue' )");
+      expect(
+        transpile(
+          'deletePostMeta(1, "color")',
+          'declare function deletePostMeta(p: number, k: string): boolean;',
+        ),
+      ).toBe("delete_post_meta( 1, 'color' )");
+      expect(
+        transpile(
+          'getUserMeta(5, "nickname", true)',
+          'declare function getUserMeta(u: number, k?: string, s?: boolean): any;',
+        ),
+      ).toBe("get_user_meta( 5, 'nickname', true )");
+      expect(
+        transpile(
+          'addUserMeta(5, "nickname", "joe")',
+          'declare function addUserMeta(u: number, k: string, v: any): any;',
+        ),
+      ).toBe("add_user_meta( 5, 'nickname', 'joe' )");
+      expect(
+        transpile(
+          'updateUserMeta(5, "nickname", "jane")',
+          'declare function updateUserMeta(u: number, k: string, v: any): any;',
+        ),
+      ).toBe("update_user_meta( 5, 'nickname', 'jane' )");
+      expect(
+        transpile(
+          'deleteUserMeta(5, "nickname")',
+          'declare function deleteUserMeta(u: number, k: string): boolean;',
+        ),
+      ).toBe("delete_user_meta( 5, 'nickname' )");
     });
 
     it('maps post parent function', () => {
-      expect(transpile('wpGetPostParentId(42)', 'declare function wpGetPostParentId(p?: number): number | false;'))
-        .toBe('wp_get_post_parent_id( 42 )');
+      expect(
+        transpile(
+          'wpGetPostParentId(42)',
+          'declare function wpGetPostParentId(p?: number): number | false;',
+        ),
+      ).toBe('wp_get_post_parent_id( 42 )');
     });
 
     it('maps term, comment, and generic metadata functions', () => {
-      expect(transpile('getTermMeta(3, "icon", true)', 'declare function getTermMeta(t: number, k?: string, s?: boolean): any;'))
-        .toBe("get_term_meta( 3, 'icon', true )");
-      expect(transpile('addTermMeta(3, "icon", "star")', 'declare function addTermMeta(t: number, k: string, v: any): any;'))
-        .toBe("add_term_meta( 3, 'icon', 'star' )");
-      expect(transpile('updateTermMeta(3, "icon", "heart")', 'declare function updateTermMeta(t: number, k: string, v: any): any;'))
-        .toBe("update_term_meta( 3, 'icon', 'heart' )");
-      expect(transpile('deleteTermMeta(3, "icon")', 'declare function deleteTermMeta(t: number, k: string): boolean;'))
-        .toBe("delete_term_meta( 3, 'icon' )");
-      expect(transpile('getCommentMeta(7, "rating", true)', 'declare function getCommentMeta(c: number, k?: string, s?: boolean): any;'))
-        .toBe("get_comment_meta( 7, 'rating', true )");
-      expect(transpile('addCommentMeta(7, "rating", 5)', 'declare function addCommentMeta(c: number, k: string, v: any): any;'))
-        .toBe("add_comment_meta( 7, 'rating', 5 )");
-      expect(transpile('updateCommentMeta(7, "rating", 4)', 'declare function updateCommentMeta(c: number, k: string, v: any): any;'))
-        .toBe("update_comment_meta( 7, 'rating', 4 )");
-      expect(transpile('deleteCommentMeta(7, "rating")', 'declare function deleteCommentMeta(c: number, k: string): boolean;'))
-        .toBe("delete_comment_meta( 7, 'rating' )");
-      expect(transpile('getMetadata("post", 1, "key", true)', 'declare function getMetadata(t: string, o: number, k?: string, s?: boolean): any;'))
-        .toBe("get_metadata( 'post', 1, 'key', true )");
-      expect(transpile('addMetadata("post", 1, "key", "val")', 'declare function addMetadata(t: string, o: number, k: string, v: any): any;'))
-        .toBe("add_metadata( 'post', 1, 'key', 'val' )");
-      expect(transpile('updateMetadata("post", 1, "key", "val")', 'declare function updateMetadata(t: string, o: number, k: string, v: any): any;'))
-        .toBe("update_metadata( 'post', 1, 'key', 'val' )");
-      expect(transpile('deleteMetadata("post", 1, "key")', 'declare function deleteMetadata(t: string, o: number, k: string): boolean;'))
-        .toBe("delete_metadata( 'post', 1, 'key' )");
+      expect(
+        transpile(
+          'getTermMeta(3, "icon", true)',
+          'declare function getTermMeta(t: number, k?: string, s?: boolean): any;',
+        ),
+      ).toBe("get_term_meta( 3, 'icon', true )");
+      expect(
+        transpile(
+          'addTermMeta(3, "icon", "star")',
+          'declare function addTermMeta(t: number, k: string, v: any): any;',
+        ),
+      ).toBe("add_term_meta( 3, 'icon', 'star' )");
+      expect(
+        transpile(
+          'updateTermMeta(3, "icon", "heart")',
+          'declare function updateTermMeta(t: number, k: string, v: any): any;',
+        ),
+      ).toBe("update_term_meta( 3, 'icon', 'heart' )");
+      expect(
+        transpile(
+          'deleteTermMeta(3, "icon")',
+          'declare function deleteTermMeta(t: number, k: string): boolean;',
+        ),
+      ).toBe("delete_term_meta( 3, 'icon' )");
+      expect(
+        transpile(
+          'getCommentMeta(7, "rating", true)',
+          'declare function getCommentMeta(c: number, k?: string, s?: boolean): any;',
+        ),
+      ).toBe("get_comment_meta( 7, 'rating', true )");
+      expect(
+        transpile(
+          'addCommentMeta(7, "rating", 5)',
+          'declare function addCommentMeta(c: number, k: string, v: any): any;',
+        ),
+      ).toBe("add_comment_meta( 7, 'rating', 5 )");
+      expect(
+        transpile(
+          'updateCommentMeta(7, "rating", 4)',
+          'declare function updateCommentMeta(c: number, k: string, v: any): any;',
+        ),
+      ).toBe("update_comment_meta( 7, 'rating', 4 )");
+      expect(
+        transpile(
+          'deleteCommentMeta(7, "rating")',
+          'declare function deleteCommentMeta(c: number, k: string): boolean;',
+        ),
+      ).toBe("delete_comment_meta( 7, 'rating' )");
+      expect(
+        transpile(
+          'getMetadata("post", 1, "key", true)',
+          'declare function getMetadata(t: string, o: number, k?: string, s?: boolean): any;',
+        ),
+      ).toBe("get_metadata( 'post', 1, 'key', true )");
+      expect(
+        transpile(
+          'addMetadata("post", 1, "key", "val")',
+          'declare function addMetadata(t: string, o: number, k: string, v: any): any;',
+        ),
+      ).toBe("add_metadata( 'post', 1, 'key', 'val' )");
+      expect(
+        transpile(
+          'updateMetadata("post", 1, "key", "val")',
+          'declare function updateMetadata(t: string, o: number, k: string, v: any): any;',
+        ),
+      ).toBe("update_metadata( 'post', 1, 'key', 'val' )");
+      expect(
+        transpile(
+          'deleteMetadata("post", 1, "key")',
+          'declare function deleteMetadata(t: string, o: number, k: string): boolean;',
+        ),
+      ).toBe("delete_metadata( 'post', 1, 'key' )");
     });
 
     it('maps URL parsing functions', () => {
-      expect(transpile('wpParseUrl("https://example.com/path")', 'declare function wpParseUrl(u: string, c?: number): any;'))
-        .toBe("wp_parse_url( 'https://example.com/path' )");
+      expect(
+        transpile(
+          'wpParseUrl("https://example.com/path")',
+          'declare function wpParseUrl(u: string, c?: number): any;',
+        ),
+      ).toBe("wp_parse_url( 'https://example.com/path' )");
     });
 
     it('maps HTTP API request functions', () => {
-      expect(transpile('wpRemoteGet("https://api.example.com")', 'declare function wpRemoteGet(u: string, a?: any): any;'))
-        .toBe("wp_remote_get( 'https://api.example.com' )");
-      expect(transpile('wpRemotePost("https://api.example.com")', 'declare function wpRemotePost(u: string, a?: any): any;'))
-        .toBe("wp_remote_post( 'https://api.example.com' )");
-      expect(transpile('wpRemoteHead("https://api.example.com")', 'declare function wpRemoteHead(u: string, a?: any): any;'))
-        .toBe("wp_remote_head( 'https://api.example.com' )");
-      expect(transpile('wpRemoteRequest("https://api.example.com")', 'declare function wpRemoteRequest(u: string, a?: any): any;'))
-        .toBe("wp_remote_request( 'https://api.example.com' )");
-      expect(transpile('wpSafeRemoteGet("https://api.example.com")', 'declare function wpSafeRemoteGet(u: string, a?: any): any;'))
-        .toBe("wp_safe_remote_get( 'https://api.example.com' )");
-      expect(transpile('wpSafeRemotePost("https://api.example.com")', 'declare function wpSafeRemotePost(u: string, a?: any): any;'))
-        .toBe("wp_safe_remote_post( 'https://api.example.com' )");
-      expect(transpile('wpSafeRemoteHead("https://api.example.com")', 'declare function wpSafeRemoteHead(u: string, a?: any): any;'))
-        .toBe("wp_safe_remote_head( 'https://api.example.com' )");
-      expect(transpile('wpSafeRemoteRequest("https://api.example.com")', 'declare function wpSafeRemoteRequest(u: string, a?: any): any;'))
-        .toBe("wp_safe_remote_request( 'https://api.example.com' )");
+      expect(
+        transpile(
+          'wpRemoteGet("https://api.example.com")',
+          'declare function wpRemoteGet(u: string, a?: any): any;',
+        ),
+      ).toBe("wp_remote_get( 'https://api.example.com' )");
+      expect(
+        transpile(
+          'wpRemotePost("https://api.example.com")',
+          'declare function wpRemotePost(u: string, a?: any): any;',
+        ),
+      ).toBe("wp_remote_post( 'https://api.example.com' )");
+      expect(
+        transpile(
+          'wpRemoteHead("https://api.example.com")',
+          'declare function wpRemoteHead(u: string, a?: any): any;',
+        ),
+      ).toBe("wp_remote_head( 'https://api.example.com' )");
+      expect(
+        transpile(
+          'wpRemoteRequest("https://api.example.com")',
+          'declare function wpRemoteRequest(u: string, a?: any): any;',
+        ),
+      ).toBe("wp_remote_request( 'https://api.example.com' )");
+      expect(
+        transpile(
+          'wpSafeRemoteGet("https://api.example.com")',
+          'declare function wpSafeRemoteGet(u: string, a?: any): any;',
+        ),
+      ).toBe("wp_safe_remote_get( 'https://api.example.com' )");
+      expect(
+        transpile(
+          'wpSafeRemotePost("https://api.example.com")',
+          'declare function wpSafeRemotePost(u: string, a?: any): any;',
+        ),
+      ).toBe("wp_safe_remote_post( 'https://api.example.com' )");
+      expect(
+        transpile(
+          'wpSafeRemoteHead("https://api.example.com")',
+          'declare function wpSafeRemoteHead(u: string, a?: any): any;',
+        ),
+      ).toBe("wp_safe_remote_head( 'https://api.example.com' )");
+      expect(
+        transpile(
+          'wpSafeRemoteRequest("https://api.example.com")',
+          'declare function wpSafeRemoteRequest(u: string, a?: any): any;',
+        ),
+      ).toBe("wp_safe_remote_request( 'https://api.example.com' )");
     });
 
     it('maps HTTP API response and error functions', () => {
-      expect(transpile('wpRemoteRetrieveBody(response)', 'declare function wpRemoteRetrieveBody(r: any): string; const response: any = null;'))
-        .toBe("wp_remote_retrieve_body( $response )");
-      expect(transpile('wpRemoteRetrieveResponseCode(response)', 'declare function wpRemoteRetrieveResponseCode(r: any): any; const response: any = null;'))
-        .toBe("wp_remote_retrieve_response_code( $response )");
-      expect(transpile('wpRemoteRetrieveResponseMessage(response)', 'declare function wpRemoteRetrieveResponseMessage(r: any): string; const response: any = null;'))
-        .toBe("wp_remote_retrieve_response_message( $response )");
-      expect(transpile('wpRemoteRetrieveHeader(response, "content-type")', 'declare function wpRemoteRetrieveHeader(r: any, h: string): any; const response: any = null;'))
-        .toBe("wp_remote_retrieve_header( $response, 'content-type' )");
-      expect(transpile('wpRemoteRetrieveHeaders(response)', 'declare function wpRemoteRetrieveHeaders(r: any): any; const response: any = null;'))
-        .toBe("wp_remote_retrieve_headers( $response )");
-      expect(transpile('wpRemoteRetrieveCookies(response)', 'declare function wpRemoteRetrieveCookies(r: any): any[]; const response: any = null;'))
-        .toBe("wp_remote_retrieve_cookies( $response )");
-      expect(transpile('isWpError(result)', 'declare function isWpError(t: any): boolean; const result: any = null;'))
-        .toBe("is_wp_error( $result )");
+      expect(
+        transpile(
+          'wpRemoteRetrieveBody(response)',
+          'declare function wpRemoteRetrieveBody(r: any): string; const response: any = null;',
+        ),
+      ).toBe('wp_remote_retrieve_body( $response )');
+      expect(
+        transpile(
+          'wpRemoteRetrieveResponseCode(response)',
+          'declare function wpRemoteRetrieveResponseCode(r: any): any; const response: any = null;',
+        ),
+      ).toBe('wp_remote_retrieve_response_code( $response )');
+      expect(
+        transpile(
+          'wpRemoteRetrieveResponseMessage(response)',
+          'declare function wpRemoteRetrieveResponseMessage(r: any): string; const response: any = null;',
+        ),
+      ).toBe('wp_remote_retrieve_response_message( $response )');
+      expect(
+        transpile(
+          'wpRemoteRetrieveHeader(response, "content-type")',
+          'declare function wpRemoteRetrieveHeader(r: any, h: string): any; const response: any = null;',
+        ),
+      ).toBe("wp_remote_retrieve_header( $response, 'content-type' )");
+      expect(
+        transpile(
+          'wpRemoteRetrieveHeaders(response)',
+          'declare function wpRemoteRetrieveHeaders(r: any): any; const response: any = null;',
+        ),
+      ).toBe('wp_remote_retrieve_headers( $response )');
+      expect(
+        transpile(
+          'wpRemoteRetrieveCookies(response)',
+          'declare function wpRemoteRetrieveCookies(r: any): any[]; const response: any = null;',
+        ),
+      ).toBe('wp_remote_retrieve_cookies( $response )');
+      expect(
+        transpile(
+          'isWpError(result)',
+          'declare function isWpError(t: any): boolean; const result: any = null;',
+        ),
+      ).toBe('is_wp_error( $result )');
     });
 
     it('maps user management and auth functions', () => {
-      expect(transpile('getUserBy("email", "test@example.com")', 'declare function getUserBy(f: string, v: any): any;'))
-        .toBe("get_user_by( 'email', 'test@example.com' )");
-      expect(transpile('getUsers({ meta_key: "phone" })', 'declare function getUsers(a?: any): any[];'))
-        .toBe("get_users( array( 'meta_key' => 'phone' ) )");
-      expect(transpile('wpInsertUser({ user_login: "john" })', 'declare function wpInsertUser(d: any): any;'))
-        .toBe("wp_insert_user( array( 'user_login' => 'john' ) )");
-      expect(transpile('wpGetCurrentUser()', 'declare function wpGetCurrentUser(): any;'))
-        .toBe('wp_get_current_user()');
-      expect(transpile('wpGeneratePassword(12, true)', 'declare function wpGeneratePassword(l?: number, s?: boolean): string;'))
-        .toBe('wp_generate_password( 12, true )');
-      expect(transpile('wpHashPassword("secret")', 'declare function wpHashPassword(p: string): string;'))
-        .toBe("wp_hash_password( 'secret' )");
-      expect(transpile('wpCheckPassword("secret", hash)', 'declare function wpCheckPassword(p: string, h: string): boolean; const hash: string = "";'))
-        .toBe("wp_check_password( 'secret', $hash )");
-      expect(transpile('wpSetCurrentUser(1)', 'declare function wpSetCurrentUser(id: number): any;'))
-        .toBe('wp_set_current_user( 1 )');
+      expect(
+        transpile(
+          'getUserBy("email", "test@example.com")',
+          'declare function getUserBy(f: string, v: any): any;',
+        ),
+      ).toBe("get_user_by( 'email', 'test@example.com' )");
+      expect(
+        transpile('getUsers({ meta_key: "phone" })', 'declare function getUsers(a?: any): any[];'),
+      ).toBe("get_users( array( 'meta_key' => 'phone' ) )");
+      expect(
+        transpile(
+          'wpInsertUser({ user_login: "john" })',
+          'declare function wpInsertUser(d: any): any;',
+        ),
+      ).toBe("wp_insert_user( array( 'user_login' => 'john' ) )");
+      expect(transpile('wpGetCurrentUser()', 'declare function wpGetCurrentUser(): any;')).toBe(
+        'wp_get_current_user()',
+      );
+      expect(
+        transpile(
+          'wpGeneratePassword(12, true)',
+          'declare function wpGeneratePassword(l?: number, s?: boolean): string;',
+        ),
+      ).toBe('wp_generate_password( 12, true )');
+      expect(
+        transpile(
+          'wpHashPassword("secret")',
+          'declare function wpHashPassword(p: string): string;',
+        ),
+      ).toBe("wp_hash_password( 'secret' )");
+      expect(
+        transpile(
+          'wpCheckPassword("secret", hash)',
+          'declare function wpCheckPassword(p: string, h: string): boolean; const hash: string = "";',
+        ),
+      ).toBe("wp_check_password( 'secret', $hash )");
+      expect(
+        transpile('wpSetCurrentUser(1)', 'declare function wpSetCurrentUser(id: number): any;'),
+      ).toBe('wp_set_current_user( 1 )');
     });
 
     it('maps JWT and encoding built-in functions', () => {
-      expect(transpile('jsonEncode({ key: "value" })', 'declare function jsonEncode(v: any): string;'))
-        .toBe("json_encode( array( 'key' => 'value' ) )");
-      expect(transpile('jsonDecode(data, true)', 'declare function jsonDecode(j: string, a?: boolean): any; const data: string = "";'))
-        .toBe('json_decode( $data, true )');
-      expect(transpile('base64Encode("hello")', 'declare function base64Encode(d: string): string;'))
-        .toBe("base64_encode( 'hello' )");
-      expect(transpile('base64Decode("aGVsbG8=")', 'declare function base64Decode(d: string): string;'))
-        .toBe("base64_decode( 'aGVsbG8=' )");
-      expect(transpile('hashHmac("sha256", data, key, true)', 'declare function hashHmac(a: string, d: string, k: string, r?: boolean): string; const data: string = ""; const key: string = "";'))
-        .toBe("hash_hmac( 'sha256', $data, $key, true )");
-      expect(transpile('hashEquals(expected, actual)', 'declare function hashEquals(k: string, u: string): boolean; const expected: string = ""; const actual: string = "";'))
-        .toBe('hash_equals( $expected, $actual )');
+      expect(
+        transpile('jsonEncode({ key: "value" })', 'declare function jsonEncode(v: any): string;'),
+      ).toBe("json_encode( array( 'key' => 'value' ) )");
+      expect(
+        transpile(
+          'jsonDecode(data, true)',
+          'declare function jsonDecode(j: string, a?: boolean): any; const data: string = "";',
+        ),
+      ).toBe('json_decode( $data, true )');
+      expect(
+        transpile('base64Encode("hello")', 'declare function base64Encode(d: string): string;'),
+      ).toBe("base64_encode( 'hello' )");
+      expect(
+        transpile('base64Decode("aGVsbG8=")', 'declare function base64Decode(d: string): string;'),
+      ).toBe("base64_decode( 'aGVsbG8=' )");
+      expect(
+        transpile(
+          'hashHmac("sha256", data, key, true)',
+          'declare function hashHmac(a: string, d: string, k: string, r?: boolean): string; const data: string = ""; const key: string = "";',
+        ),
+      ).toBe("hash_hmac( 'sha256', $data, $key, true )");
+      expect(
+        transpile(
+          'hashEquals(expected, actual)',
+          'declare function hashEquals(k: string, u: string): boolean; const expected: string = ""; const actual: string = "";',
+        ),
+      ).toBe('hash_equals( $expected, $actual )');
     });
 
     it('maps general PHP built-in functions', () => {
-      expect(transpile('md5("test")', 'declare function md5(s: string): string;'))
-        .toBe("md5( 'test' )");
-      expect(transpile('intval(val)', 'declare function intval(v: any): number; const val: any = "42";'))
-        .toBe('intval( $val )');
-      expect(transpile('strval(num)', 'declare function strval(v: any): string; const num: number = 1;'))
-        .toBe('strval( $num )');
-      expect(transpile('strtr(str, "+/", "-_")', 'declare function strtr(s: string, f: string, t: string): string; const str: string = "";'))
-        .toBe("strtr( $str, '+/', '-_' )");
-      expect(transpile('rtrim(str, "=")', 'declare function rtrim(s: string, c?: string): string; const str: string = "";'))
-        .toBe("rtrim( $str, '=' )");
-      expect(transpile('time()', 'declare function time(): number;'))
-        .toBe('time()');
-      expect(transpile('getallheaders()', 'declare function getallheaders(): Record<string, string>;'))
-        .toBe("function_exists( 'getallheaders' ) ? getallheaders() : array()");
-      expect(transpile('header("Content-Type: application/json")', 'declare function header(h: string): void;'))
-        .toBe("header( 'Content-Type: application/json' )");
+      expect(transpile('md5("test")', 'declare function md5(s: string): string;')).toBe(
+        "md5( 'test' )",
+      );
+      expect(
+        transpile('intval(val)', 'declare function intval(v: any): number; const val: any = "42";'),
+      ).toBe('intval( $val )');
+      expect(
+        transpile('strval(num)', 'declare function strval(v: any): string; const num: number = 1;'),
+      ).toBe('strval( $num )');
+      expect(
+        transpile(
+          'strtr(str, "+/", "-_")',
+          'declare function strtr(s: string, f: string, t: string): string; const str: string = "";',
+        ),
+      ).toBe("strtr( $str, '+/', '-_' )");
+      expect(
+        transpile(
+          'rtrim(str, "=")',
+          'declare function rtrim(s: string, c?: string): string; const str: string = "";',
+        ),
+      ).toBe("rtrim( $str, '=' )");
+      expect(transpile('time()', 'declare function time(): number;')).toBe('time()');
+      expect(
+        transpile('getallheaders()', 'declare function getallheaders(): Record<string, string>;'),
+      ).toBe("function_exists( 'getallheaders' ) ? getallheaders() : array()");
+      expect(
+        transpile(
+          'header("Content-Type: application/json")',
+          'declare function header(h: string): void;',
+        ),
+      ).toBe("header( 'Content-Type: application/json' )");
     });
 
     it('maps escUrlRaw for non-display URL contexts', () => {
-      expect(transpile('escUrlRaw(url)', 'declare function escUrlRaw(url: string, protocols?: string[]): string; const url: string = "";'))
-        .toBe('esc_url_raw( $url )');
+      expect(
+        transpile(
+          'escUrlRaw(url)',
+          'declare function escUrlRaw(url: string, protocols?: string[]): string; const url: string = "";',
+        ),
+      ).toBe('esc_url_raw( $url )');
     });
 
     it('maps hash and uniqid built-in functions', () => {
-      expect(transpile('hash("sha256", data)', 'declare function hash(a: string, d: string, r?: boolean): string; const data: string = "";'))
-        .toBe("hash( 'sha256', $data )");
-      expect(transpile('uniqid("mp_")', 'declare function uniqid(p?: string, m?: boolean): string;'))
-        .toBe("uniqid( 'mp_' )");
-      expect(transpile('numberFormat(price, 2, ".", "")', 'declare function numberFormat(n: number, d?: number, dp?: string, ts?: string): string; const price: number = 0;'))
-        .toBe("number_format( $price, 2, '.', '' )");
+      expect(
+        transpile(
+          'hash("sha256", data)',
+          'declare function hash(a: string, d: string, r?: boolean): string; const data: string = "";',
+        ),
+      ).toBe("hash( 'sha256', $data )");
+      expect(
+        transpile('uniqid("mp_")', 'declare function uniqid(p?: string, m?: boolean): string;'),
+      ).toBe("uniqid( 'mp_' )");
+      expect(
+        transpile(
+          'numberFormat(price, 2, ".", "")',
+          'declare function numberFormat(n: number, d?: number, dp?: string, ts?: string): string; const price: number = 0;',
+        ),
+      ).toBe("number_format( $price, 2, '.', '' )");
     });
 
     it('maps search and query conditionals', () => {
-      expect(transpile('isSearch()', 'declare function isSearch(): boolean;'))
-        .toBe('is_search()');
-      expect(transpile('getSearchQuery()', 'declare function getSearchQuery(): string;'))
-        .toBe('get_search_query()');
-      expect(transpile('getQueriedObjectId()', 'declare function getQueriedObjectId(): number;'))
-        .toBe('get_queried_object_id()');
+      expect(transpile('isSearch()', 'declare function isSearch(): boolean;')).toBe('is_search()');
+      expect(transpile('getSearchQuery()', 'declare function getSearchQuery(): string;')).toBe(
+        'get_search_query()',
+      );
+      expect(
+        transpile('getQueriedObjectId()', 'declare function getQueriedObjectId(): number;'),
+      ).toBe('get_queried_object_id()');
     });
 
     it('maps utility and REST functions', () => {
-      expect(transpile('wpRand(0, 9)', 'declare function wpRand(min?: number, max?: number): number;'))
-        .toBe('wp_rand( 0, 9 )');
-      expect(transpile('restEnsureResponse(data)', 'declare function restEnsureResponse(r: any): any; const data: any = null;'))
-        .toBe('rest_ensure_response( $data )');
+      expect(
+        transpile('wpRand(0, 9)', 'declare function wpRand(min?: number, max?: number): number;'),
+      ).toBe('wp_rand( 0, 9 )');
+      expect(
+        transpile(
+          'restEnsureResponse(data)',
+          'declare function restEnsureResponse(r: any): any; const data: any = null;',
+        ),
+      ).toBe('rest_ensure_response( $data )');
     });
 
     it('maps console.log to error_log', () => {
@@ -342,7 +612,9 @@ describe('transpileExpression', () => {
     });
 
     it('maps JSON.parse', () => {
-      expect(transpile('JSON.parse("test")', 'const test = "";')).toBe("json_decode( 'test', true )");
+      expect(transpile('JSON.parse("test")', 'const test = "";')).toBe(
+        "json_decode( 'test', true )",
+      );
     });
 
     it('maps parseInt', () => {
@@ -511,7 +783,10 @@ describe('transpileExpression', () => {
     });
 
     it('transpiles function call spread', () => {
-      const result = transpile('fn(...args)', 'const args: any[] = []; declare function fn(...a: any[]): void;');
+      const result = transpile(
+        'fn(...args)',
+        'const args: any[] = []; declare function fn(...a: any[]): void;',
+      );
       expect(result).toContain('...$args');
     });
   });
@@ -572,25 +847,37 @@ describe('transpileExpression', () => {
 
   describe('custom array methods', () => {
     it('maps arr.find to array_filter + reset', () => {
-      const result = transpile('arr.find((x: number) => x > 2)', 'const arr: number[] = [1, 2, 3];');
+      const result = transpile(
+        'arr.find((x: number) => x > 2)',
+        'const arr: number[] = [1, 2, 3];',
+      );
       expect(result).toContain('array_filter(');
       expect(result).toContain('reset(');
     });
 
     it('maps arr.reduce with initial value', () => {
-      const result = transpile('arr.reduce((acc: number, cur: number) => acc + cur, 0)', 'const arr: number[] = [1, 2, 3];');
+      const result = transpile(
+        'arr.reduce((acc: number, cur: number) => acc + cur, 0)',
+        'const arr: number[] = [1, 2, 3];',
+      );
       expect(result).toContain('array_reduce(');
       expect(result).toContain('$arr');
     });
 
     it('maps arr.some to count + array_filter > 0', () => {
-      const result = transpile('arr.some((x: number) => x > 2)', 'const arr: number[] = [1, 2, 3];');
+      const result = transpile(
+        'arr.some((x: number) => x > 2)',
+        'const arr: number[] = [1, 2, 3];',
+      );
       expect(result).toContain('array_filter(');
       expect(result).toContain('> 0');
     });
 
     it('maps arr.every to count comparison', () => {
-      const result = transpile('arr.every((x: number) => x > 0)', 'const arr: number[] = [1, 2, 3];');
+      const result = transpile(
+        'arr.every((x: number) => x > 0)',
+        'const arr: number[] = [1, 2, 3];',
+      );
       expect(result).toContain('array_filter(');
       expect(result).toContain('=== count(');
     });
@@ -618,7 +905,10 @@ describe('transpileExpression', () => {
     });
 
     it('transpiles string enum member', () => {
-      const result = transpile('Status.Active', 'enum Status { Active = "active", Inactive = "inactive" }');
+      const result = transpile(
+        'Status.Active',
+        'enum Status { Active = "active", Inactive = "inactive" }',
+      );
       expect(result).toBe('Status::ACTIVE');
     });
   });
@@ -662,12 +952,18 @@ describe('transpileExpression', () => {
 
   describe('new expressions', () => {
     it('transpiles new ClassName without $ prefix', () => {
-      const result = transpile('new WP_Error("code", "message")', 'declare class WP_Error { constructor(code: string, msg: string); }');
+      const result = transpile(
+        'new WP_Error("code", "message")',
+        'declare class WP_Error { constructor(code: string, msg: string); }',
+      );
       expect(result).toBe("new WP_Error( 'code', 'message' )");
     });
 
     it('preserves class name casing verbatim', () => {
-      const result = transpile('new MyCustomClass()', 'declare class MyCustomClass { constructor(); }');
+      const result = transpile(
+        'new MyCustomClass()',
+        'declare class MyCustomClass { constructor(); }',
+      );
       expect(result).toBe('new MyCustomClass()');
     });
   });

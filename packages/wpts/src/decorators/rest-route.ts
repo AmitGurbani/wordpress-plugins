@@ -9,7 +9,7 @@ export interface RestRouteOptions {
  * The decorated method becomes the route callback, transpiled to PHP.
  */
 export function RestRoute(route: string, options: RestRouteOptions): (...args: any[]) => any {
-  return function (..._args: any[]) {
+  return (..._args: any[]) => {
     // No-op at runtime — metadata is extracted at compile time by the transpiler.
   };
 }

@@ -8,7 +8,6 @@
 import { Action } from 'wpts';
 
 class UmamiServerTracking {
-
   // ── Helper Methods ────────────────────────────────────────────────────
 
   sendUmamiEvent(eventName: string, url: string, title: string, eventData: any): any {
@@ -120,7 +119,12 @@ class UmamiServerTracking {
 
     const orderUrl: string = order.get_checkout_order_received_url();
 
-    const result: any = this.sendUmamiEvent('purchase', orderUrl, 'Purchase - Order #' + strval(orderId), eventData);
+    const result: any = this.sendUmamiEvent(
+      'purchase',
+      orderUrl,
+      'Purchase - Order #' + strval(orderId),
+      eventData,
+    );
 
     // Only mark as sent on success — allows retry on next status change if Umami was unreachable
     if (result['success']) {

@@ -1,7 +1,7 @@
 import path from 'node:path';
-import { watch as chokidarWatch } from 'chokidar';
 import chalk from 'chalk';
-import { build, type BuildOptions } from '../compiler/pipeline.js';
+import { watch as chokidarWatch } from 'chokidar';
+import { type BuildOptions, build } from '../compiler/pipeline.js';
 
 export async function watchProject(file: string, options: BuildOptions): Promise<void> {
   const entryPath = path.resolve(file);
@@ -40,12 +40,19 @@ async function runBuild(entryPath: string, options: BuildOptions): Promise<void>
   const result = await build({ ...options, entry: entryPath });
 
   for (const d of result.diagnostics.getAll()) {
-    const prefix = d.level === 'error' ? chalk.red('ERROR') : d.level === 'warning' ? chalk.yellow('WARN') : 'INFO';
+    const prefix =
+      d.level === 'error'
+        ? chalk.red('ERROR')
+        : d.level === 'warning'
+          ? chalk.yellow('WARN')
+          : 'INFO';
     console.log(`  [${prefix}] ${d.code}: ${d.message}`);
   }
 
   if (result.success) {
-    console.log(chalk.green(`Build succeeded in ${Date.now() - start}ms (${result.files.length} files)`));
+    console.log(
+      chalk.green(`Build succeeded in ${Date.now() - start}ms (${result.files.length} files)`),
+    );
   } else {
     console.log(chalk.red('Build failed. Watching for changes...'));
   }

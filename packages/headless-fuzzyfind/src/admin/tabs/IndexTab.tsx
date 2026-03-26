@@ -1,7 +1,7 @@
-import { useState, useEffect } from '@wordpress/element';
-import { Button, Spinner } from '@wordpress/components';
-import { __ } from '@wordpress/i18n';
 import apiFetch from '@wordpress/api-fetch';
+import { Button, Spinner } from '@wordpress/components';
+import { useEffect, useState } from '@wordpress/element';
+import { __ } from '@wordpress/i18n';
 import type { IndexStatus } from '../types';
 
 export function IndexTab() {
@@ -41,7 +41,14 @@ export function IndexTab() {
   };
 
   const handleDelete = async () => {
-    if (!confirm(__('Are you sure? This will clear the search index. Search will be unavailable until you rebuild.', 'headless-fuzzyfind'))) {
+    if (
+      !confirm(
+        __(
+          'Are you sure? This will clear the search index. Search will be unavailable until you rebuild.',
+          'headless-fuzzyfind',
+        ),
+      )
+    ) {
       return;
     }
     setDeleting(true);
@@ -61,13 +68,15 @@ export function IndexTab() {
 
   if (loading) return <Spinner />;
 
-  const percentage = status && status.total_products > 0
-    ? Math.round((status.total_indexed / status.total_products) * 100)
-    : 0;
+  const percentage =
+    status && status.total_products > 0
+      ? Math.round((status.total_indexed / status.total_products) * 100)
+      : 0;
 
-  const lastIndexedDate = status && status.last_indexed
-    ? new Date(status.last_indexed * 1000).toLocaleString()
-    : __('Never', 'headless-fuzzyfind');
+  const lastIndexedDate =
+    status && status.last_indexed
+      ? new Date(status.last_indexed * 1000).toLocaleString()
+      : __('Never', 'headless-fuzzyfind');
 
   return (
     <div style={{ padding: '16px 0', maxWidth: '600px' }}>
@@ -77,20 +86,34 @@ export function IndexTab() {
         <table className="widefat" style={{ marginBottom: '16px' }}>
           <tbody>
             <tr>
-              <td><strong>{__('Total Products', 'headless-fuzzyfind')}</strong></td>
+              <td>
+                <strong>{__('Total Products', 'headless-fuzzyfind')}</strong>
+              </td>
               <td>{status.total_products}</td>
             </tr>
             <tr>
-              <td><strong>{__('Products Indexed', 'headless-fuzzyfind')}</strong></td>
-              <td>{status.total_indexed} ({percentage}%)</td>
+              <td>
+                <strong>{__('Products Indexed', 'headless-fuzzyfind')}</strong>
+              </td>
+              <td>
+                {status.total_indexed} ({percentage}%)
+              </td>
             </tr>
             <tr>
-              <td><strong>{__('Last Indexed', 'headless-fuzzyfind')}</strong></td>
+              <td>
+                <strong>{__('Last Indexed', 'headless-fuzzyfind')}</strong>
+              </td>
               <td>{lastIndexedDate}</td>
             </tr>
             <tr>
-              <td><strong>{__('Status', 'headless-fuzzyfind')}</strong></td>
-              <td>{status.is_indexing ? __('Indexing in progress...', 'headless-fuzzyfind') : __('Idle', 'headless-fuzzyfind')}</td>
+              <td>
+                <strong>{__('Status', 'headless-fuzzyfind')}</strong>
+              </td>
+              <td>
+                {status.is_indexing
+                  ? __('Indexing in progress...', 'headless-fuzzyfind')
+                  : __('Idle', 'headless-fuzzyfind')}
+              </td>
             </tr>
           </tbody>
         </table>
@@ -113,9 +136,7 @@ export function IndexTab() {
         >
           {deleting ? <Spinner /> : __('Delete Index', 'headless-fuzzyfind')}
         </Button>
-        {message && (
-          <span style={{ color: '#00a32a' }}>{message}</span>
-        )}
+        {message && <span style={{ color: '#00a32a' }}>{message}</span>}
       </div>
     </div>
   );

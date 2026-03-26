@@ -1,59 +1,64 @@
 // Public API — decorators for user import
-export {
-  Plugin,
-  Action,
-  Filter,
-  AdminPage,
-  Setting,
-  Activate,
-  Deactivate,
-  Shortcode,
-  CustomPostType,
-  CustomTaxonomy,
-  RestRoute,
-  AjaxHandler,
-} from './decorators/index.js';
 
 export type {
-  PluginOptions,
-  HookOptions,
-  AdminPageOptions,
-  SettingOptions,
-  CustomPostTypeOptions,
-  CustomTaxonomyOptions,
-  RestRouteOptions,
-  AjaxHandlerOptions,
-} from './decorators/index.js';
-
-// IR types
-export type {
-  PluginIR,
-  PluginMetadata,
-  ActionIR,
-  FilterIR,
-  SettingIR,
-  AdminPageIR,
-  ShortcodeIR,
-  FunctionBodyIR,
-  ParameterIR,
-  HookContext,
-  CustomPostTypeIR,
-  CustomTaxonomyIR,
-  RestRouteIR,
-  AjaxHandlerIR,
-} from './ir/index.js';
-
+  BuildOptions,
+  BuildResult,
+  Diagnostic,
+  DiagnosticLevel,
+  ParseResult,
+} from './compiler/index.js';
 // Compiler
-export { parseSourceFile, parseSourceString } from './compiler/index.js';
-export { build } from './compiler/index.js';
-export { DiagnosticCollection } from './compiler/index.js';
-export { extractDecorators } from './compiler/index.js';
-export type { ParseResult, BuildOptions, BuildResult } from './compiler/index.js';
-export type { Diagnostic, DiagnosticLevel } from './compiler/index.js';
-
+export {
+  build,
+  DiagnosticCollection,
+  extractDecorators,
+  parseSourceFile,
+  parseSourceString,
+} from './compiler/index.js';
+export type { WptsConfig } from './config.js';
 // Config
 export { loadConfig } from './config.js';
-export type { WptsConfig } from './config.js';
+export type {
+  AdminPageOptions,
+  AjaxHandlerOptions,
+  CustomPostTypeOptions,
+  CustomTaxonomyOptions,
+  HookOptions,
+  PluginOptions,
+  RestRouteOptions,
+  SettingOptions,
+} from './decorators/index.js';
+export {
+  Action,
+  Activate,
+  AdminPage,
+  AjaxHandler,
+  CustomPostType,
+  CustomTaxonomy,
+  Deactivate,
+  Filter,
+  Plugin,
+  RestRoute,
+  Setting,
+  Shortcode,
+} from './decorators/index.js';
+// IR types
+export type {
+  ActionIR,
+  AdminPageIR,
+  AjaxHandlerIR,
+  CustomPostTypeIR,
+  CustomTaxonomyIR,
+  FilterIR,
+  FunctionBodyIR,
+  HookContext,
+  ParameterIR,
+  PluginIR,
+  PluginMetadata,
+  RestRouteIR,
+  SettingIR,
+  ShortcodeIR,
+} from './ir/index.js';
 
 // WordPress API global declarations (activates declare global when imported)
 export type { WPGlobals } from './runtime/wp-types.js';

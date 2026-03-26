@@ -8,7 +8,7 @@
  * Build: npx wpts build src/plugin.ts -o dist --clean
  */
 
-import { Plugin, Setting, AdminPage, Activate, Deactivate, Action, Filter } from 'wpts';
+import { Action, Activate, AdminPage, Deactivate, Filter, Plugin, Setting } from 'wpts';
 import './capi.js';
 import './config-routes.js';
 import './track-routes.js';
@@ -16,7 +16,8 @@ import './diagnostics-routes.js';
 
 @Plugin({
   name: 'Headless Meta Pixel',
-  description: 'Meta Pixel with WooCommerce integration and Conversions API for headless WordPress.',
+  description:
+    'Meta Pixel with WooCommerce integration and Conversions API for headless WordPress.',
   version: '1.0.0',
   author: 'wpts',
   license: 'GPL-2.0+',
@@ -32,7 +33,6 @@ import './diagnostics-routes.js';
   iconUrl: 'dashicons-chart-area',
 })
 class MetaPixel {
-
   // ── General Settings ──────────────────────────────────────────────────
 
   @Setting({
@@ -134,7 +134,12 @@ class MetaPixel {
   wooNotice(): void {
     if (!classExists('WooCommerce')) {
       echo('<div class="notice notice-warning"><p><strong>Headless Meta Pixel:</strong> ');
-      echo(escHtml__('WooCommerce is recommended for automatic Purchase event tracking.', 'headless-meta-pixel'));
+      echo(
+        escHtml__(
+          'WooCommerce is recommended for automatic Purchase event tracking.',
+          'headless-meta-pixel',
+        ),
+      );
       echo('</p></div>');
     }
   }

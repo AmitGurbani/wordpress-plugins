@@ -8,7 +8,7 @@
  * Build: npx wpts build src/plugin.ts -o dist --clean
  */
 
-import { Plugin, Setting, AdminPage, Activate, Deactivate } from 'wpts';
+import { Activate, AdminPage, Deactivate, Plugin, Setting } from 'wpts';
 import './config-routes.js';
 import './diagnostics-routes.js';
 
@@ -30,7 +30,6 @@ import './diagnostics-routes.js';
   iconUrl: 'dashicons-visibility',
 })
 class HeadlessClarity {
-
   // ── General Settings ──────────────────────────────────────────────────
 
   @Setting({
@@ -38,7 +37,8 @@ class HeadlessClarity {
     type: 'string',
     default: '',
     label: 'Clarity Project ID',
-    description: 'Your Microsoft Clarity project ID (10-character alphanumeric string from Settings > Overview).',
+    description:
+      'Your Microsoft Clarity project ID (10-character alphanumeric string from Settings > Overview).',
   })
   projectId: string = '';
 

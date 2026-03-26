@@ -7,35 +7,50 @@
 import { RestRoute } from 'wpts';
 
 class AuthRoutes {
-
   @RestRoute('/auth/register', { method: 'POST', public: true })
   registerUser(request: any): any {
     const regToken: string = sanitizeTextField(request.get_param('registration_token'));
     const name: string = sanitizeTextField(request.get_param('name'));
 
     if (!regToken || !name) {
-      return new WP_Error('missing_params', 'Registration token and name are required.', { status: 400 });
+      return new WP_Error('missing_params', 'Registration token and name are required.', {
+        status: 400,
+      });
     }
 
     // Check if registration is enabled
     const regEnabled: string = getOption('headless_otp_auth_enable_registration', '1');
     if (regEnabled !== '1') {
-      return new WP_Error('registration_disabled', 'New user registration is disabled.', { status: 403 });
+      return new WP_Error('registration_disabled', 'New user registration is disabled.', {
+        status: 403,
+      });
     }
 
     const regTokenHash: string = md5(regToken);
     const phone: string = getTransient('hoa_reg_' + regTokenHash);
 
     if (!phone) {
-      return new WP_Error('invalid_token', 'Registration token is invalid or expired.', { status: 400 });
+      return new WP_Error('invalid_token', 'Registration token is invalid or expired.', {
+        status: 400,
+      });
     }
 
     // Check if user already exists (use fields:'ids' to avoid WP_User objects)
-    let existingIds: any[] = getUsers({ meta_key: 'phone_number', meta_value: phone, number: 1, fields: 'ids' });
+    let existingIds: any[] = getUsers({
+      meta_key: 'phone_number',
+      meta_value: phone,
+      number: 1,
+      fields: 'ids',
+    });
 
     // Fallback: check WooCommerce billing_phone
     if (existingIds.length === 0 && classExists('WooCommerce')) {
-      const wcIds: any[] = getUsers({ meta_key: 'billing_phone', meta_value: phone, number: 1, fields: 'ids' });
+      const wcIds: any[] = getUsers({
+        meta_key: 'billing_phone',
+        meta_value: phone,
+        number: 1,
+        fields: 'ids',
+      });
       if (wcIds.length > 0) {
         updateUserMeta(intval(wcIds[0]), 'phone_number', phone);
         existingIds = wcIds;
@@ -44,7 +59,9 @@ class AuthRoutes {
 
     if (existingIds.length > 0) {
       deleteTransient('hoa_reg_' + regTokenHash);
-      return new WP_Error('user_exists', 'An account with this phone number already exists.', { status: 409 });
+      return new WP_Error('user_exists', 'An account with this phone number already exists.', {
+        status: 409,
+      });
     }
 
     // Generate username from display name
@@ -103,8 +120,22 @@ class AuthRoutes {
     const accessExpiry: number = intval(getOption('headless_otp_auth_jwt_access_expiry', 3600));
     const refreshExpiry: number = intval(getOption('headless_otp_auth_jwt_refresh_expiry', 604800));
 
-    const accessToken: string = applyFilters('hoa_generate_jwt', '', userId, 'access', accessExpiry, secret);
-    const refreshToken: string = applyFilters('hoa_generate_jwt', '', userId, 'refresh', refreshExpiry, secret);
+    const accessToken: string = applyFilters(
+      'hoa_generate_jwt',
+      '',
+      userId,
+      'access',
+      accessExpiry,
+      secret,
+    );
+    const refreshToken: string = applyFilters(
+      'hoa_generate_jwt',
+      '',
+      userId,
+      'refresh',
+      refreshExpiry,
+      secret,
+    );
 
     updateUserMeta(userId, 'hoa_refresh_token_hash', wpHashPassword(refreshToken));
     updateUserMeta(userId, 'hoa_refresh_token_expiry', strval(time() + refreshExpiry));
@@ -140,7 +171,11 @@ class AuthRoutes {
     }
 
     const headerPayload: string = tokenParts[0] + '.' + tokenParts[1];
-    const expectedSig: string = strtr(rtrim(base64Encode(hashHmac('sha256', headerPayload, secret, true)), '='), '+/', '-_');
+    const expectedSig: string = strtr(
+      rtrim(base64Encode(hashHmac('sha256', headerPayload, secret, true)), '='),
+      '+/',
+      '-_',
+    );
 
     if (!hashEquals(expectedSig, tokenParts[2])) {
       return new WP_Error('invalid_token', 'Invalid refresh token.', { status: 401 });
@@ -181,8 +216,22 @@ class AuthRoutes {
     const accessExpiry: number = intval(getOption('headless_otp_auth_jwt_access_expiry', 3600));
     const refreshExpiry: number = intval(getOption('headless_otp_auth_jwt_refresh_expiry', 604800));
 
-    const newAccessToken: string = applyFilters('hoa_generate_jwt', '', userId, 'access', accessExpiry, secret);
-    const newRefreshToken: string = applyFilters('hoa_generate_jwt', '', userId, 'refresh', refreshExpiry, secret);
+    const newAccessToken: string = applyFilters(
+      'hoa_generate_jwt',
+      '',
+      userId,
+      'access',
+      accessExpiry,
+      secret,
+    );
+    const newRefreshToken: string = applyFilters(
+      'hoa_generate_jwt',
+      '',
+      userId,
+      'refresh',
+      refreshExpiry,
+      secret,
+    );
 
     updateUserMeta(userId, 'hoa_refresh_token_hash', wpHashPassword(newRefreshToken));
     updateUserMeta(userId, 'hoa_refresh_token_expiry', strval(time() + refreshExpiry));

@@ -1,12 +1,16 @@
 import ts from 'typescript';
+import { toSnakeCase } from '../utils/naming.js';
 import { transpileExpression } from './expression-transpiler.js';
 import { mapType } from './type-mapper.js';
-import { toSnakeCase } from '../utils/naming.js';
 
 /**
  * Transpile a TypeScript statement node to a PHP statement string.
  */
-export function transpileStatement(node: ts.Statement, typeChecker: ts.TypeChecker, indent: string = '\t'): string {
+export function transpileStatement(
+  node: ts.Statement,
+  typeChecker: ts.TypeChecker,
+  indent: string = '\t',
+): string {
   switch (node.kind) {
     case ts.SyntaxKind.VariableStatement:
       return transpileVariableStatement(node as ts.VariableStatement, typeChecker, indent);
@@ -80,9 +84,13 @@ export function transpileStatement(node: ts.Statement, typeChecker: ts.TypeCheck
 /**
  * Transpile a block of statements.
  */
-export function transpileBlock(block: ts.Block, typeChecker: ts.TypeChecker, indent: string = '\t'): string {
+export function transpileBlock(
+  block: ts.Block,
+  typeChecker: ts.TypeChecker,
+  indent: string = '\t',
+): string {
   return block.statements
-    .map(stmt => transpileStatement(stmt, typeChecker, indent))
+    .map((stmt) => transpileStatement(stmt, typeChecker, indent))
     .filter(Boolean)
     .join('\n');
 }
@@ -90,7 +98,10 @@ export function transpileBlock(block: ts.Block, typeChecker: ts.TypeChecker, ind
 /**
  * Transpile a function body (Block) to PHP code string.
  */
-export function transpileFunctionBody(body: ts.Block | ts.Node, typeChecker: ts.TypeChecker): string {
+export function transpileFunctionBody(
+  body: ts.Block | ts.Node,
+  typeChecker: ts.TypeChecker,
+): string {
   if (ts.isBlock(body)) {
     return transpileBlock(body, typeChecker, '\t\t');
   }
@@ -101,47 +112,64 @@ export function transpileFunctionBody(body: ts.Block | ts.Node, typeChecker: ts.
   return '\t\t/* empty body */';
 }
 
-function transpileVariableStatement(node: ts.VariableStatement, typeChecker: ts.TypeChecker, indent: string): string {
+function transpileVariableStatement(
+  node: ts.VariableStatement,
+  typeChecker: ts.TypeChecker,
+  indent: string,
+): string {
   const declarations = node.declarationList.declarations;
   return declarations
-    .map(decl => {
+    .map((decl) => {
       // Object destructuring: const { a, b } = obj;
       if (ts.isObjectBindingPattern(decl.name)) {
         const obj = decl.initializer ? transpileExpression(decl.initializer, typeChecker) : 'null';
-        return decl.name.elements.map(el => {
-          if (el.dotDotDotToken) {
-            return `${indent}/* WPTS: Rest elements (...) in destructuring are not supported. Extract properties individually. */`;
-          }
-          // { x: renamed } -> propertyName = 'x', name = 'renamed'
-          // { x } -> propertyName is undefined, name = 'x'
-          const propName = el.propertyName
-            ? (ts.isIdentifier(el.propertyName) ? el.propertyName.text : el.propertyName.getText())
-            : (ts.isIdentifier(el.name) ? el.name.text : el.name.getText());
-          const varName = ts.isIdentifier(el.name) ? `$${toSnakeCase(el.name.text)}` : '$var';
-          if (el.initializer) {
-            const defaultVal = transpileExpression(el.initializer, typeChecker);
-            return `${indent}${varName} = ${obj}['${propName}'] ?? ${defaultVal};`;
-          }
-          return `${indent}${varName} = ${obj}['${propName}'];`;
-        }).join('\n');
+        return decl.name.elements
+          .map((el) => {
+            if (el.dotDotDotToken) {
+              return `${indent}/* WPTS: Rest elements (...) in destructuring are not supported. Extract properties individually. */`;
+            }
+            // { x: renamed } -> propertyName = 'x', name = 'renamed'
+            // { x } -> propertyName is undefined, name = 'x'
+            const propName = el.propertyName
+              ? ts.isIdentifier(el.propertyName)
+                ? el.propertyName.text
+                : el.propertyName.getText()
+              : ts.isIdentifier(el.name)
+                ? el.name.text
+                : el.name.getText();
+            const varName = ts.isIdentifier(el.name) ? `$${toSnakeCase(el.name.text)}` : '$var';
+            if (el.initializer) {
+              const defaultVal = transpileExpression(el.initializer, typeChecker);
+              return `${indent}${varName} = ${obj}['${propName}'] ?? ${defaultVal};`;
+            }
+            return `${indent}${varName} = ${obj}['${propName}'];`;
+          })
+          .join('\n');
       }
 
       // Array destructuring: const [a, b] = arr;
       if (ts.isArrayBindingPattern(decl.name)) {
-        const arr = decl.initializer ? transpileExpression(decl.initializer, typeChecker) : 'array()';
-        return decl.name.elements.map((el, i) => {
-          if (ts.isOmittedExpression(el)) return ''; // skip holes
-          const bindEl = el as ts.BindingElement;
-          if (bindEl.dotDotDotToken) {
-            return `${indent}/* WPTS: Rest elements (...) in destructuring are not supported. Use array_slice() instead. */`;
-          }
-          const varName = ts.isIdentifier(bindEl.name) ? `$${toSnakeCase(bindEl.name.text)}` : '$var';
-          if (bindEl.initializer) {
-            const defaultVal = transpileExpression(bindEl.initializer, typeChecker);
-            return `${indent}${varName} = ${arr}[${i}] ?? ${defaultVal};`;
-          }
-          return `${indent}${varName} = ${arr}[${i}];`;
-        }).filter(Boolean).join('\n');
+        const arr = decl.initializer
+          ? transpileExpression(decl.initializer, typeChecker)
+          : 'array()';
+        return decl.name.elements
+          .map((el, i) => {
+            if (ts.isOmittedExpression(el)) return ''; // skip holes
+            const bindEl = el as ts.BindingElement;
+            if (bindEl.dotDotDotToken) {
+              return `${indent}/* WPTS: Rest elements (...) in destructuring are not supported. Use array_slice() instead. */`;
+            }
+            const varName = ts.isIdentifier(bindEl.name)
+              ? `$${toSnakeCase(bindEl.name.text)}`
+              : '$var';
+            if (bindEl.initializer) {
+              const defaultVal = transpileExpression(bindEl.initializer, typeChecker);
+              return `${indent}${varName} = ${arr}[${i}] ?? ${defaultVal};`;
+            }
+            return `${indent}${varName} = ${arr}[${i}];`;
+          })
+          .filter(Boolean)
+          .join('\n');
       }
 
       // Simple variable: const x = value;
@@ -155,7 +183,11 @@ function transpileVariableStatement(node: ts.VariableStatement, typeChecker: ts.
     .join('\n');
 }
 
-function transpileExpressionStatement(node: ts.ExpressionStatement, typeChecker: ts.TypeChecker, indent: string): string {
+function transpileExpressionStatement(
+  node: ts.ExpressionStatement,
+  typeChecker: ts.TypeChecker,
+  indent: string,
+): string {
   const expr = transpileExpression(node.expression, typeChecker);
   // echo is a language construct, doesn't need semicolon handling
   if (expr.startsWith('echo ')) {
@@ -164,7 +196,11 @@ function transpileExpressionStatement(node: ts.ExpressionStatement, typeChecker:
   return `${indent}${expr};`;
 }
 
-function transpileReturnStatement(node: ts.ReturnStatement, typeChecker: ts.TypeChecker, indent: string): string {
+function transpileReturnStatement(
+  node: ts.ReturnStatement,
+  typeChecker: ts.TypeChecker,
+  indent: string,
+): string {
   if (node.expression) {
     const expr = transpileExpression(node.expression, typeChecker);
     return `${indent}return ${expr};`;
@@ -172,7 +208,11 @@ function transpileReturnStatement(node: ts.ReturnStatement, typeChecker: ts.Type
   return `${indent}return;`;
 }
 
-function transpileIfStatement(node: ts.IfStatement, typeChecker: ts.TypeChecker, indent: string): string {
+function transpileIfStatement(
+  node: ts.IfStatement,
+  typeChecker: ts.TypeChecker,
+  indent: string,
+): string {
   const condition = transpileExpression(node.expression, typeChecker);
   const thenBody = transpileStatementBody(node.thenStatement, typeChecker, indent);
   let result = `${indent}if ( ${condition} ) {\n${thenBody}\n${indent}}`;
@@ -192,12 +232,16 @@ function transpileIfStatement(node: ts.IfStatement, typeChecker: ts.TypeChecker,
   return result;
 }
 
-function transpileForStatement(node: ts.ForStatement, typeChecker: ts.TypeChecker, indent: string): string {
+function transpileForStatement(
+  node: ts.ForStatement,
+  typeChecker: ts.TypeChecker,
+  indent: string,
+): string {
   let init = '';
   if (node.initializer) {
     if (ts.isVariableDeclarationList(node.initializer)) {
       init = node.initializer.declarations
-        .map(d => {
+        .map((d) => {
           const name = ts.isIdentifier(d.name) ? `$${toSnakeCase(d.name.text)}` : '$i';
           const value = d.initializer ? transpileExpression(d.initializer, typeChecker) : '0';
           return `${name} = ${value}`;
@@ -215,7 +259,11 @@ function transpileForStatement(node: ts.ForStatement, typeChecker: ts.TypeChecke
   return `${indent}for ( ${init}; ${condition}; ${incrementor} ) {\n${body}\n${indent}}`;
 }
 
-function transpileForOfStatement(node: ts.ForOfStatement, typeChecker: ts.TypeChecker, indent: string): string {
+function transpileForOfStatement(
+  node: ts.ForOfStatement,
+  typeChecker: ts.TypeChecker,
+  indent: string,
+): string {
   const expr = transpileExpression(node.expression, typeChecker);
   const body = transpileStatementBody(node.statement, typeChecker, indent);
 
@@ -231,20 +279,26 @@ function transpileForOfStatement(node: ts.ForOfStatement, typeChecker: ts.TypeCh
     if (ts.isObjectBindingPattern(decl.name)) {
       const tempVar = '$__item';
       const innerIndent = indent + '\t';
-      const destructured = decl.name.elements.map(el => {
-        if (el.dotDotDotToken) {
-          return `${innerIndent}/* WPTS: Rest elements (...) in for-of destructuring are not supported. */`;
-        }
-        const propName = el.propertyName
-          ? (ts.isIdentifier(el.propertyName) ? el.propertyName.text : el.propertyName.getText())
-          : (ts.isIdentifier(el.name) ? el.name.text : el.name.getText());
-        const varName = ts.isIdentifier(el.name) ? `$${toSnakeCase(el.name.text)}` : '$var';
-        if (el.initializer) {
-          const defaultVal = transpileExpression(el.initializer, typeChecker);
-          return `${innerIndent}${varName} = ${tempVar}['${propName}'] ?? ${defaultVal};`;
-        }
-        return `${innerIndent}${varName} = ${tempVar}['${propName}'];`;
-      }).join('\n');
+      const destructured = decl.name.elements
+        .map((el) => {
+          if (el.dotDotDotToken) {
+            return `${innerIndent}/* WPTS: Rest elements (...) in for-of destructuring are not supported. */`;
+          }
+          const propName = el.propertyName
+            ? ts.isIdentifier(el.propertyName)
+              ? el.propertyName.text
+              : el.propertyName.getText()
+            : ts.isIdentifier(el.name)
+              ? el.name.text
+              : el.name.getText();
+          const varName = ts.isIdentifier(el.name) ? `$${toSnakeCase(el.name.text)}` : '$var';
+          if (el.initializer) {
+            const defaultVal = transpileExpression(el.initializer, typeChecker);
+            return `${innerIndent}${varName} = ${tempVar}['${propName}'] ?? ${defaultVal};`;
+          }
+          return `${innerIndent}${varName} = ${tempVar}['${propName}'];`;
+        })
+        .join('\n');
       return `${indent}foreach ( ${expr} as ${tempVar} ) {\n${destructured}\n${body}\n${indent}}`;
     }
 
@@ -252,19 +306,24 @@ function transpileForOfStatement(node: ts.ForOfStatement, typeChecker: ts.TypeCh
     if (ts.isArrayBindingPattern(decl.name)) {
       const tempVar = '$__item';
       const innerIndent = indent + '\t';
-      const destructured = decl.name.elements.map((el, i) => {
-        if (ts.isOmittedExpression(el)) return '';
-        const bindEl = el as ts.BindingElement;
-        if (bindEl.dotDotDotToken) {
-          return `${innerIndent}/* WPTS: Rest elements (...) in for-of destructuring are not supported. */`;
-        }
-        const varName = ts.isIdentifier(bindEl.name) ? `$${toSnakeCase(bindEl.name.text)}` : '$var';
-        if (bindEl.initializer) {
-          const defaultVal = transpileExpression(bindEl.initializer, typeChecker);
-          return `${innerIndent}${varName} = ${tempVar}[${i}] ?? ${defaultVal};`;
-        }
-        return `${innerIndent}${varName} = ${tempVar}[${i}];`;
-      }).filter(Boolean).join('\n');
+      const destructured = decl.name.elements
+        .map((el, i) => {
+          if (ts.isOmittedExpression(el)) return '';
+          const bindEl = el as ts.BindingElement;
+          if (bindEl.dotDotDotToken) {
+            return `${innerIndent}/* WPTS: Rest elements (...) in for-of destructuring are not supported. */`;
+          }
+          const varName = ts.isIdentifier(bindEl.name)
+            ? `$${toSnakeCase(bindEl.name.text)}`
+            : '$var';
+          if (bindEl.initializer) {
+            const defaultVal = transpileExpression(bindEl.initializer, typeChecker);
+            return `${innerIndent}${varName} = ${tempVar}[${i}] ?? ${defaultVal};`;
+          }
+          return `${innerIndent}${varName} = ${tempVar}[${i}];`;
+        })
+        .filter(Boolean)
+        .join('\n');
       return `${indent}foreach ( ${expr} as ${tempVar} ) {\n${destructured}\n${body}\n${indent}}`;
     }
   }
@@ -272,7 +331,11 @@ function transpileForOfStatement(node: ts.ForOfStatement, typeChecker: ts.TypeCh
   return `${indent}foreach ( ${expr} as $item ) {\n${body}\n${indent}}`;
 }
 
-function transpileForInStatement(node: ts.ForInStatement, typeChecker: ts.TypeChecker, indent: string): string {
+function transpileForInStatement(
+  node: ts.ForInStatement,
+  typeChecker: ts.TypeChecker,
+  indent: string,
+): string {
   const expr = transpileExpression(node.expression, typeChecker);
   const body = transpileStatementBody(node.statement, typeChecker, indent);
 
@@ -308,35 +371,47 @@ function transpileForInStatement(node: ts.ForInStatement, typeChecker: ts.TypeCh
   return `${indent}foreach ( ${expr} as $key => $value ) {\n${body}\n${indent}}`;
 }
 
-function transpileWhileStatement(node: ts.WhileStatement, typeChecker: ts.TypeChecker, indent: string): string {
+function transpileWhileStatement(
+  node: ts.WhileStatement,
+  typeChecker: ts.TypeChecker,
+  indent: string,
+): string {
   const condition = transpileExpression(node.expression, typeChecker);
   const body = transpileStatementBody(node.statement, typeChecker, indent);
   return `${indent}while ( ${condition} ) {\n${body}\n${indent}}`;
 }
 
-function transpileDoWhileStatement(node: ts.DoStatement, typeChecker: ts.TypeChecker, indent: string): string {
+function transpileDoWhileStatement(
+  node: ts.DoStatement,
+  typeChecker: ts.TypeChecker,
+  indent: string,
+): string {
   const condition = transpileExpression(node.expression, typeChecker);
   const body = transpileStatementBody(node.statement, typeChecker, indent);
   return `${indent}do {\n${body}\n${indent}} while ( ${condition} );`;
 }
 
-function transpileSwitchStatement(node: ts.SwitchStatement, typeChecker: ts.TypeChecker, indent: string): string {
+function transpileSwitchStatement(
+  node: ts.SwitchStatement,
+  typeChecker: ts.TypeChecker,
+  indent: string,
+): string {
   const expr = transpileExpression(node.expression, typeChecker);
   const innerIndent = indent + '\t';
   const caseIndent = innerIndent + '    ';
 
-  const cases = node.caseBlock.clauses.map(clause => {
+  const cases = node.caseBlock.clauses.map((clause) => {
     if (ts.isCaseClause(clause)) {
       const caseExpr = transpileExpression(clause.expression, typeChecker);
       const stmts = clause.statements
-        .map(s => transpileStatement(s, typeChecker, caseIndent))
+        .map((s) => transpileStatement(s, typeChecker, caseIndent))
         .filter(Boolean)
         .join('\n');
       return `${innerIndent}case ${caseExpr}:\n${stmts}`;
     } else {
       // Default clause
       const stmts = clause.statements
-        .map(s => transpileStatement(s, typeChecker, caseIndent))
+        .map((s) => transpileStatement(s, typeChecker, caseIndent))
         .filter(Boolean)
         .join('\n');
       return `${innerIndent}default:\n${stmts}`;
@@ -346,7 +421,11 @@ function transpileSwitchStatement(node: ts.SwitchStatement, typeChecker: ts.Type
   return `${indent}switch ( ${expr} ) {\n${cases.join('\n')}\n${indent}}`;
 }
 
-function transpileThrowStatement(node: ts.ThrowStatement, typeChecker: ts.TypeChecker, indent: string): string {
+function transpileThrowStatement(
+  node: ts.ThrowStatement,
+  typeChecker: ts.TypeChecker,
+  indent: string,
+): string {
   if (node.expression) {
     const expr = transpileExpression(node.expression, typeChecker);
     return `${indent}throw ${expr};`;
@@ -354,15 +433,19 @@ function transpileThrowStatement(node: ts.ThrowStatement, typeChecker: ts.TypeCh
   return `${indent}throw new \\Exception();`;
 }
 
-function transpileTryStatement(node: ts.TryStatement, typeChecker: ts.TypeChecker, indent: string): string {
+function transpileTryStatement(
+  node: ts.TryStatement,
+  typeChecker: ts.TypeChecker,
+  indent: string,
+): string {
   const tryBody = transpileBlock(node.tryBlock, typeChecker, indent + '\t');
   let result = `${indent}try {\n${tryBody}\n${indent}}`;
 
   if (node.catchClause) {
     const varName = node.catchClause.variableDeclaration
-      ? (ts.isIdentifier(node.catchClause.variableDeclaration.name)
-          ? `$${toSnakeCase((node.catchClause.variableDeclaration.name as ts.Identifier).text)}`
-          : '$e')
+      ? ts.isIdentifier(node.catchClause.variableDeclaration.name)
+        ? `$${toSnakeCase((node.catchClause.variableDeclaration.name as ts.Identifier).text)}`
+        : '$e'
       : '$e';
     const catchBody = transpileBlock(node.catchClause.block, typeChecker, indent + '\t');
     result += ` catch ( \\Exception ${varName} ) {\n${catchBody}\n${indent}}`;
@@ -376,7 +459,11 @@ function transpileTryStatement(node: ts.TryStatement, typeChecker: ts.TypeChecke
   return result;
 }
 
-function transpileEnumDeclaration(node: ts.EnumDeclaration, typeChecker: ts.TypeChecker, indent: string): string {
+function transpileEnumDeclaration(
+  node: ts.EnumDeclaration,
+  typeChecker: ts.TypeChecker,
+  indent: string,
+): string {
   const enumName = node.name.text;
   const innerIndent = indent + '\t';
   const lines: string[] = [];
@@ -392,9 +479,7 @@ function transpileEnumDeclaration(node: ts.EnumDeclaration, typeChecker: ts.Type
         : member.name.getText();
 
     // Convert to UPPER_SNAKE_CASE
-    const phpConstName = memberName
-      .replace(/([a-z0-9])([A-Z])/g, '$1_$2')
-      .toUpperCase();
+    const phpConstName = memberName.replace(/([a-z0-9])([A-Z])/g, '$1_$2').toUpperCase();
 
     if (member.initializer) {
       const value = transpileExpression(member.initializer, typeChecker);
@@ -415,7 +500,11 @@ function transpileEnumDeclaration(node: ts.EnumDeclaration, typeChecker: ts.Type
 /**
  * Helper to transpile a statement that may or may not be a block.
  */
-function transpileStatementBody(node: ts.Statement, typeChecker: ts.TypeChecker, indent: string): string {
+function transpileStatementBody(
+  node: ts.Statement,
+  typeChecker: ts.TypeChecker,
+  indent: string,
+): string {
   const innerIndent = indent + '\t';
   if (ts.isBlock(node)) {
     return transpileBlock(node, typeChecker, innerIndent);

@@ -10,7 +10,6 @@
 import { RestRoute } from 'wpts';
 
 class FfSearchRoutes {
-
   // ── Search Endpoint ──────────────────────────────────────────────────
 
   @RestRoute('/search', { method: 'GET', public: true })
@@ -22,22 +21,43 @@ class FfSearchRoutes {
     const query: string = sanitizeTextField(request.get_param('query') ?? '');
     const page: number = intval(request.get_param('page') ?? 1);
     const rawPerPage: number = intval(request.get_param('per_page') ?? 10);
-    const perPage: number = rawPerPage > 100 ? 100 : (rawPerPage < 1 ? 1 : rawPerPage);
+    const perPage: number = rawPerPage > 100 ? 100 : rawPerPage < 1 ? 1 : rawPerPage;
     const orderby: string = sanitizeTextField(request.get_param('orderby') ?? 'relevance');
 
     const minLength: number = intval(getOption('headless_fuzzy_find_min_query_length', 2));
     if (query.length < minLength) {
-      return restEnsureResponse({ results: [], total: 0, total_pages: 0, page: page, per_page: perPage, did_you_mean: [] });
+      return restEnsureResponse({
+        results: [],
+        total: 0,
+        total_pages: 0,
+        page: page,
+        per_page: perPage,
+        did_you_mean: [],
+      });
     }
 
     const tableName: string = getOption('headless_fuzzyfind_index_table', '');
     if (!tableName) {
-      return restEnsureResponse({ results: [], total: 0, total_pages: 0, page: page, per_page: perPage, did_you_mean: [] });
+      return restEnsureResponse({
+        results: [],
+        total: 0,
+        total_pages: 0,
+        page: page,
+        per_page: perPage,
+        did_you_mean: [],
+      });
     }
 
     let booleanQuery: string = this.buildBooleanQuery(query);
     if (!booleanQuery) {
-      return restEnsureResponse({ results: [], total: 0, total_pages: 0, page: page, per_page: perPage, did_you_mean: [] });
+      return restEnsureResponse({
+        results: [],
+        total: 0,
+        total_pages: 0,
+        page: page,
+        per_page: perPage,
+        did_you_mean: [],
+      });
     }
 
     // Load weights
@@ -49,12 +69,17 @@ class FfSearchRoutes {
     let didYouMean: string[] = [];
 
     // Count total matches (FULLTEXT + post_status check)
-    let total: number = intval(wpdb.getVar(
-      wpdb.prepare(
-        'SELECT COUNT(DISTINCT ff_si.product_id) FROM %i AS ff_si INNER JOIN %i AS p ON ff_si.product_id = p.ID WHERE p.post_status = %s AND MATCH(ff_si.title, ff_si.sku, ff_si.short_desc, ff_si.attributes, ff_si.categories, ff_si.tags, ff_si.variation_skus) AGAINST (%s IN BOOLEAN MODE)',
-        tableName, postsTable, 'publish', booleanQuery
-      )
-    ) ?? '0');
+    let total: number = intval(
+      wpdb.getVar(
+        wpdb.prepare(
+          'SELECT COUNT(DISTINCT ff_si.product_id) FROM %i AS ff_si INNER JOIN %i AS p ON ff_si.product_id = p.ID WHERE p.post_status = %s AND MATCH(ff_si.title, ff_si.sku, ff_si.short_desc, ff_si.attributes, ff_si.categories, ff_si.tags, ff_si.variation_skus) AGAINST (%s IN BOOLEAN MODE)',
+          tableName,
+          postsTable,
+          'publish',
+          booleanQuery,
+        ),
+      ) ?? '0',
+    );
 
     // Fuzzy correction fallback if 0 results
     if (total === 0) {
@@ -62,12 +87,17 @@ class FfSearchRoutes {
       if (corrected) {
         booleanQuery = this.buildBooleanQuery(corrected);
         if (booleanQuery) {
-          total = intval(wpdb.getVar(
-            wpdb.prepare(
-              'SELECT COUNT(DISTINCT ff_si.product_id) FROM %i AS ff_si INNER JOIN %i AS p ON ff_si.product_id = p.ID WHERE p.post_status = %s AND MATCH(ff_si.title, ff_si.sku, ff_si.short_desc, ff_si.attributes, ff_si.categories, ff_si.tags, ff_si.variation_skus) AGAINST (%s IN BOOLEAN MODE)',
-              tableName, postsTable, 'publish', booleanQuery
-            )
-          ) ?? '0');
+          total = intval(
+            wpdb.getVar(
+              wpdb.prepare(
+                'SELECT COUNT(DISTINCT ff_si.product_id) FROM %i AS ff_si INNER JOIN %i AS p ON ff_si.product_id = p.ID WHERE p.post_status = %s AND MATCH(ff_si.title, ff_si.sku, ff_si.short_desc, ff_si.attributes, ff_si.categories, ff_si.tags, ff_si.variation_skus) AGAINST (%s IN BOOLEAN MODE)',
+                tableName,
+                postsTable,
+                'publish',
+                booleanQuery,
+              ),
+            ) ?? '0',
+          );
         }
       }
     }
@@ -77,12 +107,18 @@ class FfSearchRoutes {
     if (total === 0 && query.length < 3) {
       const escapedQuery: string = wpdb.escLike(query);
       const likePattern: string = '%' + escapedQuery + '%';
-      total = intval(wpdb.getVar(
-        wpdb.prepare(
-          'SELECT COUNT(DISTINCT ff_si.product_id) FROM %i AS ff_si INNER JOIN %i AS p ON ff_si.product_id = p.ID WHERE p.post_status = %s AND (ff_si.title LIKE %s OR ff_si.sku LIKE %s)',
-          tableName, postsTable, 'publish', likePattern, likePattern
-        )
-      ) ?? '0');
+      total = intval(
+        wpdb.getVar(
+          wpdb.prepare(
+            'SELECT COUNT(DISTINCT ff_si.product_id) FROM %i AS ff_si INNER JOIN %i AS p ON ff_si.product_id = p.ID WHERE p.post_status = %s AND (ff_si.title LIKE %s OR ff_si.sku LIKE %s)',
+            tableName,
+            postsTable,
+            'publish',
+            likePattern,
+            likePattern,
+          ),
+        ) ?? '0',
+      );
       useLike = true;
     }
 
@@ -96,7 +132,14 @@ class FfSearchRoutes {
         didYouMean = this.getDidYouMeanSuggestions(query, tableName);
       }
       this.logSearch(query, 0);
-      return restEnsureResponse({ results: [], total: 0, total_pages: 0, page: page, per_page: perPage, did_you_mean: didYouMean });
+      return restEnsureResponse({
+        results: [],
+        total: 0,
+        total_pages: 0,
+        page: page,
+        per_page: perPage,
+        did_you_mean: didYouMean,
+      });
     }
 
     // Fetch matching rows with weighted relevance scoring
@@ -104,31 +147,55 @@ class FfSearchRoutes {
     if (useLike) {
       const escapedQuery: string = wpdb.escLike(query);
       const likePattern: string = '%' + escapedQuery + '%';
-      rows = wpdb.getResults(
-        wpdb.prepare(
-          'SELECT ff_si.product_id, ff_si.title, ff_si.sku, ff_si.short_desc FROM %i AS ff_si INNER JOIN %i AS p ON ff_si.product_id = p.ID WHERE p.post_status = %s AND (ff_si.title LIKE %s OR ff_si.sku LIKE %s) ORDER BY ff_si.title ASC LIMIT %d OFFSET %d',
-          tableName, postsTable, 'publish', likePattern, likePattern, perPage, offset
-        ),
-        'ARRAY_A'
-      ) ?? [];
+      rows =
+        wpdb.getResults(
+          wpdb.prepare(
+            'SELECT ff_si.product_id, ff_si.title, ff_si.sku, ff_si.short_desc FROM %i AS ff_si INNER JOIN %i AS p ON ff_si.product_id = p.ID WHERE p.post_status = %s AND (ff_si.title LIKE %s OR ff_si.sku LIKE %s) ORDER BY ff_si.title ASC LIMIT %d OFFSET %d',
+            tableName,
+            postsTable,
+            'publish',
+            likePattern,
+            likePattern,
+            perPage,
+            offset,
+          ),
+          'ARRAY_A',
+        ) ?? [];
     } else {
       if (orderby === 'title') {
-        rows = wpdb.getResults(
-          wpdb.prepare(
-            'SELECT ff_si.product_id, ff_si.title, ff_si.sku, ff_si.short_desc FROM %i AS ff_si INNER JOIN %i AS p ON ff_si.product_id = p.ID WHERE p.post_status = %s AND MATCH(ff_si.title, ff_si.sku, ff_si.short_desc, ff_si.attributes, ff_si.categories, ff_si.tags, ff_si.variation_skus) AGAINST (%s IN BOOLEAN MODE) ORDER BY ff_si.title ASC LIMIT %d OFFSET %d',
-            tableName, postsTable, 'publish', booleanQuery, perPage, offset
-          ),
-          'ARRAY_A'
-        ) ?? [];
+        rows =
+          wpdb.getResults(
+            wpdb.prepare(
+              'SELECT ff_si.product_id, ff_si.title, ff_si.sku, ff_si.short_desc FROM %i AS ff_si INNER JOIN %i AS p ON ff_si.product_id = p.ID WHERE p.post_status = %s AND MATCH(ff_si.title, ff_si.sku, ff_si.short_desc, ff_si.attributes, ff_si.categories, ff_si.tags, ff_si.variation_skus) AGAINST (%s IN BOOLEAN MODE) ORDER BY ff_si.title ASC LIMIT %d OFFSET %d',
+              tableName,
+              postsTable,
+              'publish',
+              booleanQuery,
+              perPage,
+              offset,
+            ),
+            'ARRAY_A',
+          ) ?? [];
       } else {
-        rows = wpdb.getResults(
-          wpdb.prepare(
-            'SELECT ff_si.product_id, ff_si.title, ff_si.sku, ff_si.short_desc, (MATCH(ff_si.title) AGAINST (%s IN BOOLEAN MODE) * %d + MATCH(ff_si.sku) AGAINST (%s IN BOOLEAN MODE) * %d + MATCH(ff_si.title, ff_si.sku, ff_si.short_desc, ff_si.attributes, ff_si.categories, ff_si.tags, ff_si.variation_skus) AGAINST (%s IN BOOLEAN MODE) * %d) AS relevance_score FROM %i AS ff_si INNER JOIN %i AS p ON ff_si.product_id = p.ID WHERE p.post_status = %s AND MATCH(ff_si.title, ff_si.sku, ff_si.short_desc, ff_si.attributes, ff_si.categories, ff_si.tags, ff_si.variation_skus) AGAINST (%s IN BOOLEAN MODE) ORDER BY relevance_score DESC LIMIT %d OFFSET %d',
-            booleanQuery, wTitle, booleanQuery, wSku, booleanQuery, wContent,
-            tableName, postsTable, 'publish', booleanQuery, perPage, offset
-          ),
-          'ARRAY_A'
-        ) ?? [];
+        rows =
+          wpdb.getResults(
+            wpdb.prepare(
+              'SELECT ff_si.product_id, ff_si.title, ff_si.sku, ff_si.short_desc, (MATCH(ff_si.title) AGAINST (%s IN BOOLEAN MODE) * %d + MATCH(ff_si.sku) AGAINST (%s IN BOOLEAN MODE) * %d + MATCH(ff_si.title, ff_si.sku, ff_si.short_desc, ff_si.attributes, ff_si.categories, ff_si.tags, ff_si.variation_skus) AGAINST (%s IN BOOLEAN MODE) * %d) AS relevance_score FROM %i AS ff_si INNER JOIN %i AS p ON ff_si.product_id = p.ID WHERE p.post_status = %s AND MATCH(ff_si.title, ff_si.sku, ff_si.short_desc, ff_si.attributes, ff_si.categories, ff_si.tags, ff_si.variation_skus) AGAINST (%s IN BOOLEAN MODE) ORDER BY relevance_score DESC LIMIT %d OFFSET %d',
+              booleanQuery,
+              wTitle,
+              booleanQuery,
+              wSku,
+              booleanQuery,
+              wContent,
+              tableName,
+              postsTable,
+              'publish',
+              booleanQuery,
+              perPage,
+              offset,
+            ),
+            'ARRAY_A',
+          ) ?? [];
       }
     }
 
@@ -138,9 +205,10 @@ class FfSearchRoutes {
       productIds.push(intval(row['product_id']));
     }
 
-    const products: any[] = productIds.length > 0
-      ? wcGetProducts({ include: productIds, limit: productIds.length, return: 'objects' })
-      : [];
+    const products: any[] =
+      productIds.length > 0
+        ? wcGetProducts({ include: productIds, limit: productIds.length, return: 'objects' })
+        : [];
 
     // Map products by ID for quick lookup
     const productMap: Record<string, any> = {};
@@ -151,7 +219,7 @@ class FfSearchRoutes {
     }
 
     // Build response
-    let results: any[] = [];
+    const results: any[] = [];
     for (const row of rows) {
       const productId: number = intval(row['product_id']);
       const product: any = productMap[productId] ?? null;
@@ -219,8 +287,10 @@ class FfSearchRoutes {
     }
 
     const query: string = sanitizeTextField(request.get_param('query') ?? '');
-    const rawLimit: number = intval(request.get_param('limit') ?? getOption('headless_fuzzy_find_autocomplete_limit', 8));
-    const limit: number = rawLimit > 50 ? 50 : (rawLimit < 1 ? 1 : rawLimit);
+    const rawLimit: number = intval(
+      request.get_param('limit') ?? getOption('headless_fuzzy_find_autocomplete_limit', 8),
+    );
+    const limit: number = rawLimit > 50 ? 50 : rawLimit < 1 ? 1 : rawLimit;
 
     const minLength: number = intval(getOption('headless_fuzzy_find_min_query_length', 2));
     if (query.length < minLength) {
@@ -245,9 +315,14 @@ class FfSearchRoutes {
     results = wpdb.getResults(
       wpdb.prepare(
         'SELECT ff_si.product_id, ff_si.title, ff_si.sku FROM %i AS ff_si INNER JOIN %i AS p ON ff_si.product_id = p.ID WHERE p.post_status = %s AND MATCH(ff_si.title, ff_si.sku, ff_si.short_desc, ff_si.attributes, ff_si.categories, ff_si.tags, ff_si.variation_skus) AGAINST (%s IN BOOLEAN MODE) ORDER BY MATCH(ff_si.title) AGAINST (%s IN BOOLEAN MODE) DESC LIMIT %d',
-        tableName, postsTableAc, 'publish', booleanQuery, booleanQuery, limit
+        tableName,
+        postsTableAc,
+        'publish',
+        booleanQuery,
+        booleanQuery,
+        limit,
       ),
-      'ARRAY_A'
+      'ARRAY_A',
     );
 
     // Fallback to LIKE if FULLTEXT returns nothing (handles short words < 3 chars)
@@ -257,9 +332,14 @@ class FfSearchRoutes {
       results = wpdb.getResults(
         wpdb.prepare(
           'SELECT ff_si.product_id, ff_si.title, ff_si.sku FROM %i AS ff_si INNER JOIN %i AS p ON ff_si.product_id = p.ID WHERE p.post_status = %s AND (ff_si.title LIKE %s OR ff_si.sku LIKE %s) LIMIT %d',
-          tableName, postsTableAc, 'publish', likePattern, likePattern, limit
+          tableName,
+          postsTableAc,
+          'publish',
+          likePattern,
+          likePattern,
+          limit,
         ),
-        'ARRAY_A'
+        'ARRAY_A',
       );
     }
 
@@ -273,9 +353,10 @@ class FfSearchRoutes {
       productIds.push(intval(row['product_id']));
     }
 
-    const products: any[] = productIds.length > 0
-      ? wcGetProducts({ include: productIds, limit: productIds.length, return: 'objects' })
-      : [];
+    const products: any[] =
+      productIds.length > 0
+        ? wcGetProducts({ include: productIds, limit: productIds.length, return: 'objects' })
+        : [];
 
     const productMap: Record<string, any> = {};
     for (const product of products) {
@@ -285,7 +366,7 @@ class FfSearchRoutes {
     }
 
     // Build product response
-    let suggestions: any[] = [];
+    const suggestions: any[] = [];
     for (const row of results) {
       const productId: number = intval(row['product_id']);
       const product: any = productMap[productId] ?? null;
@@ -336,9 +417,15 @@ class FfSearchRoutes {
     }
 
     const postsTableCw: string = wpdb.posts;
-    const titles: string[] = wpdb.getCol(
-      wpdb.prepare('SELECT DISTINCT ff_si.title FROM %i AS ff_si INNER JOIN %i AS p ON ff_si.product_id = p.ID WHERE p.post_status = %s LIMIT 500', tableName, postsTableCw, 'publish')
-    ) ?? [];
+    const titles: string[] =
+      wpdb.getCol(
+        wpdb.prepare(
+          'SELECT DISTINCT ff_si.title FROM %i AS ff_si INNER JOIN %i AS p ON ff_si.product_id = p.ID WHERE p.post_status = %s LIMIT 500',
+          tableName,
+          postsTableCw,
+          'publish',
+        ),
+      ) ?? [];
 
     let indexWords: string[] = [];
     for (const title of titles) {
@@ -348,7 +435,7 @@ class FfSearchRoutes {
     indexWords = arrayValues(arrayUnique(indexWords));
 
     const searchWords: string[] = searchTerm.trim().toLowerCase().split(' ');
-    let correctedWords: string[] = [];
+    const correctedWords: string[] = [];
     let hasCorrected: boolean = false;
 
     for (const word of searchWords) {
@@ -365,9 +452,10 @@ class FfSearchRoutes {
         if (indexWord.length < 2) {
           continue;
         }
-        const lenDiff: number = trimmed.length > indexWord.length
-          ? trimmed.length - indexWord.length
-          : indexWord.length - trimmed.length;
+        const lenDiff: number =
+          trimmed.length > indexWord.length
+            ? trimmed.length - indexWord.length
+            : indexWord.length - trimmed.length;
         if (lenDiff > 2) {
           continue;
         }
@@ -397,12 +485,16 @@ class FfSearchRoutes {
 
     const boolQuery: string = this.buildBooleanQuery(result['corrected']);
     const postsTableDym: string = wpdb.posts;
-    const correctedResults: string[] = wpdb.getCol(
-      wpdb.prepare(
-        'SELECT DISTINCT ff_si.title FROM %i AS ff_si INNER JOIN %i AS p ON ff_si.product_id = p.ID WHERE p.post_status = %s AND MATCH(ff_si.title, ff_si.sku, ff_si.short_desc, ff_si.attributes, ff_si.categories, ff_si.tags, ff_si.variation_skus) AGAINST (%s IN BOOLEAN MODE) LIMIT 5',
-        tableName, postsTableDym, 'publish', boolQuery
-      )
-    ) ?? [];
+    const correctedResults: string[] =
+      wpdb.getCol(
+        wpdb.prepare(
+          'SELECT DISTINCT ff_si.title FROM %i AS ff_si INNER JOIN %i AS p ON ff_si.product_id = p.ID WHERE p.post_status = %s AND MATCH(ff_si.title, ff_si.sku, ff_si.short_desc, ff_si.attributes, ff_si.categories, ff_si.tags, ff_si.variation_skus) AGAINST (%s IN BOOLEAN MODE) LIMIT 5',
+          tableName,
+          postsTableDym,
+          'publish',
+          boolQuery,
+        ),
+      ) ?? [];
 
     return correctedResults;
   }
@@ -424,14 +516,16 @@ class FfSearchRoutes {
     const synonymGroups: string[] = synonymsRaw ? synonymsRaw.split('\n') : [];
 
     const words: string[] = searchTerm.trim().toLowerCase().split(' ');
-    let parts: string[] = [];
+    const parts: string[] = [];
 
     for (const word of words) {
       const trimmed: string = word.trim();
-      if (trimmed.length === 0) { continue; }
+      if (trimmed.length === 0) {
+        continue;
+      }
 
       // Find synonyms for this word
-      let synonyms: string[] = [];
+      const synonyms: string[] = [];
       for (const group of synonymGroups) {
         const terms: string[] = group.split(',');
         let found: boolean = false;
@@ -454,7 +548,9 @@ class FfSearchRoutes {
 
       // Strip all MySQL FULLTEXT boolean mode operators
       const safeTrimmed: string = strtr(trimmed, '+-><()~*"@', '          ').trim();
-      if (safeTrimmed.length === 0) { continue; }
+      if (safeTrimmed.length === 0) {
+        continue;
+      }
 
       if (synonyms.length > 0) {
         let synGroup: string = safeTrimmed + '*';
@@ -494,8 +590,11 @@ class FfSearchRoutes {
     wpdb.query(
       wpdb.prepare(
         'INSERT INTO %i (query, result_count, search_count, last_searched) VALUES (%s, %d, 1, NOW()) ON DUPLICATE KEY UPDATE search_count = search_count + 1, result_count = %d, last_searched = NOW()',
-        logTable, normalizedQuery, resultCount, resultCount
-      )
+        logTable,
+        normalizedQuery,
+        resultCount,
+        resultCount,
+      ),
     );
   }
 }

@@ -9,7 +9,10 @@ export function DiagnosticsTab() {
       testAction={{
         path: '/headless-umami/v1/diagnostics/test-connection',
         title: __('Test Umami Connection', 'headless-umami'),
-        description: __('Send a test event to verify your Umami connection. Check your Umami dashboard to confirm the event arrived.', 'headless-umami'),
+        description: __(
+          'Send a test event to verify your Umami connection. Check your Umami dashboard to confirm the event arrived.',
+          'headless-umami',
+        ),
         buttonLabel: __('Test Connection', 'headless-umami'),
       }}
     />

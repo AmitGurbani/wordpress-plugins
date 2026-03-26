@@ -7,7 +7,6 @@
 import { RestRoute } from 'wpts';
 
 class FfAdminRoutes {
-
   // ── Index Status ────────────────────────────────────────────────────
 
   @RestRoute('/index/status', { method: 'GET', capability: 'manage_options' })
@@ -27,7 +26,10 @@ class FfAdminRoutes {
     let totalProducts: number = 0;
     if (classExists('WooCommerce')) {
       const count: string | null = wpdb.getVar(
-        wpdb.prepare("SELECT COUNT(*) FROM %i WHERE post_type = 'product' AND post_status = 'publish'", wpdb.posts)
+        wpdb.prepare(
+          "SELECT COUNT(*) FROM %i WHERE post_type = 'product' AND post_status = 'publish'",
+          wpdb.posts,
+        ),
       );
       totalProducts = count ? intval(count) : 0;
     }
@@ -52,8 +54,10 @@ class FfAdminRoutes {
     if (isIndexing === '1') {
       // Allow override if flag is stale (>10 minutes old)
       const flagTime: number = intval(getOption('headless_fuzzyfind_reindex_started', '0'));
-      if (flagTime > 0 && (time() - flagTime) < 600) {
-        return new WP_Error('already_indexing', 'A reindex is already in progress.', { status: 409 });
+      if (flagTime > 0 && time() - flagTime < 600) {
+        return new WP_Error('already_indexing', 'A reindex is already in progress.', {
+          status: 409,
+        });
       }
     }
 
@@ -63,7 +67,10 @@ class FfAdminRoutes {
 
     // For small stores, run synchronously
     const count: string | null = wpdb.getVar(
-      wpdb.prepare("SELECT COUNT(*) FROM %i WHERE post_type = 'product' AND post_status = 'publish'", wpdb.posts)
+      wpdb.prepare(
+        "SELECT COUNT(*) FROM %i WHERE post_type = 'product' AND post_status = 'publish'",
+        wpdb.posts,
+      ),
     );
     const totalProducts: number = count ? intval(count) : 0;
 
@@ -114,20 +121,22 @@ class FfAdminRoutes {
     }
 
     // Popular searches (top 20)
-    const popular: any[] = wpdb.getResults(
-      wpdb.prepare(
-        'SELECT query, search_count, result_count, last_searched FROM %i WHERE result_count > 0 ORDER BY search_count DESC LIMIT 20',
-        logTable
-      )
-    ) ?? [];
+    const popular: any[] =
+      wpdb.getResults(
+        wpdb.prepare(
+          'SELECT query, search_count, result_count, last_searched FROM %i WHERE result_count > 0 ORDER BY search_count DESC LIMIT 20',
+          logTable,
+        ),
+      ) ?? [];
 
     // Zero-result searches (top 20)
-    const zeroResults: any[] = wpdb.getResults(
-      wpdb.prepare(
-        'SELECT query, search_count, last_searched FROM %i WHERE result_count = 0 ORDER BY search_count DESC LIMIT 20',
-        logTable
-      )
-    ) ?? [];
+    const zeroResults: any[] =
+      wpdb.getResults(
+        wpdb.prepare(
+          'SELECT query, search_count, last_searched FROM %i WHERE result_count = 0 ORDER BY search_count DESC LIMIT 20',
+          logTable,
+        ),
+      ) ?? [];
 
     return restEnsureResponse({
       popular: popular,

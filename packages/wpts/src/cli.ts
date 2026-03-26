@@ -1,7 +1,7 @@
-import { Command } from 'commander';
 import { readFileSync } from 'node:fs';
-import { resolve, dirname } from 'node:path';
+import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { Command } from 'commander';
 import { build } from './compiler/pipeline.js';
 import { loadConfig } from './config.js';
 
@@ -10,10 +10,7 @@ const pkg = JSON.parse(readFileSync(resolve(__dirname, '..', '..', 'package.json
 
 const program = new Command();
 
-program
-  .name('wpts')
-  .description('TypeScript-to-WordPress-Plugin transpiler')
-  .version(pkg.version);
+program.name('wpts').description('TypeScript-to-WordPress-Plugin transpiler').version(pkg.version);
 
 program
   .command('init')
@@ -34,50 +31,55 @@ program
   .option('-o, --outDir <dir>', 'Output directory')
   .option('--clean', 'Clean output directory before build')
   .option('--zip', 'Generate a .zip file for WordPress upload')
-  .action(async (file: string | undefined, options: { outDir?: string; clean?: boolean; zip?: boolean }) => {
-    const config = await loadConfig(process.cwd()) ?? {};
+  .action(
+    async (
+      file: string | undefined,
+      options: { outDir?: string; clean?: boolean; zip?: boolean },
+    ) => {
+      const config = (await loadConfig(process.cwd())) ?? {};
 
-    const entryPath = resolve(file ?? config.entry ?? 'src/plugin.ts');
-    const outDir = resolve(options.outDir ?? config.outDir ?? './dist');
-    const clean = options.clean ?? config.clean;
+      const entryPath = resolve(file ?? config.entry ?? 'src/plugin.ts');
+      const outDir = resolve(options.outDir ?? config.outDir ?? './dist');
+      const clean = options.clean ?? config.clean;
 
-    console.log(`Building plugin from ${file ?? config.entry ?? 'src/plugin.ts'}...`);
+      console.log(`Building plugin from ${file ?? config.entry ?? 'src/plugin.ts'}...`);
 
-    const result = await build({
-      entry: entryPath,
-      outDir,
-      clean,
-      adminSrcDir: config.adminSrcDir,
-      zip: options.zip,
-    });
+      const result = await build({
+        entry: entryPath,
+        outDir,
+        clean,
+        adminSrcDir: config.adminSrcDir,
+        zip: options.zip,
+      });
 
-    // Print diagnostics
-    const diags = result.diagnostics.getAll();
-    for (const d of diags) {
-      const prefix = d.level === 'error' ? 'ERROR' : d.level === 'warning' ? 'WARN' : 'INFO';
-      console.log(`  [${prefix}] ${d.code}: ${d.message}`);
-      if (d.suggestion) {
-        console.log(`    Suggestion: ${d.suggestion}`);
+      // Print diagnostics
+      const diags = result.diagnostics.getAll();
+      for (const d of diags) {
+        const prefix = d.level === 'error' ? 'ERROR' : d.level === 'warning' ? 'WARN' : 'INFO';
+        console.log(`  [${prefix}] ${d.code}: ${d.message}`);
+        if (d.suggestion) {
+          console.log(`    Suggestion: ${d.suggestion}`);
+        }
       }
-    }
 
-    if (result.success) {
-      console.log(`\nBuild successful! Generated ${result.files.length} files to ${outDir}`);
-      console.log('\nGenerated files:');
-      for (const f of result.files) {
-        console.log(`  ${f.relativePath}`);
+      if (result.success) {
+        console.log(`\nBuild successful! Generated ${result.files.length} files to ${outDir}`);
+        console.log('\nGenerated files:');
+        for (const f of result.files) {
+          console.log(`  ${f.relativePath}`);
+        }
+        if (result.zipPath) {
+          console.log(`\nPlugin zip: ${result.zipPath}`);
+        }
+        console.log('\nNext steps:');
+        console.log('  1. Copy the plugin directory to wp-content/plugins/');
+        console.log('  2. Activate the plugin in WordPress admin');
+      } else {
+        console.error('\nBuild failed. Fix the errors above and try again.');
+        process.exit(1);
       }
-      if (result.zipPath) {
-        console.log(`\nPlugin zip: ${result.zipPath}`);
-      }
-      console.log('\nNext steps:');
-      console.log('  1. Copy the plugin directory to wp-content/plugins/');
-      console.log('  2. Activate the plugin in WordPress admin');
-    } else {
-      console.error('\nBuild failed. Fix the errors above and try again.');
-      process.exit(1);
-    }
-  });
+    },
+  );
 
 program
   .command('validate')
@@ -89,7 +91,7 @@ program
     const { extractDecorators } = await import('./compiler/decorator-extractor.js');
     const { DiagnosticCollection } = await import('./compiler/diagnostics.js');
 
-    const config = await loadConfig(process.cwd()) ?? {};
+    const config = (await loadConfig(process.cwd())) ?? {};
     const entryPath = resolve(file ?? config.entry ?? 'src/plugin.ts');
     console.log(`Validating ${file ?? config.entry ?? 'src/plugin.ts'}...`);
 
@@ -104,7 +106,8 @@ program
         console.log(`  [${prefix}] ${d.code}: ${d.message}`);
       }
 
-      const hasIssues = diagnostics.hasErrors() || (options.strict && diagnostics.getWarnings().length > 0);
+      const hasIssues =
+        diagnostics.hasErrors() || (options.strict && diagnostics.getWarnings().length > 0);
       if (hasIssues) {
         console.error('\nValidation failed.');
         process.exit(1);
@@ -123,7 +126,7 @@ program
   .argument('[file]', 'Entry TypeScript file')
   .option('-o, --outDir <dir>', 'Output directory')
   .action(async (file: string | undefined, options: { outDir?: string }) => {
-    const config = await loadConfig(process.cwd()) ?? {};
+    const config = (await loadConfig(process.cwd())) ?? {};
     const entry = file ?? config.entry ?? 'src/plugin.ts';
     const outDir = resolve(options.outDir ?? config.outDir ?? './dist');
 

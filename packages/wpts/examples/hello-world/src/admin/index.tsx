@@ -1,7 +1,7 @@
-import { createRoot, useState, useEffect } from '@wordpress/element';
-import { Panel, PanelBody, TextControl, Button, Spinner, ColorPicker } from '@wordpress/components';
-import { __ } from '@wordpress/i18n';
 import apiFetch from '@wordpress/api-fetch';
+import { Button, ColorPicker, Panel, PanelBody, Spinner, TextControl } from '@wordpress/components';
+import { createRoot, useEffect, useState } from '@wordpress/element';
+import { __ } from '@wordpress/i18n';
 
 function SettingsPage() {
   const [greeting, setGreeting] = useState('');

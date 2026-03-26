@@ -1,19 +1,19 @@
 import ts from 'typescript';
 import type {
-  RawPluginData,
-  RawPluginDecorator,
   RawActionDecorator,
-  RawFilterDecorator,
-  RawSettingDecorator,
   RawAdminPageDecorator,
-  RawShortcodeDecorator,
-  RawLifecycleDecorator,
+  RawAjaxHandlerDecorator,
   RawCustomPostTypeDecorator,
   RawCustomTaxonomyDecorator,
+  RawFilterDecorator,
+  RawLifecycleDecorator,
+  RawPluginData,
+  RawPluginDecorator,
   RawRestRouteDecorator,
-  RawAjaxHandlerDecorator,
+  RawSettingDecorator,
+  RawShortcodeDecorator,
 } from '../ir/plugin-ir.js';
-import { DiagnosticCollection } from './diagnostics.js';
+import type { DiagnosticCollection } from './diagnostics.js';
 
 function createEmptyRawData(): RawPluginData {
   return {
@@ -91,7 +91,7 @@ export function extractDecoratorsFromFiles(
   }
 
   if (!result.plugin) {
-    const fileNames = sourceFiles.map(sf => sf.fileName).join(', ');
+    const fileNames = sourceFiles.map((sf) => sf.fileName).join(', ');
     diagnostics.error(
       'WPTS001',
       'No @Plugin decorator found. One class must be decorated with @Plugin.',
@@ -117,7 +117,11 @@ function extractClassDecorators(
 
     if (name === 'Plugin') {
       if (result.plugin) {
-        diagnostics.error('WPTS002', 'Multiple @Plugin decorators found. Only one is allowed.', getLocation(decorator, sourceFile));
+        diagnostics.error(
+          'WPTS002',
+          'Multiple @Plugin decorators found. Only one is allowed.',
+          getLocation(decorator, sourceFile),
+        );
         continue;
       }
       result.plugin = extractPluginDecorator(decorator, diagnostics, sourceFile);
@@ -189,12 +193,26 @@ function extractMethodDecorators(
 
     switch (name) {
       case 'Action': {
-        const action = extractActionDecorator(decorator, methodName, method, typeChecker, diagnostics, sourceFile);
+        const action = extractActionDecorator(
+          decorator,
+          methodName,
+          method,
+          typeChecker,
+          diagnostics,
+          sourceFile,
+        );
         if (action) result.actions.push(action);
         break;
       }
       case 'Filter': {
-        const filter = extractFilterDecorator(decorator, methodName, method, typeChecker, diagnostics, sourceFile);
+        const filter = extractFilterDecorator(
+          decorator,
+          methodName,
+          method,
+          typeChecker,
+          diagnostics,
+          sourceFile,
+        );
         if (filter) result.filters.push(filter);
         break;
       }
@@ -204,30 +222,57 @@ function extractMethodDecorators(
         break;
       }
       case 'Shortcode': {
-        const shortcode = extractShortcodeDecorator(decorator, methodName, method, typeChecker, diagnostics, sourceFile);
+        const shortcode = extractShortcodeDecorator(
+          decorator,
+          methodName,
+          method,
+          typeChecker,
+          diagnostics,
+          sourceFile,
+        );
         if (shortcode) result.shortcodes.push(shortcode);
         break;
       }
       case 'RestRoute': {
-        const route = extractRestRouteDecorator(decorator, methodName, method, diagnostics, sourceFile);
+        const route = extractRestRouteDecorator(
+          decorator,
+          methodName,
+          method,
+          diagnostics,
+          sourceFile,
+        );
         if (route) result.restRoutes.push(route);
         break;
       }
       case 'AjaxHandler': {
-        const ajax = extractAjaxHandlerDecorator(decorator, methodName, method, diagnostics, sourceFile);
+        const ajax = extractAjaxHandlerDecorator(
+          decorator,
+          methodName,
+          method,
+          diagnostics,
+          sourceFile,
+        );
         if (ajax) result.ajaxHandlers.push(ajax);
         break;
       }
       case 'Activate': {
         if (result.activation) {
-          diagnostics.warning('WPTS003', 'Multiple @Activate decorators found. Only the last one will be used.', getLocation(decorator, sourceFile));
+          diagnostics.warning(
+            'WPTS003',
+            'Multiple @Activate decorators found. Only the last one will be used.',
+            getLocation(decorator, sourceFile),
+          );
         }
         result.activation = { methodName, bodyNode: method.body ?? method };
         break;
       }
       case 'Deactivate': {
         if (result.deactivation) {
-          diagnostics.warning('WPTS004', 'Multiple @Deactivate decorators found. Only the last one will be used.', getLocation(decorator, sourceFile));
+          diagnostics.warning(
+            'WPTS004',
+            'Multiple @Deactivate decorators found. Only the last one will be used.',
+            getLocation(decorator, sourceFile),
+          );
         }
         result.deactivation = { methodName, bodyNode: method.body ?? method };
         break;
@@ -264,19 +309,31 @@ function extractPluginDecorator(
 ): RawPluginDecorator | null {
   const args = getDecoratorArgs(decorator);
   if (!args || args.length === 0) {
-    diagnostics.error('WPTS010', '@Plugin requires an options object argument.', getLocation(decorator, sourceFile));
+    diagnostics.error(
+      'WPTS010',
+      '@Plugin requires an options object argument.',
+      getLocation(decorator, sourceFile),
+    );
     return null;
   }
 
   const obj = extractObjectLiteral(args[0]);
   if (!obj) {
-    diagnostics.error('WPTS011', '@Plugin argument must be an object literal.', getLocation(decorator, sourceFile));
+    diagnostics.error(
+      'WPTS011',
+      '@Plugin argument must be an object literal.',
+      getLocation(decorator, sourceFile),
+    );
     return null;
   }
 
   const name = getStringProp(obj, 'name');
   if (!name) {
-    diagnostics.error('WPTS012', '@Plugin requires a "name" property.', getLocation(decorator, sourceFile));
+    diagnostics.error(
+      'WPTS012',
+      '@Plugin requires a "name" property.',
+      getLocation(decorator, sourceFile),
+    );
     return null;
   }
 
@@ -307,13 +364,21 @@ function extractActionDecorator(
 ): RawActionDecorator | null {
   const args = getDecoratorArgs(decorator);
   if (!args || args.length === 0) {
-    diagnostics.error('WPTS020', '@Action requires a hook name argument.', getLocation(decorator, sourceFile));
+    diagnostics.error(
+      'WPTS020',
+      '@Action requires a hook name argument.',
+      getLocation(decorator, sourceFile),
+    );
     return null;
   }
 
   const hookName = getStringValue(args[0]);
   if (!hookName) {
-    diagnostics.error('WPTS021', '@Action first argument must be a string literal (hook name).', getLocation(decorator, sourceFile));
+    diagnostics.error(
+      'WPTS021',
+      '@Action first argument must be a string literal (hook name).',
+      getLocation(decorator, sourceFile),
+    );
     return null;
   }
 
@@ -350,13 +415,21 @@ function extractFilterDecorator(
 ): RawFilterDecorator | null {
   const args = getDecoratorArgs(decorator);
   if (!args || args.length === 0) {
-    diagnostics.error('WPTS030', '@Filter requires a hook name argument.', getLocation(decorator, sourceFile));
+    diagnostics.error(
+      'WPTS030',
+      '@Filter requires a hook name argument.',
+      getLocation(decorator, sourceFile),
+    );
     return null;
   }
 
   const hookName = getStringValue(args[0]);
   if (!hookName) {
-    diagnostics.error('WPTS031', '@Filter first argument must be a string literal (hook name).', getLocation(decorator, sourceFile));
+    diagnostics.error(
+      'WPTS031',
+      '@Filter first argument must be a string literal (hook name).',
+      getLocation(decorator, sourceFile),
+    );
     return null;
   }
 
@@ -391,19 +464,31 @@ function extractSettingDecorator(
 ): RawSettingDecorator | null {
   const args = getDecoratorArgs(decorator);
   if (!args || args.length === 0) {
-    diagnostics.error('WPTS040', '@Setting requires an options object argument.', getLocation(decorator, sourceFile));
+    diagnostics.error(
+      'WPTS040',
+      '@Setting requires an options object argument.',
+      getLocation(decorator, sourceFile),
+    );
     return null;
   }
 
   const obj = extractObjectLiteral(args[0]);
   if (!obj) {
-    diagnostics.error('WPTS041', '@Setting argument must be an object literal.', getLocation(decorator, sourceFile));
+    diagnostics.error(
+      'WPTS041',
+      '@Setting argument must be an object literal.',
+      getLocation(decorator, sourceFile),
+    );
     return null;
   }
 
   const key = getStringProp(obj, 'key');
   if (!key) {
-    diagnostics.error('WPTS042', '@Setting requires a "key" property.', getLocation(decorator, sourceFile));
+    diagnostics.error(
+      'WPTS042',
+      '@Setting requires a "key" property.',
+      getLocation(decorator, sourceFile),
+    );
     return null;
   }
 
@@ -428,13 +513,21 @@ function extractAdminPageDecorator(
 ): RawAdminPageDecorator | null {
   const args = getDecoratorArgs(decorator);
   if (!args || args.length === 0) {
-    diagnostics.error('WPTS050', '@AdminPage requires an options object argument.', getLocation(decorator, sourceFile));
+    diagnostics.error(
+      'WPTS050',
+      '@AdminPage requires an options object argument.',
+      getLocation(decorator, sourceFile),
+    );
     return null;
   }
 
   const obj = extractObjectLiteral(args[0]);
   if (!obj) {
-    diagnostics.error('WPTS051', '@AdminPage argument must be an object literal.', getLocation(decorator, sourceFile));
+    diagnostics.error(
+      'WPTS051',
+      '@AdminPage argument must be an object literal.',
+      getLocation(decorator, sourceFile),
+    );
     return null;
   }
 
@@ -459,13 +552,21 @@ function extractShortcodeDecorator(
 ): RawShortcodeDecorator | null {
   const args = getDecoratorArgs(decorator);
   if (!args || args.length === 0) {
-    diagnostics.error('WPTS060', '@Shortcode requires a tag name argument.', getLocation(decorator, sourceFile));
+    diagnostics.error(
+      'WPTS060',
+      '@Shortcode requires a tag name argument.',
+      getLocation(decorator, sourceFile),
+    );
     return null;
   }
 
   const tag = getStringValue(args[0]);
   if (!tag) {
-    diagnostics.error('WPTS061', '@Shortcode first argument must be a string literal (tag name).', getLocation(decorator, sourceFile));
+    diagnostics.error(
+      'WPTS061',
+      '@Shortcode first argument must be a string literal (tag name).',
+      getLocation(decorator, sourceFile),
+    );
     return null;
   }
 
@@ -486,31 +587,51 @@ function extractCustomPostTypeDecorator(
 ): RawCustomPostTypeDecorator | null {
   const args = getDecoratorArgs(decorator);
   if (!args || args.length < 2) {
-    diagnostics.error('WPTS070', '@CustomPostType requires a slug and an options object.', getLocation(decorator, sourceFile));
+    diagnostics.error(
+      'WPTS070',
+      '@CustomPostType requires a slug and an options object.',
+      getLocation(decorator, sourceFile),
+    );
     return null;
   }
 
   const slug = getStringValue(args[0]);
   if (!slug) {
-    diagnostics.error('WPTS071', '@CustomPostType first argument must be a string literal (slug).', getLocation(decorator, sourceFile));
+    diagnostics.error(
+      'WPTS071',
+      '@CustomPostType first argument must be a string literal (slug).',
+      getLocation(decorator, sourceFile),
+    );
     return null;
   }
 
   const obj = extractObjectLiteral(args[1]);
   if (!obj) {
-    diagnostics.error('WPTS072', '@CustomPostType second argument must be an object literal.', getLocation(decorator, sourceFile));
+    diagnostics.error(
+      'WPTS072',
+      '@CustomPostType second argument must be an object literal.',
+      getLocation(decorator, sourceFile),
+    );
     return null;
   }
 
   const singularName = getStringProp(obj, 'singularName');
   if (!singularName) {
-    diagnostics.error('WPTS073', '@CustomPostType requires a "singularName" property.', getLocation(decorator, sourceFile));
+    diagnostics.error(
+      'WPTS073',
+      '@CustomPostType requires a "singularName" property.',
+      getLocation(decorator, sourceFile),
+    );
     return null;
   }
 
   const pluralName = getStringProp(obj, 'pluralName');
   if (!pluralName) {
-    diagnostics.error('WPTS074', '@CustomPostType requires a "pluralName" property.', getLocation(decorator, sourceFile));
+    diagnostics.error(
+      'WPTS074',
+      '@CustomPostType requires a "pluralName" property.',
+      getLocation(decorator, sourceFile),
+    );
     return null;
   }
 
@@ -537,37 +658,61 @@ function extractCustomTaxonomyDecorator(
 ): RawCustomTaxonomyDecorator | null {
   const args = getDecoratorArgs(decorator);
   if (!args || args.length < 2) {
-    diagnostics.error('WPTS080', '@CustomTaxonomy requires a slug and an options object.', getLocation(decorator, sourceFile));
+    diagnostics.error(
+      'WPTS080',
+      '@CustomTaxonomy requires a slug and an options object.',
+      getLocation(decorator, sourceFile),
+    );
     return null;
   }
 
   const slug = getStringValue(args[0]);
   if (!slug) {
-    diagnostics.error('WPTS081', '@CustomTaxonomy first argument must be a string literal (slug).', getLocation(decorator, sourceFile));
+    diagnostics.error(
+      'WPTS081',
+      '@CustomTaxonomy first argument must be a string literal (slug).',
+      getLocation(decorator, sourceFile),
+    );
     return null;
   }
 
   const obj = extractObjectLiteral(args[1]);
   if (!obj) {
-    diagnostics.error('WPTS082', '@CustomTaxonomy second argument must be an object literal.', getLocation(decorator, sourceFile));
+    diagnostics.error(
+      'WPTS082',
+      '@CustomTaxonomy second argument must be an object literal.',
+      getLocation(decorator, sourceFile),
+    );
     return null;
   }
 
   const singularName = getStringProp(obj, 'singularName');
   if (!singularName) {
-    diagnostics.error('WPTS083', '@CustomTaxonomy requires a "singularName" property.', getLocation(decorator, sourceFile));
+    diagnostics.error(
+      'WPTS083',
+      '@CustomTaxonomy requires a "singularName" property.',
+      getLocation(decorator, sourceFile),
+    );
     return null;
   }
 
   const pluralName = getStringProp(obj, 'pluralName');
   if (!pluralName) {
-    diagnostics.error('WPTS084', '@CustomTaxonomy requires a "pluralName" property.', getLocation(decorator, sourceFile));
+    diagnostics.error(
+      'WPTS084',
+      '@CustomTaxonomy requires a "pluralName" property.',
+      getLocation(decorator, sourceFile),
+    );
     return null;
   }
 
   const postTypes = getStringArrayProp(obj, 'postTypes');
   if (!postTypes || postTypes.length === 0) {
-    diagnostics.error('WPTS085', '@CustomTaxonomy requires a "postTypes" property.', getLocation(decorator, sourceFile));
+    diagnostics.error(
+      'WPTS085',
+      '@CustomTaxonomy requires a "postTypes" property.',
+      getLocation(decorator, sourceFile),
+    );
     return null;
   }
 
@@ -594,25 +739,41 @@ function extractRestRouteDecorator(
 ): RawRestRouteDecorator | null {
   const args = getDecoratorArgs(decorator);
   if (!args || args.length < 2) {
-    diagnostics.error('WPTS090', '@RestRoute requires a route path and an options object.', getLocation(decorator, sourceFile));
+    diagnostics.error(
+      'WPTS090',
+      '@RestRoute requires a route path and an options object.',
+      getLocation(decorator, sourceFile),
+    );
     return null;
   }
 
   const route = getStringValue(args[0]);
   if (!route) {
-    diagnostics.error('WPTS091', '@RestRoute first argument must be a string literal (route path).', getLocation(decorator, sourceFile));
+    diagnostics.error(
+      'WPTS091',
+      '@RestRoute first argument must be a string literal (route path).',
+      getLocation(decorator, sourceFile),
+    );
     return null;
   }
 
   const obj = extractObjectLiteral(args[1]);
   if (!obj) {
-    diagnostics.error('WPTS092', '@RestRoute second argument must be an object literal.', getLocation(decorator, sourceFile));
+    diagnostics.error(
+      'WPTS092',
+      '@RestRoute second argument must be an object literal.',
+      getLocation(decorator, sourceFile),
+    );
     return null;
   }
 
   const httpMethod = getStringProp(obj, 'method');
   if (!httpMethod) {
-    diagnostics.error('WPTS093', '@RestRoute requires a "method" property (GET, POST, PUT, DELETE).', getLocation(decorator, sourceFile));
+    diagnostics.error(
+      'WPTS093',
+      '@RestRoute requires a "method" property (GET, POST, PUT, DELETE).',
+      getLocation(decorator, sourceFile),
+    );
     return null;
   }
 
@@ -635,13 +796,21 @@ function extractAjaxHandlerDecorator(
 ): RawAjaxHandlerDecorator | null {
   const args = getDecoratorArgs(decorator);
   if (!args || args.length === 0) {
-    diagnostics.error('WPTS095', '@AjaxHandler requires an action name argument.', getLocation(decorator, sourceFile));
+    diagnostics.error(
+      'WPTS095',
+      '@AjaxHandler requires an action name argument.',
+      getLocation(decorator, sourceFile),
+    );
     return null;
   }
 
   const action = getStringValue(args[0]);
   if (!action) {
-    diagnostics.error('WPTS096', '@AjaxHandler first argument must be a string literal (action name).', getLocation(decorator, sourceFile));
+    diagnostics.error(
+      'WPTS096',
+      '@AjaxHandler first argument must be a string literal (action name).',
+      getLocation(decorator, sourceFile),
+    );
     return null;
   }
 
@@ -781,7 +950,7 @@ function getStringArrayProp(obj: ts.ObjectLiteralExpression, name: string): stri
     if (ts.isPropertyAssignment(prop) && ts.isIdentifier(prop.name) && prop.name.text === name) {
       if (ts.isArrayLiteralExpression(prop.initializer)) {
         return prop.initializer.elements
-          .map(el => getStringValue(el))
+          .map((el) => getStringValue(el))
           .filter((v): v is string => v !== null);
       }
       const single = getStringValue(prop.initializer);
@@ -819,7 +988,10 @@ function extractParameters(
   });
 }
 
-function getLocation(node: ts.Node, sourceFile: ts.SourceFile): { file: string; line: number; column: number } {
+function getLocation(
+  node: ts.Node,
+  sourceFile: ts.SourceFile,
+): { file: string; line: number; column: number } {
   const { line, character } = sourceFile.getLineAndCharacterOfPosition(node.getStart(sourceFile));
   return {
     file: sourceFile.fileName,

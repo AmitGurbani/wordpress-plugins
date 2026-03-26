@@ -1,8 +1,8 @@
-import Handlebars from 'handlebars';
-import path from 'node:path';
 import { readFileSync } from 'node:fs';
+import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import type { PluginIR, SettingIR, HookContext } from '../ir/plugin-ir.js';
+import Handlebars from 'handlebars';
+import type { HookContext, PluginIR, SettingIR } from '../ir/plugin-ir.js';
 import { toSnakeCase } from '../utils/naming.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -30,9 +30,14 @@ function loadTemplate(name: string): HandlebarsTemplateDelegate {
  */
 function classifyHook(hookName: string): HookContext {
   const adminHooks = [
-    'admin_init', 'admin_menu', 'admin_enqueue_scripts',
-    'admin_notices', 'admin_footer', 'admin_head',
-    'admin_bar_menu', 'admin_post_',
+    'admin_init',
+    'admin_menu',
+    'admin_enqueue_scripts',
+    'admin_notices',
+    'admin_footer',
+    'admin_head',
+    'admin_bar_menu',
+    'admin_post_',
   ];
 
   for (const prefix of adminHooks) {
@@ -40,9 +45,14 @@ function classifyHook(hookName: string): HookContext {
   }
 
   const publicHooks = [
-    'wp_enqueue_scripts', 'wp_head', 'wp_footer',
-    'the_content', 'the_title', 'the_excerpt',
-    'wp_body_open', 'template_redirect',
+    'wp_enqueue_scripts',
+    'wp_head',
+    'wp_footer',
+    'the_content',
+    'the_title',
+    'the_excerpt',
+    'wp_body_open',
+    'template_redirect',
   ];
 
   for (const hook of publicHooks) {
@@ -72,9 +82,10 @@ function formatPhpDefault(setting: SettingIR): string {
 function extractActivationOptions(phpCode: string, settingOptionNames: string[]): string[] {
   const optionNames = new Set<string>();
   const regex = /(?:add_option|update_option)\s*\(\s*'([^']+)'/g;
-  let match;
-  while ((match = regex.exec(phpCode)) !== null) {
+  let match: RegExpExecArray | null = regex.exec(phpCode);
+  while (match !== null) {
     optionNames.add(match[1]);
+    match = regex.exec(phpCode);
   }
   for (const name of settingOptionNames) {
     optionNames.delete(name);
@@ -91,11 +102,11 @@ export function generatePlugin(ir: PluginIR): GeneratedFile[] {
   const fp = metadata.filePrefix;
 
   // Classify actions and filters
-  const adminActions = ir.actions.filter(a => classifyHook(a.hookName) === 'admin');
-  const publicActions = ir.actions.filter(a => classifyHook(a.hookName) !== 'admin');
+  const adminActions = ir.actions.filter((a) => classifyHook(a.hookName) === 'admin');
+  const publicActions = ir.actions.filter((a) => classifyHook(a.hookName) !== 'admin');
   const publicFilters = ir.filters; // Filters are almost always public in MVP
-  const publicHelperMethods = ir.helperMethods.filter(m => m.context !== 'rest');
-  const restHelperMethods = ir.helperMethods.filter(m => m.context === 'rest');
+  const publicHelperMethods = ir.helperMethods.filter((m) => m.context !== 'rest');
+  const restHelperMethods = ir.helperMethods.filter((m) => m.context === 'rest');
   const hasSettings = ir.settings.length > 0;
   const hasShortcodes = ir.shortcodes.length > 0;
   const hasCustomPostTypes = ir.customPostTypes.length > 0;
@@ -105,7 +116,7 @@ export function generatePlugin(ir: PluginIR): GeneratedFile[] {
   const hasCustomRestApi = hasSettings || hasRestRoutes;
 
   // Prepare settings with PHP defaults
-  const settingsWithDefaults = ir.settings.map(s => ({
+  const settingsWithDefaults = ir.settings.map((s) => ({
     ...s,
     phpDefault: formatPhpDefault(s),
     isBoolean: s.type === 'boolean',
@@ -140,7 +151,7 @@ export function generatePlugin(ir: PluginIR): GeneratedFile[] {
     activationOptions: ir.activation?.phpCode
       ? extractActivationOptions(
           ir.activation.phpCode,
-          settingsWithDefaults.map(s => `${metadata.functionPrefix}${s.key}`),
+          settingsWithDefaults.map((s) => `${metadata.functionPrefix}${s.key}`),
         )
       : [],
     deactivationCode: ir.deactivation?.phpCode ?? null,

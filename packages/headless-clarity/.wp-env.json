@@ -1,9 +1,7 @@
 {
   "core": null,
   "phpVersion": "8.2",
-  "plugins": [
-    "./dist/headless-clarity"
-  ],
+  "plugins": ["./dist/headless-clarity"],
   "config": {
     "WP_DEBUG": true,
     "WP_DEBUG_LOG": true

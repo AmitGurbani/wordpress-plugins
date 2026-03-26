@@ -1,7 +1,10 @@
-import { describe, it, expect } from 'vitest';
 import ts from 'typescript';
-import { transpileStatement, transpileBlock } from '../../../src/transpiler/statement-transpiler.js';
+import { describe, expect, it } from 'vitest';
 import { parseSourceString } from '../../../src/compiler/parser.js';
+import {
+  transpileBlock,
+  transpileStatement,
+} from '../../../src/transpiler/statement-transpiler.js';
 
 /**
  * Helper: parse a TS function body and transpile it to PHP.
@@ -69,7 +72,9 @@ describe('transpileStatement', () => {
     });
 
     it('transpiles if/else if/else', () => {
-      const result = transpileBody('if (true) { return 1; } else if (false) { return 2; } else { return 3; }');
+      const result = transpileBody(
+        'if (true) { return 1; } else if (false) { return 2; } else { return 3; }',
+      );
       expect(result).toContain('if ( true )');
       // PHP supports both "elseif" and "else if" — we emit "elseif" which is more common
       expect(result).toContain('if ( false )');
@@ -99,26 +104,34 @@ describe('transpileStatement', () => {
 
   describe('for-of with destructuring', () => {
     it('transpiles for-of with object destructuring', () => {
-      const result = transpileBody('const items: any[] = []; for (const { id, name } of items) { const x = id; }');
+      const result = transpileBody(
+        'const items: any[] = []; for (const { id, name } of items) { const x = id; }',
+      );
       expect(result).toContain('foreach ( $items as $__item )');
       expect(result).toContain("$id = $__item['id'];");
       expect(result).toContain("$name = $__item['name'];");
     });
 
     it('transpiles for-of with array destructuring', () => {
-      const result = transpileBody('const entries: any[] = []; for (const [key, val] of entries) { const x = key; }');
+      const result = transpileBody(
+        'const entries: any[] = []; for (const [key, val] of entries) { const x = key; }',
+      );
       expect(result).toContain('foreach ( $entries as $__item )');
       expect(result).toContain('$key = $__item[0];');
       expect(result).toContain('$val = $__item[1];');
     });
 
     it('transpiles for-of with destructuring defaults', () => {
-      const result = transpileBody('const items: any[] = []; for (const { id, name = "unknown" } of items) { }');
+      const result = transpileBody(
+        'const items: any[] = []; for (const { id, name = "unknown" } of items) { }',
+      );
       expect(result).toContain("$name = $__item['name'] ?? 'unknown';");
     });
 
     it('transpiles for-of with destructuring rename', () => {
-      const result = transpileBody('const items: any[] = []; for (const { id: userId } of items) { }');
+      const result = transpileBody(
+        'const items: any[] = []; for (const { id: userId } of items) { }',
+      );
       expect(result).toContain("$user_id = $__item['id'];");
     });
   });

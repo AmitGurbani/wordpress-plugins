@@ -7,7 +7,10 @@ export function GeneralTab({ settings, update }: TabProps) {
     <div style={{ padding: '16px 0', maxWidth: '600px' }}>
       <TextControl
         label={__('Umami URL', 'headless-umami')}
-        help={__('Your Umami instance URL. Use https://cloud.umami.is for Umami Cloud, or your self-hosted URL.', 'headless-umami')}
+        help={__(
+          'Your Umami instance URL. Use https://cloud.umami.is for Umami Cloud, or your self-hosted URL.',
+          'headless-umami',
+        )}
         value={settings.umami_url}
         onChange={(v) => update('umami_url', v)}
         placeholder="https://cloud.umami.is"
@@ -24,7 +27,10 @@ export function GeneralTab({ settings, update }: TabProps) {
 
       <ToggleControl
         label={__('Track Purchases', 'headless-umami')}
-        help={__('Automatically send purchase events to Umami when WooCommerce orders are completed. No frontend code needed.', 'headless-umami')}
+        help={__(
+          'Automatically send purchase events to Umami when WooCommerce orders are completed. No frontend code needed.',
+          'headless-umami',
+        )}
         checked={settings.enable_purchase}
         onChange={(v) => update('enable_purchase', v)}
       />

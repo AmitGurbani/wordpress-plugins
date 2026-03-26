@@ -10,7 +10,6 @@
  */
 
 declare global {
-
   // ---------------------------------------------------------------------------
   // Options API
   // ---------------------------------------------------------------------------
@@ -28,7 +27,11 @@ declare global {
   function escUrlRaw(url: string, protocols?: string[]): string;
   function escJs(text: string): string;
   function escTextarea(text: string): string;
-  function wpKses(content: string, allowedHtml: Record<string, any>, allowedProtocols?: string[]): string;
+  function wpKses(
+    content: string,
+    allowedHtml: Record<string, any>,
+    allowedProtocols?: string[],
+  ): string;
   function wpKsesPost(content: string): string;
 
   // ---------------------------------------------------------------------------
@@ -50,10 +53,34 @@ declare global {
   // ---------------------------------------------------------------------------
   // Enqueueing
   // ---------------------------------------------------------------------------
-  function wpEnqueueStyle(handle: string, src?: string, deps?: string[], ver?: string | false, media?: string): void;
-  function wpEnqueueScript(handle: string, src?: string, deps?: string[], ver?: string | false, inFooter?: boolean): void;
-  function wpRegisterStyle(handle: string, src: string, deps?: string[], ver?: string | false, media?: string): boolean;
-  function wpRegisterScript(handle: string, src: string, deps?: string[], ver?: string | false, inFooter?: boolean): boolean;
+  function wpEnqueueStyle(
+    handle: string,
+    src?: string,
+    deps?: string[],
+    ver?: string | false,
+    media?: string,
+  ): void;
+  function wpEnqueueScript(
+    handle: string,
+    src?: string,
+    deps?: string[],
+    ver?: string | false,
+    inFooter?: boolean,
+  ): void;
+  function wpRegisterStyle(
+    handle: string,
+    src: string,
+    deps?: string[],
+    ver?: string | false,
+    media?: string,
+  ): boolean;
+  function wpRegisterScript(
+    handle: string,
+    src: string,
+    deps?: string[],
+    ver?: string | false,
+    inFooter?: boolean,
+  ): boolean;
   function wpLocalizeScript(handle: string, objectName: string, data: Record<string, any>): boolean;
 
   // ---------------------------------------------------------------------------
@@ -66,7 +93,11 @@ declare global {
   // ---------------------------------------------------------------------------
   // i18n / Text Domain
   // ---------------------------------------------------------------------------
-  function loadPluginTextdomain(domain: string, deprecated?: boolean, pluginRelPath?: string): boolean;
+  function loadPluginTextdomain(
+    domain: string,
+    deprecated?: boolean,
+    pluginRelPath?: string,
+  ): boolean;
 
   // ---------------------------------------------------------------------------
   // i18n — Translation
@@ -76,7 +107,13 @@ declare global {
   function _x(text: string, context: string, domain: string): string;
   function _ex(text: string, context: string, domain: string): void;
   function _n(single: string, plural: string, number: number, domain: string): string;
-  function _nx(single: string, plural: string, number: number, context: string, domain: string): string;
+  function _nx(
+    single: string,
+    plural: string,
+    number: number,
+    context: string,
+    domain: string,
+  ): string;
 
   // ---------------------------------------------------------------------------
   // i18n — Escaped Translation
@@ -93,17 +130,57 @@ declare global {
   // ---------------------------------------------------------------------------
   function settingsFields(optionGroup: string): void;
   function doSettingsSections(page: string): void;
-  function submitButton(text?: string, type?: string, name?: string, wrap?: boolean, otherAttributes?: Record<string, any>): void;
-  function registerSetting(optionGroup: string, optionName: string, args?: Record<string, any>): void;
+  function submitButton(
+    text?: string,
+    type?: string,
+    name?: string,
+    wrap?: boolean,
+    otherAttributes?: Record<string, any>,
+  ): void;
+  function registerSetting(
+    optionGroup: string,
+    optionName: string,
+    args?: Record<string, any>,
+  ): void;
   function addSettingsSection(id: string, title: string, callback: () => void, page: string): void;
-  function addSettingsField(id: string, title: string, callback: () => void, page: string, section?: string, args?: Record<string, any>): void;
+  function addSettingsField(
+    id: string,
+    title: string,
+    callback: () => void,
+    page: string,
+    section?: string,
+    args?: Record<string, any>,
+  ): void;
 
   // ---------------------------------------------------------------------------
   // Admin Pages
   // ---------------------------------------------------------------------------
-  function addMenuPage(pageTitle: string, menuTitle: string, capability: string, menuSlug: string, callback?: () => void, iconUrl?: string, position?: number): string;
-  function addSubmenuPage(parentSlug: string, pageTitle: string, menuTitle: string, capability: string, menuSlug: string, callback?: () => void, position?: number): string | false;
-  function addOptionsPage(pageTitle: string, menuTitle: string, capability: string, menuSlug: string, callback?: () => void, position?: number): string;
+  function addMenuPage(
+    pageTitle: string,
+    menuTitle: string,
+    capability: string,
+    menuSlug: string,
+    callback?: () => void,
+    iconUrl?: string,
+    position?: number,
+  ): string;
+  function addSubmenuPage(
+    parentSlug: string,
+    pageTitle: string,
+    menuTitle: string,
+    capability: string,
+    menuSlug: string,
+    callback?: () => void,
+    position?: number,
+  ): string | false;
+  function addOptionsPage(
+    pageTitle: string,
+    menuTitle: string,
+    capability: string,
+    menuSlug: string,
+    callback?: () => void,
+    position?: number,
+  ): string;
 
   // ---------------------------------------------------------------------------
   // Conditionals
@@ -132,7 +209,11 @@ declare global {
   function usernameExists(username: string): number | false;
   function wpInsertUser(userdata: Record<string, any>): number | any;
   function wpGetCurrentUser(): any;
-  function wpGeneratePassword(length?: number, specialChars?: boolean, extraSpecialChars?: boolean): string;
+  function wpGeneratePassword(
+    length?: number,
+    specialChars?: boolean,
+    extraSpecialChars?: boolean,
+  ): string;
   function wpHashPassword(password: string): string;
   function wpCheckPassword(password: string, hash: string, userId?: number): boolean;
   function wpSetCurrentUser(id: number, name?: string): any;
@@ -149,13 +230,34 @@ declare global {
   // ---------------------------------------------------------------------------
   // Hooks
   // ---------------------------------------------------------------------------
-  function addAction(hookName: string, callback: (...args: any[]) => void, priority?: number, acceptedArgs?: number): boolean;
-  function addFilter(hookName: string, callback: (...args: any[]) => any, priority?: number, acceptedArgs?: number): boolean;
+  function addAction(
+    hookName: string,
+    callback: (...args: any[]) => void,
+    priority?: number,
+    acceptedArgs?: number,
+  ): boolean;
+  function addFilter(
+    hookName: string,
+    callback: (...args: any[]) => any,
+    priority?: number,
+    acceptedArgs?: number,
+  ): boolean;
   function doAction(hookName: string, ...args: any[]): void;
   function applyFilters(hookName: string, value: any, ...args: any[]): any;
-  function removeAction(hookName: string, callback: (...args: any[]) => void, priority?: number): boolean;
-  function removeFilter(hookName: string, callback: (...args: any[]) => any, priority?: number): boolean;
-  function addShortcode(tag: string, callback: (atts: Record<string, string>, content?: string) => string): void;
+  function removeAction(
+    hookName: string,
+    callback: (...args: any[]) => void,
+    priority?: number,
+  ): boolean;
+  function removeFilter(
+    hookName: string,
+    callback: (...args: any[]) => any,
+    priority?: number,
+  ): boolean;
+  function addShortcode(
+    tag: string,
+    callback: (atts: Record<string, string>, content?: string) => string,
+  ): void;
 
   // ---------------------------------------------------------------------------
   // Transients
@@ -180,41 +282,98 @@ declare global {
   // Metadata — Post
   // ---------------------------------------------------------------------------
   function getPostMeta(postId: number, key?: string, single?: boolean): any;
-  function addPostMeta(postId: number, metaKey: string, metaValue: any, unique?: boolean): number | false;
-  function updatePostMeta(postId: number, metaKey: string, metaValue: any, prevValue?: any): number | boolean;
+  function addPostMeta(
+    postId: number,
+    metaKey: string,
+    metaValue: any,
+    unique?: boolean,
+  ): number | false;
+  function updatePostMeta(
+    postId: number,
+    metaKey: string,
+    metaValue: any,
+    prevValue?: any,
+  ): number | boolean;
   function deletePostMeta(postId: number, metaKey: string, metaValue?: any): boolean;
 
   // ---------------------------------------------------------------------------
   // Metadata — User
   // ---------------------------------------------------------------------------
   function getUserMeta(userId: number, key?: string, single?: boolean): any;
-  function addUserMeta(userId: number, metaKey: string, metaValue: any, unique?: boolean): number | false;
-  function updateUserMeta(userId: number, metaKey: string, metaValue: any, prevValue?: any): number | boolean;
+  function addUserMeta(
+    userId: number,
+    metaKey: string,
+    metaValue: any,
+    unique?: boolean,
+  ): number | false;
+  function updateUserMeta(
+    userId: number,
+    metaKey: string,
+    metaValue: any,
+    prevValue?: any,
+  ): number | boolean;
   function deleteUserMeta(userId: number, metaKey: string, metaValue?: any): boolean;
 
   // ---------------------------------------------------------------------------
   // Metadata — Term
   // ---------------------------------------------------------------------------
   function getTermMeta(termId: number, key?: string, single?: boolean): any;
-  function addTermMeta(termId: number, metaKey: string, metaValue: any, unique?: boolean): number | false;
-  function updateTermMeta(termId: number, metaKey: string, metaValue: any, prevValue?: any): number | boolean;
+  function addTermMeta(
+    termId: number,
+    metaKey: string,
+    metaValue: any,
+    unique?: boolean,
+  ): number | false;
+  function updateTermMeta(
+    termId: number,
+    metaKey: string,
+    metaValue: any,
+    prevValue?: any,
+  ): number | boolean;
   function deleteTermMeta(termId: number, metaKey: string, metaValue?: any): boolean;
 
   // ---------------------------------------------------------------------------
   // Metadata — Comment
   // ---------------------------------------------------------------------------
   function getCommentMeta(commentId: number, key?: string, single?: boolean): any;
-  function addCommentMeta(commentId: number, metaKey: string, metaValue: any, unique?: boolean): number | false;
-  function updateCommentMeta(commentId: number, metaKey: string, metaValue: any, prevValue?: any): number | boolean;
+  function addCommentMeta(
+    commentId: number,
+    metaKey: string,
+    metaValue: any,
+    unique?: boolean,
+  ): number | false;
+  function updateCommentMeta(
+    commentId: number,
+    metaKey: string,
+    metaValue: any,
+    prevValue?: any,
+  ): number | boolean;
   function deleteCommentMeta(commentId: number, metaKey: string, metaValue?: any): boolean;
 
   // ---------------------------------------------------------------------------
   // Metadata — Generic
   // ---------------------------------------------------------------------------
   function getMetadata(metaType: string, objectId: number, metaKey?: string, single?: boolean): any;
-  function addMetadata(metaType: string, objectId: number, metaKey: string, metaValue: any, unique?: boolean): number | false;
-  function updateMetadata(metaType: string, objectId: number, metaKey: string, metaValue: any, prevValue?: any): number | boolean;
-  function deleteMetadata(metaType: string, objectId: number, metaKey: string, metaValue?: any): boolean;
+  function addMetadata(
+    metaType: string,
+    objectId: number,
+    metaKey: string,
+    metaValue: any,
+    unique?: boolean,
+  ): number | false;
+  function updateMetadata(
+    metaType: string,
+    objectId: number,
+    metaKey: string,
+    metaValue: any,
+    prevValue?: any,
+  ): number | boolean;
+  function deleteMetadata(
+    metaType: string,
+    objectId: number,
+    metaKey: string,
+    metaValue?: any,
+  ): boolean;
 
   // ---------------------------------------------------------------------------
   // HTTP API — Requests
@@ -295,7 +454,11 @@ declare global {
   // ---------------------------------------------------------------------------
   // WooCommerce — Customer
   // ---------------------------------------------------------------------------
-  function wcCustomerBoughtProduct(customerEmail: string, userId: number, productId: number): boolean;
+  function wcCustomerBoughtProduct(
+    customerEmail: string,
+    userId: number,
+    productId: number,
+  ): boolean;
   function wcGetCustomerOrderCount(userId: number): number;
 
   // ---------------------------------------------------------------------------
@@ -309,13 +472,22 @@ declare global {
   // WooCommerce — Taxonomy/Attributes
   // ---------------------------------------------------------------------------
   function wcGetAttributeTaxonomies(): any[];
-  function wcGetProductTerms(productId: number, attribute: string, args?: Record<string, any>): any[];
+  function wcGetProductTerms(
+    productId: number,
+    attribute: string,
+    args?: Record<string, any>,
+  ): any[];
 
   // ---------------------------------------------------------------------------
   // WooCommerce — Templates
   // ---------------------------------------------------------------------------
   function wcGetTemplatePart(slug: string, name?: string): void;
-  function wcGetTemplate(templateName: string, args?: Record<string, any>, templatePath?: string, defaultPath?: string): void;
+  function wcGetTemplate(
+    templateName: string,
+    args?: Record<string, any>,
+    templatePath?: string,
+    defaultPath?: string,
+  ): void;
 
   // ---------------------------------------------------------------------------
   // REST API
@@ -354,7 +526,12 @@ declare global {
   function getallheaders(): Record<string, string>;
   function header(headerStr: string): void;
   function isArray(value: any): boolean;
-  function numberFormat(number: number, decimals?: number, decPoint?: string, thousandsSep?: string): string;
+  function numberFormat(
+    number: number,
+    decimals?: number,
+    decPoint?: string,
+    thousandsSep?: string,
+  ): string;
   function levenshtein(s1: string, s2: string): number;
   function arrayUnique(arr: any[]): any[];
   function arrayValues(arr: any[]): any[];
@@ -375,7 +552,11 @@ declare global {
   // Custom Post Types & Taxonomies
   // ---------------------------------------------------------------------------
   function registerPostType(postType: string, args?: Record<string, any>): any;
-  function registerTaxonomy(taxonomy: string, objectType: string | string[], args?: Record<string, any>): any;
+  function registerTaxonomy(
+    taxonomy: string,
+    objectType: string | string[],
+    args?: Record<string, any>,
+  ): any;
   function wpDeletePost(postId: number, forceDelete?: boolean): any;
   function wpCountPosts(type?: string, perm?: string): Record<string, number>;
 
@@ -403,7 +584,13 @@ declare global {
     getVar(query: string, x?: number, y?: number): string | null;
     getCol(query: string, x?: number): string[];
     insert(table: string, data: Record<string, any>, format?: string[]): number | false;
-    update(table: string, data: Record<string, any>, where: Record<string, any>, format?: string[], whereFormat?: string[]): number | false;
+    update(
+      table: string,
+      data: Record<string, any>,
+      where: Record<string, any>,
+      format?: string[],
+      whereFormat?: string[],
+    ): number | false;
     delete(table: string, where: Record<string, any>, whereFormat?: string[]): number | false;
     replace(table: string, data: Record<string, any>, format?: string[]): number | false;
     escLike(text: string): string;
@@ -421,7 +608,11 @@ declare global {
   // ---------------------------------------------------------------------------
   // Media
   // ---------------------------------------------------------------------------
-  function wpGetAttachmentImageSrc(attachmentId: number, size?: string | number[], iconForMimeType?: boolean): any[] | false;
+  function wpGetAttachmentImageSrc(
+    attachmentId: number,
+    size?: string | number[],
+    iconForMimeType?: boolean,
+  ): any[] | false;
   function wpGetAttachmentUrl(attachmentId: number): string | false;
 
   // ---------------------------------------------------------------------------
@@ -435,7 +626,11 @@ declare global {
   // Taxonomy
   // ---------------------------------------------------------------------------
   function getTerms(args?: Record<string, any>): any[];
-  function wpGetObjectTerms(objectIds: number | number[], taxonomies: string | string[], args?: Record<string, any>): any[];
+  function wpGetObjectTerms(
+    objectIds: number | number[],
+    taxonomies: string | string[],
+    args?: Record<string, any>,
+  ): any[];
   function getTheTerms(post: number | any, taxonomy: string): any[] | false;
 
   // ---------------------------------------------------------------------------

@@ -1,8 +1,8 @@
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { build } from '../../src/compiler/pipeline.js';
-import fs from 'fs-extra';
-import path from 'node:path';
 import os from 'node:os';
+import path from 'node:path';
+import fs from 'fs-extra';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { build } from '../../src/compiler/pipeline.js';
 
 describe('Full plugin build (end-to-end)', () => {
   let tmpDir: string;
@@ -239,7 +239,12 @@ class PortfolioManager {
     expect(result.files.length).toBeGreaterThan(0);
 
     // Verify public class has CPT and taxonomy registration
-    const publicClass = path.join(outDir, 'portfolio-manager', 'public', 'class-portfolio-manager-public.php');
+    const publicClass = path.join(
+      outDir,
+      'portfolio-manager',
+      'public',
+      'class-portfolio-manager-public.php',
+    );
     expect(await fs.pathExists(publicClass)).toBe(true);
     const publicContent = await fs.readFile(publicClass, 'utf-8');
     expect(publicContent).toContain("register_post_type( 'project'");
@@ -254,7 +259,12 @@ class PortfolioManager {
     expect(publicContent).toContain("'project_type'");
 
     // Verify REST API class has custom routes
-    const restApi = path.join(outDir, 'portfolio-manager', 'includes', 'class-portfolio-manager-rest-api.php');
+    const restApi = path.join(
+      outDir,
+      'portfolio-manager',
+      'includes',
+      'class-portfolio-manager-rest-api.php',
+    );
     expect(await fs.pathExists(restApi)).toBe(true);
     const restContent = await fs.readFile(restApi, 'utf-8');
     expect(restContent).toContain("'/projects'");
@@ -268,7 +278,12 @@ class PortfolioManager {
     expect(restContent).toContain('function list_public_projects');
 
     // Verify admin class has AJAX handlers
-    const adminClass = path.join(outDir, 'portfolio-manager', 'admin', 'class-portfolio-manager-admin.php');
+    const adminClass = path.join(
+      outDir,
+      'portfolio-manager',
+      'admin',
+      'class-portfolio-manager-admin.php',
+    );
     expect(await fs.pathExists(adminClass)).toBe(true);
     const adminContent = await fs.readFile(adminClass, 'utf-8');
     expect(adminContent).toContain('function handle_ajax_delete_project');
@@ -279,7 +294,12 @@ class PortfolioManager {
     expect(adminContent).toContain('function handle_ajax_load_more_projects');
 
     // Verify main class hooks
-    const mainClass = path.join(outDir, 'portfolio-manager', 'includes', 'class-portfolio-manager.php');
+    const mainClass = path.join(
+      outDir,
+      'portfolio-manager',
+      'includes',
+      'class-portfolio-manager.php',
+    );
     const mainContent = await fs.readFile(mainClass, 'utf-8');
     expect(mainContent).toContain("'init', $public, 'register_custom_post_types'");
     expect(mainContent).toContain("'init', $public, 'register_custom_taxonomies'");
@@ -372,7 +392,12 @@ class PluginRoutes {
     expect(mainContent).toContain('Plugin Name:       Multi File Plugin');
 
     // Verify settings from entry file
-    const restApi = path.join(outDir, 'multi-file-plugin', 'includes', 'class-multi-file-plugin-rest-api.php');
+    const restApi = path.join(
+      outDir,
+      'multi-file-plugin',
+      'includes',
+      'class-multi-file-plugin-rest-api.php',
+    );
     const restContent = await fs.readFile(restApi, 'utf-8');
     expect(restContent).toContain("'api_key'");
 

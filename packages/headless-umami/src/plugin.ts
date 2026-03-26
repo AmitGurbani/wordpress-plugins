@@ -8,7 +8,7 @@
  * Build: npx wpts build src/plugin.ts -o dist --clean
  */
 
-import { Plugin, Setting, AdminPage, Activate, Deactivate, Action } from 'wpts';
+import { Action, Activate, AdminPage, Deactivate, Plugin, Setting } from 'wpts';
 import './server-tracking.js';
 import './config-routes.js';
 import './diagnostics-routes.js';
@@ -31,7 +31,6 @@ import './diagnostics-routes.js';
   iconUrl: 'dashicons-chart-bar',
 })
 class HeadlessUmami {
-
   // ── General Settings ──────────────────────────────────────────────────
 
   @Setting({
@@ -67,7 +66,12 @@ class HeadlessUmami {
   wooNotice(): void {
     if (!classExists('WooCommerce')) {
       echo('<div class="notice notice-warning"><p><strong>Headless Umami:</strong> ');
-      echo(escHtml__('WooCommerce is recommended for automatic purchase event tracking.', 'headless-umami'));
+      echo(
+        escHtml__(
+          'WooCommerce is recommended for automatic purchase event tracking.',
+          'headless-umami',
+        ),
+      );
       echo('</p></div>');
     }
   }

@@ -19,7 +19,7 @@ export interface PluginOptions {
  * Provides metadata for the plugin header.
  */
 export function Plugin(options: PluginOptions): (...args: any[]) => any {
-  return function (..._args: any[]) {
+  return (..._args: any[]) => {
     // No-op at runtime — metadata is extracted at compile time by the transpiler.
   };
 }

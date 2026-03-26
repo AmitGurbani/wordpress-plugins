@@ -7,7 +7,6 @@
 import { RestRoute } from 'wpts';
 
 class ClarityDiagnostics {
-
   @RestRoute('/diagnostics/last-error', { method: 'GET', capability: 'manage_options' })
   getLastError(request: any): any {
     return {

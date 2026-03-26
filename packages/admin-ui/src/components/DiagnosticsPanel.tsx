@@ -1,7 +1,7 @@
-import { useState } from '@wordpress/element';
-import { Button, Notice, Spinner } from '@wordpress/components';
-import { __ } from '@wordpress/i18n';
 import apiFetch from '@wordpress/api-fetch';
+import { Button, Notice, Spinner } from '@wordpress/components';
+import { useState } from '@wordpress/element';
+import { __ } from '@wordpress/i18n';
 import type { DiagnosticsConfig } from '../types';
 
 interface TestResult {
@@ -60,19 +60,14 @@ export function DiagnosticsPanel({
       {testAction && (
         <>
           <h3>{testAction.title}</h3>
-          <p style={{ color: '#666', marginBottom: '12px' }}>
-            {testAction.description}
-          </p>
+          <p style={{ color: '#666', marginBottom: '12px' }}>{testAction.description}</p>
           <Button variant="secondary" onClick={runTest} isBusy={testing}>
             {testing ? <Spinner /> : testAction.buttonLabel}
           </Button>
 
           {result && (
             <div style={{ marginTop: '12px' }}>
-              <Notice
-                status={result.success ? 'success' : 'error'}
-                isDismissible={false}
-              >
+              <Notice status={result.success ? 'success' : 'error'} isDismissible={false}>
                 <p>{result.message}</p>
                 {renderTestExtra?.(result)}
               </Notice>
@@ -94,7 +89,14 @@ export function DiagnosticsPanel({
       </Button>
 
       {lastError && (
-        <pre style={{ marginTop: '12px', padding: '8px', background: '#f0f0f0', whiteSpace: 'pre-wrap' }}>
+        <pre
+          style={{
+            marginTop: '12px',
+            padding: '8px',
+            background: '#f0f0f0',
+            whiteSpace: 'pre-wrap',
+          }}
+        >
           {lastError}
         </pre>
       )}

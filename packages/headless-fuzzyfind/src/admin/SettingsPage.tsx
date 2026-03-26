@@ -1,11 +1,11 @@
-import { useSettings, SettingsShell } from 'admin-ui';
 import { __ } from '@wordpress/i18n';
-import { DEFAULTS, TABS } from './types';
-import type { Settings } from './types';
-import { WeightsTab } from './tabs/WeightsTab';
+import { SettingsShell, useSettings } from 'admin-ui';
+import { AnalyticsTab } from './tabs/AnalyticsTab';
 import { FeaturesTab } from './tabs/FeaturesTab';
 import { IndexTab } from './tabs/IndexTab';
-import { AnalyticsTab } from './tabs/AnalyticsTab';
+import { WeightsTab } from './tabs/WeightsTab';
+import type { Settings } from './types';
+import { DEFAULTS, TABS } from './types';
 
 export function SettingsPage() {
   const state = useSettings<Settings>({

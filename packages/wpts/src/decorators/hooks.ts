@@ -8,7 +8,7 @@ export interface HookOptions {
  * The decorated method becomes the callback for the hook.
  */
 export function Action(hookName: string, options?: HookOptions): (...args: any[]) => any {
-  return function (..._args: any[]) {
+  return (..._args: any[]) => {
     // No-op at runtime — metadata is extracted at compile time by the transpiler.
   };
 }
@@ -18,7 +18,7 @@ export function Action(hookName: string, options?: HookOptions): (...args: any[]
  * The decorated method becomes the callback for the filter.
  */
 export function Filter(hookName: string, options?: HookOptions): (...args: any[]) => any {
-  return function (..._args: any[]) {
+  return (..._args: any[]) => {
     // No-op at runtime — metadata is extracted at compile time by the transpiler.
   };
 }

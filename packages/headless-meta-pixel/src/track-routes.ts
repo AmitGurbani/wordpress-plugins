@@ -8,7 +8,6 @@
 import { RestRoute } from 'wpts';
 
 class MetaPixelTrack {
-
   hashForCapi(value: string): string {
     if (!value) {
       return '';
@@ -17,7 +16,13 @@ class MetaPixelTrack {
     return hash('sha256', normalized);
   }
 
-  sendCapiEvent(eventName: string, eventId: string, sourceUrl: string, customData: any, userData: any): any {
+  sendCapiEvent(
+    eventName: string,
+    eventId: string,
+    sourceUrl: string,
+    customData: any,
+    userData: any,
+  ): any {
     const pixelId: string = getOption('headless_meta_pixel_pixel_id', '');
     const accessToken: string = getOption('headless_meta_pixel_access_token', '');
 
@@ -47,7 +52,8 @@ class MetaPixelTrack {
       payload['test_event_code'] = testEventCode;
     }
 
-    const url: string = 'https://graph.facebook.com/v25.0/' + pixelId + '/events?access_token=' + accessToken;
+    const url: string =
+      'https://graph.facebook.com/v25.0/' + pixelId + '/events?access_token=' + accessToken;
 
     const response: any = wpRemotePost(url, {
       body: jsonEncode(payload),
@@ -84,7 +90,9 @@ class MetaPixelTrack {
     const rlKey: string = 'hmp_rl_' + md5(rlIp);
     const rlCount: any = getTransient(rlKey);
     if (rlCount && intval(rlCount) >= 60) {
-      return new WP_Error('rate_limited', 'Too many requests. Please try again later.', { status: 429 });
+      return new WP_Error('rate_limited', 'Too many requests. Please try again later.', {
+        status: 429,
+      });
     }
     setTransient(rlKey, strval(rlCount ? intval(rlCount) + 1 : 1), 60);
 
@@ -99,7 +107,16 @@ class MetaPixelTrack {
     // Whitelist custom_data keys to prevent analytics pollution via public endpoint
     const rawCustomData: any = request.get_param('custom_data') ?? {};
     const customData: any = {};
-    const allowedCustomDataKeys: string[] = ['currency', 'value', 'content_type', 'contents', 'content_ids', 'search_string', 'num_items', 'order_id'];
+    const allowedCustomDataKeys: string[] = [
+      'currency',
+      'value',
+      'content_type',
+      'contents',
+      'content_ids',
+      'search_string',
+      'num_items',
+      'order_id',
+    ];
     for (const key of allowedCustomDataKeys) {
       const val: any = rawCustomData[key] ?? null;
       if (val !== null) {
@@ -116,7 +133,9 @@ class MetaPixelTrack {
     }
 
     if (!eventName || !eventId) {
-      return new WP_Error('missing_params', 'event_name and event_id are required.', { status: 400 });
+      return new WP_Error('missing_params', 'event_name and event_id are required.', {
+        status: 400,
+      });
     }
 
     // Validate event_name is allowed
@@ -195,7 +214,13 @@ class MetaPixelTrack {
       userData['external_id'] = this.hashForCapi(strval(userId));
     }
 
-    const result: any = this.sendCapiEvent(eventName, eventId, eventSourceUrl, customData, userData);
+    const result: any = this.sendCapiEvent(
+      eventName,
+      eventId,
+      eventSourceUrl,
+      customData,
+      userData,
+    );
 
     return { success: result['success'], event_id: eventId };
   }

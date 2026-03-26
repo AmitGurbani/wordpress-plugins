@@ -8,7 +8,6 @@
 import { Action } from 'wpts';
 
 class GoogleAnalyticsServerTracking {
-
   // ── Helper Methods ────────────────────────────────────────────────────
 
   // Duplicated in track-routes.ts — wpts classes compile independently, matching meta-pixel pattern
@@ -22,17 +21,23 @@ class GoogleAnalyticsServerTracking {
 
     const payload: any = {
       client_id: clientId,
-      events: [{
-        name: eventName,
-        params: params,
-      }],
+      events: [
+        {
+          name: eventName,
+          params: params,
+        },
+      ],
     };
 
     if (userId) {
       payload['user_id'] = userId;
     }
 
-    const url: string = 'https://www.google-analytics.com/mp/collect?measurement_id=' + measurementId + '&api_secret=' + apiSecret;
+    const url: string =
+      'https://www.google-analytics.com/mp/collect?measurement_id=' +
+      measurementId +
+      '&api_secret=' +
+      apiSecret;
 
     const response: any = wpRemotePost(url, {
       body: jsonEncode(payload),

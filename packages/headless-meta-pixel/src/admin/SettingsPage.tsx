@@ -1,10 +1,10 @@
-import { useSettings, SettingsShell } from 'admin-ui';
 import { __ } from '@wordpress/i18n';
-import { DEFAULTS, TABS } from './types';
-import type { Settings } from './types';
-import { GeneralTab } from './tabs/GeneralTab';
-import { EventsTab } from './tabs/EventsTab';
+import { SettingsShell, useSettings } from 'admin-ui';
 import { DiagnosticsTab } from './tabs/DiagnosticsTab';
+import { EventsTab } from './tabs/EventsTab';
+import { GeneralTab } from './tabs/GeneralTab';
+import type { Settings } from './types';
+import { DEFAULTS, TABS } from './types';
 
 export function SettingsPage() {
   const state = useSettings<Settings>({

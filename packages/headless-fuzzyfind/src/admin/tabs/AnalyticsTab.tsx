@@ -1,7 +1,7 @@
-import { useState, useEffect } from '@wordpress/element';
-import { Button, Spinner } from '@wordpress/components';
-import { __ } from '@wordpress/i18n';
 import apiFetch from '@wordpress/api-fetch';
+import { Button, Spinner } from '@wordpress/components';
+import { useEffect, useState } from '@wordpress/element';
+import { __ } from '@wordpress/i18n';
 import type { AnalyticsData } from '../types';
 
 export function AnalyticsTab() {
@@ -54,7 +54,9 @@ export function AnalyticsTab() {
           <tbody>
             {data.popular.map((row, i) => (
               <tr key={i}>
-                <td><code>{row.query}</code></td>
+                <td>
+                  <code>{row.query}</code>
+                </td>
                 <td>{row.search_count}</td>
                 <td>{row.result_count}</td>
                 <td>{row.last_searched}</td>
@@ -79,7 +81,9 @@ export function AnalyticsTab() {
           <tbody>
             {data.zero_results.map((row, i) => (
               <tr key={i}>
-                <td><code>{row.query}</code></td>
+                <td>
+                  <code>{row.query}</code>
+                </td>
                 <td>{row.search_count}</td>
                 <td>{row.last_searched}</td>
               </tr>
@@ -87,15 +91,12 @@ export function AnalyticsTab() {
           </tbody>
         </table>
       ) : (
-        <p style={{ color: '#666' }}>{__('No zero-result searches recorded.', 'headless-fuzzyfind')}</p>
+        <p style={{ color: '#666' }}>
+          {__('No zero-result searches recorded.', 'headless-fuzzyfind')}
+        </p>
       )}
 
-      <Button
-        variant="secondary"
-        isDestructive
-        onClick={handleClear}
-        isBusy={clearing}
-      >
+      <Button variant="secondary" isDestructive onClick={handleClear} isBusy={clearing}>
         {clearing ? <Spinner /> : __('Clear Analytics', 'headless-fuzzyfind')}
       </Button>
     </div>

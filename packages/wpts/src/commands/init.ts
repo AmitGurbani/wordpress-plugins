@@ -1,5 +1,5 @@
 import path from 'node:path';
-import { writeFile, ensureDir } from '../utils/fs-utils.js';
+import { ensureDir, writeFile } from '../utils/fs-utils.js';
 
 export async function initProject(
   directory: string,
@@ -148,10 +148,7 @@ if (rootElement) {
     include: ['src/**/*'],
   };
 
-  await writeFile(
-    path.join(projectDir, 'tsconfig.json'),
-    JSON.stringify(tsconfig, null, 2) + '\n',
-  );
+  await writeFile(path.join(projectDir, 'tsconfig.json'), JSON.stringify(tsconfig, null, 2) + '\n');
 
   // Create .gitignore to track generated PHP output
   const gitignore = `# Track generated PHP plugin output (un-ignore dist from root rule)

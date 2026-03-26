@@ -7,7 +7,6 @@
 import { RestRoute } from 'wpts';
 
 class UmamiDiagnostics {
-
   sendUmamiEvent(eventName: string, url: string, title: string, eventData: any): any {
     const umamiUrl: string = getOption('headless_umami_umami_url', '');
     const websiteId: string = getOption('headless_umami_website_id', '');
@@ -67,7 +66,9 @@ class UmamiDiagnostics {
 
   @RestRoute('/diagnostics/test-connection', { method: 'POST', capability: 'manage_options' })
   testConnection(request: any): any {
-    const result: any = this.sendUmamiEvent('plugin_test', '/', 'Plugin Connection Test', { source: 'headless-umami-diagnostics' });
+    const result: any = this.sendUmamiEvent('plugin_test', '/', 'Plugin Connection Test', {
+      source: 'headless-umami-diagnostics',
+    });
 
     if (result['success']) {
       return { success: true, message: 'Connection to Umami successful. A test event was sent.' };

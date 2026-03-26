@@ -1,14 +1,14 @@
-import { describe, it, expect } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import {
+  toConstantPrefix,
+  toFilePrefix,
+  toFunctionPrefix,
+  toPascalCase,
+  toPhpFunctionName,
   toSlugCase,
   toSnakeCase,
-  toPascalCase,
-  toWPClassName,
-  toConstantPrefix,
-  toFunctionPrefix,
-  toPhpFunctionName,
-  toFilePrefix,
   toTextDomain,
+  toWPClassName,
 } from '../../../src/utils/naming.js';
 
 describe('toSlugCase', () => {

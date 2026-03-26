@@ -1,8 +1,11 @@
-import { describe, it, expect } from 'vitest';
 import ts from 'typescript';
-import { parseSourceString } from '../../../src/compiler/parser.js';
-import { extractDecorators, extractDecoratorsFromFiles } from '../../../src/compiler/decorator-extractor.js';
+import { describe, expect, it } from 'vitest';
+import {
+  extractDecorators,
+  extractDecoratorsFromFiles,
+} from '../../../src/compiler/decorator-extractor.js';
 import { DiagnosticCollection } from '../../../src/compiler/diagnostics.js';
+import { parseSourceString } from '../../../src/compiler/parser.js';
 
 function extract(source: string) {
   const parsed = parseSourceString(source);
@@ -388,7 +391,7 @@ describe('extractDecorators', () => {
       `);
 
       expect(diagnostics.hasErrors()).toBe(true);
-      expect(diagnostics.getErrors().some(e => e.code === 'WPTS073')).toBe(true);
+      expect(diagnostics.getErrors().some((e) => e.code === 'WPTS073')).toBe(true);
     });
 
     it('reports error for missing arguments', () => {
@@ -402,7 +405,7 @@ describe('extractDecorators', () => {
       `);
 
       expect(diagnostics.hasErrors()).toBe(true);
-      expect(diagnostics.getErrors().some(e => e.code === 'WPTS070')).toBe(true);
+      expect(diagnostics.getErrors().some((e) => e.code === 'WPTS070')).toBe(true);
     });
   });
 
@@ -470,7 +473,7 @@ describe('extractDecorators', () => {
       `);
 
       expect(diagnostics.hasErrors()).toBe(true);
-      expect(diagnostics.getErrors().some(e => e.code === 'WPTS085')).toBe(true);
+      expect(diagnostics.getErrors().some((e) => e.code === 'WPTS085')).toBe(true);
     });
   });
 
@@ -525,7 +528,7 @@ describe('extractDecorators', () => {
       `);
 
       expect(diagnostics.hasErrors()).toBe(true);
-      expect(diagnostics.getErrors().some(e => e.code === 'WPTS093')).toBe(true);
+      expect(diagnostics.getErrors().some((e) => e.code === 'WPTS093')).toBe(true);
     });
   });
 
@@ -581,7 +584,7 @@ describe('extractDecorators', () => {
       `);
 
       expect(diagnostics.hasErrors()).toBe(true);
-      expect(diagnostics.getErrors().some(e => e.code === 'WPTS095')).toBe(true);
+      expect(diagnostics.getErrors().some((e) => e.code === 'WPTS095')).toBe(true);
     });
   });
 
@@ -620,7 +623,7 @@ describe('extractDecorators', () => {
       };
 
       const program = ts.createProgram(fileNames, compilerOptions, host);
-      const sourceFiles = fileNames.map(name => program.getSourceFile(name)!);
+      const sourceFiles = fileNames.map((name) => program.getSourceFile(name)!);
       return { sourceFiles, typeChecker: program.getTypeChecker() };
     }
 
@@ -680,7 +683,7 @@ describe('extractDecorators', () => {
       extractDecoratorsFromFiles(sourceFiles, typeChecker, diagnostics);
 
       expect(diagnostics.hasErrors()).toBe(true);
-      expect(diagnostics.getErrors().some(e => e.code === 'WPTS002')).toBe(true);
+      expect(diagnostics.getErrors().some((e) => e.code === 'WPTS002')).toBe(true);
     });
 
     it('reports WPTS001 when no file has @Plugin', () => {
@@ -702,7 +705,7 @@ describe('extractDecorators', () => {
       extractDecoratorsFromFiles(sourceFiles, typeChecker, diagnostics);
 
       expect(diagnostics.hasErrors()).toBe(true);
-      expect(diagnostics.getErrors().some(e => e.code === 'WPTS001')).toBe(true);
+      expect(diagnostics.getErrors().some((e) => e.code === 'WPTS001')).toBe(true);
     });
   });
 

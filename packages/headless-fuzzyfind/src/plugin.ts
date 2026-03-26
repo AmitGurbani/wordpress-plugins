@@ -7,7 +7,7 @@
  * Build: npx wpts build src/plugin.ts -o dist --clean
  */
 
-import { Plugin, Setting, AdminPage, Activate, Deactivate, Action } from 'wpts';
+import { Action, Activate, AdminPage, Deactivate, Plugin, Setting } from 'wpts';
 import './indexer.js';
 import './search-routes.js';
 import './admin-routes.js';
@@ -30,7 +30,6 @@ import './admin-routes.js';
   iconUrl: 'dashicons-search',
 })
 class FuzzyFind {
-
   // ── Weight Settings (1–10 scale) ────────────────────────────────────
 
   @Setting({
@@ -121,7 +120,8 @@ class FuzzyFind {
     type: 'string',
     default: '',
     label: 'Search Synonyms',
-    description: 'Define synonym groups, one per line, comma-separated. All terms in a group match interchangeably.',
+    description:
+      'Define synonym groups, one per line, comma-separated. All terms in a group match interchangeably.',
     sanitize: 'sanitize_textarea_field',
   })
   synonyms: string = '';
@@ -152,35 +152,45 @@ class FuzzyFind {
     const indexTable: string = prefix + 'ff_search_index';
     const logTable: string = prefix + 'ff_search_log';
 
-    const sqlIndex: string = 'CREATE TABLE ' + indexTable + ' ('
-      + 'id bigint(20) unsigned NOT NULL AUTO_INCREMENT, '
-      + 'product_id bigint(20) unsigned NOT NULL, '
-      + 'title text NOT NULL, '
-      + 'sku varchar(100) NOT NULL DEFAULT \'\', '
-      + 'short_desc text NOT NULL, '
-      + 'content longtext NOT NULL, '
-      + 'attributes text NOT NULL, '
-      + 'categories text NOT NULL, '
-      + 'tags text NOT NULL, '
-      + 'variation_skus text NOT NULL, '
-      + 'indexed_at datetime NOT NULL, '
-      + 'PRIMARY KEY  (id), '
-      + 'UNIQUE KEY product_id (product_id), '
-      + 'FULLTEXT KEY ft_title (title), '
-      + 'FULLTEXT KEY ft_sku (sku), '
-      + 'FULLTEXT KEY ft_all (title, sku, short_desc, attributes, categories, tags, variation_skus)'
-      + ') ENGINE=InnoDB ' + charsetCollate + ';';
+    const sqlIndex: string =
+      'CREATE TABLE ' +
+      indexTable +
+      ' (' +
+      'id bigint(20) unsigned NOT NULL AUTO_INCREMENT, ' +
+      'product_id bigint(20) unsigned NOT NULL, ' +
+      'title text NOT NULL, ' +
+      "sku varchar(100) NOT NULL DEFAULT '', " +
+      'short_desc text NOT NULL, ' +
+      'content longtext NOT NULL, ' +
+      'attributes text NOT NULL, ' +
+      'categories text NOT NULL, ' +
+      'tags text NOT NULL, ' +
+      'variation_skus text NOT NULL, ' +
+      'indexed_at datetime NOT NULL, ' +
+      'PRIMARY KEY  (id), ' +
+      'UNIQUE KEY product_id (product_id), ' +
+      'FULLTEXT KEY ft_title (title), ' +
+      'FULLTEXT KEY ft_sku (sku), ' +
+      'FULLTEXT KEY ft_all (title, sku, short_desc, attributes, categories, tags, variation_skus)' +
+      ') ENGINE=InnoDB ' +
+      charsetCollate +
+      ';';
 
-    const sqlLog: string = 'CREATE TABLE ' + logTable + ' ('
-      + 'id bigint(20) unsigned NOT NULL AUTO_INCREMENT, '
-      + 'query varchar(200) NOT NULL, '
-      + 'result_count int NOT NULL DEFAULT 0, '
-      + 'search_count int NOT NULL DEFAULT 1, '
-      + 'last_searched datetime NOT NULL, '
-      + 'PRIMARY KEY  (id), '
-      + 'UNIQUE KEY query_unique (query), '
-      + 'KEY result_count (result_count)'
-      + ') ENGINE=InnoDB ' + charsetCollate + ';';
+    const sqlLog: string =
+      'CREATE TABLE ' +
+      logTable +
+      ' (' +
+      'id bigint(20) unsigned NOT NULL AUTO_INCREMENT, ' +
+      'query varchar(200) NOT NULL, ' +
+      'result_count int NOT NULL DEFAULT 0, ' +
+      'search_count int NOT NULL DEFAULT 1, ' +
+      'last_searched datetime NOT NULL, ' +
+      'PRIMARY KEY  (id), ' +
+      'UNIQUE KEY query_unique (query), ' +
+      'KEY result_count (result_count)' +
+      ') ENGINE=InnoDB ' +
+      charsetCollate +
+      ';';
 
     dbDelta(sqlIndex);
     dbDelta(sqlLog);

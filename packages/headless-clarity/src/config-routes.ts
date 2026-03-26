@@ -8,7 +8,6 @@
 import { RestRoute } from 'wpts';
 
 class ClarityConfig {
-
   @RestRoute('/config', { method: 'GET', public: true })
   getConfig(request: any): any {
     const projectId: string = getOption('headless_clarity_project_id', '');

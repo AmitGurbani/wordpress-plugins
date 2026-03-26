@@ -1,9 +1,9 @@
 import ts from 'typescript';
-import { WP_FUNCTION_MAP, JS_METHOD_MAP, WP_CONST_MAP } from './wp-function-map.js';
 import { toSnakeCase } from '../utils/naming.js';
 // Circular import with statement-transpiler is safe: both modules only call each other's
 // functions at runtime (not at module load time), so ESM live bindings resolve correctly.
 import { transpileBlock as transpileBlockStmts } from './statement-transpiler.js';
+import { JS_METHOD_MAP, WP_CONST_MAP, WP_FUNCTION_MAP } from './wp-function-map.js';
 
 /**
  * Transpile a TypeScript expression node to a PHP expression string.
@@ -137,7 +137,9 @@ export function transpileExpression(node: ts.Expression, typeChecker: ts.TypeChe
       } else {
         className = transpileExpression(newExpr.expression, typeChecker);
       }
-      const newArgs = newExpr.arguments ? newExpr.arguments.map(a => transpileExpression(a, typeChecker)) : [];
+      const newArgs = newExpr.arguments
+        ? newExpr.arguments.map((a) => transpileExpression(a, typeChecker))
+        : [];
       return `new ${phpCall(className, newArgs)}`;
     }
 
@@ -165,7 +167,7 @@ function transpileIdentifier(node: ts.Identifier, typeChecker: ts.TypeChecker): 
   if (WP_FUNCTION_MAP[name]) {
     const symbol = typeChecker.getSymbolAtLocation(node);
     const isVariable = symbol?.declarations?.some(
-      d => ts.isVariableDeclaration(d) || ts.isParameter(d) || ts.isBindingElement(d)
+      (d) => ts.isVariableDeclaration(d) || ts.isParameter(d) || ts.isBindingElement(d),
     );
     if (!isVariable) {
       return WP_FUNCTION_MAP[name];
@@ -173,8 +175,16 @@ function transpileIdentifier(node: ts.Identifier, typeChecker: ts.TypeChecker): 
   }
 
   // PHP superglobals — preserve verbatim (already include $ in the name)
-  if (name === '$_SERVER' || name === '$_POST' || name === '$_GET' || name === '$_REQUEST'
-      || name === '$_SESSION' || name === '$_COOKIE' || name === '$_FILES' || name === '$_ENV') {
+  if (
+    name === '$_SERVER' ||
+    name === '$_POST' ||
+    name === '$_GET' ||
+    name === '$_REQUEST' ||
+    name === '$_SESSION' ||
+    name === '$_COOKIE' ||
+    name === '$_FILES' ||
+    name === '$_ENV'
+  ) {
     return name;
   }
 
@@ -202,9 +212,15 @@ function transpileBinaryExpression(node: ts.BinaryExpression, typeChecker: ts.Ty
   return `${left} ${op} ${right}`;
 }
 
-function tryTranspileTypeofComparison(node: ts.BinaryExpression, typeChecker: ts.TypeChecker): string | null {
+function tryTranspileTypeofComparison(
+  node: ts.BinaryExpression,
+  typeChecker: ts.TypeChecker,
+): string | null {
   const op = node.operatorToken.kind;
-  if (op !== ts.SyntaxKind.EqualsEqualsEqualsToken && op !== ts.SyntaxKind.ExclamationEqualsEqualsToken) {
+  if (
+    op !== ts.SyntaxKind.EqualsEqualsEqualsToken &&
+    op !== ts.SyntaxKind.ExclamationEqualsEqualsToken
+  ) {
     return null;
   }
 
@@ -225,12 +241,12 @@ function tryTranspileTypeofComparison(node: ts.BinaryExpression, typeChecker: ts
   const negate = op === ts.SyntaxKind.ExclamationEqualsEqualsToken;
 
   const typeMap: Record<string, string> = {
-    'string': 'is_string',
-    'number': 'is_numeric',
-    'boolean': 'is_bool',
-    'object': 'is_array',
-    'undefined': 'is_null',
-    'function': 'is_callable',
+    string: 'is_string',
+    number: 'is_numeric',
+    boolean: 'is_bool',
+    object: 'is_array',
+    undefined: 'is_null',
+    function: 'is_callable',
   };
 
   const phpFunc = typeMap[typeStr];
@@ -254,46 +270,76 @@ function transpileBinaryOperator(
       }
       return token.kind === ts.SyntaxKind.PlusEqualsToken ? '+=' : '+';
     }
-    case ts.SyntaxKind.MinusToken: return '-';
-    case ts.SyntaxKind.MinusEqualsToken: return '-=';
-    case ts.SyntaxKind.AsteriskToken: return '*';
-    case ts.SyntaxKind.AsteriskEqualsToken: return '*=';
-    case ts.SyntaxKind.SlashToken: return '/';
-    case ts.SyntaxKind.SlashEqualsToken: return '/=';
-    case ts.SyntaxKind.PercentToken: return '%';
-    case ts.SyntaxKind.PercentEqualsToken: return '%=';
-    case ts.SyntaxKind.AsteriskAsteriskToken: return '**';
+    case ts.SyntaxKind.MinusToken:
+      return '-';
+    case ts.SyntaxKind.MinusEqualsToken:
+      return '-=';
+    case ts.SyntaxKind.AsteriskToken:
+      return '*';
+    case ts.SyntaxKind.AsteriskEqualsToken:
+      return '*=';
+    case ts.SyntaxKind.SlashToken:
+      return '/';
+    case ts.SyntaxKind.SlashEqualsToken:
+      return '/=';
+    case ts.SyntaxKind.PercentToken:
+      return '%';
+    case ts.SyntaxKind.PercentEqualsToken:
+      return '%=';
+    case ts.SyntaxKind.AsteriskAsteriskToken:
+      return '**';
 
     // Comparison
-    case ts.SyntaxKind.EqualsEqualsToken: return '==';
-    case ts.SyntaxKind.EqualsEqualsEqualsToken: return '===';
-    case ts.SyntaxKind.ExclamationEqualsToken: return '!=';
-    case ts.SyntaxKind.ExclamationEqualsEqualsToken: return '!==';
-    case ts.SyntaxKind.LessThanToken: return '<';
-    case ts.SyntaxKind.LessThanEqualsToken: return '<=';
-    case ts.SyntaxKind.GreaterThanToken: return '>';
-    case ts.SyntaxKind.GreaterThanEqualsToken: return '>=';
+    case ts.SyntaxKind.EqualsEqualsToken:
+      return '==';
+    case ts.SyntaxKind.EqualsEqualsEqualsToken:
+      return '===';
+    case ts.SyntaxKind.ExclamationEqualsToken:
+      return '!=';
+    case ts.SyntaxKind.ExclamationEqualsEqualsToken:
+      return '!==';
+    case ts.SyntaxKind.LessThanToken:
+      return '<';
+    case ts.SyntaxKind.LessThanEqualsToken:
+      return '<=';
+    case ts.SyntaxKind.GreaterThanToken:
+      return '>';
+    case ts.SyntaxKind.GreaterThanEqualsToken:
+      return '>=';
 
     // Logical
-    case ts.SyntaxKind.AmpersandAmpersandToken: return '&&';
-    case ts.SyntaxKind.BarBarToken: return '||';
-    case ts.SyntaxKind.QuestionQuestionToken: return '??'; // Nullish coalescing
+    case ts.SyntaxKind.AmpersandAmpersandToken:
+      return '&&';
+    case ts.SyntaxKind.BarBarToken:
+      return '||';
+    case ts.SyntaxKind.QuestionQuestionToken:
+      return '??'; // Nullish coalescing
 
     // Bitwise
-    case ts.SyntaxKind.AmpersandToken: return '&';
-    case ts.SyntaxKind.BarToken: return '|';
-    case ts.SyntaxKind.CaretToken: return '^';
-    case ts.SyntaxKind.LessThanLessThanToken: return '<<';
-    case ts.SyntaxKind.GreaterThanGreaterThanToken: return '>>';
+    case ts.SyntaxKind.AmpersandToken:
+      return '&';
+    case ts.SyntaxKind.BarToken:
+      return '|';
+    case ts.SyntaxKind.CaretToken:
+      return '^';
+    case ts.SyntaxKind.LessThanLessThanToken:
+      return '<<';
+    case ts.SyntaxKind.GreaterThanGreaterThanToken:
+      return '>>';
 
     // Assignment
-    case ts.SyntaxKind.EqualsToken: return '=';
-    case ts.SyntaxKind.AmpersandAmpersandEqualsToken: return '&&=';
-    case ts.SyntaxKind.BarBarEqualsToken: return '||=';
-    case ts.SyntaxKind.QuestionQuestionEqualsToken: return '??=';
+    case ts.SyntaxKind.EqualsToken:
+      return '=';
+    case ts.SyntaxKind.AmpersandAmpersandEqualsToken:
+      return '&&=';
+    case ts.SyntaxKind.BarBarEqualsToken:
+      return '||=';
+    case ts.SyntaxKind.QuestionQuestionEqualsToken:
+      return '??=';
 
     // instanceof
-    case ts.SyntaxKind.InstanceOfKeyword: return 'instanceof';
+    case ts.SyntaxKind.InstanceOfKeyword:
+      return 'instanceof';
 
     default:
       return token.getText();
@@ -303,27 +349,40 @@ function transpileBinaryOperator(
 function transpilePrefixUnary(node: ts.PrefixUnaryExpression, typeChecker: ts.TypeChecker): string {
   const operand = transpileExpression(node.operand, typeChecker);
   switch (node.operator) {
-    case ts.SyntaxKind.ExclamationToken: return `! ${operand}`;
-    case ts.SyntaxKind.MinusToken: return `-${operand}`;
-    case ts.SyntaxKind.PlusToken: return `+${operand}`;
-    case ts.SyntaxKind.TildeToken: return `~${operand}`;
-    case ts.SyntaxKind.PlusPlusToken: return `++${operand}`;
-    case ts.SyntaxKind.MinusMinusToken: return `--${operand}`;
-    default: return operand;
+    case ts.SyntaxKind.ExclamationToken:
+      return `! ${operand}`;
+    case ts.SyntaxKind.MinusToken:
+      return `-${operand}`;
+    case ts.SyntaxKind.PlusToken:
+      return `+${operand}`;
+    case ts.SyntaxKind.TildeToken:
+      return `~${operand}`;
+    case ts.SyntaxKind.PlusPlusToken:
+      return `++${operand}`;
+    case ts.SyntaxKind.MinusMinusToken:
+      return `--${operand}`;
+    default:
+      return operand;
   }
 }
 
-function transpilePostfixUnary(node: ts.PostfixUnaryExpression, typeChecker: ts.TypeChecker): string {
+function transpilePostfixUnary(
+  node: ts.PostfixUnaryExpression,
+  typeChecker: ts.TypeChecker,
+): string {
   const operand = transpileExpression(node.operand, typeChecker);
   switch (node.operator) {
-    case ts.SyntaxKind.PlusPlusToken: return `${operand}++`;
-    case ts.SyntaxKind.MinusMinusToken: return `${operand}--`;
-    default: return operand;
+    case ts.SyntaxKind.PlusPlusToken:
+      return `${operand}++`;
+    case ts.SyntaxKind.MinusMinusToken:
+      return `${operand}--`;
+    default:
+      return operand;
   }
 }
 
 function transpileCallExpression(node: ts.CallExpression, typeChecker: ts.TypeChecker): string {
-  const args = node.arguments.map(a => transpileExpression(a, typeChecker));
+  const args = node.arguments.map((a) => transpileExpression(a, typeChecker));
 
   // Method call: obj.method(args) or obj?.method(args)
   if (ts.isPropertyAccessExpression(node.expression)) {
@@ -359,9 +418,19 @@ function transpileCallExpression(node: ts.CallExpression, typeChecker: ts.TypeCh
     // Math methods
     if (ts.isIdentifier(obj) && obj.text === 'Math') {
       const mathMap: Record<string, string> = {
-        floor: 'floor', ceil: 'ceil', round: 'round', abs: 'abs',
-        min: 'min', max: 'max', random: 'mt_rand', pow: 'pow',
-        sqrt: 'sqrt', log: 'log', sin: 'sin', cos: 'cos', tan: 'tan',
+        floor: 'floor',
+        ceil: 'ceil',
+        round: 'round',
+        abs: 'abs',
+        min: 'min',
+        max: 'max',
+        random: 'mt_rand',
+        pow: 'pow',
+        sqrt: 'sqrt',
+        log: 'log',
+        sin: 'sin',
+        cos: 'cos',
+        tan: 'tan',
       };
       if (mathMap[methodName]) {
         return phpCall(mathMap[methodName], args);
@@ -373,7 +442,12 @@ function transpileCallExpression(node: ts.CallExpression, typeChecker: ts.TypeCh
       if (methodName === 'keys') return phpCall('array_keys', [args[0]]);
       if (methodName === 'values') return phpCall('array_values', [args[0]]);
       if (methodName === 'assign') return phpCall('array_merge', args);
-      if (methodName === 'entries') return phpCall('array_map', ['null', phpCall('array_keys', [args[0]]), phpCall('array_values', [args[0]])]);
+      if (methodName === 'entries')
+        return phpCall('array_map', [
+          'null',
+          phpCall('array_keys', [args[0]]),
+          phpCall('array_values', [args[0]]),
+        ]);
     }
 
     // Type-ambiguous methods: different PHP function for strings vs arrays
@@ -381,7 +455,8 @@ function transpileCallExpression(node: ts.CallExpression, typeChecker: ts.TypeCh
       indexOf: (o, a) => `strpos( ${o}, ${a[0]} )`,
       includes: (o, a) => `str_contains( ${o}, ${a[0]} )`,
       lastIndexOf: (o, a) => `strrpos( ${o}, ${a[0]} )`,
-      slice: (o, a) => a.length === 2 ? `substr( ${o}, ${a[0]}, ${a[1]} - ${a[0]} )` : `substr( ${o}, ${a[0]} )`,
+      slice: (o, a) =>
+        a.length === 2 ? `substr( ${o}, ${a[0]}, ${a[1]} - ${a[0]} )` : `substr( ${o}, ${a[0]} )`,
       concat: (o, a) => [o, ...a].join(' . '),
       padEnd: (o, a) => `str_pad( ${[o, ...a].join(', ')}, STR_PAD_RIGHT )`,
     };
@@ -469,7 +544,8 @@ function transpileCallExpression(node: ts.CallExpression, typeChecker: ts.TypeCh
     if (funcName === 'String') return phpCall('strval', [args[0]]);
     if (funcName === 'Number') return phpCall('intval', [args[0]]);
     if (funcName === 'Boolean') return phpCall('boolval', [args[0]]);
-    if (funcName === 'Array' && args.length > 0) return phpCall('array_fill', ['0', args[0], 'null']);
+    if (funcName === 'Array' && args.length > 0)
+      return phpCall('array_fill', ['0', args[0], 'null']);
     if (funcName === 'isNaN') return phpCall('is_nan', [args[0]]);
     if (funcName === 'isFinite') return phpCall('is_finite', [args[0]]);
 
@@ -482,7 +558,10 @@ function transpileCallExpression(node: ts.CallExpression, typeChecker: ts.TypeCh
   return phpCall(callee, args);
 }
 
-function transpilePropertyAccess(node: ts.PropertyAccessExpression, typeChecker: ts.TypeChecker): string {
+function transpilePropertyAccess(
+  node: ts.PropertyAccessExpression,
+  typeChecker: ts.TypeChecker,
+): string {
   const prop = node.name.text;
 
   // Optional chaining: obj?.prop
@@ -499,11 +578,9 @@ function transpilePropertyAccess(node: ts.PropertyAccessExpression, typeChecker:
   if (ts.isIdentifier(node.expression)) {
     try {
       const exprSymbol = typeChecker.getSymbolAtLocation(node.expression);
-      if (exprSymbol && (exprSymbol.flags & ts.SymbolFlags.RegularEnum)) {
+      if (exprSymbol && exprSymbol.flags & ts.SymbolFlags.RegularEnum) {
         const enumName = node.expression.text;
-        const memberName = prop
-          .replace(/([a-z0-9])([A-Z])/g, '$1_$2')
-          .toUpperCase();
+        const memberName = prop.replace(/([a-z0-9])([A-Z])/g, '$1_$2').toUpperCase();
         return `${enumName}::${memberName}`;
       }
     } catch {
@@ -541,7 +618,10 @@ function transpilePropertyAccess(node: ts.PropertyAccessExpression, typeChecker:
   return `${obj}['${prop}']`;
 }
 
-function transpileElementAccess(node: ts.ElementAccessExpression, typeChecker: ts.TypeChecker): string {
+function transpileElementAccess(
+  node: ts.ElementAccessExpression,
+  typeChecker: ts.TypeChecker,
+): string {
   const obj = transpileExpression(node.expression, typeChecker);
   const index = transpileExpression(node.argumentExpression, typeChecker);
 
@@ -553,7 +633,10 @@ function transpileElementAccess(node: ts.ElementAccessExpression, typeChecker: t
   return `${obj}[${index}]`;
 }
 
-function transpileTemplateLiteral(node: ts.TemplateExpression, typeChecker: ts.TypeChecker): string {
+function transpileTemplateLiteral(
+  node: ts.TemplateExpression,
+  typeChecker: ts.TypeChecker,
+): string {
   const parts: string[] = [];
 
   // Head
@@ -579,11 +662,14 @@ function transpileConditional(node: ts.ConditionalExpression, typeChecker: ts.Ty
   return `${condition} ? ${whenTrue} : ${whenFalse}`;
 }
 
-function transpileArrayLiteral(node: ts.ArrayLiteralExpression, typeChecker: ts.TypeChecker): string {
+function transpileArrayLiteral(
+  node: ts.ArrayLiteralExpression,
+  typeChecker: ts.TypeChecker,
+): string {
   if (node.elements.length === 0) return 'array()';
 
   // Check for spread elements: [...arr, 4, 5] -> array_merge( $arr, array( 4, 5 ) )
-  const hasSpread = node.elements.some(e => ts.isSpreadElement(e));
+  const hasSpread = node.elements.some((e) => ts.isSpreadElement(e));
   if (hasSpread) {
     const groups: string[] = [];
     let currentGroup: string[] = [];
@@ -604,15 +690,18 @@ function transpileArrayLiteral(node: ts.ArrayLiteralExpression, typeChecker: ts.
     return groups.length === 1 ? groups[0] : `array_merge( ${groups.join(', ')} )`;
   }
 
-  const elements = node.elements.map(e => transpileExpression(e, typeChecker));
+  const elements = node.elements.map((e) => transpileExpression(e, typeChecker));
   return `array( ${elements.join(', ')} )`;
 }
 
-function transpileObjectLiteral(node: ts.ObjectLiteralExpression, typeChecker: ts.TypeChecker): string {
+function transpileObjectLiteral(
+  node: ts.ObjectLiteralExpression,
+  typeChecker: ts.TypeChecker,
+): string {
   if (node.properties.length === 0) return 'array()';
 
   // Check for spread: { ...obj, key: val } -> array_merge( $obj, array( 'key' => $val ) )
-  const hasSpread = node.properties.some(p => ts.isSpreadAssignment(p));
+  const hasSpread = node.properties.some((p) => ts.isSpreadAssignment(p));
   if (hasSpread) {
     const groups: string[] = [];
     let currentProps: string[] = [];
@@ -633,11 +722,14 @@ function transpileObjectLiteral(node: ts.ObjectLiteralExpression, typeChecker: t
     return `array_merge( ${groups.join(', ')} )`;
   }
 
-  const props = node.properties.map(p => transpileObjectProperty(p, typeChecker));
+  const props = node.properties.map((p) => transpileObjectProperty(p, typeChecker));
   return `array( ${props.join(', ')} )`;
 }
 
-function transpileObjectProperty(prop: ts.ObjectLiteralElementLike, typeChecker: ts.TypeChecker): string {
+function transpileObjectProperty(
+  prop: ts.ObjectLiteralElementLike,
+  typeChecker: ts.TypeChecker,
+): string {
   if (ts.isPropertyAssignment(prop)) {
     const key = ts.isIdentifier(prop.name)
       ? `'${prop.name.text}'`
@@ -655,7 +747,7 @@ function transpileObjectProperty(prop: ts.ObjectLiteralElementLike, typeChecker:
 }
 
 function transpileArrowFunction(node: ts.ArrowFunction, typeChecker: ts.TypeChecker): string {
-  const params = node.parameters.map(p => {
+  const params = node.parameters.map((p) => {
     const name = ts.isIdentifier(p.name) ? `$${toSnakeCase(p.name.text)}` : '$param';
     return name;
   });
@@ -693,7 +785,11 @@ function phpCall(name: string, args: string[]): string {
  */
 function isStringType(node: ts.Expression, typeChecker: ts.TypeChecker): boolean {
   // Heuristic check first — most reliable for literals
-  if (ts.isStringLiteral(node) || ts.isNoSubstitutionTemplateLiteral(node) || ts.isTemplateExpression(node)) {
+  if (
+    ts.isStringLiteral(node) ||
+    ts.isNoSubstitutionTemplateLiteral(node) ||
+    ts.isTemplateExpression(node)
+  ) {
     return true;
   }
 

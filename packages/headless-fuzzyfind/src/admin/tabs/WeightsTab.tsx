@@ -6,7 +6,10 @@ export function WeightsTab({ settings, update }: TabProps) {
   return (
     <div style={{ padding: '16px 0', maxWidth: '600px' }}>
       <p style={{ color: '#666', marginBottom: '16px' }}>
-        {__('Adjust how much weight each field has in search relevance scoring. Higher values mean matches in that field rank higher in results.', 'headless-fuzzyfind')}
+        {__(
+          'Adjust how much weight each field has in search relevance scoring. Higher values mean matches in that field rank higher in results.',
+          'headless-fuzzyfind',
+        )}
       </p>
       <NumberControl
         label={__('Title Weight', 'headless-fuzzyfind')}

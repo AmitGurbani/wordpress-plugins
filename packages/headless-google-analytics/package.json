@@ -8,7 +8,9 @@
     "dev": "wpts watch src/plugin.ts -o dist",
     "wp-env:start": "wp-env start",
     "wp-env:stop": "wp-env stop",
-    "wp-env:clean": "wp-env clean all"
+    "wp-env:clean": "wp-env clean all",
+    "lint": "biome lint src/",
+    "check": "biome check src/"
   },
   "devDependencies": {
     "@types/react": "^18.3.1",

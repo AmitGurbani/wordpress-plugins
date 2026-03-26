@@ -8,14 +8,15 @@
  * Build: npx wpts build src/plugin.ts -o dist --clean
  */
 
-import { Plugin, Setting, AdminPage, Activate, Deactivate, Action, Filter } from 'wpts';
+import { Action, Activate, AdminPage, Deactivate, Filter, Plugin, Setting } from 'wpts';
 import './server-tracking.js';
 import './config-routes.js';
 import './diagnostics-routes.js';
 
 @Plugin({
   name: 'Headless Google Analytics',
-  description: 'Google Analytics (GA4) with WooCommerce integration and Measurement Protocol for headless WordPress.',
+  description:
+    'Google Analytics (GA4) with WooCommerce integration and Measurement Protocol for headless WordPress.',
   version: '1.0.0',
   author: 'wpts',
   license: 'GPL-2.0+',
@@ -31,7 +32,6 @@ import './diagnostics-routes.js';
   iconUrl: 'dashicons-chart-line',
 })
 class GoogleAnalytics {
-
   // ── General Settings ──────────────────────────────────────────────────
 
   @Setting({
@@ -79,7 +79,12 @@ class GoogleAnalytics {
   wooNotice(): void {
     if (!classExists('WooCommerce')) {
       echo('<div class="notice notice-warning"><p><strong>Headless Google Analytics:</strong> ');
-      echo(escHtml__('WooCommerce is recommended for automatic Purchase event tracking.', 'headless-google-analytics'));
+      echo(
+        escHtml__(
+          'WooCommerce is recommended for automatic Purchase event tracking.',
+          'headless-google-analytics',
+        ),
+      );
       echo('</p></div>');
     }
   }

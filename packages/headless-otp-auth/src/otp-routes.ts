@@ -7,7 +7,6 @@
 import { RestRoute } from 'wpts';
 
 class OtpRoutes {
-
   escapeForJson(value: string): string {
     const encoded: string = jsonEncode(value);
     if (!encoded) {
@@ -29,10 +28,15 @@ class OtpRoutes {
     const phoneHash: string = md5(phone);
     const attemptsKey: string = 'hoa_attempts_' + phoneHash;
     const currentAttempts: any = getTransient(attemptsKey);
-    const maxAttempts: number = Math.max(1, intval(getOption('headless_otp_auth_max_otp_attempts', 3)));
+    const maxAttempts: number = Math.max(
+      1,
+      intval(getOption('headless_otp_auth_max_otp_attempts', 3)),
+    );
 
     if (currentAttempts && intval(currentAttempts) >= maxAttempts) {
-      return new WP_Error('too_many_attempts', 'Too many OTP requests. Please try again later.', { status: 429 });
+      return new WP_Error('too_many_attempts', 'Too many OTP requests. Please try again later.', {
+        status: 429,
+      });
     }
 
     // Resend cooldown
@@ -40,7 +44,10 @@ class OtpRoutes {
     const cooldownExpiry: any = getTransient(cooldownKey);
     if (cooldownExpiry) {
       const retryAfter: number = Math.max(0, intval(cooldownExpiry) - time());
-      return new WP_Error('cooldown_active', 'Please wait before requesting another OTP.', { status: 429, retry_after: retryAfter });
+      return new WP_Error('cooldown_active', 'Please wait before requesting another OTP.', {
+        status: 429,
+        retry_after: retryAfter,
+      });
     }
 
     // Generate OTP
@@ -56,22 +63,32 @@ class OtpRoutes {
     setTransient('hoa_otp_' + phoneHash, otpHash, otpExpiry);
 
     // Update attempt count (use rate limit window, not OTP expiry)
-    const rateLimitWindow: number = Math.max(60, intval(getOption('headless_otp_auth_rate_limit_window', 900)));
+    const rateLimitWindow: number = Math.max(
+      60,
+      intval(getOption('headless_otp_auth_rate_limit_window', 900)),
+    );
     const newAttempts: number = currentAttempts ? intval(currentAttempts) + 1 : 1;
     setTransient(attemptsKey, strval(newAttempts), rateLimitWindow);
 
     // Set resend cooldown
-    const cooldown: number = Math.max(10, intval(getOption('headless_otp_auth_otp_resend_cooldown', 60)));
+    const cooldown: number = Math.max(
+      10,
+      intval(getOption('headless_otp_auth_otp_resend_cooldown', 60)),
+    );
     setTransient(cooldownKey, strval(time() + cooldown), cooldown);
 
     // Test mode — skip external delivery, store OTP for admin display
     const testMode: string = getOption('headless_otp_auth_otp_test_mode', '');
     if (testMode === '1') {
-      setTransient('hoa_test_otp_latest', jsonEncode({
-        otp: otp,
-        phone: phone,
-        created_at: time(),
-      }), otpExpiry);
+      setTransient(
+        'hoa_test_otp_latest',
+        jsonEncode({
+          otp: otp,
+          phone: phone,
+          created_at: time(),
+        }),
+        otpExpiry,
+      );
       return { success: true, message: 'OTP generated in test mode.' };
     }
 
@@ -92,7 +109,10 @@ class OtpRoutes {
     const safeSiteUrl: string = this.escapeForJson(siteUrlVal);
 
     // Build payload from template
-    const payloadTemplate: string = getOption('headless_otp_auth_otp_server_payload_template', '{}');
+    const payloadTemplate: string = getOption(
+      'headless_otp_auth_otp_server_payload_template',
+      '{}',
+    );
     let payload: string = payloadTemplate;
     payload = payload.replace('{{phone}}', safePhone);
     payload = payload.replace('{{otp}}', safeOtp);
@@ -100,7 +120,10 @@ class OtpRoutes {
     payload = payload.replace('{{siteUrl}}', safeSiteUrl);
 
     // Build headers from template
-    const headersTemplate: string = getOption('headless_otp_auth_otp_server_headers_template', '{}');
+    const headersTemplate: string = getOption(
+      'headless_otp_auth_otp_server_headers_template',
+      '{}',
+    );
     let headersJson: string = headersTemplate;
     headersJson = headersJson.replace('{{phone}}', safePhone);
     headersJson = headersJson.replace('{{otp}}', safeOtp);
@@ -122,7 +145,9 @@ class OtpRoutes {
 
     const responseCode: number = intval(wpRemoteRetrieveResponseCode(response));
     if (responseCode < 200 || responseCode >= 300) {
-      return new WP_Error('otp_send_failed', 'OTP delivery server returned an error.', { status: 502 });
+      return new WP_Error('otp_send_failed', 'OTP delivery server returned an error.', {
+        status: 502,
+      });
     }
 
     return { success: true, message: 'OTP sent successfully.' };
@@ -147,16 +172,26 @@ class OtpRoutes {
     // Brute-force protection: limit wrong verify attempts
     const verifyKey: string = 'hoa_verify_' + phoneHash;
     const verifyAttempts: any = getTransient(verifyKey);
-    const maxVerify: number = Math.max(1, intval(getOption('headless_otp_auth_max_otp_verify_attempts', 3)));
+    const maxVerify: number = Math.max(
+      1,
+      intval(getOption('headless_otp_auth_max_otp_verify_attempts', 3)),
+    );
 
     if (verifyAttempts && intval(verifyAttempts) >= maxVerify) {
       deleteTransient('hoa_otp_' + phoneHash);
-      return new WP_Error('too_many_verify_attempts', 'Too many failed attempts. Please request a new OTP.', { status: 429 });
+      return new WP_Error(
+        'too_many_verify_attempts',
+        'Too many failed attempts. Please request a new OTP.',
+        { status: 429 },
+      );
     }
 
     if (!wpCheckPassword(otp, storedOtpHash)) {
       const newVerify: number = verifyAttempts ? intval(verifyAttempts) + 1 : 1;
-      const verifyExpiry: number = Math.max(60, intval(getOption('headless_otp_auth_rate_limit_window', 900)));
+      const verifyExpiry: number = Math.max(
+        60,
+        intval(getOption('headless_otp_auth_rate_limit_window', 900)),
+      );
       setTransient(verifyKey, strval(newVerify), verifyExpiry);
       return new WP_Error('invalid_otp', 'Invalid OTP.', { status: 400 });
     }
@@ -167,11 +202,21 @@ class OtpRoutes {
     deleteTransient('hoa_verify_' + phoneHash);
 
     // Look up existing user by phone (use fields:'ids' to avoid WP_User objects)
-    let userIds: any[] = getUsers({ meta_key: 'phone_number', meta_value: phone, number: 1, fields: 'ids' });
+    let userIds: any[] = getUsers({
+      meta_key: 'phone_number',
+      meta_value: phone,
+      number: 1,
+      fields: 'ids',
+    });
 
     // Fallback: check WooCommerce billing_phone if no match
     if (userIds.length === 0 && classExists('WooCommerce')) {
-      const wcIds: any[] = getUsers({ meta_key: 'billing_phone', meta_value: phone, number: 1, fields: 'ids' });
+      const wcIds: any[] = getUsers({
+        meta_key: 'billing_phone',
+        meta_value: phone,
+        number: 1,
+        fields: 'ids',
+      });
       if (wcIds.length > 0) {
         // Upgrade: save phone_number for future lookups
         updateUserMeta(intval(wcIds[0]), 'phone_number', phone);
@@ -186,10 +231,26 @@ class OtpRoutes {
         return new WP_Error('config_error', 'JWT is not configured.', { status: 403 });
       }
       const accessExpiry: number = intval(getOption('headless_otp_auth_jwt_access_expiry', 3600));
-      const refreshExpiry: number = intval(getOption('headless_otp_auth_jwt_refresh_expiry', 604800));
+      const refreshExpiry: number = intval(
+        getOption('headless_otp_auth_jwt_refresh_expiry', 604800),
+      );
 
-      const accessToken: string = applyFilters('hoa_generate_jwt', '', existingUserId, 'access', accessExpiry, secret);
-      const refreshToken: string = applyFilters('hoa_generate_jwt', '', existingUserId, 'refresh', refreshExpiry, secret);
+      const accessToken: string = applyFilters(
+        'hoa_generate_jwt',
+        '',
+        existingUserId,
+        'access',
+        accessExpiry,
+        secret,
+      );
+      const refreshToken: string = applyFilters(
+        'hoa_generate_jwt',
+        '',
+        existingUserId,
+        'refresh',
+        refreshExpiry,
+        secret,
+      );
 
       updateUserMeta(existingUserId, 'hoa_refresh_token_hash', wpHashPassword(refreshToken));
       updateUserMeta(existingUserId, 'hoa_refresh_token_expiry', strval(time() + refreshExpiry));

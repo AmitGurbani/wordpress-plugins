@@ -7,31 +7,39 @@
 import { Action, Filter } from 'wpts';
 
 class JwtAuth {
-
   // ── JWT Helper via WordPress Filter ───────────────────────────────────
   // Since wpts only includes decorated methods in generated PHP,
   // we use a WordPress filter as a reusable JWT generation function.
 
   @Action('init')
   registerJwtHelper(): void {
-    addFilter('hoa_generate_jwt', (value: string, userId: number, tokenType: string, expiry: number, secret: string) => {
-      if (!secret) {
-        return '';
-      }
-      const headerData: string = jsonEncode({ alg: 'HS256', typ: 'JWT' });
-      const payloadData: string = jsonEncode({
-        iss: siteUrl(),
-        sub: userId,
-        iat: time(),
-        exp: time() + expiry,
-        type: tokenType,
-      });
-      const b64Header: string = strtr(rtrim(base64Encode(headerData), '='), '+/', '-_');
-      const b64Payload: string = strtr(rtrim(base64Encode(payloadData), '='), '+/', '-_');
-      const headerPayload: string = b64Header + '.' + b64Payload;
-      const signature: string = strtr(rtrim(base64Encode(hashHmac('sha256', headerPayload, secret, true)), '='), '+/', '-_');
-      return headerPayload + '.' + signature;
-    }, 10, 5);
+    addFilter(
+      'hoa_generate_jwt',
+      (value: string, userId: number, tokenType: string, expiry: number, secret: string) => {
+        if (!secret) {
+          return '';
+        }
+        const headerData: string = jsonEncode({ alg: 'HS256', typ: 'JWT' });
+        const payloadData: string = jsonEncode({
+          iss: siteUrl(),
+          sub: userId,
+          iat: time(),
+          exp: time() + expiry,
+          type: tokenType,
+        });
+        const b64Header: string = strtr(rtrim(base64Encode(headerData), '='), '+/', '-_');
+        const b64Payload: string = strtr(rtrim(base64Encode(payloadData), '='), '+/', '-_');
+        const headerPayload: string = b64Header + '.' + b64Payload;
+        const signature: string = strtr(
+          rtrim(base64Encode(hashHmac('sha256', headerPayload, secret, true)), '='),
+          '+/',
+          '-_',
+        );
+        return headerPayload + '.' + signature;
+      },
+      10,
+      5,
+    );
   }
 
   // ── CORS Headers ──────────────────────────────────────────────────────
@@ -102,7 +110,11 @@ class JwtAuth {
 
     // Verify signature
     const headerPayload: string = tokenParts[0] + '.' + tokenParts[1];
-    const expectedSig: string = strtr(rtrim(base64Encode(hashHmac('sha256', headerPayload, secret, true)), '='), '+/', '-_');
+    const expectedSig: string = strtr(
+      rtrim(base64Encode(hashHmac('sha256', headerPayload, secret, true)), '='),
+      '+/',
+      '-_',
+    );
 
     if (!hashEquals(expectedSig, tokenParts[2])) {
       return userId;

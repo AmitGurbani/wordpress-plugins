@@ -1,11 +1,9 @@
-import { useState, useEffect } from '@wordpress/element';
-import { __ } from '@wordpress/i18n';
 import apiFetch from '@wordpress/api-fetch';
+import { useEffect, useState } from '@wordpress/element';
+import { __ } from '@wordpress/i18n';
 import type { SettingsConfig, SettingsState } from '../types';
 
-export function useSettings<S extends object>(
-  config: SettingsConfig<S>,
-): SettingsState<S> {
+export function useSettings<S extends object>(config: SettingsConfig<S>): SettingsState<S> {
   const { slug, textDomain, defaults } = config;
   const [settings, setSettings] = useState<S>(defaults);
   const [loading, setLoading] = useState(true);

@@ -1,8 +1,8 @@
 import ts from 'typescript';
-import { transpileFunctionBody } from './statement-transpiler.js';
-import { mapType } from './type-mapper.js';
 import type { FunctionBodyIR, ParameterIR } from '../ir/plugin-ir.js';
 import { toSnakeCase } from '../utils/naming.js';
+import { transpileFunctionBody } from './statement-transpiler.js';
+import { mapType } from './type-mapper.js';
 
 /**
  * Inject `global $wpdb;` at the start of a PHP method body if $wpdb is used.
@@ -50,7 +50,7 @@ export function transpileMethodBody(
 export function transpileParameters(
   params: { name: string; type: string; defaultValue?: string }[],
 ): ParameterIR[] {
-  return params.map(p => ({
+  return params.map((p) => ({
     name: p.name,
     phpName: `$${toSnakeCase(p.name)}`,
     type: mapType(p.type),
@@ -63,7 +63,7 @@ export function transpileParameters(
  */
 export function formatPhpParameters(params: ParameterIR[]): string {
   return params
-    .map(p => {
+    .map((p) => {
       let param = p.phpName;
       if (p.defaultValue) {
         param += ` = ${p.defaultValue}`;

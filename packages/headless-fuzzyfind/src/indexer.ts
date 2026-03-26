@@ -8,7 +8,6 @@
 import { Action } from 'wpts';
 
 class FfIndexer {
-
   // ── Real-time Indexing ──────────────────────────────────────────────
 
   @Action('woocommerce_new_product', { priority: 20 })
@@ -115,10 +114,13 @@ class FfIndexer {
     }
 
     // Clean up stale entries for deleted/unpublished products
-    wpdb.query(wpdb.prepare(
-      "DELETE FROM %i WHERE product_id NOT IN (SELECT ID FROM %i WHERE post_type = 'product' AND post_status = 'publish')",
-      tableName, wpdb.posts
-    ));
+    wpdb.query(
+      wpdb.prepare(
+        "DELETE FROM %i WHERE product_id NOT IN (SELECT ID FROM %i WHERE post_type = 'product' AND post_status = 'publish')",
+        tableName,
+        wpdb.posts,
+      ),
+    );
 
     updateOption('headless_fuzzyfind_last_indexed', time());
     deleteOption('headless_fuzzyfind_reindex_in_progress');
@@ -164,7 +166,9 @@ class FfIndexer {
     if (attributes) {
       for (const key in attributes) {
         const attr: any = attributes[key];
-        if (!attr) { continue; }
+        if (!attr) {
+          continue;
+        }
         if (attr.is_taxonomy()) {
           const terms: any[] = wcGetProductTerms(productId, attr.get_name(), { fields: 'names' });
           if (terms && terms.length > 0) {
@@ -181,15 +185,17 @@ class FfIndexer {
     const attributeStr: string = attrValues.join(' ');
 
     // Extract categories
-    const categoryNames: string[] = wcGetProductTerms(productId, 'product_cat', { fields: 'names' }) ?? [];
+    const categoryNames: string[] =
+      wcGetProductTerms(productId, 'product_cat', { fields: 'names' }) ?? [];
     const categoriesStr: string = categoryNames.join(' ');
 
     // Extract tags
-    const tagNames: string[] = wcGetProductTerms(productId, 'product_tag', { fields: 'names' }) ?? [];
+    const tagNames: string[] =
+      wcGetProductTerms(productId, 'product_tag', { fields: 'names' }) ?? [];
     const tagsStr: string = tagNames.join(' ');
 
     // Extract variation SKUs for variable products
-    let variationSkus: string[] = [];
+    const variationSkus: string[] = [];
     const productType: string = product.get_type();
     if (productType === 'variable') {
       const childIds: any[] = product.get_children();
@@ -210,7 +216,16 @@ class FfIndexer {
     // Upsert into search index
     const sql: string = wpdb.prepare(
       'INSERT INTO %i (product_id, title, sku, short_desc, content, attributes, categories, tags, variation_skus, indexed_at) VALUES (%d, %s, %s, %s, %s, %s, %s, %s, %s, NOW()) ON DUPLICATE KEY UPDATE title = VALUES(title), sku = VALUES(sku), short_desc = VALUES(short_desc), content = VALUES(content), attributes = VALUES(attributes), categories = VALUES(categories), tags = VALUES(tags), variation_skus = VALUES(variation_skus), indexed_at = NOW()',
-      tableName, productId, title, sku, shortDesc, content, attributeStr, categoriesStr, tagsStr, variationSkusStr
+      tableName,
+      productId,
+      title,
+      sku,
+      shortDesc,
+      content,
+      attributeStr,
+      categoriesStr,
+      tagsStr,
+      variationSkusStr,
     );
     wpdb.query(sql);
   }

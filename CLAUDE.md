@@ -8,6 +8,10 @@ Turborepo monorepo with pnpm workspaces.
 - `turbo run build` — Build all packages
 - `turbo run test` — Run all tests
 - `pnpm --filter <package> <script>` — Run script in specific package
+- `pnpm lint` — Lint all packages (via turbo)
+- `pnpm check` — Lint + format check all packages (via turbo, for CI)
+- `pnpm format` — Auto-format entire monorepo
+- `pnpm biome check --write .` — Fix all auto-fixable lint + format issues
 
 ## Conventions
 
