@@ -6,7 +6,7 @@ Turborepo monorepo for WordPress plugins and tooling, using pnpm workspaces.
 
 | Package | Description | Docs |
 |---------|-------------|------|
-| [admin-ui](packages/admin-ui/) | Shared React admin UI components (useSettings, SettingsShell, DiagnosticsPanel) | — |
+| [admin-ui](packages/admin-ui/) | Shared React admin UI components (useSettings, SettingsShell, DiagnosticsPanel) | [README](packages/admin-ui/README.md) |
 | [wpts](packages/wpts/) | TypeScript-to-WordPress-Plugin transpiler | [README](packages/wpts/README.md) |
 | [headless-otp-auth](packages/headless-otp-auth/) | Mobile OTP authentication with JWT for headless WordPress | [Integration](packages/headless-otp-auth/docs/integration-guide.md) · [Admin](packages/headless-otp-auth/docs/admin-guide.md) |
 | [headless-fuzzyfind](packages/headless-fuzzyfind/) | Weighted, fuzzy WooCommerce product search with autocomplete (built with wpts) | [Integration](packages/headless-fuzzyfind/docs/integration-guide.md) · [Admin](packages/headless-fuzzyfind/docs/admin-guide.md) |
@@ -28,6 +28,17 @@ Run a script in a specific package:
 ```bash
 pnpm --filter wpts test
 pnpm --filter headless-otp-auth build
+```
+
+### Linting & Formatting
+
+[Biome](https://biomejs.dev/) handles linting and formatting across the monorepo.
+
+```bash
+pnpm lint              # Lint all packages (via turbo)
+pnpm check             # Lint + format check all packages (CI)
+pnpm format            # Auto-format entire monorepo
+pnpm biome check --write .   # Fix all auto-fixable lint + format issues
 ```
 
 ## Requirements
