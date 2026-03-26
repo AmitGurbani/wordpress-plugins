@@ -1,7 +1,5 @@
-import { useState, useEffect } from '@wordpress/element';
-import { TabPanel, Button, Spinner } from '@wordpress/components';
+import { useSettings, SettingsShell } from 'admin-ui';
 import { __ } from '@wordpress/i18n';
-import apiFetch from '@wordpress/api-fetch';
 import { DEFAULTS, TABS } from './types';
 import type { Settings } from './types';
 import { GeneralTab } from './tabs/GeneralTab';
@@ -9,84 +7,31 @@ import { EventsTab } from './tabs/EventsTab';
 import { DiagnosticsTab } from './tabs/DiagnosticsTab';
 
 export function SettingsPage() {
-  const [settings, setSettings] = useState<Settings>(DEFAULTS);
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
-  const [saved, setSaved] = useState(false);
-  const [error, setError] = useState('');
-
-  useEffect(() => {
-    apiFetch({ path: '/headless-meta-pixel/v1/settings' })
-      .then((data: any) => {
-        setSettings({ ...DEFAULTS, ...data });
-        setLoading(false);
-      })
-      .catch(() => {
-        setError(__('Failed to load settings.', 'headless-meta-pixel'));
-        setLoading(false);
-      });
-  }, []);
-
-  const update = (key: keyof Settings, value: any) => {
-    setSettings((prev) => ({ ...prev, [key]: value }));
-  };
-
-  const save = async () => {
-    setSaving(true);
-    setSaved(false);
-    setError('');
-    try {
-      await apiFetch({
-        path: '/headless-meta-pixel/v1/settings',
-        method: 'POST',
-        data: settings,
-      });
-      setSaved(true);
-      setTimeout(() => setSaved(false), 3000);
-    } catch {
-      setError(__('Failed to save settings.', 'headless-meta-pixel'));
-    }
-    setSaving(false);
-  };
-
-  if (loading) return <Spinner />;
-
-  const tabProps = { settings, update };
+  const state = useSettings<Settings>({
+    slug: 'headless-meta-pixel',
+    textDomain: 'headless-meta-pixel',
+    defaults: DEFAULTS,
+  });
 
   return (
-    <div className="wrap">
-      <h1>{__('Headless Meta Pixel Settings', 'headless-meta-pixel')}</h1>
-
-      <TabPanel tabs={TABS}>
-        {(tab) => {
-          switch (tab.name) {
-            case 'general':
-              return <GeneralTab {...tabProps} />;
-            case 'events':
-              return <EventsTab {...tabProps} />;
-            case 'diagnostics':
-              return <DiagnosticsTab />;
-            default:
-              return null;
-          }
-        }}
-      </TabPanel>
-
-      <div style={{ marginTop: '16px' }}>
-        <Button variant="primary" onClick={save} isBusy={saving}>
-          {saving ? <Spinner /> : __('Save Settings', 'headless-meta-pixel')}
-        </Button>
-        {saved && (
-          <span style={{ marginLeft: '12px', color: '#00a32a' }}>
-            {__('Settings saved.', 'headless-meta-pixel')}
-          </span>
-        )}
-        {error && (
-          <span style={{ marginLeft: '12px', color: '#d63638' }}>
-            {error}
-          </span>
-        )}
-      </div>
-    </div>
+    <SettingsShell
+      title={__('Headless Meta Pixel Settings', 'headless-meta-pixel')}
+      textDomain="headless-meta-pixel"
+      tabs={TABS}
+      settingsState={state}
+    >
+      {(tab, tabProps) => {
+        switch (tab.name) {
+          case 'general':
+            return <GeneralTab {...tabProps} />;
+          case 'events':
+            return <EventsTab {...tabProps} />;
+          case 'diagnostics':
+            return <DiagnosticsTab />;
+          default:
+            return null;
+        }
+      }}
+    </SettingsShell>
   );
 }

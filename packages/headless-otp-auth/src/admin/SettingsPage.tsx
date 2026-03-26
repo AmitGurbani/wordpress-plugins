@@ -1,5 +1,5 @@
-import { useState, useEffect } from '@wordpress/element';
-import { TabPanel, Button, Spinner } from '@wordpress/components';
+import { useState } from '@wordpress/element';
+import { useSettings, SettingsShell } from 'admin-ui';
 import { __ } from '@wordpress/i18n';
 import apiFetch from '@wordpress/api-fetch';
 import { DEFAULTS, TABS } from './types';
@@ -10,28 +10,13 @@ import { AuthTab } from './tabs/AuthTab';
 import { AdvancedTab } from './tabs/AdvancedTab';
 
 export function SettingsPage() {
-  const [settings, setSettings] = useState<Settings>(DEFAULTS);
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
-  const [saved, setSaved] = useState(false);
-  const [error, setError] = useState('');
+  const state = useSettings<Settings>({
+    slug: 'headless-otp-auth',
+    textDomain: 'headless-otp-auth',
+    defaults: DEFAULTS,
+  });
+
   const [testOtp, setTestOtp] = useState<TestOtpData | null>(null);
-
-  useEffect(() => {
-    apiFetch({ path: '/headless-otp-auth/v1/settings' })
-      .then((data: any) => {
-        setSettings({ ...DEFAULTS, ...data });
-        setLoading(false);
-      })
-      .catch(() => {
-        setError(__('Failed to load settings.', 'headless-otp-auth'));
-        setLoading(false);
-      });
-  }, []);
-
-  const update = (key: keyof Settings, value: any) => {
-    setSettings((prev) => ({ ...prev, [key]: value }));
-  };
 
   const fetchTestOtp = () => {
     apiFetch({ path: '/headless-otp-auth/v1/otp/test-otp' })
@@ -39,64 +24,27 @@ export function SettingsPage() {
       .catch(() => setTestOtp(null));
   };
 
-  const save = async () => {
-    setSaving(true);
-    setSaved(false);
-    setError('');
-    try {
-      await apiFetch({
-        path: '/headless-otp-auth/v1/settings',
-        method: 'POST',
-        data: settings,
-      });
-      setSaved(true);
-      setTimeout(() => setSaved(false), 3000);
-    } catch {
-      setError(__('Failed to save settings.', 'headless-otp-auth'));
-    }
-    setSaving(false);
-  };
-
-  if (loading) return <Spinner />;
-
-  const tabProps = { settings, update };
-
   return (
-    <div className="wrap">
-      <h1>{__('Headless OTP Auth Settings', 'headless-otp-auth')}</h1>
-
-      <TabPanel tabs={TABS}>
-        {(tab) => {
-          switch (tab.name) {
-            case 'otp':
-              return <OtpTab {...tabProps} testOtp={testOtp} fetchTestOtp={fetchTestOtp} />;
-            case 'security':
-              return <SecurityTab {...tabProps} />;
-            case 'auth':
-              return <AuthTab {...tabProps} />;
-            case 'advanced':
-              return <AdvancedTab {...tabProps} />;
-            default:
-              return null;
-          }
-        }}
-      </TabPanel>
-
-      <div style={{ marginTop: '16px' }}>
-        <Button variant="primary" onClick={save} isBusy={saving}>
-          {saving ? <Spinner /> : __('Save Settings', 'headless-otp-auth')}
-        </Button>
-        {saved && (
-          <span style={{ marginLeft: '12px', color: '#00a32a' }}>
-            {__('Settings saved.', 'headless-otp-auth')}
-          </span>
-        )}
-        {error && (
-          <span style={{ marginLeft: '12px', color: '#d63638' }}>
-            {error}
-          </span>
-        )}
-      </div>
-    </div>
+    <SettingsShell
+      title={__('Headless OTP Auth Settings', 'headless-otp-auth')}
+      textDomain="headless-otp-auth"
+      tabs={TABS}
+      settingsState={state}
+    >
+      {(tab, tabProps) => {
+        switch (tab.name) {
+          case 'otp':
+            return <OtpTab {...tabProps} testOtp={testOtp} fetchTestOtp={fetchTestOtp} />;
+          case 'security':
+            return <SecurityTab {...tabProps} />;
+          case 'auth':
+            return <AuthTab {...tabProps} />;
+          case 'advanced':
+            return <AdvancedTab {...tabProps} />;
+          default:
+            return null;
+        }
+      }}
+    </SettingsShell>
   );
 }

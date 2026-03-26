@@ -208,14 +208,6 @@ export function generatePlugin(ir: PluginIR): GeneratedFile[] {
     content: loadTemplate('readme')(data),
   });
 
-  // Admin JS package.json (for wp-scripts)
-  if (ir.adminPages.length > 0) {
-    files.push({
-      relativePath: `${fp}/admin/js/package.json`,
-      content: loadTemplate('admin-package')(data),
-    });
-  }
-
   // Index guard files
   const guardContent = '<?php\n// Silence is golden.\n';
   for (const dir of ['includes', 'admin', 'public', 'languages']) {

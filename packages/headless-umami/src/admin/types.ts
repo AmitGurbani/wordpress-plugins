@@ -1,4 +1,5 @@
 import { __ } from '@wordpress/i18n';
+import type { TabProps as GenericTabProps } from 'admin-ui';
 
 export interface Settings {
   umami_url: string;
@@ -6,10 +7,7 @@ export interface Settings {
   enable_purchase: boolean;
 }
 
-export interface TabProps {
-  settings: Settings;
-  update: (key: keyof Settings, value: any) => void;
-}
+export type TabProps = GenericTabProps<Settings>;
 
 export const DEFAULTS: Settings = {
   umami_url: '',

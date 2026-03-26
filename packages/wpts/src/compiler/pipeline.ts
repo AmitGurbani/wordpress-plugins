@@ -1,5 +1,4 @@
 import path from 'node:path';
-import { createHash } from 'node:crypto';
 import { promisify } from 'node:util';
 import { execFile } from 'node:child_process';
 
@@ -10,7 +9,7 @@ import { extractDecoratorsFromFiles } from './decorator-extractor.js';
 import { DiagnosticCollection } from './diagnostics.js';
 import { transpileMethodBody, transpileParameters } from '../transpiler/function-transpiler.js';
 import { generatePlugin, type GeneratedFile } from '../generator/index.js';
-import { writeFile, readFile, cleanDir, ensureDir, pathExists, copyPath, movePath, zipDir } from '../utils/fs-utils.js';
+import { writeFile, cleanDir, ensureDir, pathExists, zipDir } from '../utils/fs-utils.js';
 import {
   toSlugCase, toWPClassName, toConstantPrefix,
   toFunctionPrefix, toFilePrefix, toTextDomain, toSnakeCase,
@@ -88,20 +87,12 @@ export async function build(options: BuildOptions): Promise<BuildResult> {
     await writeFile(fullPath, file.content);
   }
 
-  // Copy admin React source if it exists
-  const adminSrcDir = options.adminSrcDir ?? path.join(path.dirname(options.entry), 'admin');
-  if (await pathExists(adminSrcDir)) {
-    const destAdminSrc = path.join(options.outDir, ir.metadata.filePrefix, 'admin', 'js', 'src');
-    await copyPath(adminSrcDir, destAdminSrc);
-  }
-
   // Stage 6: Build admin React app if admin pages exist
-  if (!options.skipAdminBuild) {
-    const adminJsDir = path.join(options.outDir, ir.metadata.filePrefix, 'admin', 'js');
-    if (ir.adminPages.length > 0 && await pathExists(path.join(adminJsDir, 'package.json'))) {
-      const cacheDir = path.join(options.outDir, '..', '.wpts-cache');
-      await buildAdminApp(adminJsDir, cacheDir);
-    }
+  if (!options.skipAdminBuild && ir.adminPages.length > 0) {
+    const adminSrcDir = options.adminSrcDir ?? path.join(path.dirname(options.entry), 'admin');
+    const pluginDir = path.resolve(path.dirname(options.entry), '..');
+    const outputDir = path.join(path.resolve(options.outDir), ir.metadata.filePrefix, 'admin', 'js', 'build');
+    await buildAdminApp(pluginDir, adminSrcDir, outputDir);
   }
 
   // Stage 7: Generate zip for WordPress upload
@@ -288,67 +279,25 @@ function getDefaultSanitizer(type: string): string | null {
 }
 
 /**
- * Install dependencies and build the admin React app using pnpm + wp-scripts.
- * Caches node_modules in a .wpts-cache/ directory to skip install on subsequent builds.
+ * Build the admin React app using wp-scripts from the workspace.
+ * Runs wp-scripts directly from the plugin directory — no isolated install needed.
  */
-async function buildAdminApp(adminJsDir: string, cacheDir: string): Promise<void> {
+async function buildAdminApp(pluginDir: string, adminSrcDir: string, outputDir: string): Promise<void> {
   console.log('\nBuilding admin React app...');
-  const nodeModulesDir = path.join(adminJsDir, 'node_modules');
-
+  const entry = path.join(adminSrcDir, 'index.tsx');
+  if (!await pathExists(entry)) {
+    console.warn('  Warning: No admin entry point found at ' + entry);
+    return;
+  }
   try {
-    // Hash dependencies to detect changes
-    const packageJsonContent = await readFile(path.join(adminJsDir, 'package.json'));
-    const parsed = JSON.parse(packageJsonContent);
-    const depsFingerprint = JSON.stringify({
-      dependencies: parsed.dependencies ?? {},
-      devDependencies: parsed.devDependencies ?? {},
-    });
-    const currentHash = createHash('sha256').update(depsFingerprint).digest('hex');
-
-    const cachedModulesDir = path.join(cacheDir, 'admin-node-modules');
-    const cachedHashFile = path.join(cacheDir, 'admin-deps-hash');
-
-    let needsInstall = true;
-
-    if (await pathExists(cachedModulesDir) && await pathExists(cachedHashFile)) {
-      const cachedHash = (await readFile(cachedHashFile)).trim();
-      if (cachedHash === currentHash) {
-        console.log('  Using cached node_modules (dependencies unchanged).');
-        await movePath(cachedModulesDir, nodeModulesDir);
-        needsInstall = false;
-      }
-    }
-
-    if (needsInstall) {
-      console.log('  Installing dependencies...');
-      await execFileAsync('pnpm', ['--ignore-workspace', 'install'], { cwd: adminJsDir });
-    }
-
-    await execFileAsync('pnpm', ['--ignore-workspace', 'run', 'build'], { cwd: adminJsDir });
-
-    // Cache node_modules for next build
-    await ensureDir(cacheDir);
-    if (await pathExists(cachedModulesDir)) {
-      await cleanDir(cachedModulesDir);
-    }
-    await movePath(nodeModulesDir, cachedModulesDir);
-    await writeFile(cachedHashFile, currentHash);
-
-    // Clean up remaining build artifacts (only build/ is needed in dist)
-    await cleanDir(path.join(adminJsDir, 'src'));
-    const fsExtra = await import('fs-extra');
-    for (const file of ['pnpm-lock.yaml', 'package.json']) {
-      const filePath = path.join(adminJsDir, file);
-      if (await pathExists(filePath)) {
-        await fsExtra.remove(filePath);
-      }
-    }
+    await execFileAsync('pnpm', [
+      'exec', 'wp-scripts', 'build',
+      'index=' + path.relative(pluginDir, entry),
+      '--output-path=' + path.relative(pluginDir, outputDir),
+    ], { cwd: pluginDir });
     console.log('Admin React app built successfully.');
-  } catch {
-    // Ensure node_modules doesn't linger in dist on failure
-    if (await pathExists(nodeModulesDir)) {
-      await cleanDir(nodeModulesDir);
-    }
-    console.warn('Warning: Failed to build admin React app. Run manually: cd admin/js && pnpm install && pnpm run build');
+  } catch (err: any) {
+    const stderr = err?.stderr || err?.message || String(err);
+    console.warn(`Warning: Failed to build admin React app.\n  Error: ${stderr}`);
   }
 }

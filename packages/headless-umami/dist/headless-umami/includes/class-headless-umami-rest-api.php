@@ -69,8 +69,8 @@ class Headless_Umami_Rest_Api {
 	public function get_settings( $request ) {
 		$settings = array(
 			'umami_url' => get_option( 'headless_umami_umami_url', '' ),
-			'website_id' => get_option( 'headless_umami_website_id', '' ),
-			'enable_purchase' => (bool) get_option( 'headless_umami_enable_purchase', true ),
+						'website_id' => get_option( 'headless_umami_website_id', '' ),
+						'enable_purchase' => (bool) get_option( 'headless_umami_enable_purchase', true ),
 		);
 
 		return rest_ensure_response( $settings );

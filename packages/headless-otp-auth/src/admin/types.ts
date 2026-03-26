@@ -1,4 +1,5 @@
 import { __ } from '@wordpress/i18n';
+import type { TabProps as GenericTabProps } from 'admin-ui';
 
 export interface Settings {
   otp_test_mode: boolean;
@@ -25,10 +26,7 @@ export interface TestOtpData {
   created_at?: number;
 }
 
-export interface TabProps {
-  settings: Settings;
-  update: (key: keyof Settings, value: any) => void;
-}
+export type TabProps = GenericTabProps<Settings>;
 
 export const DEFAULTS: Settings = {
   otp_test_mode: false,

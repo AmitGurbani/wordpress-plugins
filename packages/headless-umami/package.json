@@ -18,6 +18,8 @@
     "@wordpress/element": "^6.40.0",
     "@wordpress/env": "^10.0.0",
     "@wordpress/i18n": "^6.13.0",
+    "@wordpress/scripts": "^31.5.0",
+    "admin-ui": "workspace:*",
     "wpts": "workspace:*"
   }
 }

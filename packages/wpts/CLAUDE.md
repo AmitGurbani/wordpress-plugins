@@ -46,7 +46,7 @@ To add a new WordPress function mapping:
 - Settings auto-sanitize: string→sanitize_text_field, number→absint, boolean→rest_sanitize_boolean
 - REST API sanitize null guard: returns `WP_Error` with 400 when sanitize callback returns null
 - Admin template: `get_current_screen()` null-guarded with ternary
-- Admin auto-build: pipeline runs `pnpm --ignore-workspace install && run build` in admin/js/
+- Admin auto-build: pipeline runs `pnpm exec wp-scripts build` from the plugin directory using workspace-level `@wordpress/scripts`
 - Integration tests use `skipAdminBuild: true` to avoid timeouts
 - Decorators: @Plugin, @Action, @Filter, @Setting, @AdminPage, @Shortcode, @Activate, @Deactivate, @CustomPostType, @CustomTaxonomy, @RestRoute, @AjaxHandler
 - Helper methods: non-decorated class methods are auto-captured; placed in public class by default, or REST API class if the class has @RestRoute

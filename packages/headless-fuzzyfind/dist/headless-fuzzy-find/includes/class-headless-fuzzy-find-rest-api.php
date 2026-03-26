@@ -111,16 +111,16 @@ class Headless_Fuzzyfind_Rest_Api {
 	public function get_settings( $request ) {
 		$settings = array(
 			'weight_title' => get_option( 'headless_fuzzy_find_weight_title', 10 ),
-			'weight_sku' => get_option( 'headless_fuzzy_find_weight_sku', 8 ),
-			'weight_content' => get_option( 'headless_fuzzy_find_weight_content', 2 ),
-			'fuzzy_enabled' => (bool) get_option( 'headless_fuzzy_find_fuzzy_enabled', true ),
+						'weight_sku' => get_option( 'headless_fuzzy_find_weight_sku', 8 ),
+						'weight_content' => get_option( 'headless_fuzzy_find_weight_content', 2 ),
+						'fuzzy_enabled' => (bool) get_option( 'headless_fuzzy_find_fuzzy_enabled', true ),
 			'autocomplete_enabled' => (bool) get_option( 'headless_fuzzy_find_autocomplete_enabled', true ),
 			'analytics_enabled' => (bool) get_option( 'headless_fuzzy_find_analytics_enabled', true ),
 			'min_query_length' => get_option( 'headless_fuzzy_find_min_query_length', 2 ),
-			'autocomplete_limit' => get_option( 'headless_fuzzy_find_autocomplete_limit', 8 ),
-			'did_you_mean_threshold' => get_option( 'headless_fuzzy_find_did_you_mean_threshold', 3 ),
-			'synonyms' => get_option( 'headless_fuzzy_find_synonyms', '' ),
-		);
+						'autocomplete_limit' => get_option( 'headless_fuzzy_find_autocomplete_limit', 8 ),
+						'did_you_mean_threshold' => get_option( 'headless_fuzzy_find_did_you_mean_threshold', 3 ),
+						'synonyms' => get_option( 'headless_fuzzy_find_synonyms', '' ),
+					);
 
 		return rest_ensure_response( $settings );
 	}

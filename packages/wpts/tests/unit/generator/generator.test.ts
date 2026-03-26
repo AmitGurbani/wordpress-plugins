@@ -127,7 +127,6 @@ describe('generatePlugin', () => {
     expect(paths).toContain('hello-greeter/includes/class-hello-greeter-rest-api.php');
     expect(paths).toContain('hello-greeter/uninstall.php');
     expect(paths).toContain('hello-greeter/readme.txt');
-    expect(paths).toContain('hello-greeter/admin/js/package.json');
   });
 
   it('generates correct plugin header', () => {
@@ -299,16 +298,6 @@ describe('generatePlugin', () => {
 
     expect(readme.content).toContain('=== Hello Greeter ===');
     expect(readme.content).toContain('Stable tag: 1.0.0');
-  });
-
-  it('generates admin JS package.json', () => {
-    const ir = createTestIR();
-    const files = generatePlugin(ir);
-    const pkg = files.find(f => f.relativePath === 'hello-greeter/admin/js/package.json')!;
-
-    expect(pkg.content).toContain('@wordpress/scripts');
-    expect(pkg.content).toContain('@wordpress/components');
-    expect(pkg.content).toContain('@wordpress/api-fetch');
   });
 
   it('generates index guard files', () => {

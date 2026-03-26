@@ -21,6 +21,6 @@ Turborepo monorepo with pnpm workspaces.
 Format: `<type>(<scope>): <emoji> <subject>`
 
 Types: feat ✨, fix 🐛, docs 📝, style 💄, refactor ♻️, perf ⚡, test ✅, chore 🔧, ci 👷, build 📦, revert ⏪
-Scopes: wpts, monorepo, deps, config
+Scopes: wpts, admin-ui, monorepo, deps, config
 
 **No attribution** — never add "Co-Authored-By: Claude", "Generated with Claude Code", or claude.com links to commits.

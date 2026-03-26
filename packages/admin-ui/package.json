@@ -1,0 +1,26 @@
+{
+  "name": "admin-ui",
+  "version": "0.1.0",
+  "private": true,
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": ["dist"],
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "dev": "tsc -p tsconfig.build.json --watch"
+  },
+  "peerDependencies": {
+    "@wordpress/api-fetch": "^7.0.0",
+    "@wordpress/components": "^32.0.0",
+    "@wordpress/element": "^6.0.0",
+    "@wordpress/i18n": "^6.0.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.1",
+    "@wordpress/api-fetch": "^7.40.0",
+    "@wordpress/components": "^32.2.0",
+    "@wordpress/element": "^6.40.0",
+    "@wordpress/i18n": "^6.13.0",
+    "typescript": "^5.9.3"
+  }
+}
