@@ -1,6 +1,5 @@
-# Track generated PHP plugin output (un-ignore dist from root rule)
+# Track generated plugin output (un-ignore dist from root rule)
 !dist/
 
-# Exclude non-PHP artifacts
+# Exclude non-plugin artifacts
 dist/*.zip
-dist/*/admin/js/
