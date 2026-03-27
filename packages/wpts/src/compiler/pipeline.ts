@@ -7,7 +7,7 @@ const execFileAsync = promisify(execFile);
 import { type GeneratedFile, generatePlugin } from '../generator/index.js';
 import type { PluginIR, PluginMetadata, RawPluginData } from '../ir/plugin-ir.js';
 import { transpileMethodBody, transpileParameters } from '../transpiler/function-transpiler.js';
-import { cleanDir, ensureDir, pathExists, writeFile, zipDir } from '../utils/fs-utils.js';
+import { cleanDir, copyPath, ensureDir, pathExists, writeFile, zipDir } from '../utils/fs-utils.js';
 import {
   toConstantPrefix,
   toFilePrefix,
@@ -110,7 +110,15 @@ export async function build(options: BuildOptions): Promise<BuildResult> {
     await buildAdminApp(pluginDir, adminSrcDir, outputDir);
   }
 
-  // Stage 7: Generate zip for WordPress upload
+  // Stage 7: Copy hand-written readme.txt if present (overrides generated template)
+  const pluginRoot = path.resolve(path.dirname(options.entry), '..');
+  const readmeSrc = path.join(pluginRoot, 'readme.txt');
+  if (await pathExists(readmeSrc)) {
+    const readmeDest = path.join(options.outDir, ir.metadata.filePrefix, 'readme.txt');
+    await copyPath(readmeSrc, readmeDest);
+  }
+
+  // Stage 8: Generate zip for WordPress upload
   let zipPath: string | undefined;
   if (options.zip) {
     const pluginDir = path.join(options.outDir, ir.metadata.filePrefix);

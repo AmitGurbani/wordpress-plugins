@@ -4,7 +4,7 @@
   "private": true,
   "description": "Headless FuzzyFind — weighted, fuzzy product search with autocomplete",
   "scripts": {
-    "build": "wpts build src/plugin.ts -o dist --clean --zip && cp readme.txt dist/headless-fuzzy-find/readme.txt",
+    "build": "wpts build src/plugin.ts -o dist --clean --zip",
     "dev": "wpts watch src/plugin.ts -o dist",
     "wp-env:start": "wp-env start",
     "wp-env:stop": "wp-env stop",

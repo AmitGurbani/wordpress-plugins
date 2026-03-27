@@ -4,7 +4,7 @@
   "private": true,
   "description": "Headless Umami Analytics with WooCommerce purchase tracking for headless WordPress",
   "scripts": {
-    "build": "wpts build src/plugin.ts -o dist --clean --zip && cp readme.txt dist/headless-umami/readme.txt",
+    "build": "wpts build src/plugin.ts -o dist --clean --zip",
     "dev": "wpts watch src/plugin.ts -o dist",
     "wp-env:start": "wp-env start",
     "wp-env:stop": "wp-env stop",
