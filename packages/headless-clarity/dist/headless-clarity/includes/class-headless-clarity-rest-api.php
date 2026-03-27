@@ -58,7 +58,7 @@ class Headless_Clarity_Rest_Api {
 	public function get_settings( $request ) {
 		$settings = array(
 			'project_id' => get_option( 'headless_clarity_project_id', '' ),
-						'enable_identify' => (bool) get_option( 'headless_clarity_enable_identify', true ),
+			'enable_identify' => (bool) get_option( 'headless_clarity_enable_identify', true ),
 		);
 
 		return rest_ensure_response( $settings );

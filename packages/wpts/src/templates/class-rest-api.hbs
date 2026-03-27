@@ -58,13 +58,7 @@ class {{className}}_Rest_Api {
 	public function get_settings( $request ) {
 		$settings = array(
 			{{#each settings}}
-			{{#if isSensitive}}
-			'{{key}}' => get_option( '{{../functionPrefix}}{{key}}', '' ) ? '********' : '',
-			{{else if isBoolean}}
-			'{{key}}' => (bool) get_option( '{{../functionPrefix}}{{key}}', {{{phpDefault}}} ),
-			{{else}}
-			'{{key}}' => get_option( '{{../functionPrefix}}{{key}}', {{{phpDefault}}} ),
-			{{/if}}
+			'{{key}}' => {{{phpGetExpression}}},
 			{{/each}}
 		);
 

@@ -78,10 +78,10 @@ class Headless_Meta_Pixel_Rest_Api {
 	public function get_settings( $request ) {
 		$settings = array(
 			'pixel_id' => get_option( 'headless_meta_pixel_pixel_id', '' ),
-						'access_token' => get_option( 'headless_meta_pixel_access_token', '' ) ? '********' : '',
+			'access_token' => get_option( 'headless_meta_pixel_access_token', '' ) ? '********' : '',
 			'test_event_code' => get_option( 'headless_meta_pixel_test_event_code', '' ),
-						'currency' => get_option( 'headless_meta_pixel_currency', 'USD' ),
-						'enable_view_content' => (bool) get_option( 'headless_meta_pixel_enable_view_content', true ),
+			'currency' => get_option( 'headless_meta_pixel_currency', 'USD' ),
+			'enable_view_content' => (bool) get_option( 'headless_meta_pixel_enable_view_content', true ),
 			'enable_add_to_cart' => (bool) get_option( 'headless_meta_pixel_enable_add_to_cart', true ),
 			'enable_initiate_checkout' => (bool) get_option( 'headless_meta_pixel_enable_initiate_checkout', true ),
 			'enable_purchase' => (bool) get_option( 'headless_meta_pixel_enable_purchase', true ),

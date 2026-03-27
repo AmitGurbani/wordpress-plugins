@@ -69,9 +69,9 @@ class Headless_Google_Analytics_Rest_Api {
 	public function get_settings( $request ) {
 		$settings = array(
 			'measurement_id' => get_option( 'headless_google_analytics_measurement_id', '' ),
-						'api_secret' => get_option( 'headless_google_analytics_api_secret', '' ) ? '********' : '',
+			'api_secret' => get_option( 'headless_google_analytics_api_secret', '' ) ? '********' : '',
 			'currency' => get_option( 'headless_google_analytics_currency', 'USD' ),
-						'enable_purchase' => (bool) get_option( 'headless_google_analytics_enable_purchase', true ),
+			'enable_purchase' => (bool) get_option( 'headless_google_analytics_enable_purchase', true ),
 		);
 
 		return rest_ensure_response( $settings );

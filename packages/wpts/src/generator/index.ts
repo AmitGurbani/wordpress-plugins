@@ -116,12 +116,21 @@ export function generatePlugin(ir: PluginIR): GeneratedFile[] {
   const hasCustomRestApi = hasSettings || hasRestRoutes;
 
   // Prepare settings with PHP defaults
-  const settingsWithDefaults = ir.settings.map((s) => ({
-    ...s,
-    phpDefault: formatPhpDefault(s),
-    isBoolean: s.type === 'boolean',
-    isSensitive: s.sensitive,
-  }));
+  const settingsWithDefaults = ir.settings.map((s) => {
+    const phpDefault = formatPhpDefault(s);
+    const optionName = `${metadata.functionPrefix}${s.key}`;
+    return {
+      ...s,
+      phpDefault,
+      isBoolean: s.type === 'boolean',
+      isSensitive: s.sensitive,
+      phpGetExpression: s.sensitive
+        ? `get_option( '${optionName}', '' ) ? '********' : ''`
+        : s.type === 'boolean'
+          ? `(bool) get_option( '${optionName}', ${phpDefault} )`
+          : `get_option( '${optionName}', ${phpDefault} )`,
+    };
+  });
 
   // Common template data
   const data = {

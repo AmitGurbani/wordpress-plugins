@@ -97,20 +97,20 @@ class Headless_Otp_Auth_Rest_Api {
 		$settings = array(
 			'otp_test_mode' => (bool) get_option( 'headless_otp_auth_otp_test_mode', false ),
 			'otp_server_url' => get_option( 'headless_otp_auth_otp_server_url', '' ),
-						'otp_server_headers_template' => get_option( 'headless_otp_auth_otp_server_headers_template', '{}' ),
-						'otp_server_payload_template' => get_option( 'headless_otp_auth_otp_server_payload_template', '{}' ),
-						'otp_length' => get_option( 'headless_otp_auth_otp_length', 6 ),
-						'otp_expiry' => get_option( 'headless_otp_auth_otp_expiry', 300 ),
-						'max_otp_attempts' => get_option( 'headless_otp_auth_max_otp_attempts', 3 ),
-						'jwt_access_expiry' => get_option( 'headless_otp_auth_jwt_access_expiry', 3600 ),
-						'jwt_refresh_expiry' => get_option( 'headless_otp_auth_jwt_refresh_expiry', 604800 ),
-						'allowed_origins' => get_option( 'headless_otp_auth_allowed_origins', '' ),
-						'max_otp_verify_attempts' => get_option( 'headless_otp_auth_max_otp_verify_attempts', 3 ),
-						'otp_resend_cooldown' => get_option( 'headless_otp_auth_otp_resend_cooldown', 60 ),
-						'rate_limit_window' => get_option( 'headless_otp_auth_rate_limit_window', 900 ),
-						'enable_registration' => (bool) get_option( 'headless_otp_auth_enable_registration', true ),
+			'otp_server_headers_template' => get_option( 'headless_otp_auth_otp_server_headers_template', '{}' ),
+			'otp_server_payload_template' => get_option( 'headless_otp_auth_otp_server_payload_template', '{}' ),
+			'otp_length' => get_option( 'headless_otp_auth_otp_length', 6 ),
+			'otp_expiry' => get_option( 'headless_otp_auth_otp_expiry', 300 ),
+			'max_otp_attempts' => get_option( 'headless_otp_auth_max_otp_attempts', 3 ),
+			'jwt_access_expiry' => get_option( 'headless_otp_auth_jwt_access_expiry', 3600 ),
+			'jwt_refresh_expiry' => get_option( 'headless_otp_auth_jwt_refresh_expiry', 604800 ),
+			'allowed_origins' => get_option( 'headless_otp_auth_allowed_origins', '' ),
+			'max_otp_verify_attempts' => get_option( 'headless_otp_auth_max_otp_verify_attempts', 3 ),
+			'otp_resend_cooldown' => get_option( 'headless_otp_auth_otp_resend_cooldown', 60 ),
+			'rate_limit_window' => get_option( 'headless_otp_auth_rate_limit_window', 900 ),
+			'enable_registration' => (bool) get_option( 'headless_otp_auth_enable_registration', true ),
 			'default_user_role' => get_option( 'headless_otp_auth_default_user_role', 'subscriber' ),
-					);
+		);
 
 		return rest_ensure_response( $settings );
 	}

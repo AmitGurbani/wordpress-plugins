@@ -570,6 +570,86 @@ describe('generatePlugin', () => {
     expect(adminClass.content).toContain("current_user_can( 'read' )");
   });
 
+  it('generates get_settings with consistent indentation for all setting types', () => {
+    const ir = createTestIR();
+    ir.settings = [
+      {
+        propertyName: 'siteName',
+        key: 'site_name',
+        optionName: 'hello_greeter_site_name',
+        type: 'string',
+        default: '',
+        label: 'Site Name',
+        description: '',
+        sanitize: 'sanitize_text_field',
+        sensitive: false,
+        exposeInConfig: false,
+        wooCurrencyDefault: false,
+      },
+      {
+        propertyName: 'apiKey',
+        key: 'api_key',
+        optionName: 'hello_greeter_api_key',
+        type: 'string',
+        default: '',
+        label: 'API Key',
+        description: '',
+        sanitize: 'sanitize_text_field',
+        sensitive: true,
+        exposeInConfig: false,
+        wooCurrencyDefault: false,
+      },
+      {
+        propertyName: 'enabled',
+        key: 'enabled',
+        optionName: 'hello_greeter_enabled',
+        type: 'boolean',
+        default: true,
+        label: 'Enabled',
+        description: '',
+        sanitize: 'rest_sanitize_boolean',
+        sensitive: false,
+        exposeInConfig: false,
+        wooCurrencyDefault: false,
+      },
+      {
+        propertyName: 'maxItems',
+        key: 'max_items',
+        optionName: 'hello_greeter_max_items',
+        type: 'number',
+        default: 10,
+        label: 'Max Items',
+        description: '',
+        sanitize: 'absint',
+        sensitive: false,
+        exposeInConfig: false,
+        wooCurrencyDefault: false,
+      },
+    ];
+    const files = generatePlugin(ir);
+    const restApi = files.find(
+      (f) => f.relativePath === 'hello-greeter/includes/class-hello-greeter-rest-api.php',
+    )!;
+
+    // Extract the get_settings array body
+    const settingsMatch = restApi.content.match(
+      /\$settings = array\(\n([\s\S]*?)\n\t\t\);/,
+    );
+    expect(settingsMatch).not.toBeNull();
+    const arrayLines = settingsMatch![1].split('\n').filter((l: string) => l.trim());
+
+    // Every setting line must start with exactly 3 tabs
+    for (const line of arrayLines) {
+      expect(line).toMatch(/^\t\t\t'/);
+    }
+
+    // Verify all branches produce correct expressions
+    expect(restApi.content).toContain("'site_name' => get_option( 'hello_greeter_site_name', '' ),");
+    expect(restApi.content).toContain("'api_key' => get_option( 'hello_greeter_api_key', '' ) ? '********' : '',");
+    expect(restApi.content).toContain("'enabled' => (bool) get_option( 'hello_greeter_enabled', true ),");
+    expect(restApi.content).toContain("'max_items' => get_option( 'hello_greeter_max_items', 10 ),");
+  });
+
   it('uses hasAdminPages flag to register hooks only once', () => {
     const ir = createTestIR();
     ir.adminPages.push({
