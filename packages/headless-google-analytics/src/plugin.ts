@@ -8,9 +8,8 @@
  * Build: npx wpts build src/plugin.ts -o dist --clean
  */
 
-import { Action, Activate, AdminPage, Deactivate, Filter, Plugin, Setting } from 'wpts';
+import { Activate, AdminPage, Deactivate, Plugin, Setting } from 'wpts';
 import './server-tracking.js';
-import './config-routes.js';
 import './diagnostics-routes.js';
 
 @Plugin({
@@ -23,6 +22,7 @@ import './diagnostics-routes.js';
   textDomain: 'headless-google-analytics',
   requiresWP: '6.0',
   requiresPHP: '8.0',
+  wooNotice: 'recommended',
 })
 @AdminPage({
   pageTitle: 'Headless Google Analytics Settings',
@@ -40,6 +40,7 @@ class GoogleAnalytics {
     default: '',
     label: 'Measurement ID',
     description: 'GA4 Measurement ID (G-XXXXXXXX) from Google Analytics.',
+    exposeInConfig: true,
   })
   measurementId: string = '';
 
@@ -59,6 +60,7 @@ class GoogleAnalytics {
     default: 'USD',
     label: 'Currency',
     description: 'Default currency for ecommerce events (ISO 4217).',
+    wooCurrencyDefault: true,
   })
   currency: string = 'USD';
 
@@ -72,32 +74,6 @@ class GoogleAnalytics {
     description: 'Auto-send purchase events via WooCommerce hooks.',
   })
   enablePurchase: boolean = true;
-
-  // ── Admin Notices ────────────────────────────────────────────────────
-
-  @Action('admin_notices')
-  wooNotice(): void {
-    if (!classExists('WooCommerce')) {
-      echo('<div class="notice notice-warning"><p><strong>Headless Google Analytics:</strong> ');
-      echo(
-        escHtml__(
-          'WooCommerce is recommended for automatic Purchase event tracking.',
-          'headless-google-analytics',
-        ),
-      );
-      echo('</p></div>');
-    }
-  }
-
-  // ── Dynamic Defaults ─────────────────────────────────────────────────
-
-  @Filter('default_option_headless_google_analytics_currency', { priority: 11 })
-  filterDefaultCurrency(defaultValue: string): string {
-    if (classExists('WooCommerce')) {
-      return getOption('woocommerce_currency', 'USD');
-    }
-    return defaultValue;
-  }
 
   // ── Lifecycle ─────────────────────────────────────────────────────────
 

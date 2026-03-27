@@ -950,6 +950,28 @@ describe('transpileExpression', () => {
     });
   });
 
+  describe('undefined comparison with array key access', () => {
+    it('transpiles obj["key"] !== undefined to isset()', () => {
+      const result = transpile('obj["key"] !== undefined', 'const obj: any = {};');
+      expect(result).toBe("isset( $obj['key'] )");
+    });
+
+    it('transpiles obj["key"] === undefined to ! isset()', () => {
+      const result = transpile('obj["key"] === undefined', 'const obj: any = {};');
+      expect(result).toBe("! isset( $obj['key'] )");
+    });
+
+    it('transpiles obj.prop !== undefined to isset()', () => {
+      const result = transpile('obj.prop !== undefined', 'const obj: any = {};');
+      expect(result).toBe("isset( $obj['prop'] )");
+    });
+
+    it('keeps plain variable !== undefined as !== null', () => {
+      const result = transpile('x !== undefined', 'const x: any = null;');
+      expect(result).toBe('$x !== null');
+    });
+  });
+
   describe('new expressions', () => {
     it('transpiles new ClassName without $ prefix', () => {
       const result = transpile(

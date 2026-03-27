@@ -8,9 +8,8 @@
  * Build: npx wpts build src/plugin.ts -o dist --clean
  */
 
-import { Action, Activate, AdminPage, Deactivate, Filter, Plugin, Setting } from 'wpts';
+import { Activate, AdminPage, Deactivate, Plugin, Setting } from 'wpts';
 import './capi.js';
-import './config-routes.js';
 import './track-routes.js';
 import './diagnostics-routes.js';
 
@@ -24,6 +23,7 @@ import './diagnostics-routes.js';
   textDomain: 'headless-meta-pixel',
   requiresWP: '6.0',
   requiresPHP: '8.0',
+  wooNotice: 'recommended',
 })
 @AdminPage({
   pageTitle: 'Headless Meta Pixel Settings',
@@ -41,6 +41,7 @@ class MetaPixel {
     default: '',
     label: 'Meta Pixel ID',
     description: 'Your Meta Pixel ID from Events Manager.',
+    exposeInConfig: true,
   })
   pixelId: string = '';
 
@@ -69,6 +70,7 @@ class MetaPixel {
     default: 'USD',
     label: 'Currency',
     description: 'Default currency for ecommerce events (ISO 4217).',
+    wooCurrencyDefault: true,
   })
   currency: string = 'USD';
 
@@ -127,32 +129,6 @@ class MetaPixel {
     description: 'Send server-side events to Meta via Conversions API.',
   })
   enableCapi: boolean = true;
-
-  // ── Admin Notices ────────────────────────────────────────────────────
-
-  @Action('admin_notices')
-  wooNotice(): void {
-    if (!classExists('WooCommerce')) {
-      echo('<div class="notice notice-warning"><p><strong>Headless Meta Pixel:</strong> ');
-      echo(
-        escHtml__(
-          'WooCommerce is recommended for automatic Purchase event tracking.',
-          'headless-meta-pixel',
-        ),
-      );
-      echo('</p></div>');
-    }
-  }
-
-  // ── Dynamic Defaults ─────────────────────────────────────────────────
-
-  @Filter('default_option_headless_meta_pixel_currency', { priority: 11 })
-  filterDefaultCurrency(defaultValue: string): string {
-    if (classExists('WooCommerce')) {
-      return getOption('woocommerce_currency', 'USD');
-    }
-    return defaultValue;
-  }
 
   // ── Lifecycle ─────────────────────────────────────────────────────────
 

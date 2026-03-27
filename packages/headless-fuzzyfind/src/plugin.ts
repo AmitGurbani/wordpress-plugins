@@ -7,7 +7,7 @@
  * Build: npx wpts build src/plugin.ts -o dist --clean
  */
 
-import { Action, Activate, AdminPage, Deactivate, Plugin, Setting } from 'wpts';
+import { Activate, AdminPage, Deactivate, Plugin, Setting } from 'wpts';
 import './indexer.js';
 import './search-routes.js';
 import './admin-routes.js';
@@ -21,6 +21,7 @@ import './admin-routes.js';
   textDomain: 'headless-fuzzyfind',
   requiresWP: '6.0',
   requiresPHP: '8.0',
+  wooNotice: 'required',
 })
 @AdminPage({
   pageTitle: 'Headless FuzzyFind Settings',
@@ -125,17 +126,6 @@ class FuzzyFind {
     sanitize: 'sanitize_textarea_field',
   })
   synonyms: string = '';
-
-  // ── Admin Notices ───────────────────────────────────────────────────
-
-  @Action('admin_notices')
-  wooRequiredNotice(): void {
-    if (!classExists('WooCommerce')) {
-      echo('<div class="notice notice-error"><p><strong>FuzzyFind:</strong> ');
-      echo(escHtml__('WooCommerce is required for this plugin to work.', 'headless-fuzzyfind'));
-      echo('</p></div>');
-    }
-  }
 
   // ── Lifecycle ───────────────────────────────────────────────────────
 

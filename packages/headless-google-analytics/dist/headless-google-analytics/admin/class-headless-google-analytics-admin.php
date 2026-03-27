@@ -110,8 +110,8 @@ class Headless_Google_Analytics_Admin {
 
 	public function woo_notice() {
 		if ( ! class_exists( 'WooCommerce' ) ) {
-			echo '<div class="notice notice-warning"><p><strong>Headless Google Analytics:</strong> ';
-			echo esc_html__( 'WooCommerce is recommended for automatic Purchase event tracking.', 'headless-google-analytics' );
+			echo '<div class="notice notice-warning"><p><strong>' . esc_html( 'Headless Google Analytics' ) . ':</strong> ';
+			echo esc_html__( 'WooCommerce is recommended for automatic purchase event tracking.', 'headless-google-analytics' );
 			echo '</p></div>';
 		}
 	}

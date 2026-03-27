@@ -4,8 +4,9 @@
  * Test CAPI connection and retrieve error logs.
  */
 
-import { RestRoute } from 'wpts';
+import { DiagnosticsRoute, RestRoute } from 'wpts';
 
+@DiagnosticsRoute({ errorOptionSuffix: 'last_capi_error' })
 class MetaPixelDiagnostics {
   @RestRoute('/diagnostics/test-capi', { method: 'POST', capability: 'manage_options' })
   testCapi(request: any): any {
@@ -62,12 +63,5 @@ class MetaPixelDiagnostics {
     }
 
     return { success: false, message: 'CAPI returned error.', status: code, response: body };
-  }
-
-  @RestRoute('/diagnostics/last-error', { method: 'GET', capability: 'manage_options' })
-  getLastError(request: any): any {
-    return {
-      last_error: getOption('headless_meta_pixel_last_capi_error', ''),
-    };
   }
 }

@@ -5,8 +5,8 @@ import type {
   RawAjaxHandlerDecorator,
   RawCustomPostTypeDecorator,
   RawCustomTaxonomyDecorator,
+  RawDiagnosticsRouteDecorator,
   RawFilterDecorator,
-  RawLifecycleDecorator,
   RawPluginData,
   RawPluginDecorator,
   RawRestRouteDecorator,
@@ -30,6 +30,7 @@ function createEmptyRawData(): RawPluginData {
     helperMethods: [],
     activation: null,
     deactivation: null,
+    diagnosticsRoute: null,
   };
 }
 
@@ -134,6 +135,8 @@ function extractClassDecorators(
     } else if (name === 'CustomTaxonomy') {
       const tax = extractCustomTaxonomyDecorator(decorator, diagnostics, sourceFile);
       if (tax) result.customTaxonomies.push(tax);
+    } else if (name === 'DiagnosticsRoute') {
+      result.diagnosticsRoute = extractDiagnosticsRouteDecorator(decorator);
     }
   }
 
@@ -337,6 +340,8 @@ function extractPluginDecorator(
     return null;
   }
 
+  const wooNotice = getStringProp(obj, 'wooNotice') as 'recommended' | 'required' | undefined;
+
   return {
     name,
     slug: getStringProp(obj, 'slug'),
@@ -351,6 +356,7 @@ function extractPluginDecorator(
     domainPath: getStringProp(obj, 'domainPath'),
     requiresWP: getStringProp(obj, 'requiresWP'),
     requiresPHP: getStringProp(obj, 'requiresPHP'),
+    wooNotice,
   };
 }
 
@@ -502,6 +508,8 @@ function extractSettingDecorator(
     description: getStringProp(obj, 'description'),
     sanitize: getStringProp(obj, 'sanitize'),
     sensitive: getBooleanProp(obj, 'sensitive') ?? false,
+    exposeInConfig: getBooleanProp(obj, 'exposeInConfig') ?? false,
+    wooCurrencyDefault: getBooleanProp(obj, 'wooCurrencyDefault') ?? false,
     propertyName,
   };
 }
@@ -835,6 +843,20 @@ function extractAjaxHandlerDecorator(
     methodName,
     bodyNode: method.body ?? method,
   };
+}
+
+function extractDiagnosticsRouteDecorator(decorator: ts.Decorator): RawDiagnosticsRouteDecorator {
+  const args = getDecoratorArgs(decorator);
+  let errorOptionSuffix = 'last_error';
+
+  if (args && args.length > 0) {
+    const obj = extractObjectLiteral(args[0]);
+    if (obj) {
+      errorOptionSuffix = getStringProp(obj, 'errorOptionSuffix') ?? 'last_error';
+    }
+  }
+
+  return { errorOptionSuffix };
 }
 
 // --- AST utility helpers ---

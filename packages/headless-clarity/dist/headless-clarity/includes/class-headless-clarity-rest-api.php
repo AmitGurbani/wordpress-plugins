@@ -107,7 +107,9 @@ class Headless_Clarity_Rest_Api {
 	}
 
 	public function get_last_error( $request ) {
-		return array( 'last_error' => get_option( 'headless_clarity_last_error', '' ) );
+		return rest_ensure_response( array(
+			'last_error' => get_option( 'headless_clarity_last_error', '' ),
+		) );
 	}
 
 }

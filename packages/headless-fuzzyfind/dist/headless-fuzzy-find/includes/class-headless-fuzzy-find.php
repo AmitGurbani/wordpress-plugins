@@ -33,7 +33,7 @@ class Headless_Fuzzyfind {
 		$rest_api = new Headless_Fuzzyfind_Rest_Api( 'headless-fuzzyfind' );
 		$this->loader->add_action( 'rest_api_init', $rest_api, 'register_routes' );
 		$this->loader->add_action( 'admin_init', $admin, 'register_settings' );
-		$this->loader->add_action( 'admin_notices', $admin, 'woo_required_notice', 10, 0 );
+		$this->loader->add_action( 'admin_notices', $admin, 'woo_notice', 10, 0 );
 	}
 
 	private function define_public_hooks() {

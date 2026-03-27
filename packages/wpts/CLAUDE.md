@@ -48,8 +48,13 @@ To add a new WordPress function mapping:
 - Admin template: `get_current_screen()` null-guarded with ternary
 - Admin auto-build: pipeline runs `pnpm exec wp-scripts build` from the plugin directory using workspace-level `@wordpress/scripts`
 - Integration tests use `skipAdminBuild: true` to avoid timeouts
-- Decorators: @Plugin, @Action, @Filter, @Setting, @AdminPage, @Shortcode, @Activate, @Deactivate, @CustomPostType, @CustomTaxonomy, @RestRoute, @AjaxHandler
+- Decorators: @Plugin, @Action, @Filter, @Setting, @AdminPage, @Shortcode, @Activate, @Deactivate, @CustomPostType, @CustomTaxonomy, @RestRoute, @AjaxHandler, @DiagnosticsRoute
 - Helper methods: non-decorated class methods are auto-captured; placed in public class by default, or REST API class if the class has @RestRoute
 - `global $wpdb;`: auto-injected by `injectGlobalWpdb()` in `function-transpiler.ts` when transpiled PHP contains `$wpdb`
 - Action parameters: extracted same as filter parameters; `acceptedArgs` defaults to method parameter count
 - `@Setting({ sensitive: true })`: masks value in auto-generated GET /settings response — returns `'********'` if set, `''` if empty. The raw value is still stored and used server-side; only the REST GET response is masked.
+- `@Plugin({ wooNotice: 'recommended' | 'required' })`: auto-generates an `admin_notices` action with a WooCommerce dependency notice. `'recommended'` → `notice-warning`, `'required'` → `notice-error`.
+- `@Setting({ exposeInConfig: true })`: includes the setting in an auto-generated public `GET /config` REST route. Skipped if a manual `@RestRoute('/config', ...)` exists.
+- `@Setting({ wooCurrencyDefault: true })`: auto-generates a `default_option_{optionName}` filter that returns the WooCommerce currency when WooCommerce is active.
+- `@DiagnosticsRoute({ errorOptionSuffix?: string })`: class decorator that auto-generates a `GET /diagnostics/last-error` admin REST route. Default suffix: `'last_error'`.
+- Undefined array key checks: `obj['key'] !== undefined` transpiles to `isset( $obj['key'] )` (not `$obj['key'] !== null`) for PHP 8 compatibility. Only applies to element/property access, not plain variables.

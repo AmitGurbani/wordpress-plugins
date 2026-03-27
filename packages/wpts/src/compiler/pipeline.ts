@@ -19,12 +19,7 @@ import {
 } from '../utils/naming.js';
 import { extractDecoratorsFromFiles } from './decorator-extractor.js';
 import { DiagnosticCollection } from './diagnostics.js';
-import {
-  getUserSourceFiles,
-  type ParseResult,
-  parseSourceFile,
-  parseSourceString,
-} from './parser.js';
+import { getUserSourceFiles, type ParseResult, parseSourceFile } from './parser.js';
 
 export interface BuildOptions {
   entry: string;
@@ -180,6 +175,8 @@ function buildIR(
       description: s.description ?? '',
       sanitize: s.sanitize ?? getDefaultSanitizer(s.type),
       sensitive: s.sensitive ?? false,
+      exposeInConfig: s.exposeInConfig ?? false,
+      wooCurrencyDefault: s.wooCurrencyDefault ?? false,
     })),
     actions: rawData.actions.map((a) => ({
       hookName: a.hookName,
@@ -265,7 +262,7 @@ function buildIR(
       capability: a.capability,
       nonce: a.nonce,
       methodName: a.methodName,
-      phpMethodName: 'handle_ajax_' + a.action,
+      phpMethodName: `handle_ajax_${a.action}`,
       body: transpileMethodBody(a.bodyNode, parsed.typeChecker),
     })),
     helperMethods: rawData.helperMethods.map((m) => ({
@@ -283,7 +280,116 @@ function buildIR(
       : null,
   };
 
+  // ── Synthesize auto-generated IR entries from decorator options ──────
+
+  // @Plugin({ wooNotice }) → admin_notices action
+  if (raw.wooNotice) {
+    const noticeType = raw.wooNotice === 'required' ? 'notice-error' : 'notice-warning';
+    const verb =
+      raw.wooNotice === 'required'
+        ? 'WooCommerce is required for this plugin to work.'
+        : 'WooCommerce is recommended for automatic purchase event tracking.';
+    const phpCode = [
+      `\t\tif ( ! class_exists( 'WooCommerce' ) ) {`,
+      `\t\t\techo '<div class="notice ${noticeType}"><p><strong>' . esc_html( '${metadata.name}' ) . ':</strong> ';`,
+      `\t\t\techo esc_html__( '${verb}', '${metadata.textDomain}' );`,
+      `\t\t\techo '</p></div>';`,
+      `\t\t}`,
+    ].join('\n');
+    ir.actions.push({
+      hookName: 'admin_notices',
+      methodName: 'woo_notice',
+      phpMethodName: 'woo_notice',
+      priority: 10,
+      acceptedArgs: 0,
+      parameters: [],
+      body: { phpCode, sourceText: '' },
+      context: 'admin',
+    });
+  }
+
+  // @Setting({ wooCurrencyDefault }) → default_option filter
+  for (const s of ir.settings) {
+    if (s.wooCurrencyDefault) {
+      ir.filters.push({
+        hookName: `default_option_${s.optionName}`,
+        methodName: `filter_default_${s.key}`,
+        phpMethodName: `filter_default_${s.key}`,
+        priority: 11,
+        acceptedArgs: 1,
+        parameters: [
+          { name: 'default_value', phpName: '$default_value', type: 'string', defaultValue: null },
+        ],
+        body: {
+          phpCode: [
+            `\t\tif ( class_exists( 'WooCommerce' ) ) {`,
+            `\t\t\treturn get_option( 'woocommerce_currency', 'USD' );`,
+            `\t\t}`,
+            `\t\treturn $default_value;`,
+          ].join('\n'),
+          sourceText: '',
+        },
+        context: 'public',
+      });
+    }
+  }
+
+  // @Setting({ exposeInConfig }) → GET /config REST route
+  const configSettings = ir.settings.filter((s) => s.exposeInConfig);
+  const hasManualConfigRoute = ir.restRoutes.some((r) => r.route === '/config');
+  if (configSettings.length > 0 && !hasManualConfigRoute) {
+    const getOptionLines = configSettings
+      .map(
+        (s) => `\t\t$config['${s.key}'] = get_option( '${s.optionName}', ${formatPhpDefault(s)} );`,
+      )
+      .join('\n');
+    ir.restRoutes.push({
+      route: '/config',
+      method: 'GET',
+      capability: '',
+      public: true,
+      methodName: 'get_config',
+      phpMethodName: 'get_config',
+      body: {
+        phpCode: `\t\t$config = array();\n${getOptionLines}\n\t\treturn rest_ensure_response( $config );`,
+        sourceText: '',
+      },
+    });
+  }
+
+  // @DiagnosticsRoute() → GET /diagnostics/last-error REST route
+  if (rawData.diagnosticsRoute) {
+    const errorOptionName = `${metadata.functionPrefix}${rawData.diagnosticsRoute.errorOptionSuffix}`;
+    ir.restRoutes.push({
+      route: '/diagnostics/last-error',
+      method: 'GET',
+      capability: 'manage_options',
+      public: false,
+      methodName: 'get_last_error',
+      phpMethodName: 'get_last_error',
+      body: {
+        phpCode: [
+          `\t\treturn rest_ensure_response( array(`,
+          `\t\t\t'last_error' => get_option( '${errorOptionName}', '' ),`,
+          `\t\t) );`,
+        ].join('\n'),
+        sourceText: '',
+      },
+    });
+  }
+
   return ir;
+}
+
+/**
+ * Format a PHP default value for a setting (used in synthesized routes).
+ */
+function formatPhpDefault(setting: { type: string; default: unknown }): string {
+  if (setting.default === null || setting.default === undefined) return "''";
+  if (setting.type === 'string') return `'${String(setting.default).replace(/'/g, "\\'")}'`;
+  if (setting.type === 'boolean') return setting.default ? "'1'" : "''";
+  if (setting.type === 'number') return String(setting.default);
+  return "''";
 }
 
 /**
@@ -314,7 +420,7 @@ async function buildAdminApp(
   console.log('\nBuilding admin React app...');
   const entry = path.join(adminSrcDir, 'index.tsx');
   if (!(await pathExists(entry))) {
-    console.warn('  Warning: No admin entry point found at ' + entry);
+    console.warn(`  Warning: No admin entry point found at ${entry}`);
     return;
   }
   try {
@@ -324,8 +430,8 @@ async function buildAdminApp(
         'exec',
         'wp-scripts',
         'build',
-        'index=' + path.relative(pluginDir, entry),
-        '--output-path=' + path.relative(pluginDir, outputDir),
+        `index=${path.relative(pluginDir, entry)}`,
+        `--output-path=${path.relative(pluginDir, outputDir)}`,
       ],
       { cwd: pluginDir },
     );

@@ -1,10 +1,7 @@
 import ts from 'typescript';
 import { describe, expect, it } from 'vitest';
 import { parseSourceString } from '../../../src/compiler/parser.js';
-import {
-  transpileBlock,
-  transpileStatement,
-} from '../../../src/transpiler/statement-transpiler.js';
+import { transpileBlock } from '../../../src/transpiler/statement-transpiler.js';
 
 /**
  * Helper: parse a TS function body and transpile it to PHP.

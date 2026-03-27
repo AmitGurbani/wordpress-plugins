@@ -15,7 +15,7 @@ Multi-file wpts plugin with 3 source files:
 
 - `src/plugin.ts` — Entry file: @Plugin, @AdminPage, 2 @Settings, @Activate/@Deactivate
 - `src/config-routes.ts` — GET /config (public) — returns project_id and optional user identity for frontend Clarity initialization
-- `src/diagnostics-routes.ts` — GET /diagnostics/last-error (admin)
+- `src/diagnostics-routes.ts` — @DiagnosticsRoute (auto-generates GET /diagnostics/last-error)
 - `src/admin/index.tsx` — React settings page (General, Diagnostics tabs)
 
 ## Design: No Server-Side Tracking

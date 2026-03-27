@@ -13,10 +13,10 @@ Umami Analytics with WooCommerce purchase tracking for headless WordPress stores
 
 Multi-file wpts plugin with 4 source files:
 
-- `src/plugin.ts` — Entry file: @Plugin, @AdminPage, 3 @Settings, @Activate/@Deactivate, WooCommerce notice
+- `src/plugin.ts` — Entry file: @Plugin(`wooNotice: 'recommended'`), @AdminPage, 3 @Settings, @Activate/@Deactivate
 - `src/server-tracking.ts` — Umami send helper + WooCommerce purchase hook (`woocommerce_order_status_changed`)
 - `src/config-routes.ts` — GET /config (public) — returns umami_url + website_id for frontend script initialization
-- `src/diagnostics-routes.ts` — POST /diagnostics/test-connection (admin), GET /diagnostics/last-error (admin)
+- `src/diagnostics-routes.ts` — @DiagnosticsRoute (auto last-error), POST /diagnostics/test-connection (admin)
 - `src/admin/index.tsx` — React settings page (General, Diagnostics tabs)
 
 ## Event Flow

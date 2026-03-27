@@ -131,7 +131,9 @@ class Headless_Umami_Rest_Api {
 	}
 
 	public function get_last_error( $request ) {
-		return array( 'last_error' => get_option( 'headless_umami_last_error', '' ) );
+		return rest_ensure_response( array(
+			'last_error' => get_option( 'headless_umami_last_error', '' ),
+		) );
 	}
 
 	public function send_umami_event( $event_name, $url, $title, $event_data ) {

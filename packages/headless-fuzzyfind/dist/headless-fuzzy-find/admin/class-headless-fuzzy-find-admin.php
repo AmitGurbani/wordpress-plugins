@@ -162,9 +162,9 @@ class Headless_Fuzzyfind_Admin {
 		);
 	}
 
-	public function woo_required_notice() {
+	public function woo_notice() {
 		if ( ! class_exists( 'WooCommerce' ) ) {
-			echo '<div class="notice notice-error"><p><strong>FuzzyFind:</strong> ';
+			echo '<div class="notice notice-error"><p><strong>' . esc_html( 'Headless FuzzyFind' ) . ':</strong> ';
 			echo esc_html__( 'WooCommerce is required for this plugin to work.', 'headless-fuzzyfind' );
 			echo '</p></div>';
 		}

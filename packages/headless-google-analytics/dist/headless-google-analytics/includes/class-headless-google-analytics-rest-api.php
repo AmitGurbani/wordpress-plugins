@@ -31,15 +31,6 @@ class Headless_Google_Analytics_Rest_Api {
 		);
 		register_rest_route(
 			$this->namespace,
-			'/config',
-			array(
-				'methods'             => 'GET',
-				'callback'            => array( $this, 'get_config' ),
-				'permission_callback' => '__return_true',
-			)
-		);
-		register_rest_route(
-			$this->namespace,
 			'/diagnostics/test-event',
 			array(
 				'methods'             => 'POST',
@@ -47,6 +38,15 @@ class Headless_Google_Analytics_Rest_Api {
 				'permission_callback' => function() {
 					return current_user_can( 'manage_options' );
 				},
+			)
+		);
+		register_rest_route(
+			$this->namespace,
+			'/config',
+			array(
+				'methods'             => 'GET',
+				'callback'            => array( $this, 'get_config' ),
+				'permission_callback' => '__return_true',
 			)
 		);
 		register_rest_route(
@@ -128,11 +128,6 @@ class Headless_Google_Analytics_Rest_Api {
 		return rest_ensure_response( array( 'success' => true ) );
 	}
 
-	public function get_config( $request ) {
-		$measurement_id = get_option( 'headless_google_analytics_measurement_id', '' );
-		return array( 'measurement_id' => $measurement_id );
-	}
-
 	public function test_event( $request ) {
 		$measurement_id = get_option( 'headless_google_analytics_measurement_id', '' );
 		$api_secret = get_option( 'headless_google_analytics_api_secret', '' );
@@ -149,7 +144,7 @@ class Headless_Google_Analytics_Rest_Api {
 		$code = intval( wp_remote_retrieve_response_code( $response ) );
 		$body = wp_remote_retrieve_body( $response );
 		$decoded = json_decode( $body, true );
-		if ( $decoded && $decoded['validationMessages'] !== null ) {
+		if ( $decoded && isset( $decoded['validationMessages'] ) ) {
 			$messages = $decoded['validationMessages'];
 			if ( count( $messages ) === 0 ) {
 				return array( 'success' => true, 'message' => 'Measurement Protocol validation passed. Note: the debug endpoint does not validate your Measurement ID or API Secret — verify events appear in GA4 Realtime.' );
@@ -167,8 +162,16 @@ class Headless_Google_Analytics_Rest_Api {
 		return array( 'success' => false, 'message' => 'Unexpected response.', 'status' => $code, 'response' => $body );
 	}
 
+	public function get_config( $request ) {
+		$config = array();
+		$config['measurement_id'] = get_option( 'headless_google_analytics_measurement_id', '' );
+		return rest_ensure_response( $config );
+	}
+
 	public function get_last_error( $request ) {
-		return array( 'last_error' => get_option( 'headless_google_analytics_last_error', '' ) );
+		return rest_ensure_response( array(
+			'last_error' => get_option( 'headless_google_analytics_last_error', '' ),
+		) );
 	}
 
 }

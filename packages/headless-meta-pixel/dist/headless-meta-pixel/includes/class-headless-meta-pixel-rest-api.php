@@ -31,15 +31,6 @@ class Headless_Meta_Pixel_Rest_Api {
 		);
 		register_rest_route(
 			$this->namespace,
-			'/config',
-			array(
-				'methods'             => 'GET',
-				'callback'            => array( $this, 'get_config' ),
-				'permission_callback' => '__return_true',
-			)
-		);
-		register_rest_route(
-			$this->namespace,
 			'/track',
 			array(
 				'methods'             => 'POST',
@@ -56,6 +47,15 @@ class Headless_Meta_Pixel_Rest_Api {
 				'permission_callback' => function() {
 					return current_user_can( 'manage_options' );
 				},
+			)
+		);
+		register_rest_route(
+			$this->namespace,
+			'/config',
+			array(
+				'methods'             => 'GET',
+				'callback'            => array( $this, 'get_config' ),
+				'permission_callback' => '__return_true',
 			)
 		);
 		register_rest_route(
@@ -209,11 +209,6 @@ class Headless_Meta_Pixel_Rest_Api {
 		return rest_ensure_response( array( 'success' => true ) );
 	}
 
-	public function get_config( $request ) {
-		$pixel_id = get_option( 'headless_meta_pixel_pixel_id', '' );
-		return array( 'pixel_id' => $pixel_id );
-	}
-
 	public function track_event( $request ) {
 		$rl_headers = function_exists( 'getallheaders' ) ? getallheaders() : array();
 		$rl_ip = '';
@@ -251,10 +246,10 @@ class Headless_Meta_Pixel_Rest_Api {
 				$custom_data[$key] = $val;
 			}
 		}
-		if ( $custom_data['contents'] !== null && ! is_array( $custom_data['contents'] ) ) {
+		if ( isset( $custom_data['contents'] ) && ! is_array( $custom_data['contents'] ) ) {
 			unset( $custom_data['contents'] );
 		}
-		if ( $custom_data['content_ids'] !== null && ! is_array( $custom_data['content_ids'] ) ) {
+		if ( isset( $custom_data['content_ids'] ) && ! is_array( $custom_data['content_ids'] ) ) {
 			unset( $custom_data['content_ids'] );
 		}
 		if ( ! $event_name || ! $event_id ) {
@@ -343,8 +338,16 @@ class Headless_Meta_Pixel_Rest_Api {
 		return array( 'success' => false, 'message' => 'CAPI returned error.', 'status' => $code, 'response' => $body );
 	}
 
+	public function get_config( $request ) {
+		$config = array();
+		$config['pixel_id'] = get_option( 'headless_meta_pixel_pixel_id', '' );
+		return rest_ensure_response( $config );
+	}
+
 	public function get_last_error( $request ) {
-		return array( 'last_error' => get_option( 'headless_meta_pixel_last_capi_error', '' ) );
+		return rest_ensure_response( array(
+			'last_error' => get_option( 'headless_meta_pixel_last_capi_error', '' ),
+		) );
 	}
 
 	public function hash_for_capi( $value ) {

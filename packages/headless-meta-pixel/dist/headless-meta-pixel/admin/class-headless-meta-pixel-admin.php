@@ -164,8 +164,8 @@ class Headless_Meta_Pixel_Admin {
 
 	public function woo_notice() {
 		if ( ! class_exists( 'WooCommerce' ) ) {
-			echo '<div class="notice notice-warning"><p><strong>Headless Meta Pixel:</strong> ';
-			echo esc_html__( 'WooCommerce is recommended for automatic Purchase event tracking.', 'headless-meta-pixel' );
+			echo '<div class="notice notice-warning"><p><strong>' . esc_html( 'Headless Meta Pixel' ) . ':</strong> ';
+			echo esc_html__( 'WooCommerce is recommended for automatic purchase event tracking.', 'headless-meta-pixel' );
 			echo '</p></div>';
 		}
 	}

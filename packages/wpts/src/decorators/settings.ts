@@ -6,6 +6,10 @@ export interface SettingOptions {
   description?: string;
   sanitize?: string;
   sensitive?: boolean;
+  /** Include this setting in the auto-generated public GET /config endpoint. */
+  exposeInConfig?: boolean;
+  /** Auto-generate a filter that defaults to the WooCommerce currency when available. */
+  wooCurrencyDefault?: boolean;
 }
 
 /**

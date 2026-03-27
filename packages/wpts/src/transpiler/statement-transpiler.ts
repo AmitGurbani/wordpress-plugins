@@ -485,7 +485,7 @@ function transpileEnumDeclaration(
       const value = transpileExpression(member.initializer, typeChecker);
       lines.push(`${innerIndent}const ${phpConstName} = ${value};`);
       if (ts.isNumericLiteral(member.initializer)) {
-        autoValue = parseInt(member.initializer.text) + 1;
+        autoValue = parseInt(member.initializer.text, 10) + 1;
       }
     } else {
       lines.push(`${innerIndent}const ${phpConstName} = ${autoValue};`);

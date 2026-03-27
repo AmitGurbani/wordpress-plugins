@@ -12,6 +12,8 @@ export interface PluginOptions {
   domainPath?: string;
   requiresWP?: string;
   requiresPHP?: string;
+  /** Auto-generate a WooCommerce dependency admin notice. */
+  wooNotice?: 'recommended' | 'required';
 }
 
 /**

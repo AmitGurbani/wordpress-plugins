@@ -11,12 +11,11 @@ Google Analytics (GA4) with WooCommerce integration and Measurement Protocol for
 
 ## Architecture
 
-Multi-file wpts plugin with 4 source files:
+Multi-file wpts plugin with 3 source files:
 
-- `src/plugin.ts` — Entry file: @Plugin, @AdminPage, 4 @Settings, @Activate/@Deactivate, WooCommerce notice, currency default filter
+- `src/plugin.ts` — Entry file: @Plugin(`wooNotice: 'recommended'`), @AdminPage, 4 @Settings(`exposeInConfig`, `wooCurrencyDefault`), @Activate/@Deactivate
 - `src/server-tracking.ts` — GA4 MP send helper + WooCommerce purchase hook (`woocommerce_order_status_changed`)
-- `src/config-routes.ts` — GET /config (public) — returns measurement_id for frontend gtag.js initialization
-- `src/diagnostics-routes.ts` — POST /diagnostics/test-event (admin), GET /diagnostics/last-error (admin)
+- `src/diagnostics-routes.ts` — @DiagnosticsRoute (auto last-error), POST /diagnostics/test-event (admin)
 - `src/admin/index.tsx` — React settings page (General, Diagnostics tabs)
 
 ## Design: No /track Proxy
@@ -46,6 +45,6 @@ The frontend loads gtag.js directly and handles all browser-side tracking. WordP
 - **No PII hashing**: Unlike Meta CAPI, GA4 MP does not require hashed PII. `user_id` is sent as plain WordPress user ID string.
 - **GA4 MP endpoint**: `POST https://www.google-analytics.com/mp/collect?measurement_id={ID}&api_secret={SECRET}` — returns 2xx always, even for invalid payloads. Uses `wp_remote_post` (not `wp_safe_remote_post`) since URL is hardcoded.
 - **Debug endpoint**: `POST https://www.google-analytics.com/debug/mp/collect?...` — returns `{ validationMessages: [{ fieldPath, description, validationCode }] }`. Used in diagnostics. Does NOT validate `api_secret`/`measurement_id`.
-- **Currency default**: `default_option_headless_google_analytics_currency` filter returns WooCommerce currency when WooCommerce is active
+- **Currency default**: auto-generated via `@Setting({ wooCurrencyDefault: true })` — `default_option_headless_google_analytics_currency` filter returns WooCommerce currency when active
 - **GA4 MP payload**: `{ client_id, user_id?, events: [{ name, params }] }`. `client_id` required (format: `123456.789012`); generated server-side for purchase hooks.
 - **Numeric types**: GA4 MP requires `value`, `price`, `engagement_time_msec` as numbers (not strings). Uses `parseFloat()` → PHP `floatval()` for monetary values.

@@ -74,6 +74,8 @@ export interface SettingIR {
   description: string;
   sanitize: string | null;
   sensitive: boolean;
+  exposeInConfig: boolean;
+  wooCurrencyDefault: boolean;
 }
 
 export interface AdminPageIR {
@@ -182,6 +184,11 @@ export interface RawPluginData {
   helperMethods: RawHelperMethod[];
   activation: RawLifecycleDecorator | null;
   deactivation: RawLifecycleDecorator | null;
+  diagnosticsRoute: RawDiagnosticsRouteDecorator | null;
+}
+
+export interface RawDiagnosticsRouteDecorator {
+  errorOptionSuffix: string;
 }
 
 export interface RawHelperMethod {
@@ -205,6 +212,7 @@ export interface RawPluginDecorator {
   domainPath?: string;
   requiresWP?: string;
   requiresPHP?: string;
+  wooNotice?: 'recommended' | 'required';
 }
 
 export interface RawActionDecorator {
@@ -233,6 +241,8 @@ export interface RawSettingDecorator {
   description?: string;
   sanitize?: string;
   sensitive?: boolean;
+  exposeInConfig?: boolean;
+  wooCurrencyDefault?: boolean;
   propertyName: string;
 }
 

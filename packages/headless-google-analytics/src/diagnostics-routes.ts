@@ -5,8 +5,9 @@
  * and retrieve error logs.
  */
 
-import { RestRoute } from 'wpts';
+import { DiagnosticsRoute, RestRoute } from 'wpts';
 
+@DiagnosticsRoute()
 class GoogleAnalyticsDiagnostics {
   @RestRoute('/diagnostics/test-event', { method: 'POST', capability: 'manage_options' })
   testEvent(request: any): any {
@@ -81,12 +82,5 @@ class GoogleAnalyticsDiagnostics {
     }
 
     return { success: false, message: 'Unexpected response.', status: code, response: body };
-  }
-
-  @RestRoute('/diagnostics/last-error', { method: 'GET', capability: 'manage_options' })
-  getLastError(request: any): any {
-    return {
-      last_error: getOption('headless_google_analytics_last_error', ''),
-    };
   }
 }

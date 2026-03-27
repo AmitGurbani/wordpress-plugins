@@ -101,7 +101,7 @@ class Headless_Umami_Admin {
 
 	public function woo_notice() {
 		if ( ! class_exists( 'WooCommerce' ) ) {
-			echo '<div class="notice notice-warning"><p><strong>Headless Umami:</strong> ';
+			echo '<div class="notice notice-warning"><p><strong>' . esc_html( 'Headless Umami' ) . ':</strong> ';
 			echo esc_html__( 'WooCommerce is recommended for automatic purchase event tracking.', 'headless-umami' );
 			echo '</p></div>';
 		}

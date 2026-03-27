@@ -13,7 +13,7 @@ Weighted, fuzzy WooCommerce product search with autocomplete and analytics. Buil
 
 Multi-file wpts plugin with 4 source files:
 
-- `src/plugin.ts` — Entry file: @Plugin, @AdminPage, 10 @Settings, @Activate/@Deactivate
+- `src/plugin.ts` — Entry file: @Plugin(`wooNotice: 'required'`), @AdminPage, 10 @Settings, @Activate/@Deactivate
 - `src/search-routes.ts` — GET /search (public, paginated), GET /autocomplete (public). Boolean query builder, Levenshtein fuzzy correction, "Did You Mean" suggestions, analytics logging
 - `src/indexer.ts` — Real-time product indexing via WooCommerce hooks, batch reindex via `headless_fuzzyfind_do_reindex` action
 - `src/admin-routes.ts` — Admin REST endpoints: index status/rebuild/delete, analytics retrieval/clear

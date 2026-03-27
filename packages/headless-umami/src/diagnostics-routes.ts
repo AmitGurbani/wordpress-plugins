@@ -4,8 +4,9 @@
  * Provides endpoints to test the Umami connection and view the last error.
  */
 
-import { RestRoute } from 'wpts';
+import { DiagnosticsRoute, RestRoute } from 'wpts';
 
+@DiagnosticsRoute()
 class UmamiDiagnostics {
   sendUmamiEvent(eventName: string, url: string, title: string, eventData: any): any {
     const umamiUrl: string = getOption('headless_umami_umami_url', '');
@@ -75,12 +76,5 @@ class UmamiDiagnostics {
     }
 
     return result;
-  }
-
-  @RestRoute('/diagnostics/last-error', { method: 'GET', capability: 'manage_options' })
-  getLastError(request: any): any {
-    return {
-      last_error: getOption('headless_umami_last_error', ''),
-    };
   }
 }

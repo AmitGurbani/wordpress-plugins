@@ -205,6 +205,12 @@ function transpileBinaryExpression(node: ts.BinaryExpression, typeChecker: ts.Ty
     return typeofResult;
   }
 
+  // Detect obj['key'] !== undefined and emit isset() for PHP 8 compatibility
+  const undefinedResult = tryTranspileUndefinedComparison(node, typeChecker);
+  if (undefinedResult !== null) {
+    return undefinedResult;
+  }
+
   const left = transpileExpression(node.left, typeChecker);
   const right = transpileExpression(node.right, typeChecker);
   const op = transpileBinaryOperator(node.operatorToken, node, typeChecker);
@@ -254,6 +260,61 @@ function tryTranspileTypeofComparison(
 
   const call = `${phpFunc}( ${operand} )`;
   return negate ? `! ${call}` : call;
+}
+
+/**
+ * Detect `obj['key'] !== undefined` / `obj.prop === undefined` and emit
+ * `isset()` / `! isset()` for PHP 8 compatibility (avoids E_WARNING on
+ * undefined array keys).
+ */
+function tryTranspileUndefinedComparison(
+  node: ts.BinaryExpression,
+  typeChecker: ts.TypeChecker,
+): string | null {
+  const op = node.operatorToken.kind;
+  if (
+    op !== ts.SyntaxKind.EqualsEqualsEqualsToken &&
+    op !== ts.SyntaxKind.ExclamationEqualsEqualsToken
+  ) {
+    return null;
+  }
+
+  let accessExpr: ts.Expression | null = null;
+
+  if (isUndefinedIdentifier(node.right) && isArrayKeyAccess(node.left)) {
+    accessExpr = node.left;
+  } else if (isUndefinedIdentifier(node.left) && isArrayKeyAccess(node.right)) {
+    accessExpr = node.right;
+  }
+
+  if (!accessExpr) return null;
+
+  const phpExpr = transpileExpression(accessExpr, typeChecker);
+  const isNotEqual = op === ts.SyntaxKind.ExclamationEqualsEqualsToken;
+
+  return isNotEqual ? `isset( ${phpExpr} )` : `! isset( ${phpExpr} )`;
+}
+
+function isUndefinedIdentifier(node: ts.Expression): boolean {
+  return ts.isIdentifier(node) && node.text === 'undefined';
+}
+
+/** Returns true when the expression transpiles to PHP array key access ($obj['key']). */
+function isArrayKeyAccess(node: ts.Expression): boolean {
+  if (ts.isElementAccessExpression(node)) return true;
+
+  if (ts.isPropertyAccessExpression(node)) {
+    if (node.expression.kind === ts.SyntaxKind.ThisKeyword) return false;
+    if (node.name.text === 'length') return false;
+    if (node.questionDotToken) return false;
+    if (ts.isIdentifier(node.expression)) {
+      const name = node.expression.text;
+      if (name === 'wpdb' || name === 'Math') return false;
+    }
+    return true;
+  }
+
+  return false;
 }
 
 function transpileBinaryOperator(

@@ -6,6 +6,8 @@ export type { CustomPostTypeOptions } from './custom-post-type.js';
 export { CustomPostType } from './custom-post-type.js';
 export type { CustomTaxonomyOptions } from './custom-taxonomy.js';
 export { CustomTaxonomy } from './custom-taxonomy.js';
+export type { DiagnosticsRouteOptions } from './diagnostics.js';
+export { DiagnosticsRoute } from './diagnostics.js';
 export type { HookOptions } from './hooks.js';
 export { Action, Filter } from './hooks.js';
 export { Activate, Deactivate } from './lifecycle.js';

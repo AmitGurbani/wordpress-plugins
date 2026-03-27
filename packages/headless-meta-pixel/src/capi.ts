@@ -184,9 +184,11 @@ class MetaPixelCapi {
     const sourceUrl: string = order.get_checkout_order_received_url();
     const userData: any = this.buildUserDataFromOrder(order);
 
-    this.sendCapiEvent('Purchase', eventId, sourceUrl, customData, userData);
+    const result: any = this.sendCapiEvent('Purchase', eventId, sourceUrl, customData, userData);
 
-    // Mark as sent
-    updatePostMeta(orderId, '_headless_meta_pixel_capi_sent', '1');
+    // Only mark as sent on success — allows retry on next status change if CAPI was unreachable
+    if (result['success']) {
+      updatePostMeta(orderId, '_headless_meta_pixel_capi_sent', '1');
+    }
   }
 }

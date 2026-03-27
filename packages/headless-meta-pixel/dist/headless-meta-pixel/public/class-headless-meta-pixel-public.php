@@ -51,8 +51,10 @@ class Headless_Meta_Pixel_Public {
 		$custom_data = array( 'currency' => $currency, 'value' => $total, 'content_type' => 'product', 'contents' => $contents, 'content_ids' => $content_ids );
 		$source_url = $order->get_checkout_order_received_url();
 		$user_data = $this->build_user_data_from_order( $order );
-		$this->send_capi_event( 'Purchase', $event_id, $source_url, $custom_data, $user_data );
-		update_post_meta( $order_id, '_headless_meta_pixel_capi_sent', '1' );
+		$result = $this->send_capi_event( 'Purchase', $event_id, $source_url, $custom_data, $user_data );
+		if ( $result['success'] ) {
+			update_post_meta( $order_id, '_headless_meta_pixel_capi_sent', '1' );
+		}
 	}
 
 	public function filter_default_currency( $default_value ) {

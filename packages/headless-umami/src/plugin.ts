@@ -8,7 +8,7 @@
  * Build: npx wpts build src/plugin.ts -o dist --clean
  */
 
-import { Action, Activate, AdminPage, Deactivate, Plugin, Setting } from 'wpts';
+import { Activate, AdminPage, Deactivate, Plugin, Setting } from 'wpts';
 import './server-tracking.js';
 import './config-routes.js';
 import './diagnostics-routes.js';
@@ -22,6 +22,7 @@ import './diagnostics-routes.js';
   textDomain: 'headless-umami',
   requiresWP: '6.0',
   requiresPHP: '8.0',
+  wooNotice: 'recommended',
 })
 @AdminPage({
   pageTitle: 'Headless Umami Settings',
@@ -59,22 +60,6 @@ class HeadlessUmami {
     description: 'Auto-send purchase events via WooCommerce hooks.',
   })
   enablePurchase: boolean = true;
-
-  // ── Admin Notices ────────────────────────────────────────────────────
-
-  @Action('admin_notices')
-  wooNotice(): void {
-    if (!classExists('WooCommerce')) {
-      echo('<div class="notice notice-warning"><p><strong>Headless Umami:</strong> ');
-      echo(
-        escHtml__(
-          'WooCommerce is recommended for automatic purchase event tracking.',
-          'headless-umami',
-        ),
-      );
-      echo('</p></div>');
-    }
-  }
 
   // ── Lifecycle ─────────────────────────────────────────────────────────
 
