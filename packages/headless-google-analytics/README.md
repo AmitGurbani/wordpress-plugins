@@ -32,8 +32,7 @@ The plugin is auto-mounted from `dist/headless-google-analytics/`. Rebuild with 
 src/
 ├── plugin.ts              # Entry — @Plugin, @AdminPage, 4 @Settings, @Activate
 ├── server-tracking.ts     # GA4 MP send helper + WooCommerce purchase hook
-├── config-routes.ts       # GET /config — measurement_id for frontend
-├── diagnostics-routes.ts  # POST /diagnostics/test-event, GET /diagnostics/last-error
+├── diagnostics-routes.ts  # @DiagnosticsRoute + POST /diagnostics/test-event
 └── admin/
     ├── index.tsx           # React root
     ├── SettingsPage.tsx    # Main settings page with TabPanel

@@ -208,6 +208,7 @@ class MyPlugin { ... }
 | `domainPath` | `string` | No | Path to translations |
 | `requiresWP` | `string` | No | Minimum WordPress version (default: `6.7`) |
 | `requiresPHP` | `string` | No | Minimum PHP version (default: `8.2`) |
+| `wooNotice` | `'recommended' \| 'required'` | No | Auto-generate a WooCommerce dependency admin notice. `'recommended'` shows a warning; `'required'` shows an error. |
 
 ### `@Setting(options)`
 
@@ -233,6 +234,8 @@ greeting: string = 'Hello!';
 | `description` | `string` | No | Setting description |
 | `sanitize` | `string` | No | PHP sanitization function |
 | `sensitive` | `boolean` | No | Mask value in GET /settings response (returns `'********'` when set, `''` when empty) |
+| `exposeInConfig` | `boolean` | No | Include this setting in an auto-generated public `GET /config` endpoint |
+| `wooCurrencyDefault` | `boolean` | No | Auto-generate a `default_option` filter that returns the WooCommerce currency when active |
 
 Each `@Setting` generates:
 - `register_setting()` call with sanitization
@@ -443,6 +446,34 @@ onDeactivation(): void {
 
 Options created via `addOption()` or `updateOption()` in `@Activate()` methods are automatically detected and added to the generated `uninstall.php` cleanup. Options already covered by `@Setting` are excluded to avoid duplicates.
 
+### `@DiagnosticsRoute(options?)`
+
+Class decorator. Auto-generates a `GET /diagnostics/last-error` admin REST endpoint that returns the value of a stored error option.
+
+```typescript
+import { DiagnosticsRoute, RestRoute } from 'wpts';
+
+@DiagnosticsRoute()
+class MyPluginDiagnostics {
+  // Additional diagnostic routes can be added manually:
+  @RestRoute('/diagnostics/test', { method: 'POST', capability: 'manage_options' })
+  testConnection(request: any): any {
+    // ...
+  }
+}
+```
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `errorOptionSuffix` | `string` | `'last_error'` | Suffix for the error option key (`{plugin_prefix}{suffix}`) |
+
+The generated endpoint reads `get_option('{plugin_prefix}{errorOptionSuffix}', '')` and returns it wrapped in `rest_ensure_response()`. Override the suffix when the error option doesn't follow the default naming:
+
+```typescript
+@DiagnosticsRoute({ errorOptionSuffix: 'last_capi_error' })
+class MyDiagnostics {}
+```
+
 ### Helper Methods
 
 Methods without decorators are automatically included in the generated PHP as helper methods. By default they are placed in the public class. If the source class contains any `@RestRoute` decorator, helpers from that class are placed in the REST API class instead.
@@ -578,6 +609,8 @@ The generated PHP admin class automatically:
 | `func(...args)` | `func( ...$args )` |
 | `delete obj.prop` | `unset( $obj['prop'] )` |
 | `typeof x === 'string'` | `is_string( $x )` |
+| `obj['key'] !== undefined` | `isset( $obj['key'] )` |
+| `obj['key'] === undefined` | `! isset( $obj['key'] )` |
 | `enum Direction { Up }` | `class Direction { const UP = 0; }` |
 | `Direction.Up` | `Direction::UP` |
 | `for (const { id } of items)` | `foreach ( $items as $__item ) { $id = $__item['id']; }` |

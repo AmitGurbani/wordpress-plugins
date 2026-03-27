@@ -32,9 +32,8 @@ The plugin is auto-mounted from `dist/headless-meta-pixel/`. Rebuild with `pnpm 
 src/
 ├── plugin.ts            # Entry — @Plugin, @AdminPage, 10 @Settings, @Activate
 ├── capi.ts              # CAPI helper methods + WooCommerce purchase hook
-├── config-routes.ts     # GET /config — pixel_id for frontend init
 ├── track-routes.ts      # POST /track — CAPI proxy for browser events
-├── diagnostics-routes.ts# POST /diagnostics/test-capi, GET /diagnostics/last-error
+├── diagnostics-routes.ts# @DiagnosticsRoute + POST /diagnostics/test-capi
 └── admin/index.tsx      # React settings UI (General, Events, Diagnostics tabs)
 ```
 
@@ -117,7 +116,7 @@ Purchase events are tracked automatically via the `woocommerce_order_status_chan
 - **Bank transfer (BACS)** → status `on-hold`
 - **Manual completion** → status `completed`
 
-A `_headless_meta_pixel_capi_sent` order meta flag prevents duplicate sends across status transitions.
+A `_headless_meta_pixel_capi_sent` order meta flag prevents duplicate sends across status transitions. The flag is only set on successful CAPI delivery, allowing automatic retry on the next status change if CAPI was unreachable.
 
 ### User Data Hashing
 
