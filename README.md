@@ -14,6 +14,7 @@ Turborepo monorepo for WordPress plugins and tooling, using pnpm workspaces.
 | [headless-umami](packages/headless-umami/) | Umami Analytics with WooCommerce purchase tracking for headless WordPress (built with wpts) | [Integration](packages/headless-umami/docs/integration-guide.md) · [Admin](packages/headless-umami/docs/admin-guide.md) |
 | [headless-google-analytics](packages/headless-google-analytics/) | Google Analytics (GA4) with WooCommerce Measurement Protocol for headless WordPress (built with wpts) | [Integration](packages/headless-google-analytics/docs/integration-guide.md) · [Admin](packages/headless-google-analytics/docs/admin-guide.md) |
 | [headless-clarity](packages/headless-clarity/) | Microsoft Clarity session recordings and heatmaps for headless WordPress (built with wpts) | [Integration](packages/headless-clarity/docs/integration-guide.md) · [Admin](packages/headless-clarity/docs/admin-guide.md) |
+| [e2e](packages/e2e/) | Playwright end-to-end tests for all plugins (wp-env) | [README](packages/e2e/README.md) |
 
 ## Getting Started
 
@@ -28,6 +29,15 @@ Run a script in a specific package:
 ```bash
 pnpm --filter wpts test
 pnpm --filter headless-otp-auth build
+```
+
+### E2E Tests
+
+Requires Docker for the [wp-env](https://developer.wordpress.org/block-editor/reference-guides/packages/packages-env/) WordPress instance.
+
+```bash
+pnpm test:e2e                    # Run all e2e tests
+pnpm --filter e2e test:ui        # Playwright UI mode
 ```
 
 ### Linting & Formatting
