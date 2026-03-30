@@ -1,0 +1,20 @@
+{
+  "name": "e2e",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "test": "playwright test",
+    "test:ui": "playwright test --ui",
+    "test:debug": "playwright test --debug",
+    "test:e2e": "playwright test",
+    "wp-env:start": "wp-env start",
+    "wp-env:stop": "wp-env stop",
+    "wp-env:clean": "wp-env clean all"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.52.0",
+    "@wordpress/e2e-test-utils-playwright": "^1.42.0",
+    "@wordpress/env": "^10.0.0",
+    "@wordpress/scripts": "^30.0.0"
+  }
+}

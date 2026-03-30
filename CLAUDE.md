@@ -12,6 +12,8 @@ Turborepo monorepo with pnpm workspaces.
 - `pnpm check` — Lint + format check all packages (via turbo, for CI)
 - `pnpm format` — Auto-format entire monorepo
 - `pnpm biome check --write .` — Fix all auto-fixable lint + format issues
+- `pnpm test:e2e` — Run Playwright e2e tests (requires Docker for wp-env)
+- `pnpm --filter e2e test:ui` — Run e2e tests with Playwright UI mode
 
 ## Conventions
 
@@ -25,6 +27,6 @@ Turborepo monorepo with pnpm workspaces.
 Format: `<type>(<scope>): <emoji> <subject>`
 
 Types: feat ✨, fix 🐛, docs 📝, style 💄, refactor ♻️, perf ⚡, test ✅, chore 🔧, ci 👷, build 📦, revert ⏪
-Scopes: wpts, admin-ui, monorepo, deps, config
+Scopes: wpts, admin-ui, e2e, monorepo, deps, config
 
 **No attribution** — never add "Co-Authored-By: Claude", "Generated with Claude Code", or claude.com links to commits.

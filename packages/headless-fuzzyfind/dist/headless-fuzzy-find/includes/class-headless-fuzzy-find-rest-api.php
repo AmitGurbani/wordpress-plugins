@@ -250,7 +250,7 @@ class Headless_Fuzzyfind_Rest_Api {
 		$query = sanitize_text_field( $request->get_param( 'query' ) ?? '' );
 		$page = intval( $request->get_param( 'page' ) ?? 1 );
 		$raw_per_page = intval( $request->get_param( 'per_page' ) ?? 10 );
-		$per_page = $raw_per_page > 100 ? 100 : $raw_per_page < 1 ? 1 : $raw_per_page;
+		$per_page = $raw_per_page > 100 ? 100 : ($raw_per_page < 1 ? 1 : $raw_per_page);
 		$orderby = sanitize_text_field( $request->get_param( 'orderby' ) ?? 'relevance' );
 		$min_length = intval( get_option( 'headless_fuzzy_find_min_query_length', 2 ) );
 		if ( strlen( $query ) < $min_length ) {
@@ -359,7 +359,7 @@ class Headless_Fuzzyfind_Rest_Api {
 		}
 		$query = sanitize_text_field( $request->get_param( 'query' ) ?? '' );
 		$raw_limit = intval( $request->get_param( 'limit' ) ?? get_option( 'headless_fuzzy_find_autocomplete_limit', 8 ) );
-		$limit = $raw_limit > 50 ? 50 : $raw_limit < 1 ? 1 : $raw_limit;
+		$limit = $raw_limit > 50 ? 50 : ($raw_limit < 1 ? 1 : $raw_limit);
 		$min_length = intval( get_option( 'headless_fuzzy_find_min_query_length', 2 ) );
 		if ( strlen( $query ) < $min_length ) {
 			return rest_ensure_response( array( 'results' => array(), 'did_you_mean' => array() ) );

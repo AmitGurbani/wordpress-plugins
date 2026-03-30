@@ -13,6 +13,11 @@
     "test": {
       "dependsOn": ["build"]
     },
+    "test:e2e": {
+      "dependsOn": ["build"],
+      "cache": false,
+      "env": ["WP_ENV_PORT", "WP_ENV_TESTS_PORT", "WP_BASE_URL"]
+    },
     "lint": {},
     "check": {}
   }

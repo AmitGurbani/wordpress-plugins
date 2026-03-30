@@ -720,7 +720,9 @@ function transpileConditional(node: ts.ConditionalExpression, typeChecker: ts.Ty
   const condition = transpileExpression(node.condition, typeChecker);
   const whenTrue = transpileExpression(node.whenTrue, typeChecker);
   const whenFalse = transpileExpression(node.whenFalse, typeChecker);
-  return `${condition} ? ${whenTrue} : ${whenFalse}`;
+  // PHP 8.0+ forbids unparenthesized nested ternaries in the false branch
+  const needsParens = ts.isConditionalExpression(node.whenFalse);
+  return `${condition} ? ${whenTrue} : ${needsParens ? '(' : ''}${whenFalse}${needsParens ? ')' : ''}`;
 }
 
 function transpileArrayLiteral(
