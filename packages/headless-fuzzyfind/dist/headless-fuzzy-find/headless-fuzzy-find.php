@@ -1,11 +1,11 @@
 <?php
 /**
  * Plugin Name:       Headless FuzzyFind
- * Plugin URI:        
+ * Plugin URI:        https://github.com/AmitGurbani/wordpress-plugins
  * Description:       Weighted, fuzzy WooCommerce product search with autocomplete and analytics.
  * Version:           1.0.0
- * Author:            wpts
- * Author URI:        
+ * Author:            Amit Gurbani
+ * Author URI:        https://github.com/AmitGurbani
  * License:           GPL-2.0+
  * License URI:       http://www.gnu.org/licenses/gpl-2.0.txt
  * Text Domain:       headless-fuzzyfind
@@ -22,6 +22,15 @@ if ( ! defined( 'WPINC' ) ) {
 define( 'HEADLESS_FUZZY_FIND_VERSION', '1.0.0' );
 define( 'HEADLESS_FUZZY_FIND_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'HEADLESS_FUZZY_FIND_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
+
+/**
+ * Declare WooCommerce HPOS compatibility.
+ */
+add_action( 'before_woocommerce_init', function() {
+	if ( class_exists( \Automattic\WooCommerce\Utilities\FeaturesUtil::class ) ) {
+		\Automattic\WooCommerce\Utilities\FeaturesUtil::declare_compatibility( 'custom_order_tables', __FILE__, true );
+	}
+} );
 
 /**
  * Plugin activation.

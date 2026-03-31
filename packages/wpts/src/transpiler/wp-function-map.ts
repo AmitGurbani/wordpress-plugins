@@ -284,7 +284,7 @@ export const WP_FUNCTION_MAP: Record<string, string> = {
   numberFormat: 'number_format',
 
   // PHP Built-ins (for JWT / encoding)
-  jsonEncode: 'json_encode',
+  jsonEncode: 'wp_json_encode',
   jsonDecode: 'json_decode',
   base64Encode: 'base64_encode',
   base64Decode: 'base64_decode',

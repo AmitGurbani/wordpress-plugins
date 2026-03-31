@@ -1,11 +1,11 @@
 <?php
 /**
  * Plugin Name:       Headless Clarity
- * Plugin URI:        
+ * Plugin URI:        https://github.com/AmitGurbani/wordpress-plugins
  * Description:       Microsoft Clarity session recordings and heatmaps for headless WordPress.
  * Version:           1.0.0
- * Author:            wpts
- * Author URI:        
+ * Author:            Amit Gurbani
+ * Author URI:        https://github.com/AmitGurbani
  * License:           GPL-2.0+
  * License URI:       http://www.gnu.org/licenses/gpl-2.0.txt
  * Text Domain:       headless-clarity

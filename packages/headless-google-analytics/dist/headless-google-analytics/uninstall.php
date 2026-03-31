@@ -9,3 +9,4 @@ delete_option( 'headless_google_analytics_api_secret' );
 delete_option( 'headless_google_analytics_currency' );
 delete_option( 'headless_google_analytics_enable_purchase' );
 delete_option( 'headless_google_analytics_version' );
+delete_option( 'headless_google_analytics_last_error' );

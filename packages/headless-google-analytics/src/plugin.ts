@@ -14,10 +14,12 @@ import './diagnostics-routes.js';
 
 @Plugin({
   name: 'Headless Google Analytics',
+  uri: 'https://github.com/AmitGurbani/wordpress-plugins',
   description:
     'Google Analytics (GA4) with WooCommerce integration and Measurement Protocol for headless WordPress.',
   version: '1.0.0',
-  author: 'wpts',
+  author: 'Amit Gurbani',
+  authorUri: 'https://github.com/AmitGurbani',
   license: 'GPL-2.0+',
   textDomain: 'headless-google-analytics',
   requiresWP: '6.0',

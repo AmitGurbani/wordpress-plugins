@@ -485,7 +485,7 @@ describe('transpileExpression', () => {
     it('maps JWT and encoding built-in functions', () => {
       expect(
         transpile('jsonEncode({ key: "value" })', 'declare function jsonEncode(v: any): string;'),
-      ).toBe("json_encode( array( 'key' => 'value' ) )");
+      ).toBe("wp_json_encode( array( 'key' => 'value' ) )");
       expect(
         transpile(
           'jsonDecode(data, true)',
@@ -608,7 +608,7 @@ describe('transpileExpression', () => {
     });
 
     it('maps JSON.stringify', () => {
-      expect(transpile('JSON.stringify(null)')).toBe('json_encode( null )');
+      expect(transpile('JSON.stringify(null)')).toBe('wp_json_encode( null )');
     });
 
     it('maps JSON.parse', () => {

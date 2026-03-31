@@ -15,9 +15,11 @@ import './diagnostics-routes.js';
 
 @Plugin({
   name: 'Headless Umami',
+  uri: 'https://github.com/AmitGurbani/wordpress-plugins',
   description: 'Umami Analytics with WooCommerce purchase tracking for headless WordPress.',
   version: '1.0.0',
-  author: 'wpts',
+  author: 'Amit Gurbani',
+  authorUri: 'https://github.com/AmitGurbani',
   license: 'GPL-2.0+',
   textDomain: 'headless-umami',
   requiresWP: '6.0',
@@ -36,7 +38,7 @@ class HeadlessUmami {
 
   @Setting({
     key: 'umami_url',
-    type: 'string',
+    type: 'url',
     default: '',
     label: 'Umami URL',
     description: 'Your Umami instance URL (e.g., https://cloud.umami.is or self-hosted URL).',

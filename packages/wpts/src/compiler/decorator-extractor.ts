@@ -498,7 +498,13 @@ function extractSettingDecorator(
     return null;
   }
 
-  const typeVal = getStringProp(obj, 'type') as 'string' | 'number' | 'boolean' | 'array' | null;
+  const typeVal = getStringProp(obj, 'type') as
+    | 'string'
+    | 'number'
+    | 'boolean'
+    | 'array'
+    | 'url'
+    | null;
 
   return {
     key,

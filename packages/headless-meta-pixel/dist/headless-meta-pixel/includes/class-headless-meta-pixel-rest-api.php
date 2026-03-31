@@ -326,7 +326,7 @@ class Headless_Meta_Pixel_Rest_Api {
 		}
 		$url = 'https://graph.facebook.com/v25.0/' . $pixel_id . '/events?access_token=' . $access_token;
 		$payload = array( 'data' => array( array( 'event_name' => 'PageView', 'event_time' => time(), 'event_id' => 'test_' . strval( time() ), 'action_source' => 'website', 'event_source_url' => site_url(), 'user_data' => array( 'client_user_agent' => 'headless-meta-pixel-plugin-test' ) ) ), 'test_event_code' => $test_event_code );
-		$response = wp_remote_post( $url, array( 'body' => json_encode( $payload ), 'headers' => array( 'Content-Type' => 'application/json' ), 'timeout' => 15 ) );
+		$response = wp_remote_post( $url, array( 'body' => wp_json_encode( $payload ), 'headers' => array( 'Content-Type' => 'application/json' ), 'timeout' => 15 ) );
 		if ( is_wp_error( $response ) ) {
 			return array( 'success' => false, 'message' => $response->get_error_message() );
 		}
@@ -374,7 +374,7 @@ class Headless_Meta_Pixel_Rest_Api {
 			$payload['test_event_code'] = $test_event_code;
 		}
 		$url = 'https://graph.facebook.com/v25.0/' . $pixel_id . '/events?access_token=' . $access_token;
-		$response = wp_remote_post( $url, array( 'body' => json_encode( $payload ), 'headers' => array( 'Content-Type' => 'application/json' ), 'timeout' => 5 ) );
+		$response = wp_remote_post( $url, array( 'body' => wp_json_encode( $payload ), 'headers' => array( 'Content-Type' => 'application/json' ), 'timeout' => 5 ) );
 		if ( is_wp_error( $response ) ) {
 			update_option( 'headless_meta_pixel_last_capi_error', $response->get_error_message() );
 			return array( 'success' => false, 'message' => $response->get_error_message() );

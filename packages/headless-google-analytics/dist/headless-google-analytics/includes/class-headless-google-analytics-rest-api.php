@@ -137,7 +137,7 @@ class Headless_Google_Analytics_Rest_Api {
 		$url = 'https://www.google-analytics.com/debug/mp/collect?measurement_id=' . $measurement_id . '&api_secret=' . $api_secret;
 		$client_id = strval( wp_rand( 1000000000, 9999999999 ) ) . '.' . strval( time() );
 		$payload = array( 'client_id' => $client_id, 'events' => array( array( 'name' => 'page_view', 'params' => array( 'engagement_time_msec' => 1 ) ) ) );
-		$response = wp_remote_post( $url, array( 'body' => json_encode( $payload ), 'headers' => array( 'Content-Type' => 'application/json' ), 'timeout' => 15 ) );
+		$response = wp_remote_post( $url, array( 'body' => wp_json_encode( $payload ), 'headers' => array( 'Content-Type' => 'application/json' ), 'timeout' => 15 ) );
 		if ( is_wp_error( $response ) ) {
 			return array( 'success' => false, 'message' => $response->get_error_message() );
 		}

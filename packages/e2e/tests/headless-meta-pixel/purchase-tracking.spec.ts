@@ -2,7 +2,7 @@ import { test, expect } from '../../fixtures/wordpress';
 import {
   createOrder,
   updateOrderStatus,
-  getPostMeta,
+  getOrderMeta,
   deleteOrder,
 } from '../../fixtures/woocommerce';
 
@@ -45,7 +45,7 @@ test.describe('Headless Meta Pixel — Purchase Tracking', () => {
       // or an error was logged in diagnostics (CAPI call failed with dummy credentials).
       let hasDedup = false;
       try {
-        const meta = getPostMeta(orderId, '_headless_meta_pixel_capi_sent');
+        const meta = getOrderMeta(orderId, '_headless_meta_pixel_capi_sent');
         if (meta) hasDedup = true;
       } catch {
         // Post meta doesn't exist

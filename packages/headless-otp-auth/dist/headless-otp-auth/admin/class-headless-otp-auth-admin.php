@@ -85,7 +85,7 @@ class Headless_Otp_Auth_Admin {
 			array(
 				'type'    => 'string',
 				'default' => '',
-				'sanitize_callback' => 'sanitize_text_field',
+				'sanitize_callback' => 'esc_url_raw',
 			)
 		);
 		register_setting(

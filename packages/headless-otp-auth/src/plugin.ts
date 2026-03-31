@@ -14,9 +14,11 @@ import './auth-routes.js';
 
 @Plugin({
   name: 'Headless OTP Auth',
+  uri: 'https://github.com/AmitGurbani/wordpress-plugins',
   description: 'Mobile OTP authentication with JWT for headless WordPress stores.',
   version: '1.0.0',
-  author: 'wpts',
+  author: 'Amit Gurbani',
+  authorUri: 'https://github.com/AmitGurbani',
   license: 'GPL-2.0+',
   textDomain: 'headless-otp-auth',
 })
@@ -41,7 +43,7 @@ class HeadlessOtpAuth {
 
   @Setting({
     key: 'otp_server_url',
-    type: 'string',
+    type: 'url',
     default: '',
     label: 'OTP Server URL',
     description: 'URL of the external server that delivers OTPs via SMS/WhatsApp.',

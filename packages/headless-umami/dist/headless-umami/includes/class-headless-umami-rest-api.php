@@ -80,7 +80,7 @@ class Headless_Umami_Rest_Api {
 		$params = $request->get_json_params();
 
 		if ( isset( $params['umami_url'] ) ) {
-			$value = sanitize_text_field( $params['umami_url'] );
+			$value = esc_url_raw( $params['umami_url'] );
 			if ( null === $value ) {
 				return new \WP_Error(
 					'invalid_umami_url',
@@ -150,7 +150,7 @@ class Headless_Umami_Rest_Api {
 		}
 		$payload = array( 'type' => 'event', 'payload' => $inner_payload );
 		$api_url = rtrim( $umami_url, '/' ) . '/api/send';
-		$response = wp_safe_remote_post( $api_url, array( 'body' => json_encode( $payload ), 'headers' => array( 'Content-Type' => 'application/json', 'User-Agent' => 'Mozilla/5.0 (compatible; HeadlessUmami/1.0; +wordpress)' ), 'timeout' => 5 ) );
+		$response = wp_safe_remote_post( $api_url, array( 'body' => wp_json_encode( $payload ), 'headers' => array( 'Content-Type' => 'application/json', 'User-Agent' => 'Mozilla/5.0 (compatible; HeadlessUmami/1.0; +wordpress)' ), 'timeout' => 5 ) );
 		if ( is_wp_error( $response ) ) {
 			update_option( 'headless_umami_last_error', $response->get_error_message() );
 			return array( 'success' => false, 'message' => $response->get_error_message() );

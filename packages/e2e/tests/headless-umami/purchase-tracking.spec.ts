@@ -2,7 +2,7 @@ import { test, expect } from '../../fixtures/wordpress';
 import {
   createOrder,
   updateOrderStatus,
-  getPostMeta,
+  getOrderMeta,
   deleteOrder,
 } from '../../fixtures/woocommerce';
 
@@ -53,11 +53,11 @@ test.describe('Headless Umami — Purchase Tracking', () => {
 
       // Dedup flag should NOT be set since the send failed
       try {
-        const meta = getPostMeta(orderId, '_headless_umami_sent');
+        const meta = getOrderMeta(orderId, '_headless_umami_sent');
         // If the meta exists but is empty, that's also fine
         expect(meta).toBeFalsy();
       } catch {
-        // Post meta doesn't exist — expected behavior on failed send
+        // Order meta doesn't exist — expected behavior on failed send
       }
     } finally {
       deleteOrder(orderId);

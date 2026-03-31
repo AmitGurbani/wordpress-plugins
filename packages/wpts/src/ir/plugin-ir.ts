@@ -19,6 +19,7 @@ export interface PluginIR {
   helperMethods: HelperMethodIR[];
   activation: FunctionBodyIR | null;
   deactivation: FunctionBodyIR | null;
+  diagnosticsErrorOption: string | null;
 }
 
 export interface PluginMetadata {
@@ -35,6 +36,8 @@ export interface PluginMetadata {
   domainPath: string;
   requiresWP: string;
   requiresPHP: string;
+  // WooCommerce
+  wooNotice?: 'recommended' | 'required';
   // Derived names
   className: string;
   constantPrefix: string;
@@ -68,7 +71,7 @@ export interface SettingIR {
   propertyName: string;
   key: string;
   optionName: string;
-  type: 'string' | 'number' | 'boolean' | 'array';
+  type: 'string' | 'number' | 'boolean' | 'array' | 'url';
   default: unknown;
   label: string;
   description: string;
@@ -235,7 +238,7 @@ export interface RawFilterDecorator {
 
 export interface RawSettingDecorator {
   key: string;
-  type: 'string' | 'number' | 'boolean' | 'array';
+  type: 'string' | 'number' | 'boolean' | 'array' | 'url';
   default: unknown;
   label: string;
   description?: string;

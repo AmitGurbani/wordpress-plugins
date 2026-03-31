@@ -1,11 +1,11 @@
 <?php
 /**
  * Plugin Name:       Headless OTP Auth
- * Plugin URI:        
+ * Plugin URI:        https://github.com/AmitGurbani/wordpress-plugins
  * Description:       Mobile OTP authentication with JWT for headless WordPress stores.
  * Version:           1.0.0
- * Author:            wpts
- * Author URI:        
+ * Author:            Amit Gurbani
+ * Author URI:        https://github.com/AmitGurbani
  * License:           GPL-2.0+
  * License URI:       http://www.gnu.org/licenses/gpl-2.0.txt
  * Text Domain:       headless-otp-auth

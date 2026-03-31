@@ -2,7 +2,7 @@ import { test, expect } from '../../fixtures/wordpress';
 import {
   createOrder,
   updateOrderStatus,
-  getPostMeta,
+  getOrderMeta,
   deleteOrder,
 } from '../../fixtures/woocommerce';
 
@@ -32,14 +32,14 @@ test.describe('Headless Google Analytics — Purchase Tracking', () => {
     });
   });
 
-  test('sets _headless_ga_sent post meta on order completion', async () => {
+  test('sets _headless_ga_sent order meta on order completion', async () => {
     const orderId = createOrder({ productId });
 
     try {
       updateOrderStatus(orderId, 'completed');
 
       // GA4 MP returns 2xx always, so the flag should be set
-      const meta = getPostMeta(orderId, '_headless_ga_sent');
+      const meta = getOrderMeta(orderId, '_headless_ga_sent');
       expect(meta).toBeTruthy();
     } finally {
       deleteOrder(orderId);
@@ -52,7 +52,7 @@ test.describe('Headless Google Analytics — Purchase Tracking', () => {
     try {
       // First transition — should send
       updateOrderStatus(orderId, 'completed');
-      const meta1 = getPostMeta(orderId, '_headless_ga_sent');
+      const meta1 = getOrderMeta(orderId, '_headless_ga_sent');
       expect(meta1).toBeTruthy();
 
       // Change back and complete again — should NOT re-send (dedup flag set)
@@ -60,7 +60,7 @@ test.describe('Headless Google Analytics — Purchase Tracking', () => {
       updateOrderStatus(orderId, 'completed');
 
       // The dedup flag should still be set from the first send
-      const meta2 = getPostMeta(orderId, '_headless_ga_sent');
+      const meta2 = getOrderMeta(orderId, '_headless_ga_sent');
       expect(meta2).toBeTruthy();
     } finally {
       deleteOrder(orderId);

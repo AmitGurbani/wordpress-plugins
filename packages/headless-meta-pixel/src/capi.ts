@@ -144,7 +144,7 @@ class MetaPixelCapi {
     }
 
     // Prevent double-send on retries
-    const alreadySent: any = getPostMeta(orderId, '_headless_meta_pixel_capi_sent', true);
+    const alreadySent: any = order.get_meta('_headless_meta_pixel_capi_sent', true);
     if (alreadySent) {
       return;
     }
@@ -188,7 +188,8 @@ class MetaPixelCapi {
 
     // Only mark as sent on success — allows retry on next status change if CAPI was unreachable
     if (result['success']) {
-      updatePostMeta(orderId, '_headless_meta_pixel_capi_sent', '1');
+      order.update_meta_data('_headless_meta_pixel_capi_sent', '1');
+      order.save();
     }
   }
 }

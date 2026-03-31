@@ -15,3 +15,4 @@ delete_option( 'headless_meta_pixel_enable_purchase' );
 delete_option( 'headless_meta_pixel_enable_search' );
 delete_option( 'headless_meta_pixel_enable_capi' );
 delete_option( 'headless_meta_pixel_version' );
+delete_option( 'headless_meta_pixel_last_capi_error' );

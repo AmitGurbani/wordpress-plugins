@@ -15,10 +15,12 @@ import './diagnostics-routes.js';
 
 @Plugin({
   name: 'Headless Meta Pixel',
+  uri: 'https://github.com/AmitGurbani/wordpress-plugins',
   description:
     'Meta Pixel with WooCommerce integration and Conversions API for headless WordPress.',
   version: '1.0.0',
-  author: 'wpts',
+  author: 'Amit Gurbani',
+  authorUri: 'https://github.com/AmitGurbani',
   license: 'GPL-2.0+',
   textDomain: 'headless-meta-pixel',
   requiresWP: '6.0',

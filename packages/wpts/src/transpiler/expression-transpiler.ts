@@ -470,9 +470,9 @@ function transpileCallExpression(node: ts.CallExpression, typeChecker: ts.TypeCh
       if (methodName === 'UTC') return phpCall('gmmktime', args);
     }
 
-    // JSON.stringify -> json_encode, JSON.parse -> json_decode
+    // JSON.stringify -> wp_json_encode, JSON.parse -> json_decode
     if (ts.isIdentifier(obj) && obj.text === 'JSON') {
-      if (methodName === 'stringify') return phpCall('json_encode', args);
+      if (methodName === 'stringify') return phpCall('wp_json_encode', args);
       if (methodName === 'parse') return phpCall('json_decode', [args[0], 'true']);
     }
 

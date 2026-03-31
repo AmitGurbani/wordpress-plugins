@@ -28,7 +28,7 @@ class Headless_Meta_Pixel_Public {
 		if ( ! $order ) {
 			return;
 		}
-		$already_sent = get_post_meta( $order_id, '_headless_meta_pixel_capi_sent', true );
+		$already_sent = $order->get_meta( '_headless_meta_pixel_capi_sent', true );
 		if ( $already_sent ) {
 			return;
 		}
@@ -53,7 +53,8 @@ class Headless_Meta_Pixel_Public {
 		$user_data = $this->build_user_data_from_order( $order );
 		$result = $this->send_capi_event( 'Purchase', $event_id, $source_url, $custom_data, $user_data );
 		if ( $result['success'] ) {
-			update_post_meta( $order_id, '_headless_meta_pixel_capi_sent', '1' );
+			$order->update_meta_data( '_headless_meta_pixel_capi_sent', '1' );
+			$order->save();
 		}
 	}
 
@@ -129,7 +130,7 @@ class Headless_Meta_Pixel_Public {
 			$payload['test_event_code'] = $test_event_code;
 		}
 		$url = 'https://graph.facebook.com/v25.0/' . $pixel_id . '/events?access_token=' . $access_token;
-		$response = wp_remote_post( $url, array( 'body' => json_encode( $payload ), 'headers' => array( 'Content-Type' => 'application/json' ), 'timeout' => 5 ) );
+		$response = wp_remote_post( $url, array( 'body' => wp_json_encode( $payload ), 'headers' => array( 'Content-Type' => 'application/json' ), 'timeout' => 5 ) );
 		if ( is_wp_error( $response ) ) {
 			update_option( 'headless_meta_pixel_last_capi_error', $response->get_error_message() );
 			return array( 'success' => false, 'message' => $response->get_error_message() );

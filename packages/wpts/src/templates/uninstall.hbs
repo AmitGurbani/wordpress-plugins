@@ -10,3 +10,6 @@ delete_option( '{{../functionPrefix}}{{key}}' );
 {{#each activationOptions}}
 delete_option( '{{this}}' );
 {{/each}}
+{{#if diagnosticsErrorOption}}
+delete_option( '{{diagnosticsErrorOption}}' );
+{{/if}}

@@ -19,8 +19,8 @@ class Headless_Otp_Auth_Public {
 		if ( ! $secret ) {
 			return '';
 		}
-		$header_data = json_encode( array( 'alg' => 'HS256', 'typ' => 'JWT' ) );
-		$payload_data = json_encode( array( 'iss' => site_url(), 'sub' => $user_id, 'iat' => time(), 'exp' => time() + $expiry, 'type' => $token_type ) );
+		$header_data = wp_json_encode( array( 'alg' => 'HS256', 'typ' => 'JWT' ) );
+		$payload_data = wp_json_encode( array( 'iss' => site_url(), 'sub' => $user_id, 'iat' => time(), 'exp' => time() + $expiry, 'type' => $token_type ) );
 		$b64_header = strtr( rtrim( base64_encode( $header_data ), '=' ), '+/', '-_' );
 		$b64_payload = strtr( rtrim( base64_encode( $payload_data ), '=' ), '+/', '-_' );
 		$header_payload = $b64_header . '.' . $b64_payload;

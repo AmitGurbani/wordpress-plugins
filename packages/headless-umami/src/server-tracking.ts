@@ -84,7 +84,7 @@ class UmamiServerTracking {
       return;
     }
 
-    const alreadySent: any = getPostMeta(orderId, '_headless_umami_sent', true);
+    const alreadySent: any = order.get_meta('_headless_umami_sent', true);
     if (alreadySent) {
       return;
     }
@@ -128,7 +128,8 @@ class UmamiServerTracking {
 
     // Only mark as sent on success — allows retry on next status change if Umami was unreachable
     if (result['success']) {
-      updatePostMeta(orderId, '_headless_umami_sent', '1');
+      order.update_meta_data('_headless_umami_sent', '1');
+      order.save();
     }
   }
 }

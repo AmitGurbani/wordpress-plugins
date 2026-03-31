@@ -25,11 +25,13 @@ export function updateOrderStatus(orderId: number, status: string): void {
   wpCli(`wc shop_order update ${orderId} --status=${status} --user=admin`);
 }
 
-export function getPostMeta(postId: number, key: string): string {
-  return wpCli(`post meta get ${postId} ${key}`);
+export function getOrderMeta(orderId: number, key: string): string {
+  return wpCli(
+    `eval "\\$o = wc_get_order(${orderId}); echo \\$o ? \\$o->get_meta('${key}', true) : '';"`,
+  );
 }
 
 export function deleteOrder(orderId: number): void {
-  wpCli(`post delete ${orderId} --force`);
+  wpCli(`wc shop_order delete ${orderId} --force --user=admin`);
 }
 

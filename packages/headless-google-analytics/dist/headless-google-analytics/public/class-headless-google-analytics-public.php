@@ -25,7 +25,7 @@ class Headless_Google_Analytics_Public {
 		if ( ! $order ) {
 			return;
 		}
-		$already_sent = get_post_meta( $order_id, '_headless_ga_sent', true );
+		$already_sent = $order->get_meta( '_headless_ga_sent', true );
 		if ( $already_sent ) {
 			return;
 		}
@@ -48,7 +48,8 @@ class Headless_Google_Analytics_Public {
 		$params = array( 'currency' => $currency, 'value' => $total, 'transaction_id' => strval( $order_id ), 'items' => $ga_items, 'engagement_time_msec' => 1 );
 		$result = $this->send_ga4_event( 'purchase', $client_id, $user_id, $params );
 		if ( $result['success'] ) {
-			update_post_meta( $order_id, '_headless_ga_sent', '1' );
+			$order->update_meta_data( '_headless_ga_sent', '1' );
+			$order->save();
 		}
 	}
 
@@ -70,7 +71,7 @@ class Headless_Google_Analytics_Public {
 			$payload['user_id'] = $user_id;
 		}
 		$url = 'https://www.google-analytics.com/mp/collect?measurement_id=' . $measurement_id . '&api_secret=' . $api_secret;
-		$response = wp_remote_post( $url, array( 'body' => json_encode( $payload ), 'headers' => array( 'Content-Type' => 'application/json' ), 'timeout' => 5 ) );
+		$response = wp_remote_post( $url, array( 'body' => wp_json_encode( $payload ), 'headers' => array( 'Content-Type' => 'application/json' ), 'timeout' => 5 ) );
 		if ( is_wp_error( $response ) ) {
 			update_option( 'headless_google_analytics_last_error', $response->get_error_message() );
 			return array( 'success' => false, 'message' => $response->get_error_message() );

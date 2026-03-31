@@ -14,9 +14,11 @@ import './diagnostics-routes.js';
 
 @Plugin({
   name: 'Headless Clarity',
+  uri: 'https://github.com/AmitGurbani/wordpress-plugins',
   description: 'Microsoft Clarity session recordings and heatmaps for headless WordPress.',
   version: '1.0.0',
-  author: 'wpts',
+  author: 'Amit Gurbani',
+  authorUri: 'https://github.com/AmitGurbani',
   license: 'GPL-2.0+',
   textDomain: 'headless-clarity',
   requiresWP: '6.0',

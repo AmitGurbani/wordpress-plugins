@@ -154,6 +154,7 @@ function buildIR(
     domainPath: raw.domainPath ?? '/languages',
     requiresWP: raw.requiresWP ?? '6.7',
     requiresPHP: raw.requiresPHP ?? '8.2',
+    wooNotice: raw.wooNotice,
     className: toWPClassName(raw.name),
     constantPrefix: toConstantPrefix(raw.name),
     functionPrefix: toFunctionPrefix(raw.name),
@@ -286,6 +287,9 @@ function buildIR(
     deactivation: rawData.deactivation
       ? transpileMethodBody(rawData.deactivation.bodyNode, parsed.typeChecker)
       : null,
+    diagnosticsErrorOption: rawData.diagnosticsRoute
+      ? `${metadata.functionPrefix}${rawData.diagnosticsRoute.errorOptionSuffix}`
+      : null,
   };
 
   // ── Synthesize auto-generated IR entries from decorator options ──────
@@ -394,7 +398,8 @@ function buildIR(
  */
 function formatPhpDefault(setting: { type: string; default: unknown }): string {
   if (setting.default === null || setting.default === undefined) return "''";
-  if (setting.type === 'string') return `'${String(setting.default).replace(/'/g, "\\'")}'`;
+  if (setting.type === 'string' || setting.type === 'url')
+    return `'${String(setting.default).replace(/'/g, "\\'")}'`;
   if (setting.type === 'boolean') return setting.default ? "'1'" : "''";
   if (setting.type === 'number') return String(setting.default);
   return "''";
@@ -407,6 +412,8 @@ function getDefaultSanitizer(type: string): string | null {
   switch (type) {
     case 'string':
       return 'sanitize_text_field';
+    case 'url':
+      return 'esc_url_raw';
     case 'number':
       return 'absint';
     case 'boolean':

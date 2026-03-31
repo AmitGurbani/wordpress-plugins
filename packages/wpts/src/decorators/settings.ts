@@ -1,6 +1,6 @@
 export interface SettingOptions {
   key: string;
-  type: 'string' | 'number' | 'boolean' | 'array';
+  type: 'string' | 'number' | 'boolean' | 'array' | 'url';
   default: unknown;
   label: string;
   description?: string;

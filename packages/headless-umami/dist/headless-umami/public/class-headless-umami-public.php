@@ -25,7 +25,7 @@ class Headless_Umami_Public {
 		if ( ! $order ) {
 			return;
 		}
-		$already_sent = get_post_meta( $order_id, '_headless_umami_sent', true );
+		$already_sent = $order->get_meta( '_headless_umami_sent', true );
 		if ( $already_sent ) {
 			return;
 		}
@@ -46,7 +46,8 @@ class Headless_Umami_Public {
 		$order_url = $order->get_checkout_order_received_url();
 		$result = $this->send_umami_event( 'purchase', $order_url, 'Purchase - Order #' . strval( $order_id ), $event_data );
 		if ( $result['success'] ) {
-			update_post_meta( $order_id, '_headless_umami_sent', '1' );
+			$order->update_meta_data( '_headless_umami_sent', '1' );
+			$order->save();
 		}
 	}
 
@@ -64,7 +65,7 @@ class Headless_Umami_Public {
 		}
 		$payload = array( 'type' => 'event', 'payload' => $inner_payload );
 		$api_url = rtrim( $umami_url, '/' ) . '/api/send';
-		$response = wp_safe_remote_post( $api_url, array( 'body' => json_encode( $payload ), 'headers' => array( 'Content-Type' => 'application/json', 'User-Agent' => 'Mozilla/5.0 (compatible; HeadlessUmami/1.0; +wordpress)' ), 'timeout' => 5 ) );
+		$response = wp_safe_remote_post( $api_url, array( 'body' => wp_json_encode( $payload ), 'headers' => array( 'Content-Type' => 'application/json', 'User-Agent' => 'Mozilla/5.0 (compatible; HeadlessUmami/1.0; +wordpress)' ), 'timeout' => 5 ) );
 		if ( is_wp_error( $response ) ) {
 			update_option( 'headless_umami_last_error', $response->get_error_message() );
 			return array( 'success' => false, 'message' => $response->get_error_message() );

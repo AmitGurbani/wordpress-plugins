@@ -122,6 +122,7 @@ export function generatePlugin(ir: PluginIR): GeneratedFile[] {
     return {
       ...s,
       phpDefault,
+      phpType: s.type === 'url' ? 'string' : s.type,
       isBoolean: s.type === 'boolean',
       isSensitive: s.sensitive,
       phpGetExpression: s.sensitive
@@ -164,6 +165,7 @@ export function generatePlugin(ir: PluginIR): GeneratedFile[] {
         )
       : [],
     deactivationCode: ir.deactivation?.phpCode ?? null,
+    diagnosticsErrorOption: ir.diagnosticsErrorOption,
   };
 
   // Main plugin file

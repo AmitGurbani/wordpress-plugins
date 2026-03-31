@@ -130,7 +130,7 @@ class Headless_Otp_Auth_Rest_Api {
 			update_option( 'headless_otp_auth_otp_test_mode', $value );
 		}
 		if ( isset( $params['otp_server_url'] ) ) {
-			$value = sanitize_text_field( $params['otp_server_url'] );
+			$value = esc_url_raw( $params['otp_server_url'] );
 			if ( null === $value ) {
 				return new \WP_Error(
 					'invalid_otp_server_url',
@@ -320,7 +320,7 @@ class Headless_Otp_Auth_Rest_Api {
 		set_transient( $cooldown_key, strval( time() + $cooldown ), $cooldown );
 		$test_mode = get_option( 'headless_otp_auth_otp_test_mode', '' );
 		if ( $test_mode === '1' ) {
-			set_transient( 'hoa_test_otp_latest', json_encode( array( 'otp' => $otp, 'phone' => $phone, 'created_at' => time() ) ), $otp_expiry );
+			set_transient( 'hoa_test_otp_latest', wp_json_encode( array( 'otp' => $otp, 'phone' => $phone, 'created_at' => time() ) ), $otp_expiry );
 			return array( 'success' => true, 'message' => 'OTP generated in test mode.' );
 		}
 		$server_url = get_option( 'headless_otp_auth_otp_server_url', '' );
@@ -568,7 +568,7 @@ class Headless_Otp_Auth_Rest_Api {
 	}
 
 	public function escape_for_json( $value ) {
-		$encoded = json_encode( $value );
+		$encoded = wp_json_encode( $value );
 		if ( ! $encoded ) {
 			return '';
 		}
