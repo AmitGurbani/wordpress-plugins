@@ -12,10 +12,7 @@ test.describe('Headless OTP Auth — JWT Authentication', () => {
     });
   });
 
-  // TODO: Apache in Docker may strip the Authorization header before getallheaders() sees it.
-  // The plugin reads from getallheaders() but should also check $_SERVER['HTTP_AUTHORIZATION'].
-  // Fix the plugin's authenticate_with_jwt to use $_SERVER fallback, then unskip this test.
-  test.skip('GET /auth/me with valid access_token returns user', async ({
+  test('GET /auth/me with valid access_token returns user', async ({
     restApi,
     wpCli,
   }) => {
@@ -33,14 +30,18 @@ test.describe('Headless OTP Auth — JWT Authentication', () => {
 
     // Get tokens via OTP flow
     const ctx = await playwrightRequest.newContext();
-    await ctx.post(`${BASE}/otp/send`, { data: { phone } });
+    const sendRes = await ctx.post(`${BASE}/otp/send`, { data: { phone } });
+    expect(sendRes.status()).toBe(200);
 
     const { data: otpData } = await restApi.get(`${SLUG}/v1/otp/test-otp`);
+    expect(otpData.otp).toBeTruthy();
 
     const verifyRes = await ctx.post(`${BASE}/otp/verify`, {
       data: { phone, otp: otpData.otp },
     });
+    expect(verifyRes.status()).toBe(200);
     const tokens = await verifyRes.json();
+    expect(tokens.access_token).toBeTruthy();
 
     // Use access_token to call /auth/me
     const meRes = await ctx.get(`${BASE}/auth/me`, {

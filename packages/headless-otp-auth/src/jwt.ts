@@ -79,12 +79,12 @@ class JwtAuth {
 
   @Filter('determine_current_user', { priority: 20 })
   authenticateWithJwt(userId: number): number {
-    if (userId) {
-      return userId;
-    }
-
     const headers: Record<string, string> = getallheaders();
-    const authHeader: string = headers['Authorization'] ?? headers['authorization'] ?? '';
+    const authHeader: string = $_SERVER['HTTP_AUTHORIZATION']
+      ?? $_SERVER['REDIRECT_HTTP_AUTHORIZATION']
+      ?? headers['Authorization']
+      ?? headers['authorization']
+      ?? '';
     if (!authHeader) {
       return userId;
     }
@@ -138,11 +138,30 @@ class JwtAuth {
     }
 
     const tokenUserId: number = intval(payload['sub']);
-    if (!tokenUserId) {
+    if (!tokenUserId || !getUserBy('id', tokenUserId)) {
       return userId;
     }
 
     wpSetCurrentUser(tokenUserId);
+    $_SERVER['HOA_JWT_AUTHENTICATED'] = '1';
     return tokenUserId;
+  }
+
+  // ── Bypass cookie nonce check for JWT-authenticated requests ──────────
+  // When JWT auth succeeded, tell the REST API this request is token-
+  // authenticated (not cookies) so rest_cookie_check_errors (priority 100)
+  // skips the nonce check.
+
+  @Filter('rest_authentication_errors', { priority: 99 })
+  allowJwtAuth(result: any): any {
+    if (result) {
+      return result;
+    }
+
+    if ($_SERVER['HOA_JWT_AUTHENTICATED'] === '1') {
+      return true;
+    }
+
+    return result;
   }
 }

@@ -41,6 +41,7 @@ class Headless_Otp_Auth {
 		$this->loader->add_action( 'init', $public, 'register_jwt_helper', 10, 0 );
 		$this->loader->add_filter( 'rest_pre_serve_request', $public, 'handle_cors', 10, 1 );
 		$this->loader->add_filter( 'determine_current_user', $public, 'authenticate_with_jwt', 20, 1 );
+		$this->loader->add_filter( 'rest_authentication_errors', $public, 'allow_jwt_auth', 99, 1 );
 		$this->loader->add_filter( 'default_option_headless_otp_auth_default_user_role', $public, 'filter_default_user_role', 11, 1 );
 	}
 

@@ -56,11 +56,8 @@ class Headless_Otp_Auth_Public {
 	}
 
 	public function authenticate_with_jwt( $user_id ) {
-		if ( $user_id ) {
-			return $user_id;
-		}
 		$headers = function_exists( 'getallheaders' ) ? getallheaders() : array();
-		$auth_header = $headers['Authorization'] ?? $headers['authorization'] ?? '';
+		$auth_header = $_SERVER['HTTP_AUTHORIZATION'] ?? $_SERVER['REDIRECT_HTTP_AUTHORIZATION'] ?? $headers['Authorization'] ?? $headers['authorization'] ?? '';
 		if ( ! $auth_header ) {
 			return $user_id;
 		}
@@ -100,11 +97,22 @@ class Headless_Otp_Auth_Public {
 			return $user_id;
 		}
 		$token_user_id = intval( $payload['sub'] );
-		if ( ! $token_user_id ) {
+		if ( ! $token_user_id || ! get_user_by( 'id', $token_user_id ) ) {
 			return $user_id;
 		}
 		wp_set_current_user( $token_user_id );
+		$_SERVER['HOA_JWT_AUTHENTICATED'] = '1';
 		return $token_user_id;
+	}
+
+	public function allow_jwt_auth( $result ) {
+		if ( $result ) {
+			return $result;
+		}
+		if ( $_SERVER['HOA_JWT_AUTHENTICATED'] === '1' ) {
+			return true;
+		}
+		return $result;
 	}
 
 	public function filter_default_user_role( $default_value ) {
