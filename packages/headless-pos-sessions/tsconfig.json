@@ -1,0 +1,13 @@
+{
+  "compilerOptions": {
+    "jsx": "react-jsx",
+    "strict": true,
+    "module": "ESNext",
+    "target": "ES2015",
+    "moduleResolution": "node",
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "experimentalDecorators": true
+  },
+  "include": ["src/**/*.ts", "src/**/*.tsx"]
+}

@@ -119,6 +119,45 @@ describe('transpileExpression', () => {
       ).toBe("get_option( 'key', 'default' )");
     });
 
+    it('maps post management functions', () => {
+      expect(
+        transpile(
+          'wpInsertPost({ post_type: "pos_session", post_status: "publish" })',
+          'declare function wpInsertPost(p: Record<string, any>, e?: boolean): number | any;',
+        ),
+      ).toBe("wp_insert_post( array( 'post_type' => 'pos_session', 'post_status' => 'publish' ) )");
+      expect(
+        transpile(
+          'wpUpdatePost({ ID: 1, post_title: "Updated" })',
+          'declare function wpUpdatePost(p: Record<string, any>, e?: boolean): number | any;',
+        ),
+      ).toBe("wp_update_post( array( 'ID' => 1, 'post_title' => 'Updated' ) )");
+    });
+
+    it('maps cron scheduling functions', () => {
+      expect(
+        transpile(
+          'wpScheduleEvent(time(), "daily", "my_hook")',
+          'declare function wpScheduleEvent(t: number, r: string, h: string, a?: any[]): boolean; declare function time(): number;',
+        ),
+      ).toBe("wp_schedule_event( time(), 'daily', 'my_hook' )");
+      expect(
+        transpile(
+          'wpClearScheduledHook("my_hook")',
+          'declare function wpClearScheduledHook(h: string, a?: any[]): number | false;',
+        ),
+      ).toBe("wp_clear_scheduled_hook( 'my_hook' )");
+    });
+
+    it('maps gmdate function', () => {
+      expect(
+        transpile(
+          'gmdate("c", time())',
+          'declare function gmdate(f: string, t?: number): string; declare function time(): number;',
+        ),
+      ).toBe("gmdate( 'c', time() )");
+    });
+
     it('maps PHP built-in isArray', () => {
       expect(
         transpile(

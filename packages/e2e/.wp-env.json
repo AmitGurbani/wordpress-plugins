@@ -7,6 +7,7 @@
     "../headless-meta-pixel/dist/headless-meta-pixel",
     "../headless-umami/dist/headless-umami",
     "../headless-otp-auth/dist/headless-otp-auth",
+    "../headless-pos-sessions/dist/headless-pos-sessions",
     "../headless-fuzzyfind/dist/headless-fuzzy-find",
     "https://downloads.wordpress.org/plugin/woocommerce.latest-stable.zip"
   ],

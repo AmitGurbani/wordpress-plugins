@@ -58,3 +58,4 @@ To add a new WordPress function mapping:
 - `@Setting({ wooCurrencyDefault: true })`: auto-generates a `default_option_{optionName}` filter that returns the WooCommerce currency when WooCommerce is active.
 - `@DiagnosticsRoute({ errorOptionSuffix?: string })`: class decorator that auto-generates a `GET /diagnostics/last-error` admin REST route. Default suffix: `'last_error'`.
 - Undefined array key checks: `obj['key'] !== undefined` transpiles to `isset( $obj['key'] )` (not `$obj['key'] !== null`) for PHP 8 compatibility. Only applies to element/property access, not plain variables.
+- Uninstall template: auto-cleans `@Setting` options, `@Activate` manual options, `@DiagnosticsRoute` error option, and `@CustomPostType` posts (deletes all posts of each registered CPT on uninstall).

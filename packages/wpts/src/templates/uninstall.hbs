@@ -13,3 +13,11 @@ delete_option( '{{this}}' );
 {{#if diagnosticsErrorOption}}
 delete_option( '{{diagnosticsErrorOption}}' );
 {{/if}}
+{{#each customPostTypes}}
+
+// Delete all {{singularName}} posts and their meta
+${{slug}}_posts = get_posts( array( 'post_type' => '{{slug}}', 'posts_per_page' => -1, 'post_status' => 'any', 'fields' => 'ids' ) );
+foreach ( ${{slug}}_posts as $id ) {
+	wp_delete_post( $id, true );
+}
+{{/each}}

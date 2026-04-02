@@ -14,6 +14,7 @@ Turborepo monorepo for WordPress plugins and tooling, using pnpm workspaces.
 | [headless-umami](packages/headless-umami/) | Umami Analytics with WooCommerce purchase tracking for headless WordPress (built with wpts) | [Integration](packages/headless-umami/docs/integration-guide.md) · [Admin](packages/headless-umami/docs/admin-guide.md) |
 | [headless-google-analytics](packages/headless-google-analytics/) | Google Analytics (GA4) with WooCommerce Measurement Protocol for headless WordPress (built with wpts) | [Integration](packages/headless-google-analytics/docs/integration-guide.md) · [Admin](packages/headless-google-analytics/docs/admin-guide.md) |
 | [headless-clarity](packages/headless-clarity/) | Microsoft Clarity session recordings and heatmaps for headless WordPress (built with wpts) | [Integration](packages/headless-clarity/docs/integration-guide.md) · [Admin](packages/headless-clarity/docs/admin-guide.md) |
+| [headless-pos-sessions](packages/headless-pos-sessions/) | POS register session storage with REST API for headless WordPress (built with wpts) | [CLAUDE.md](packages/headless-pos-sessions/CLAUDE.md) |
 | [e2e](packages/e2e/) | Playwright end-to-end tests for all plugins (wp-env) | [README](packages/e2e/README.md) |
 
 ## Getting Started

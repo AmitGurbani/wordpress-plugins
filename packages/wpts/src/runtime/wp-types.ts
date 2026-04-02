@@ -277,6 +277,8 @@ declare global {
   function getTheTitle(postId?: number): string;
   function getTheContent(moreLinkText?: string, stripTeaser?: boolean): string;
   function getPermalink(postId?: number, leavename?: boolean): string | false;
+  function wpInsertPost(postarr: Record<string, any>, wpError?: boolean): number | any;
+  function wpUpdatePost(postarr: Record<string, any>, wpError?: boolean): number | any;
 
   // ---------------------------------------------------------------------------
   // Metadata — Post
@@ -512,6 +514,11 @@ declare global {
   function uniqid(prefix?: string, moreEntropy?: boolean): string;
 
   // ---------------------------------------------------------------------------
+  // PHP Built-ins (date/time)
+  // ---------------------------------------------------------------------------
+  function gmdate(format: string, timestamp?: number): string;
+
+  // ---------------------------------------------------------------------------
   // PHP Built-ins (general)
   // ---------------------------------------------------------------------------
   function classExists(className: string): boolean;
@@ -619,8 +626,10 @@ declare global {
   // Cron / Scheduling
   // ---------------------------------------------------------------------------
   function wpScheduleSingleEvent(timestamp: number, hook: string, args?: any[]): boolean;
+  function wpScheduleEvent(timestamp: number, recurrence: string, hook: string, args?: any[]): boolean;
   function wpNextScheduled(hook: string, args?: any[]): number | false;
   function wpUnscheduleEvent(timestamp: number, hook: string, args?: any[]): boolean;
+  function wpClearScheduledHook(hook: string, args?: any[]): number | false;
 
   // ---------------------------------------------------------------------------
   // Taxonomy

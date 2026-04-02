@@ -243,6 +243,8 @@ export const WP_FUNCTION_MAP: Record<string, string> = {
   // Custom Post Types & Taxonomies
   registerPostType: 'register_post_type',
   registerTaxonomy: 'register_taxonomy',
+  wpInsertPost: 'wp_insert_post',
+  wpUpdatePost: 'wp_update_post',
   wpDeletePost: 'wp_delete_post',
   wpCountPosts: 'wp_count_posts',
 
@@ -259,8 +261,10 @@ export const WP_FUNCTION_MAP: Record<string, string> = {
 
   // Cron / Scheduling
   wpScheduleSingleEvent: 'wp_schedule_single_event',
+  wpScheduleEvent: 'wp_schedule_event',
   wpNextScheduled: 'wp_next_scheduled',
   wpUnscheduleEvent: 'wp_unschedule_event',
+  wpClearScheduledHook: 'wp_clear_scheduled_hook',
 
   // Taxonomy
   getTerms: 'get_terms',
@@ -290,6 +294,9 @@ export const WP_FUNCTION_MAP: Record<string, string> = {
   base64Decode: 'base64_decode',
   hashHmac: 'hash_hmac',
   hashEquals: 'hash_equals',
+
+  // PHP Built-ins (date/time)
+  gmdate: 'gmdate',
 
   // PHP Built-ins (general)
   classExists: 'class_exists',

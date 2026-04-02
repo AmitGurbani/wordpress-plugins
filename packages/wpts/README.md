@@ -652,7 +652,7 @@ All functions are written in camelCase in TypeScript and transpiled to snake_cas
 | **User** | `currentUserCan`, `getCurrentUserId`, `isUserLoggedIn`, `getUserBy`, `getUsers`, `usernameExists`, `wpInsertUser`, `wpGetCurrentUser`, `wpGeneratePassword`, `wpHashPassword`, `wpCheckPassword`, `wpSetCurrentUser`, `getTheAuthorMeta` |
 | **Nonces** | `wpCreateNonce`, `wpVerifyNonce`, `wpNonceField`, `checkAdminReferer` |
 | **Transients** | `getTransient`, `setTransient`, `deleteTransient` |
-| **Posts** | `getPost`, `getPostType`, `getPosts`, `getTheId`, `getTheTitle`, `getTheContent`, `getPermalink`, `wpGetPostParentId` |
+| **Posts** | `getPost`, `getPostType`, `getPosts`, `wpInsertPost`, `wpUpdatePost`, `getTheId`, `getTheTitle`, `getTheContent`, `getPermalink`, `wpGetPostParentId` |
 | **URLs** | `adminUrl`, `homeUrl`, `siteUrl`, `contentUrl`, `wpParseUrl` |
 | **Plugin** | `pluginDirUrl`, `pluginDirPath`, `pluginBasename` |
 | **i18n** | `__`, `_e`, `_x`, `_ex`, `_n`, `_nx`, `escHtml__`, `escHtmlE`, `escHtmlX`, `escAttr__`, `escAttrE`, `escAttrX`, `loadPluginTextdomain` |
@@ -663,11 +663,11 @@ All functions are written in camelCase in TypeScript and transpiled to snake_cas
 | **JSON Response** | `wpSendJson`, `wpSendJsonSuccess`, `wpSendJsonError` |
 | **REST API** | `restEnsureResponse` |
 | **Utility** | `wpRand` |
-| **PHP Built-ins** | `classExists`, `functionExists`, `isArray`, `jsonEncode`, `jsonDecode`, `base64Encode`, `base64Decode`, `hashHmac`, `hashEquals`, `hash`, `md5`, `uniqid`, `numberFormat`, `intval`, `strval`, `strtolower`, `strtr`, `rtrim`, `time`, `getallheaders`, `header`, `levenshtein`, `arrayUnique`, `arrayValues`, `requireOnce` · JS built-in `parseFloat()` → PHP `floatval()` |
+| **PHP Built-ins** | `classExists`, `functionExists`, `isArray`, `jsonEncode`, `jsonDecode`, `base64Encode`, `base64Decode`, `hashHmac`, `hashEquals`, `hash`, `md5`, `uniqid`, `numberFormat`, `intval`, `strval`, `strtolower`, `strtr`, `rtrim`, `time`, `gmdate`, `getallheaders`, `header`, `levenshtein`, `arrayUnique`, `arrayValues`, `requireOnce` · JS built-in `parseFloat()` → PHP `floatval()` |
 | **Misc** | `wpDie`, `wpRedirect`, `wpSafeRedirect`, `absint`, `wpUnslash`, `echo`, `ABSPATH` |
 | **Content** | `wpStripAllTags` |
 | **Media** | `wpGetAttachmentImageSrc`, `wpGetAttachmentUrl` |
-| **Cron** | `wpScheduleSingleEvent`, `wpNextScheduled`, `wpUnscheduleEvent` |
+| **Cron** | `wpScheduleSingleEvent`, `wpScheduleEvent`, `wpNextScheduled`, `wpUnscheduleEvent`, `wpClearScheduledHook` |
 | **Taxonomy** | `getTerms`, `getTheTerms`, `wpGetObjectTerms` |
 | **WooCommerce Conditionals** | `isWoocommerce`, `isShop`, `isProduct`, `isCart`, `isCheckout`, `isAccountPage`, `isWcEndpointUrl` |
 | **WooCommerce Products** | `wcGetProduct`, `wcGetProducts`, `wcGetProductIdBySku` |

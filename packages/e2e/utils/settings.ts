@@ -135,6 +135,22 @@ export const PLUGINS: PluginConfig[] = [
     sensitiveKeys: [],
   },
   {
+    slug: 'headless-pos-sessions',
+    name: 'Headless POS Sessions',
+    menuSlug: 'headless-pos-sessions-settings',
+    hasConfig: false,
+    hasDiagnostics: false,
+    settings: {
+      retention_days: 30,
+      max_open_sessions: 5,
+    },
+    defaults: {
+      retention_days: 90,
+      max_open_sessions: 10,
+    },
+    sensitiveKeys: [],
+  },
+  {
     slug: 'headless-fuzzyfind',
     name: 'Headless FuzzyFind',
     menuSlug: 'headless-fuzzyfind-settings',
