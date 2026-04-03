@@ -22,6 +22,18 @@ Turborepo monorepo with pnpm workspaces.
 - Use turbo for orchestrating build/test/lint across packages
 - Plugin packages track generated output in `dist/` (via `!dist/` in their `.gitignore`), excluding only ZIP archives. Rebuild plugins after wpts or admin-ui changes and commit the updated dist so diffs are reviewable.
 
+## Agents & Skills
+
+Custom agents (`.claude/agents/`):
+- `quick-search` — Haiku model, read-only. Cheap codebase search.
+- `plugin-updater` — Sonnet model, worktree isolation. Parallel cross-plugin updates.
+- `reviewer` — Sonnet model, background. Auto-invokes after code changes, has persistent project memory.
+
+Skills (`.claude/skills/`):
+- `/wp-plugin-review [plugin-name]` — Full review of generated PHP dist output
+- `/commit` — Conventional commit with emoji prefix
+- `/add-wp-function [category]` — Add WordPress function mappings to wpts transpiler
+
 ## Commits
 
 Format: `<type>(<scope>): <emoji> <subject>`
