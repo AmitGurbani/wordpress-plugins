@@ -36,7 +36,7 @@ class Headless_Pos_Sessions_Rest_Api {
 				'methods'             => 'POST',
 				'callback'            => array( $this, 'create_session' ),
 				'permission_callback' => function() {
-					return current_user_can( 'manage_shop_orders' );
+					return current_user_can( 'edit_shop_orders' );
 				},
 			)
 		);
@@ -47,7 +47,7 @@ class Headless_Pos_Sessions_Rest_Api {
 				'methods'             => 'GET',
 				'callback'            => array( $this, 'list_sessions' ),
 				'permission_callback' => function() {
-					return current_user_can( 'manage_shop_orders' );
+					return current_user_can( 'edit_shop_orders' );
 				},
 			)
 		);
@@ -58,7 +58,7 @@ class Headless_Pos_Sessions_Rest_Api {
 				'methods'             => 'GET',
 				'callback'            => array( $this, 'get_session' ),
 				'permission_callback' => function() {
-					return current_user_can( 'manage_shop_orders' );
+					return current_user_can( 'edit_shop_orders' );
 				},
 			)
 		);
@@ -69,7 +69,7 @@ class Headless_Pos_Sessions_Rest_Api {
 				'methods'             => 'PUT',
 				'callback'            => array( $this, 'update_session' ),
 				'permission_callback' => function() {
-					return current_user_can( 'manage_shop_orders' );
+					return current_user_can( 'edit_shop_orders' );
 				},
 			)
 		);
@@ -153,7 +153,7 @@ class Headless_Pos_Sessions_Rest_Api {
 		if ( count( $existing ) > 0 ) {
 			return new WP_Error( 'duplicate_uuid', 'A session with this session_uuid already exists.', array( 'status' => 409 ) );
 		}
-		$closed_at = sanitize_text_field( $request->get_param( 'closed_at' ) || '' );
+		$closed_at = sanitize_text_field( $request->get_param( 'closed_at' ) ?? '' );
 		$status = $closed_at ? 'closed' : 'open';
 		if ( $status === 'open' ) {
 			$max_open = max( 1, intval( get_option( 'headless_pos_sessions_max_open_sessions', 10 ) ) );
@@ -173,39 +173,39 @@ class Headless_Pos_Sessions_Rest_Api {
 		update_post_meta( $id, '_opened_at', $opened_at );
 		update_post_meta( $id, '_closed_at', $closed_at );
 		update_post_meta( $id, '_opening_balance', strval( $opening_balance ) );
-		update_post_meta( $id, '_closing_balance', sanitize_text_field( $request->get_param( 'closing_balance' ) || '0' ) );
-		update_post_meta( $id, '_expected_balance', sanitize_text_field( $request->get_param( 'expected_balance' ) || '0' ) );
-		update_post_meta( $id, '_cash_in', sanitize_text_field( $request->get_param( 'cash_in' ) || '0' ) );
-		update_post_meta( $id, '_cash_out', sanitize_text_field( $request->get_param( 'cash_out' ) || '0' ) );
-		update_post_meta( $id, '_order_count', strval( intval( $request->get_param( 'order_count' ) || '0' ) ) );
+		update_post_meta( $id, '_closing_balance', sanitize_text_field( $request->get_param( 'closing_balance' ) ?? '0' ) );
+		update_post_meta( $id, '_expected_balance', sanitize_text_field( $request->get_param( 'expected_balance' ) ?? '0' ) );
+		update_post_meta( $id, '_cash_in', sanitize_text_field( $request->get_param( 'cash_in' ) ?? '0' ) );
+		update_post_meta( $id, '_cash_out', sanitize_text_field( $request->get_param( 'cash_out' ) ?? '0' ) );
+		update_post_meta( $id, '_order_count', strval( intval( $request->get_param( 'order_count' ) ?? '0' ) ) );
 		update_post_meta( $id, '_order_ids', $order_ids_param ? wp_json_encode( $order_ids_param ) : '[]' );
-		update_post_meta( $id, '_notes', sanitize_textarea_field( $request->get_param( 'notes' ) || '' ) );
-		$cashier_id = intval( $request->get_param( 'cashier_id' ) || '0' );
+		update_post_meta( $id, '_notes', sanitize_textarea_field( $request->get_param( 'notes' ) ?? '' ) );
+		$cashier_id = intval( $request->get_param( 'cashier_id' ) ?? '0' );
 		update_post_meta( $id, '_cashier_id', strval( $cashier_id > 0 ? $cashier_id : get_current_user_id() ) );
 		return $this->format_session( $id );
 	}
 
 	public function list_sessions( $request ) {
-		$per_page = min( 100, max( 1, intval( $request->get_param( 'per_page' ) || '20' ) ) );
-		$page = max( 1, intval( $request->get_param( 'page' ) || '1' ) );
-		$orderby = sanitize_text_field( $request->get_param( 'orderby' ) || 'opened_at' );
-		$order = sanitize_text_field( $request->get_param( 'order' ) || 'desc' );
+		$per_page = min( 100, max( 1, intval( $request->get_param( 'per_page' ) ?? '20' ) ) );
+		$page = max( 1, intval( $request->get_param( 'page' ) ?? '1' ) );
+		$orderby = sanitize_text_field( $request->get_param( 'orderby' ) ?? 'opened_at' );
+		$order = sanitize_text_field( $request->get_param( 'order' ) ?? 'desc' );
 		$sort_dir = strtoupper( $order ) === 'ASC' ? 'ASC' : 'DESC';
 		$query_args = array( 'post_type' => 'pos_session', 'post_status' => 'publish', 'posts_per_page' => $per_page, 'paged' => $page );
 		$meta_query = array();
-		$status_filter = sanitize_text_field( $request->get_param( 'status' ) || '' );
+		$status_filter = sanitize_text_field( $request->get_param( 'status' ) ?? '' );
 		if ( $status_filter ) {
 			array_push( $meta_query, array( 'key' => '_session_status', 'value' => $status_filter ) );
 		}
-		$terminal_filter = sanitize_text_field( $request->get_param( 'terminal_id' ) || '' );
+		$terminal_filter = sanitize_text_field( $request->get_param( 'terminal_id' ) ?? '' );
 		if ( $terminal_filter ) {
 			array_push( $meta_query, array( 'key' => '_terminal_id', 'value' => $terminal_filter ) );
 		}
-		$date_from = sanitize_text_field( $request->get_param( 'date_from' ) || '' );
+		$date_from = sanitize_text_field( $request->get_param( 'date_from' ) ?? '' );
 		if ( $date_from ) {
 			array_push( $meta_query, array( 'key' => '_opened_at', 'value' => $date_from, 'compare' => '>=', 'type' => 'CHAR' ) );
 		}
-		$date_to = sanitize_text_field( $request->get_param( 'date_to' ) || '' );
+		$date_to = sanitize_text_field( $request->get_param( 'date_to' ) ?? '' );
 		if ( $date_to ) {
 			array_push( $meta_query, array( 'key' => '_opened_at', 'value' => $date_to, 'compare' => '<=', 'type' => 'CHAR' ) );
 		}

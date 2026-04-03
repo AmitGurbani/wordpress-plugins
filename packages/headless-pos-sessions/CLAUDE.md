@@ -30,10 +30,10 @@ Namespace: `headless-pos-sessions/v1`
 
 | Method | Route | Permission | Purpose |
 |--------|-------|-----------|---------|
-| POST | `/sessions` | manage_shop_orders | Create session (409 on duplicate UUID) |
-| GET | `/sessions` | manage_shop_orders | List with pagination/filtering/sorting |
-| GET | `/sessions/:id` | manage_shop_orders | Get single session |
-| PUT | `/sessions/:id` | manage_shop_orders | Partial update |
+| POST | `/sessions` | edit_shop_orders | Create session (409 on duplicate UUID) |
+| GET | `/sessions` | edit_shop_orders | List with pagination/filtering/sorting |
+| GET | `/sessions/:id` | edit_shop_orders | Get single session |
+| PUT | `/sessions/:id` | edit_shop_orders | Partial update |
 | DELETE | `/sessions/:id` | manage_woocommerce | Delete session (admin-only) |
 | GET | `/settings` | manage_options | Fetch settings |
 | POST | `/settings` | manage_options | Update settings |

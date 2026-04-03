@@ -34,6 +34,8 @@ async function globalSetup(config: FullConfig) {
   //    (wp-env marks them active but may not fire activation hooks)
   wpCli('plugin deactivate headless-fuzzy-find');
   wpCli('plugin activate headless-fuzzy-find');
+  wpCli('plugin deactivate headless-pos-sessions');
+  wpCli('plugin activate headless-pos-sessions');
 
   // 3. Enable pretty permalinks (required for REST API /wp-json/ URLs)
   wpCli('rewrite structure "/%postname%/"');

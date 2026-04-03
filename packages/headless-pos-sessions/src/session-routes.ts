@@ -40,7 +40,7 @@ class SessionRoutes {
 
   // ── POST /sessions — Create session ───────────────────────────────────
 
-  @RestRoute('/sessions', { method: 'POST', capability: 'manage_shop_orders' })
+  @RestRoute('/sessions', { method: 'POST', capability: 'edit_shop_orders' })
   createSession(request: any): any {
     const uuid: string = sanitizeTextField(request.get_param('session_uuid'));
     if (!uuid) {
@@ -83,7 +83,7 @@ class SessionRoutes {
     }
 
     // Determine status
-    const closedAt: string = sanitizeTextField(request.get_param('closed_at') || '');
+    const closedAt: string = sanitizeTextField(request.get_param('closed_at') ?? '');
     const status: string = closedAt ? 'closed' : 'open';
 
     // Check max open sessions limit
@@ -122,15 +122,15 @@ class SessionRoutes {
     updatePostMeta(id, '_opened_at', openedAt);
     updatePostMeta(id, '_closed_at', closedAt);
     updatePostMeta(id, '_opening_balance', strval(openingBalance));
-    updatePostMeta(id, '_closing_balance', sanitizeTextField(request.get_param('closing_balance') || '0'));
-    updatePostMeta(id, '_expected_balance', sanitizeTextField(request.get_param('expected_balance') || '0'));
-    updatePostMeta(id, '_cash_in', sanitizeTextField(request.get_param('cash_in') || '0'));
-    updatePostMeta(id, '_cash_out', sanitizeTextField(request.get_param('cash_out') || '0'));
-    updatePostMeta(id, '_order_count', strval(intval(request.get_param('order_count') || '0')));
+    updatePostMeta(id, '_closing_balance', sanitizeTextField(request.get_param('closing_balance') ?? '0'));
+    updatePostMeta(id, '_expected_balance', sanitizeTextField(request.get_param('expected_balance') ?? '0'));
+    updatePostMeta(id, '_cash_in', sanitizeTextField(request.get_param('cash_in') ?? '0'));
+    updatePostMeta(id, '_cash_out', sanitizeTextField(request.get_param('cash_out') ?? '0'));
+    updatePostMeta(id, '_order_count', strval(intval(request.get_param('order_count') ?? '0')));
     updatePostMeta(id, '_order_ids', orderIdsParam ? jsonEncode(orderIdsParam) : '[]');
-    updatePostMeta(id, '_notes', sanitizeTextareaField(request.get_param('notes') || ''));
+    updatePostMeta(id, '_notes', sanitizeTextareaField(request.get_param('notes') ?? ''));
 
-    const cashierId: number = intval(request.get_param('cashier_id') || '0');
+    const cashierId: number = intval(request.get_param('cashier_id') ?? '0');
     updatePostMeta(id, '_cashier_id', strval(cashierId > 0 ? cashierId : getCurrentUserId()));
 
     return this.formatSession(id);
@@ -138,12 +138,12 @@ class SessionRoutes {
 
   // ── GET /sessions — List sessions ─────────────────────────────────────
 
-  @RestRoute('/sessions', { method: 'GET', capability: 'manage_shop_orders' })
+  @RestRoute('/sessions', { method: 'GET', capability: 'edit_shop_orders' })
   listSessions(request: any): any {
-    const perPage: number = Math.min(100, Math.max(1, intval(request.get_param('per_page') || '20')));
-    const page: number = Math.max(1, intval(request.get_param('page') || '1'));
-    const orderby: string = sanitizeTextField(request.get_param('orderby') || 'opened_at');
-    const order: string = sanitizeTextField(request.get_param('order') || 'desc');
+    const perPage: number = Math.min(100, Math.max(1, intval(request.get_param('per_page') ?? '20')));
+    const page: number = Math.max(1, intval(request.get_param('page') ?? '1'));
+    const orderby: string = sanitizeTextField(request.get_param('orderby') ?? 'opened_at');
+    const order: string = sanitizeTextField(request.get_param('order') ?? 'desc');
     const sortDir: string = order.toUpperCase() === 'ASC' ? 'ASC' : 'DESC';
 
     // Build query args
@@ -157,22 +157,22 @@ class SessionRoutes {
     // Build meta_query
     const metaQuery: any[] = [];
 
-    const statusFilter: string = sanitizeTextField(request.get_param('status') || '');
+    const statusFilter: string = sanitizeTextField(request.get_param('status') ?? '');
     if (statusFilter) {
       metaQuery.push({ key: '_session_status', value: statusFilter });
     }
 
-    const terminalFilter: string = sanitizeTextField(request.get_param('terminal_id') || '');
+    const terminalFilter: string = sanitizeTextField(request.get_param('terminal_id') ?? '');
     if (terminalFilter) {
       metaQuery.push({ key: '_terminal_id', value: terminalFilter });
     }
 
-    const dateFrom: string = sanitizeTextField(request.get_param('date_from') || '');
+    const dateFrom: string = sanitizeTextField(request.get_param('date_from') ?? '');
     if (dateFrom) {
       metaQuery.push({ key: '_opened_at', value: dateFrom, compare: '>=', type: 'CHAR' });
     }
 
-    const dateTo: string = sanitizeTextField(request.get_param('date_to') || '');
+    const dateTo: string = sanitizeTextField(request.get_param('date_to') ?? '');
     if (dateTo) {
       metaQuery.push({ key: '_opened_at', value: dateTo, compare: '<=', type: 'CHAR' });
     }
@@ -233,7 +233,7 @@ class SessionRoutes {
 
   // ── GET /sessions/:id — Get single session ────────────────────────────
 
-  @RestRoute('/sessions/(?P<id>\\d+)', { method: 'GET', capability: 'manage_shop_orders' })
+  @RestRoute('/sessions/(?P<id>\\d+)', { method: 'GET', capability: 'edit_shop_orders' })
   getSession(request: any): any {
     const postId: number = intval(request.get_param('id'));
     const post: any = getPost(postId);
@@ -247,7 +247,7 @@ class SessionRoutes {
 
   // ── PUT /sessions/:id — Update session (partial) ──────────────────────
 
-  @RestRoute('/sessions/(?P<id>\\d+)', { method: 'PUT', capability: 'manage_shop_orders' })
+  @RestRoute('/sessions/(?P<id>\\d+)', { method: 'PUT', capability: 'edit_shop_orders' })
   updateSession(request: any): any {
     const postId: number = intval(request.get_param('id'));
     const post: any = getPost(postId);

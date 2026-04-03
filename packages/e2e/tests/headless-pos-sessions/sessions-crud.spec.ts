@@ -1,12 +1,16 @@
 import { test, expect } from '../../fixtures/wordpress';
 import { request as playwrightRequest } from '@playwright/test';
 import fs from 'node:fs';
+import path from 'node:path';
+
+const STORAGE_STATE = path.resolve(__dirname, '../../artifacts/storage-states/admin.json');
 
 const SLUG = 'headless-pos-sessions';
 const BASE = `http://localhost:8889/wp-json/${SLUG}/v1`;
+const RUN_ID = Date.now().toString(36);
 
 const SESSION_DATA = {
-  session_uuid: '550e8400-e29b-41d4-a716-446655440000',
+  session_uuid: `test-session-${RUN_ID}-001`,
   terminal_id: 'browser-test-001',
   opened_at: '2026-04-01T09:00:00.000Z',
   opening_balance: 200.0,
@@ -22,6 +26,14 @@ const SESSION_DATA = {
 
 test.describe('Headless POS Sessions — Sessions CRUD', () => {
   let createdId: number;
+
+  test.beforeAll(async ({ wpCli }) => {
+    // Clean up leftover sessions from previous test runs
+    const ids = wpCli('post list --post_type=pos_session --format=ids');
+    if (ids.trim()) {
+      wpCli(`post delete ${ids.trim()} --force`);
+    }
+  });
 
   test('POST /sessions creates a session', async ({ restApi }) => {
     const { status, data } = await restApi.post(`${SLUG}/v1/sessions`, SESSION_DATA);
@@ -55,12 +67,12 @@ test.describe('Headless POS Sessions — Sessions CRUD', () => {
     expect(s1).toBe(400);
 
     const { status: s2 } = await restApi.post(`${SLUG}/v1/sessions`, {
-      session_uuid: 'test-missing-terminal',
+      session_uuid: `test-missing-terminal-${RUN_ID}`,
     });
     expect(s2).toBe(400);
 
     const { status: s3 } = await restApi.post(`${SLUG}/v1/sessions`, {
-      session_uuid: 'test-missing-opened',
+      session_uuid: `test-missing-opened-${RUN_ID}`,
       terminal_id: 'term-1',
     });
     expect(s3).toBe(400);
@@ -68,7 +80,7 @@ test.describe('Headless POS Sessions — Sessions CRUD', () => {
 
   test('POST /sessions with negative opening_balance returns 400', async ({ restApi }) => {
     const { status } = await restApi.post(`${SLUG}/v1/sessions`, {
-      session_uuid: 'test-negative-balance',
+      session_uuid: `test-negative-balance-${RUN_ID}`,
       terminal_id: 'term-1',
       opened_at: '2026-04-01T09:00:00.000Z',
       opening_balance: -50,
@@ -78,7 +90,7 @@ test.describe('Headless POS Sessions — Sessions CRUD', () => {
 
   test('POST /sessions without closed_at creates an open session', async ({ restApi }) => {
     const { status, data } = await restApi.post(`${SLUG}/v1/sessions`, {
-      session_uuid: 'open-session-test-001',
+      session_uuid: `open-session-${RUN_ID}-001`,
       terminal_id: 'browser-test-002',
       opened_at: '2026-04-02T08:00:00.000Z',
       opening_balance: 100,
@@ -143,7 +155,7 @@ test.describe('Headless POS Sessions — Sessions CRUD', () => {
 
   test('PUT /sessions/:id updates session (partial)', async ({ restApi }) => {
     const { status, data } = await restApi.post(`${SLUG}/v1/sessions`, {
-      session_uuid: 'update-test-session',
+      session_uuid: `update-test-${RUN_ID}`,
       terminal_id: 'browser-test-003',
       opened_at: '2026-04-03T09:00:00.000Z',
       opening_balance: 150,
@@ -153,13 +165,10 @@ test.describe('Headless POS Sessions — Sessions CRUD', () => {
 
     // Use raw fetch for PUT (restApi helper only has get/post)
     const ctx = await playwrightRequest.newContext({
-      storageState: 'packages/e2e/artifacts/storage-states/admin.json',
+      storageState: STORAGE_STATE,
       extraHTTPHeaders: {
         'X-WP-Nonce': JSON.parse(
-          fs.readFileSync(
-            'packages/e2e/artifacts/storage-states/admin.json',
-            'utf-8',
-          ),
+          fs.readFileSync(STORAGE_STATE, 'utf-8'),
         ).nonce,
       },
     });
@@ -185,7 +194,7 @@ test.describe('Headless POS Sessions — Sessions CRUD', () => {
   test('DELETE /sessions/:id requires manage_woocommerce', async ({ restApi }) => {
     // Admin user has manage_woocommerce by default in WooCommerce
     const { status, data } = await restApi.post(`${SLUG}/v1/sessions`, {
-      session_uuid: 'delete-test-session',
+      session_uuid: `delete-test-${RUN_ID}`,
       terminal_id: 'browser-test-004',
       opened_at: '2026-04-04T09:00:00.000Z',
       opening_balance: 100,
@@ -194,13 +203,10 @@ test.describe('Headless POS Sessions — Sessions CRUD', () => {
     const deleteId = data.id;
 
     const ctx = await playwrightRequest.newContext({
-      storageState: 'packages/e2e/artifacts/storage-states/admin.json',
+      storageState: STORAGE_STATE,
       extraHTTPHeaders: {
         'X-WP-Nonce': JSON.parse(
-          fs.readFileSync(
-            'packages/e2e/artifacts/storage-states/admin.json',
-            'utf-8',
-          ),
+          fs.readFileSync(STORAGE_STATE, 'utf-8'),
         ).nonce,
       },
     });
