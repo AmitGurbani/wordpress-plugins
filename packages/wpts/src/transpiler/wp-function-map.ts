@@ -314,6 +314,8 @@ export const WP_FUNCTION_MAP: Record<string, string> = {
   levenshtein: 'levenshtein',
   arrayUnique: 'array_unique',
   arrayValues: 'array_values',
+  arsort: 'arsort',
+  arraySlice: 'array_slice',
 
   // Misc
   wpDie: 'wp_die',

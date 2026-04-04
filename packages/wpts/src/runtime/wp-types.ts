@@ -542,6 +542,8 @@ declare global {
   function levenshtein(s1: string, s2: string): number;
   function arrayUnique(arr: any[]): any[];
   function arrayValues(arr: any[]): any[];
+  function arsort(arr: any): boolean;
+  function arraySlice(arr: any[], offset: number, length?: number): any[];
 
   // ---------------------------------------------------------------------------
   // Misc
@@ -581,6 +583,8 @@ declare global {
     prefix: string;
     posts: string;
     postmeta: string;
+    users: string;
+    usermeta: string;
     terms: string;
     term_taxonomy: string;
     term_relationships: string;

@@ -9,6 +9,7 @@
     "../headless-otp-auth/dist/headless-otp-auth",
     "../headless-pos-sessions/dist/headless-pos-sessions",
     "../headless-fuzzyfind/dist/headless-fuzzy-find",
+    "../headless-wishlist/dist/headless-wishlist",
     "https://downloads.wordpress.org/plugin/woocommerce.latest-stable.zip"
   ],
   "config": {

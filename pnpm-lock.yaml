@@ -282,6 +282,39 @@ importers:
         specifier: workspace:*
         version: link:../wpts
 
+  packages/headless-wishlist:
+    devDependencies:
+      '@types/react':
+        specifier: ^18.3.1
+        version: 18.3.28
+      '@types/react-dom':
+        specifier: ^18.3.1
+        version: 18.3.7(@types/react@18.3.28)
+      '@wordpress/api-fetch':
+        specifier: ^7.40.0
+        version: 7.40.0
+      '@wordpress/components':
+        specifier: ^32.2.0
+        version: 32.2.0(@emotion/is-prop-valid@1.4.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      '@wordpress/element':
+        specifier: ^6.40.0
+        version: 6.42.0
+      '@wordpress/env':
+        specifier: ^10.0.0
+        version: 10.39.0(@types/node@25.3.0)
+      '@wordpress/i18n':
+        specifier: ^6.13.0
+        version: 6.13.0
+      '@wordpress/scripts':
+        specifier: ^31.5.0
+        version: 31.7.0(@playwright/test@1.58.2)(@types/eslint@9.6.1)(@types/node@25.3.0)(@wordpress/env@10.39.0(@types/node@25.3.0))(babel-plugin-macros@3.1.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(stylelint-scss@6.14.0(stylelint@16.26.1(typescript@5.9.3)))(type-fest@4.41.0)(typescript@5.9.3)
+      admin-ui:
+        specifier: workspace:*
+        version: link:../admin-ui
+      wpts:
+        specifier: workspace:*
+        version: link:../wpts
+
   packages/wpts:
     dependencies:
       archiver:
