@@ -22,7 +22,7 @@ Turborepo monorepo with pnpm workspaces.
 - Use turbo for orchestrating build/test/lint across packages
 - Plugin packages track generated output in `dist/` (via `!dist/` in their `.gitignore`), excluding only ZIP archives. Rebuild plugins after wpts or admin-ui changes and commit the updated dist so diffs are reviewable.
 
-## Agents & Skills
+## Agents, Skills & Rules
 
 Custom agents (`.claude/agents/`):
 - `quick-search` — Haiku model, read-only. Cheap codebase search.
@@ -33,6 +33,10 @@ Skills (`.claude/skills/`):
 - `/wp-plugin-review [plugin-name]` — Full review of generated PHP dist output
 - `/commit` — Conventional commit with emoji prefix
 - `/add-wp-function [category]` — Add WordPress function mappings to wpts transpiler
+
+Path-scoped rules (`.claude/rules/`):
+- `headless-plugins.md` — Shared plugin authoring guardrails, loads for `packages/headless-*/src/**`
+- `dist-output.md` — Guards against editing generated output, loads for `packages/*/dist/**`
 
 ## Commits
 
