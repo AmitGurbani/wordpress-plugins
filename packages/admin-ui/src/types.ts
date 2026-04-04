@@ -1,5 +1,32 @@
 import type { ReactNode } from 'react';
 
+export interface FormSectionProps {
+  children: ReactNode;
+  narrow?: boolean;
+}
+
+export type AlertVariant = 'warning' | 'info' | 'success' | 'error';
+
+export interface AlertBoxProps {
+  variant: AlertVariant;
+  title: string;
+  children: ReactNode;
+}
+
+export interface InfoPopoverProps {
+  label: string;
+  children: ReactNode;
+  width?: number;
+}
+
+export interface SecretFieldProps {
+  label: string;
+  help: string;
+  textDomain: string;
+  value: string;
+  onChange: (value: string) => void;
+}
+
 export interface SettingsConfig<S extends object> {
   slug: string;
   textDomain: string;

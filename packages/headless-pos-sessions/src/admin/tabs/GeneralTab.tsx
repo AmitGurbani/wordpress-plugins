@@ -1,10 +1,11 @@
 import { __experimentalNumberControl as NumberControl } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
+import { FormSection } from 'admin-ui';
 import type { TabProps } from '../types';
 
 export function GeneralTab({ settings, update }: TabProps) {
   return (
-    <div style={{ padding: '16px 0' }}>
+    <FormSection narrow={false}>
       <NumberControl
         label={__('Retention Days', 'headless-pos-sessions')}
         help={__(
@@ -27,6 +28,6 @@ export function GeneralTab({ settings, update }: TabProps) {
         min={1}
         max={100}
       />
-    </div>
+    </FormSection>
   );
 }

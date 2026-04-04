@@ -1,10 +1,11 @@
 import { __experimentalNumberControl as NumberControl } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
+import { FormSection } from 'admin-ui';
 import type { TabProps } from '../types';
 
 export function WeightsTab({ settings, update }: TabProps) {
   return (
-    <div style={{ padding: '16px 0', maxWidth: '600px' }}>
+    <FormSection>
       <p style={{ color: '#666', marginBottom: '16px' }}>
         {__(
           'Adjust how much weight each field has in search relevance scoring. Higher values mean matches in that field rank higher in results.',
@@ -35,6 +36,6 @@ export function WeightsTab({ settings, update }: TabProps) {
         min={1}
         max={10}
       />
-    </div>
+    </FormSection>
   );
 }

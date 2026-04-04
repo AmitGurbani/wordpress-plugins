@@ -4,11 +4,12 @@ import {
   ToggleControl,
 } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
+import { FormSection } from 'admin-ui';
 import type { TabProps } from '../types';
 
 export function FeaturesTab({ settings, update }: TabProps) {
   return (
-    <div style={{ padding: '16px 0', maxWidth: '600px' }}>
+    <FormSection>
       <ToggleControl
         label={__('Enable Fuzzy Matching', 'headless-fuzzyfind')}
         help={
@@ -93,6 +94,6 @@ export function FeaturesTab({ settings, update }: TabProps) {
         onChange={(v: string) => update('synonyms', v)}
         rows={6}
       />
-    </div>
+    </FormSection>
   );
 }

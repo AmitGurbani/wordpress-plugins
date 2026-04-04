@@ -3,6 +3,7 @@ import { Button, Notice, Spinner } from '@wordpress/components';
 import { useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import type { DiagnosticsConfig } from '../types';
+import { FormSection } from './FormSection';
 
 interface TestResult {
   success: boolean;
@@ -56,7 +57,7 @@ export function DiagnosticsPanel({
   };
 
   return (
-    <div style={{ padding: '16px 0', maxWidth: '600px' }}>
+    <FormSection>
       {testAction && (
         <>
           <h3>{testAction.title}</h3>
@@ -100,6 +101,6 @@ export function DiagnosticsPanel({
           {lastError}
         </pre>
       )}
-    </div>
+    </FormSection>
   );
 }

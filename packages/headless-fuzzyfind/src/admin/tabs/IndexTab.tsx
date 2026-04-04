@@ -2,6 +2,7 @@ import apiFetch from '@wordpress/api-fetch';
 import { Button, Spinner } from '@wordpress/components';
 import { useEffect, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
+import { FormSection } from 'admin-ui';
 import type { IndexStatus } from '../types';
 
 export function IndexTab() {
@@ -79,7 +80,7 @@ export function IndexTab() {
       : __('Never', 'headless-fuzzyfind');
 
   return (
-    <div style={{ padding: '16px 0', maxWidth: '600px' }}>
+    <FormSection>
       <h3>{__('Index Status', 'headless-fuzzyfind')}</h3>
 
       {status && (
@@ -138,6 +139,6 @@ export function IndexTab() {
         </Button>
         {message && <span style={{ color: '#00a32a' }}>{message}</span>}
       </div>
-    </div>
+    </FormSection>
   );
 }

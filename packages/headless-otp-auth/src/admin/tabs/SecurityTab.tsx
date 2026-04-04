@@ -1,10 +1,11 @@
 import { __experimentalNumberControl as NumberControl } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
+import { FormSection } from 'admin-ui';
 import type { TabProps } from '../types';
 
 export function SecurityTab({ settings, update }: TabProps) {
   return (
-    <div style={{ padding: '16px 0' }}>
+    <FormSection narrow={false}>
       <NumberControl
         label={__('Max OTP Verify Attempts', 'headless-otp-auth')}
         help={__(
@@ -39,6 +40,6 @@ export function SecurityTab({ settings, update }: TabProps) {
         min={60}
         max={3600}
       />
-    </div>
+    </FormSection>
   );
 }

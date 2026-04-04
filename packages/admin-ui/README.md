@@ -47,9 +47,58 @@ Panel for testing external service connections and viewing the last logged error
 />
 ```
 
+### `FormSection`
+
+Consistent padding and optional max-width constraint for tab content. Replaces the common `<div style={{ padding: '16px 0', maxWidth: '600px' }}>` wrapper.
+
+```tsx
+<FormSection>            {/* narrow (600px max-width) by default */}
+  <TextControl ... />
+</FormSection>
+
+<FormSection narrow={false}> {/* full width — for tables, analytics */}
+  <table ... />
+</FormSection>
+```
+
+### `AlertBox`
+
+Colored alert banner with title. Supports `warning`, `info`, `success`, and `error` variants.
+
+```tsx
+<AlertBox variant="warning" title="Test Mode Active">
+  <p>OTPs will not be delivered.</p>
+</AlertBox>
+```
+
+### `InfoPopover`
+
+Icon button that toggles a popover with arbitrary content. Manages its own open/close state.
+
+```tsx
+<InfoPopover label="Placeholder reference">
+  <strong>Available Placeholders</strong>
+  <table>...</table>
+</InfoPopover>
+```
+
+### `SecretField`
+
+Password input that auto-appends a localized "Never exposed to the browser." suffix to the help text.
+
+```tsx
+<SecretField
+  label="API Secret"
+  help="Measurement Protocol API secret from GA4."
+  textDomain="my-plugin"
+  value={settings.api_secret}
+  onChange={(v) => update('api_secret', v)}
+/>
+```
+
 ### Types
 
-`SettingsConfig`, `SettingsState`, `SettingsShellProps`, `TabDef`, `TabProps`, `DiagnosticsConfig`
+`SettingsConfig`, `SettingsState`, `SettingsShellProps`, `TabDef`, `TabProps`, `DiagnosticsConfig`, `FormSectionProps`, `AlertBoxProps`, `AlertVariant`, `InfoPopoverProps`, `SecretFieldProps`
 
 ## Peer Dependencies
 

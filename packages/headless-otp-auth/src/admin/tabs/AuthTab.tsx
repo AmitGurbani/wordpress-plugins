@@ -4,11 +4,12 @@ import {
   ToggleControl,
 } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
+import { FormSection } from 'admin-ui';
 import type { TabProps } from '../types';
 
 export function AuthTab({ settings, update }: TabProps) {
   return (
-    <div style={{ padding: '16px 0' }}>
+    <FormSection narrow={false}>
       <NumberControl
         label={__('Access Token Expiry (seconds)', 'headless-otp-auth')}
         help={__('JWT access token lifetime. Default: 3600 (1 hour).', 'headless-otp-auth')}
@@ -52,6 +53,6 @@ export function AuthTab({ settings, update }: TabProps) {
         ]}
         onChange={(v) => update('default_user_role', v)}
       />
-    </div>
+    </FormSection>
   );
 }

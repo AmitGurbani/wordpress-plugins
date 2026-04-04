@@ -1,10 +1,11 @@
 import { TextControl } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
+import { FormSection, SecretField } from 'admin-ui';
 import type { TabProps } from '../types';
 
 export function GeneralTab({ settings, update }: TabProps) {
   return (
-    <div style={{ padding: '16px 0', maxWidth: '600px' }}>
+    <FormSection>
       <TextControl
         label={__('Meta Pixel ID', 'headless-meta-pixel')}
         help={__(
@@ -15,15 +16,15 @@ export function GeneralTab({ settings, update }: TabProps) {
         onChange={(v) => update('pixel_id', v)}
         placeholder="123456789012345"
       />
-      <TextControl
+      <SecretField
         label={__('Conversions API Access Token', 'headless-meta-pixel')}
         help={__(
-          'Server-side access token from Meta Events Manager. Never exposed to the browser.',
+          'Server-side access token from Meta Events Manager.',
           'headless-meta-pixel',
         )}
+        textDomain="headless-meta-pixel"
         value={settings.access_token}
         onChange={(v) => update('access_token', v)}
-        type="password"
       />
       <TextControl
         label={__('Test Event Code', 'headless-meta-pixel')}
@@ -45,6 +46,6 @@ export function GeneralTab({ settings, update }: TabProps) {
         onChange={(v) => update('currency', v)}
         placeholder="USD"
       />
-    </div>
+    </FormSection>
   );
 }

@@ -1,10 +1,11 @@
 import { TextControl, ToggleControl } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
+import { FormSection } from 'admin-ui';
 import type { TabProps } from '../types';
 
 export function GeneralTab({ settings, update }: TabProps) {
   return (
-    <div style={{ padding: '16px 0', maxWidth: '600px' }}>
+    <FormSection>
       <TextControl
         label={__('Clarity Project ID', 'headless-clarity')}
         help={__(
@@ -27,6 +28,6 @@ export function GeneralTab({ settings, update }: TabProps) {
         checked={settings.enable_identify}
         onChange={(v) => update('enable_identify', v)}
       />
-    </div>
+    </FormSection>
   );
 }

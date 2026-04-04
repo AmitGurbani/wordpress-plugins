@@ -1,10 +1,11 @@
 import { ToggleControl } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
+import { FormSection } from 'admin-ui';
 import type { TabProps } from '../types';
 
 export function EventsTab({ settings, update }: TabProps) {
   return (
-    <div style={{ padding: '16px 0', maxWidth: '600px' }}>
+    <FormSection>
       <p style={{ color: '#666', marginBottom: '16px' }}>
         {__(
           'Browser-side pixel events are handled by your frontend app. These toggles control which events the plugin accepts via the /track REST endpoint and forwards to Meta Conversions API.',
@@ -59,6 +60,6 @@ export function EventsTab({ settings, update }: TabProps) {
         checked={settings.enable_search}
         onChange={(v) => update('enable_search', v)}
       />
-    </div>
+    </FormSection>
   );
 }

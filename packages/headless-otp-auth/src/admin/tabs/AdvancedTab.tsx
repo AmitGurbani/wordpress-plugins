@@ -1,10 +1,11 @@
 import { TextControl } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
+import { FormSection } from 'admin-ui';
 import type { TabProps } from '../types';
 
 export function AdvancedTab({ settings, update }: TabProps) {
   return (
-    <div style={{ padding: '16px 0' }}>
+    <FormSection narrow={false}>
       <TextControl
         label={__('Allowed Origins', 'headless-otp-auth')}
         help={__(
@@ -14,6 +15,6 @@ export function AdvancedTab({ settings, update }: TabProps) {
         value={settings.allowed_origins}
         onChange={(v) => update('allowed_origins', v)}
       />
-    </div>
+    </FormSection>
   );
 }

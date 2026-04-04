@@ -1,10 +1,11 @@
 import { TextControl, ToggleControl } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
+import { FormSection, SecretField } from 'admin-ui';
 import type { TabProps } from '../types';
 
 export function GeneralTab({ settings, update }: TabProps) {
   return (
-    <div style={{ padding: '16px 0', maxWidth: '600px' }}>
+    <FormSection>
       <TextControl
         label={__('Measurement ID', 'headless-google-analytics')}
         help={__(
@@ -15,15 +16,15 @@ export function GeneralTab({ settings, update }: TabProps) {
         onChange={(v) => update('measurement_id', v)}
         placeholder="G-XXXXXXXXXX"
       />
-      <TextControl
+      <SecretField
         label={__('API Secret', 'headless-google-analytics')}
         help={__(
-          'Measurement Protocol API secret from GA4 Admin > Data Streams > Measurement Protocol API secrets. Never exposed to the browser.',
+          'Measurement Protocol API secret from GA4 Admin > Data Streams > Measurement Protocol API secrets.',
           'headless-google-analytics',
         )}
+        textDomain="headless-google-analytics"
         value={settings.api_secret}
         onChange={(v) => update('api_secret', v)}
-        type="password"
       />
       <TextControl
         label={__('Currency', 'headless-google-analytics')}
@@ -47,6 +48,6 @@ export function GeneralTab({ settings, update }: TabProps) {
         checked={settings.enable_purchase}
         onChange={(v) => update('enable_purchase', v)}
       />
-    </div>
+    </FormSection>
   );
 }

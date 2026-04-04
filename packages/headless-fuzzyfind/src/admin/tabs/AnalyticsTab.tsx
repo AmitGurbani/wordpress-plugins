@@ -2,6 +2,7 @@ import apiFetch from '@wordpress/api-fetch';
 import { Button, Spinner } from '@wordpress/components';
 import { useEffect, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
+import { FormSection } from 'admin-ui';
 import type { AnalyticsData } from '../types';
 
 export function AnalyticsTab() {
@@ -39,7 +40,7 @@ export function AnalyticsTab() {
   if (loading) return <Spinner />;
 
   return (
-    <div style={{ padding: '16px 0' }}>
+    <FormSection narrow={false}>
       <h3>{__('Popular Searches', 'headless-fuzzyfind')}</h3>
       {data && data.popular.length > 0 ? (
         <table className="widefat striped" style={{ marginBottom: '24px' }}>
@@ -99,6 +100,6 @@ export function AnalyticsTab() {
       <Button variant="secondary" isDestructive onClick={handleClear} isBusy={clearing}>
         {clearing ? <Spinner /> : __('Clear Analytics', 'headless-fuzzyfind')}
       </Button>
-    </div>
+    </FormSection>
   );
 }
