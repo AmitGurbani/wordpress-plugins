@@ -1,6 +1,16 @@
 {
   "name": "wordpress-plugins",
   "private": true,
+  "license": "GPL-2.0-or-later",
+  "author": "Amit Gurbani",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/AmitGurbani/wordpress-plugins.git"
+  },
+  "homepage": "https://github.com/AmitGurbani/wordpress-plugins#readme",
+  "bugs": {
+    "url": "https://github.com/AmitGurbani/wordpress-plugins/issues"
+  },
   "packageManager": "pnpm@10.6.2",
   "scripts": {
     "build": "turbo run build",

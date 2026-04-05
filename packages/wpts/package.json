@@ -24,6 +24,16 @@
     "php"
   ],
   "license": "MIT",
+  "author": "Amit Gurbani",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/AmitGurbani/wordpress-plugins.git",
+    "directory": "packages/wpts"
+  },
+  "homepage": "https://github.com/AmitGurbani/wordpress-plugins/tree/main/packages/wpts#readme",
+  "bugs": {
+    "url": "https://github.com/AmitGurbani/wordpress-plugins/issues"
+  },
   "engines": {
     "node": ">=20.0.0"
   },
