@@ -9,7 +9,7 @@ import { mapType } from './type-mapper.js';
  */
 function injectGlobalWpdb(phpCode: string): string {
   if (/\$wpdb\b/.test(phpCode)) {
-    return '\t\tglobal $wpdb;\n' + phpCode;
+    return `\t\tglobal $wpdb;\n${phpCode}`;
   }
   return phpCode;
 }

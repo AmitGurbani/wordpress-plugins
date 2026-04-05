@@ -23,47 +23,47 @@ class MetaPixelCapi {
 
     const email: string = order.get_billing_email();
     if (email) {
-      userData['em'] = this.hashForCapi(email);
+      userData.em = this.hashForCapi(email);
     }
 
     const phone: string = order.get_billing_phone();
     if (phone) {
-      userData['ph'] = this.hashForCapi(phone);
+      userData.ph = this.hashForCapi(phone);
     }
 
     const firstName: string = order.get_billing_first_name();
     if (firstName) {
-      userData['fn'] = this.hashForCapi(firstName);
+      userData.fn = this.hashForCapi(firstName);
     }
 
     const lastName: string = order.get_billing_last_name();
     if (lastName) {
-      userData['ln'] = this.hashForCapi(lastName);
+      userData.ln = this.hashForCapi(lastName);
     }
 
     const city: string = order.get_billing_city();
     if (city) {
-      userData['ct'] = this.hashForCapi(city);
+      userData.ct = this.hashForCapi(city);
     }
 
     const state: string = order.get_billing_state();
     if (state) {
-      userData['st'] = this.hashForCapi(state);
+      userData.st = this.hashForCapi(state);
     }
 
     const postcode: string = order.get_billing_postcode();
     if (postcode) {
-      userData['zp'] = this.hashForCapi(postcode);
+      userData.zp = this.hashForCapi(postcode);
     }
 
     const country: string = order.get_billing_country();
     if (country) {
-      userData['country'] = this.hashForCapi(country);
+      userData.country = this.hashForCapi(country);
     }
 
     const userId: number = order.get_customer_id();
     if (userId) {
-      userData['external_id'] = this.hashForCapi(strval(userId));
+      userData.external_id = this.hashForCapi(strval(userId));
     }
 
     return userData;
@@ -93,7 +93,7 @@ class MetaPixelCapi {
     };
 
     if (sourceUrl) {
-      event['event_source_url'] = sourceUrl;
+      event.event_source_url = sourceUrl;
     }
 
     const payload: any = {
@@ -102,11 +102,10 @@ class MetaPixelCapi {
 
     const testEventCode: string = getOption('headless_meta_pixel_test_event_code', '');
     if (testEventCode) {
-      payload['test_event_code'] = testEventCode;
+      payload.test_event_code = testEventCode;
     }
 
-    const url: string =
-      'https://graph.facebook.com/v25.0/' + pixelId + '/events?access_token=' + accessToken;
+    const url: string = `https://graph.facebook.com/v25.0/${pixelId}/events?access_token=${accessToken}`;
 
     const response: any = wpRemotePost(url, {
       body: jsonEncode(payload),
@@ -125,7 +124,7 @@ class MetaPixelCapi {
   // ── WooCommerce Purchase Hook ─────────────────────────────────────────
 
   @Action('woocommerce_order_status_changed', { priority: 10, acceptedArgs: 4 })
-  onOrderStatusChanged(orderId: number, oldStatus: string, newStatus: string, order: any): void {
+  onOrderStatusChanged(orderId: number, _oldStatus: string, newStatus: string, order: any): void {
     // Only track statuses that represent a purchase
     const purchaseStatuses: string[] = ['processing', 'on-hold', 'completed'];
     if (!purchaseStatuses.includes(newStatus)) {
@@ -149,7 +148,7 @@ class MetaPixelCapi {
       return;
     }
 
-    const eventId: string = 'order_' + strval(orderId);
+    const eventId: string = `order_${strval(orderId)}`;
     const currency: string = order.get_currency();
     const total: string = strval(order.get_total());
 
@@ -187,7 +186,7 @@ class MetaPixelCapi {
     const result: any = this.sendCapiEvent('Purchase', eventId, sourceUrl, customData, userData);
 
     // Only mark as sent on success — allows retry on next status change if CAPI was unreachable
-    if (result['success']) {
+    if (result.success) {
       order.update_meta_data('_headless_meta_pixel_capi_sent', '1');
       order.save();
     }

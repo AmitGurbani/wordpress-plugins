@@ -67,7 +67,8 @@ export function AnalyticsPage() {
                   <td>{i + 1}</td>
                   <td>{row.name}</td>
                   <td>
-                    {row.count} {row.count === 1
+                    {row.count}{' '}
+                    {row.count === 1
                       ? __('user', 'headless-wishlist')
                       : __('users', 'headless-wishlist')}
                   </td>
@@ -77,7 +78,10 @@ export function AnalyticsPage() {
           </table>
         ) : (
           <p style={{ color: '#666' }}>
-            {__('No wishlist data yet. Products will appear here once customers start adding items to their wishlists.', 'headless-wishlist')}
+            {__(
+              'No wishlist data yet. Products will appear here once customers start adding items to their wishlists.',
+              'headless-wishlist',
+            )}
           </p>
         )}
       </FormSection>

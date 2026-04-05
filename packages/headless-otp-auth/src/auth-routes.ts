@@ -27,7 +27,7 @@ class AuthRoutes {
     }
 
     const regTokenHash: string = md5(regToken);
-    const phone: string = getTransient('hoa_reg_' + regTokenHash);
+    const phone: string = getTransient(`hoa_reg_${regTokenHash}`);
 
     if (!phone) {
       return new WP_Error('invalid_token', 'Registration token is invalid or expired.', {
@@ -58,7 +58,7 @@ class AuthRoutes {
     }
 
     if (existingIds.length > 0) {
-      deleteTransient('hoa_reg_' + regTokenHash);
+      deleteTransient(`hoa_reg_${regTokenHash}`);
       return new WP_Error('user_exists', 'An account with this phone number already exists.', {
         status: 409,
       });
@@ -110,7 +110,7 @@ class AuthRoutes {
       updateUserMeta(userId, 'billing_first_name', firstName);
       updateUserMeta(userId, 'billing_last_name', lastName);
     }
-    deleteTransient('hoa_reg_' + regTokenHash);
+    deleteTransient(`hoa_reg_${regTokenHash}`);
 
     // Generate tokens
     const secret: string = getOption('headless_otp_auth_jwt_secret_key', '');
@@ -170,7 +170,7 @@ class AuthRoutes {
       return new WP_Error('invalid_token', 'Invalid refresh token format.', { status: 400 });
     }
 
-    const headerPayload: string = tokenParts[0] + '.' + tokenParts[1];
+    const headerPayload: string = `${tokenParts[0]}.${tokenParts[1]}`;
     const expectedSig: string = strtr(
       rtrim(base64Encode(hashHmac('sha256', headerPayload, secret, true)), '='),
       '+/',
@@ -184,17 +184,17 @@ class AuthRoutes {
     const payloadJson: string = base64Decode(strtr(tokenParts[1], '-_', '+/'));
     const payload: any = jsonDecode(payloadJson, true);
 
-    if (!payload || payload['type'] !== 'refresh') {
+    if (!payload || payload.type !== 'refresh') {
       return new WP_Error('invalid_token', 'Token is not a refresh token.', { status: 400 });
     }
-    if (payload['exp'] < time()) {
+    if (payload.exp < time()) {
       return new WP_Error('token_expired', 'Refresh token has expired.', { status: 401 });
     }
-    if (payload['iss'] !== siteUrl()) {
+    if (payload.iss !== siteUrl()) {
       return new WP_Error('invalid_token', 'Token issuer mismatch.', { status: 401 });
     }
 
-    const userId: number = intval(payload['sub']);
+    const userId: number = intval(payload.sub);
     if (!userId) {
       return new WP_Error('invalid_token', 'Invalid user in token.', { status: 400 });
     }
@@ -243,7 +243,7 @@ class AuthRoutes {
   }
 
   @RestRoute('/auth/me', { method: 'GET', capability: 'read' })
-  getProfile(request: any): any {
+  getProfile(_request: any): any {
     const userId: number = getCurrentUserId();
 
     if (!userId) {

@@ -13,6 +13,4 @@ export const DEFAULTS: Settings = {
   max_open_sessions: 10,
 };
 
-export const TABS = [
-  { name: 'general', title: __('General', 'headless-pos-sessions') },
-];
+export const TABS = [{ name: 'general', title: __('General', 'headless-pos-sessions') }];

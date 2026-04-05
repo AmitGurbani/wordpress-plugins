@@ -1,6 +1,6 @@
-import { test, expect } from '../../fixtures/wordpress';
-import { PLUGINS } from '../../utils/settings';
 import { request as playwrightRequest } from '@playwright/test';
+import { expect, test } from '../../fixtures/wordpress';
+import { PLUGINS } from '../../utils/settings';
 
 for (const plugin of PLUGINS) {
   test.describe(`${plugin.name} — Settings CRUD`, () => {
@@ -12,9 +12,7 @@ for (const plugin of PLUGINS) {
     test('GET /settings requires authentication', async () => {
       // Create a fresh context without stored auth
       const ctx = await playwrightRequest.newContext();
-      const res = await ctx.get(
-        `http://localhost:8889/wp-json/${plugin.slug}/v1/settings`,
-      );
+      const res = await ctx.get(`http://localhost:8889/wp-json/${plugin.slug}/v1/settings`);
       expect(res.status()).toBe(401);
       await ctx.dispose();
     });
@@ -29,10 +27,7 @@ for (const plugin of PLUGINS) {
     });
 
     test('POST /settings updates values', async ({ restApi }) => {
-      const { status: updateStatus } = await restApi.updateSettings(
-        plugin.slug,
-        plugin.settings,
-      );
+      const { status: updateStatus } = await restApi.updateSettings(plugin.slug, plugin.settings);
       expect(updateStatus).toBe(200);
 
       const { status, data } = await restApi.getSettings(plugin.slug);
@@ -69,9 +64,7 @@ for (const plugin of PLUGINS) {
     });
 
     if (plugin.sensitiveKeys.length > 0) {
-      test('sensitive fields are masked in GET response', async ({
-        restApi,
-      }) => {
+      test('sensitive fields are masked in GET response', async ({ restApi }) => {
         // Set a sensitive value
         const sensitiveUpdate: Record<string, string> = {};
         for (const key of plugin.sensitiveKeys) {
@@ -89,10 +82,9 @@ for (const plugin of PLUGINS) {
 
     test('POST /settings requires authentication', async () => {
       const ctx = await playwrightRequest.newContext();
-      const res = await ctx.post(
-        `http://localhost:8889/wp-json/${plugin.slug}/v1/settings`,
-        { data: plugin.settings },
-      );
+      const res = await ctx.post(`http://localhost:8889/wp-json/${plugin.slug}/v1/settings`, {
+        data: plugin.settings,
+      });
       expect(res.status()).toBe(401);
       await ctx.dispose();
     });

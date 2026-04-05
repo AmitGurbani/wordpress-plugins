@@ -1,10 +1,10 @@
-import { test, expect } from '../../fixtures/wordpress';
 import {
   createOrder,
-  updateOrderStatus,
-  getOrderMeta,
   deleteOrder,
+  getOrderMeta,
+  updateOrderStatus,
 } from '../../fixtures/woocommerce';
+import { expect, test } from '../../fixtures/wordpress';
 
 const SLUG = 'headless-umami';
 

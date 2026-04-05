@@ -25,18 +25,18 @@ class WishlistRoutes {
   // ── GET /items — List wishlist ───────────────────────────────────────
 
   @RestRoute('/items', { method: 'GET', capability: 'read' })
-  getItems(request: any): any {
+  getItems(_request: any): any {
     const userId: number = getCurrentUserId();
     const items: any[] = this.getWishlist(userId);
 
     const validItems: any[] = [];
     for (const item of items) {
-      const post: any = getPost(intval(item['product_id']), 'ARRAY_A');
-      if (post && post['post_type'] === 'product' && post['post_status'] === 'publish') {
+      const post: any = getPost(intval(item.product_id), 'ARRAY_A');
+      if (post && post.post_type === 'product' && post.post_status === 'publish') {
         validItems.push({
-          product_id: intval(item['product_id']),
-          slug: post['post_name'],
-          added_at: item['added_at'],
+          product_id: intval(item.product_id),
+          slug: post.post_name,
+          added_at: item.added_at,
         });
       }
     }
@@ -45,7 +45,7 @@ class WishlistRoutes {
     if (validItems.length !== items.length) {
       const cleaned: any[] = [];
       for (const v of validItems) {
-        cleaned.push({ product_id: v['product_id'], added_at: v['added_at'] });
+        cleaned.push({ product_id: v.product_id, added_at: v.added_at });
       }
       this.saveWishlist(userId, cleaned);
     }
@@ -64,7 +64,7 @@ class WishlistRoutes {
     }
 
     const post: any = getPost(productId, 'ARRAY_A');
-    if (!post || post['post_type'] !== 'product' || post['post_status'] !== 'publish') {
+    if (!post || post.post_type !== 'product' || post.post_status !== 'publish') {
       return new WP_Error('product_not_found', 'Product not found', { status: 404 });
     }
 
@@ -73,7 +73,7 @@ class WishlistRoutes {
 
     // Check duplicate
     for (const item of items) {
-      if (intval(item['product_id']) === productId) {
+      if (intval(item.product_id) === productId) {
         return new WP_Error('already_exists', 'Product already in wishlist', { status: 409 });
       }
     }
@@ -81,7 +81,9 @@ class WishlistRoutes {
     // Check max items
     const maxItems: number = intval(applyFilters('headless_wishlist_max_items', 100));
     if (items.length >= maxItems) {
-      return new WP_Error('wishlist_full', 'Wishlist has reached the maximum number of items.', { status: 400 });
+      return new WP_Error('wishlist_full', 'Wishlist has reached the maximum number of items.', {
+        status: 400,
+      });
     }
 
     const addedAt: string = gmdate('c', time());
@@ -92,7 +94,7 @@ class WishlistRoutes {
       success: true,
       item: {
         product_id: productId,
-        slug: post['post_name'],
+        slug: post.post_name,
         added_at: addedAt,
       },
     });
@@ -111,7 +113,7 @@ class WishlistRoutes {
     let found: boolean = false;
     const updated: any[] = [];
     for (const item of items) {
-      if (intval(item['product_id']) === productId) {
+      if (intval(item.product_id) === productId) {
         found = true;
       } else {
         updated.push(item);
@@ -129,7 +131,7 @@ class WishlistRoutes {
   // ── DELETE /items — Clear wishlist ───────────────────────────────────
 
   @RestRoute('/items', { method: 'DELETE', capability: 'read' })
-  clearItems(request: any): any {
+  clearItems(_request: any): any {
     const userId: number = getCurrentUserId();
     deleteUserMeta(userId, '_headless_wishlist');
     return { success: true };

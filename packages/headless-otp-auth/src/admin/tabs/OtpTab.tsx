@@ -88,7 +88,7 @@ export function OtpTab({ settings, update, testOtp, fetchTestOtp }: OtpTabProps)
       />
       {settings.otp_test_mode && (
         <AlertBox variant="warning" title={__('Test Mode Active', 'headless-otp-auth')}>
-          {testOtp && testOtp.otp ? (
+          {testOtp?.otp ? (
             <div style={{ marginTop: '8px' }}>
               <div>
                 {__('Phone:', 'headless-otp-auth')} <code>{testOtp.phone}</code>

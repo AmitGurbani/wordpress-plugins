@@ -19,10 +19,7 @@ export function GeneralTab({ settings, update }: TabProps) {
       />
       <NumberControl
         label={__('Max Open Sessions', 'headless-pos-sessions')}
-        help={__(
-          'Maximum number of concurrently open POS sessions.',
-          'headless-pos-sessions',
-        )}
+        help={__('Maximum number of concurrently open POS sessions.', 'headless-pos-sessions')}
         value={settings.max_open_sessions}
         onChange={(v: string | undefined) => update('max_open_sessions', v ? parseInt(v, 10) : 10)}
         min={1}

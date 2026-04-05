@@ -148,7 +148,7 @@ if (rootElement) {
     include: ['src/**/*'],
   };
 
-  await writeFile(path.join(projectDir, 'tsconfig.json'), JSON.stringify(tsconfig, null, 2) + '\n');
+  await writeFile(path.join(projectDir, 'tsconfig.json'), `${JSON.stringify(tsconfig, null, 2)}\n`);
 
   // Create .gitignore to track generated plugin output
   const gitignore = `# Track generated plugin output (un-ignore dist from root rule)

@@ -106,7 +106,7 @@ class FfSearchRoutes {
     let useLike: boolean = false;
     if (total === 0 && query.length < 3) {
       const escapedQuery: string = wpdb.escLike(query);
-      const likePattern: string = '%' + escapedQuery + '%';
+      const likePattern: string = `%${escapedQuery}%`;
       total = intval(
         wpdb.getVar(
           wpdb.prepare(
@@ -146,7 +146,7 @@ class FfSearchRoutes {
     let rows: any[];
     if (useLike) {
       const escapedQuery: string = wpdb.escLike(query);
-      const likePattern: string = '%' + escapedQuery + '%';
+      const likePattern: string = `%${escapedQuery}%`;
       rows =
         wpdb.getResults(
           wpdb.prepare(
@@ -202,7 +202,7 @@ class FfSearchRoutes {
     // Batch load products to avoid N+1
     const productIds: number[] = [];
     for (const row of rows) {
-      productIds.push(intval(row['product_id']));
+      productIds.push(intval(row.product_id));
     }
 
     const products: any[] =
@@ -221,7 +221,7 @@ class FfSearchRoutes {
     // Build response
     const results: any[] = [];
     for (const row of rows) {
-      const productId: number = intval(row['product_id']);
+      const productId: number = intval(row.product_id);
       const product: any = productMap[productId] ?? null;
 
       if (!product) {
@@ -232,24 +232,24 @@ class FfSearchRoutes {
       let imageUrl: string = '';
       if (imageId) {
         const imageSrc: any = wpGetAttachmentImageSrc(imageId, 'thumbnail');
-        if (imageSrc && imageSrc[0]) {
+        if (imageSrc?.[0]) {
           imageUrl = imageSrc[0];
         }
       }
 
       const item: any = {
         id: productId,
-        title: row['title'],
-        sku: row['sku'] ?? '',
+        title: row.title,
+        sku: row.sku ?? '',
         price: product.get_price() ?? '',
         price_html: product.get_price_html() ?? '',
         permalink: getPermalink(productId) ?? '',
         image: imageUrl,
-        short_description: row['short_desc'] ?? '',
+        short_description: row.short_desc ?? '',
       };
 
-      if (row['relevance_score']) {
-        item['relevance_score'] = parseFloat(row['relevance_score']);
+      if (row.relevance_score) {
+        item.relevance_score = parseFloat(row.relevance_score);
       }
 
       results.push(item);
@@ -328,7 +328,7 @@ class FfSearchRoutes {
     // Fallback to LIKE if FULLTEXT returns nothing (handles short words < 3 chars)
     if (!results || results.length === 0) {
       const escapedQuery: string = wpdb.escLike(query);
-      const likePattern: string = '%' + escapedQuery + '%';
+      const likePattern: string = `%${escapedQuery}%`;
       results = wpdb.getResults(
         wpdb.prepare(
           'SELECT ff_si.product_id, ff_si.title, ff_si.sku FROM %i AS ff_si INNER JOIN %i AS p ON ff_si.product_id = p.ID WHERE p.post_status = %s AND (ff_si.title LIKE %s OR ff_si.sku LIKE %s) LIMIT %d',
@@ -350,7 +350,7 @@ class FfSearchRoutes {
     // Batch load products to avoid N+1
     const productIds: number[] = [];
     for (const row of results) {
-      productIds.push(intval(row['product_id']));
+      productIds.push(intval(row.product_id));
     }
 
     const products: any[] =
@@ -368,7 +368,7 @@ class FfSearchRoutes {
     // Build product response
     const suggestions: any[] = [];
     for (const row of results) {
-      const productId: number = intval(row['product_id']);
+      const productId: number = intval(row.product_id);
       const product: any = productMap[productId] ?? null;
 
       if (!product) {
@@ -379,15 +379,15 @@ class FfSearchRoutes {
       let imageUrl: string = '';
       if (imageId) {
         const imageSrc: any = wpGetAttachmentImageSrc(imageId, 'thumbnail');
-        if (imageSrc && imageSrc[0]) {
+        if (imageSrc?.[0]) {
           imageUrl = imageSrc[0];
         }
       }
 
       suggestions.push({
         id: productId,
-        title: row['title'],
-        sku: row['sku'] ?? '',
+        title: row.title,
+        sku: row.sku ?? '',
         price: product.get_price() ?? '',
         price_html: product.get_price_html() ?? '',
         permalink: getPermalink(productId) ?? '',
@@ -479,11 +479,11 @@ class FfSearchRoutes {
 
   getDidYouMeanSuggestions(searchTerm: string, tableName: string): string[] {
     const result: any = this.correctWords(searchTerm, tableName);
-    if (!result['hasCorrected']) {
+    if (!result.hasCorrected) {
       return [];
     }
 
-    const boolQuery: string = this.buildBooleanQuery(result['corrected']);
+    const boolQuery: string = this.buildBooleanQuery(result.corrected);
     const postsTableDym: string = wpdb.posts;
     const correctedResults: string[] =
       wpdb.getCol(
@@ -503,10 +503,10 @@ class FfSearchRoutes {
 
   getCorrectedQuery(searchTerm: string, tableName: string): string {
     const result: any = this.correctWords(searchTerm, tableName);
-    if (!result['hasCorrected']) {
+    if (!result.hasCorrected) {
       return '';
     }
-    return result['corrected'];
+    return result.corrected;
   }
 
   // ── Boolean Query Builder ─────────────────────────────────────────
@@ -553,16 +553,16 @@ class FfSearchRoutes {
       }
 
       if (synonyms.length > 0) {
-        let synGroup: string = safeTrimmed + '*';
+        let synGroup: string = `${safeTrimmed}*`;
         for (const syn of synonyms) {
           const safeSyn: string = strtr(syn, '+-><()~*"@', '          ').trim();
           if (safeSyn.length > 0) {
-            synGroup = synGroup + ' ' + safeSyn + '*';
+            synGroup = `${synGroup} ${safeSyn}*`;
           }
         }
-        parts.push('+(' + synGroup + ')');
+        parts.push(`+(${synGroup})`);
       } else {
-        parts.push('+' + safeTrimmed + '*');
+        parts.push(`+${safeTrimmed}*`);
       }
     }
 

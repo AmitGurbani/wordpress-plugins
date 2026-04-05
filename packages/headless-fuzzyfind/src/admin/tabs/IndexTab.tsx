@@ -74,10 +74,9 @@ export function IndexTab() {
       ? Math.round((status.total_indexed / status.total_products) * 100)
       : 0;
 
-  const lastIndexedDate =
-    status && status.last_indexed
-      ? new Date(status.last_indexed * 1000).toLocaleString()
-      : __('Never', 'headless-fuzzyfind');
+  const lastIndexedDate = status?.last_indexed
+    ? new Date(status.last_indexed * 1000).toLocaleString()
+    : __('Never', 'headless-fuzzyfind');
 
   return (
     <FormSection>

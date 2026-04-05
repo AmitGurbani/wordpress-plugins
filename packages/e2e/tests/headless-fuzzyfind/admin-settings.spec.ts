@@ -1,4 +1,4 @@
-import { test, expect } from '../../fixtures/wordpress';
+import { expect, test } from '../../fixtures/wordpress';
 
 const SLUG = 'headless-fuzzyfind';
 
@@ -11,10 +11,7 @@ test.describe('Headless FuzzyFind — Admin Settings UI', () => {
     });
   });
 
-  test('can save and reload weight settings via admin UI', async ({
-    page,
-    restApi,
-  }) => {
+  test('can save and reload weight settings via admin UI', async ({ page, restApi }) => {
     // Reset to defaults
     await restApi.updateSettings(SLUG, {
       weight_title: 10,
@@ -22,9 +19,7 @@ test.describe('Headless FuzzyFind — Admin Settings UI', () => {
       weight_content: 2,
     });
 
-    await page.goto(
-      'http://localhost:8889/wp-admin/admin.php?page=headless-fuzzyfind-settings',
-    );
+    await page.goto('http://localhost:8889/wp-admin/admin.php?page=headless-fuzzyfind-settings');
     await expect(page.locator('#wpts-admin-app')).toBeVisible();
 
     // Change title weight

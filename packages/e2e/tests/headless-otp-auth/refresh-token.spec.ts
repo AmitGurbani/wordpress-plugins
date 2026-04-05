@@ -1,5 +1,5 @@
-import { test, expect } from '../../fixtures/wordpress';
 import { request as playwrightRequest } from '@playwright/test';
+import { expect, test } from '../../fixtures/wordpress';
 
 const SLUG = 'headless-otp-auth';
 const BASE = `http://localhost:8889/wp-json/${SLUG}/v1`;
@@ -12,10 +12,7 @@ test.describe('Headless OTP Auth — Token Refresh', () => {
     });
   });
 
-  test('refresh token returns new access and refresh tokens', async ({
-    restApi,
-    wpCli,
-  }) => {
+  test('refresh token returns new access and refresh tokens', async ({ restApi, wpCli }) => {
     const phone = '+14444444444';
 
     // Create user

@@ -17,7 +17,7 @@ class UmamiDiagnostics {
     }
 
     const siteUrlParsed: any = wpParseUrl(siteUrl());
-    const hostname: string = siteUrlParsed['host'] ?? '';
+    const hostname: string = siteUrlParsed.host ?? '';
 
     const innerPayload: any = {
       hostname: hostname,
@@ -31,7 +31,7 @@ class UmamiDiagnostics {
     };
 
     if (eventData) {
-      innerPayload['data'] = eventData;
+      innerPayload.data = eventData;
     }
 
     const payload: any = {
@@ -39,7 +39,7 @@ class UmamiDiagnostics {
       payload: innerPayload,
     };
 
-    const apiUrl: string = rtrim(umamiUrl, '/') + '/api/send';
+    const apiUrl: string = `${rtrim(umamiUrl, '/')}/api/send`;
 
     const response: any = wpSafeRemotePost(apiUrl, {
       body: jsonEncode(payload),
@@ -58,20 +58,20 @@ class UmamiDiagnostics {
     const code: number = intval(wpRemoteRetrieveResponseCode(response));
     if (code < 200 || code >= 300) {
       const body: string = wpRemoteRetrieveBody(response);
-      updateOption('headless_umami_last_error', 'HTTP ' + strval(code) + ': ' + body);
-      return { success: false, message: 'Umami returned HTTP ' + strval(code) };
+      updateOption('headless_umami_last_error', `HTTP ${strval(code)}: ${body}`);
+      return { success: false, message: `Umami returned HTTP ${strval(code)}` };
     }
 
     return { success: true };
   }
 
   @RestRoute('/diagnostics/test-connection', { method: 'POST', capability: 'manage_options' })
-  testConnection(request: any): any {
+  testConnection(_request: any): any {
     const result: any = this.sendUmamiEvent('plugin_test', '/', 'Plugin Connection Test', {
       source: 'headless-umami-diagnostics',
     });
 
-    if (result['success']) {
+    if (result.success) {
       return { success: true, message: 'Connection to Umami successful. A test event was sent.' };
     }
 

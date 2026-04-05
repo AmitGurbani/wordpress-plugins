@@ -1,5 +1,5 @@
-import { test, expect } from '../../fixtures/wordpress';
 import { request as playwrightRequest } from '@playwright/test';
+import { expect, test } from '../../fixtures/wordpress';
 
 const SLUG = 'headless-wishlist';
 const BASE = `http://localhost:8889/wp-json/${SLUG}/v1`;
@@ -13,7 +13,7 @@ test.describe('Headless Wishlist — Analytics', () => {
     productIds = ids
       .split(' ')
       .map((id) => parseInt(id, 10))
-      .filter((id) => !isNaN(id));
+      .filter((id) => !Number.isNaN(id));
 
     // Clean and seed: add both products to admin user's wishlist
     try {

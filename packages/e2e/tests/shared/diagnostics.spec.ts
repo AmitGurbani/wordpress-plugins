@@ -1,6 +1,6 @@
-import { test, expect } from '../../fixtures/wordpress';
-import { PLUGINS } from '../../utils/settings';
 import { request as playwrightRequest } from '@playwright/test';
+import { expect, test } from '../../fixtures/wordpress';
+import { PLUGINS } from '../../utils/settings';
 
 const pluginsWithDiagnostics = PLUGINS.filter((p) => p.hasDiagnostics);
 
@@ -15,13 +15,10 @@ for (const plugin of pluginsWithDiagnostics) {
       await ctx.dispose();
     });
 
-    test('GET /diagnostics/last-error returns empty when no error', async ({
-      restApi,
-      wpCli,
-    }) => {
+    test('GET /diagnostics/last-error returns empty when no error', async ({ restApi, wpCli }) => {
       // Clear any existing error
       const suffix = plugin.errorOptionSuffix ?? 'last_error';
-      const optionKey = plugin.slug.replace(/-/g, '_') + '_' + suffix;
+      const optionKey = `${plugin.slug.replace(/-/g, '_')}_${suffix}`;
       try {
         wpCli(`option delete ${optionKey}`);
       } catch {
@@ -33,12 +30,9 @@ for (const plugin of pluginsWithDiagnostics) {
       expect(data.last_error).toBe('');
     });
 
-    test('GET /diagnostics/last-error returns error when set', async ({
-      restApi,
-      wpCli,
-    }) => {
+    test('GET /diagnostics/last-error returns error when set', async ({ restApi, wpCli }) => {
       const suffix = plugin.errorOptionSuffix ?? 'last_error';
-      const optionKey = plugin.slug.replace(/-/g, '_') + '_' + suffix;
+      const optionKey = `${plugin.slug.replace(/-/g, '_')}_${suffix}`;
       wpCli(`option update ${optionKey} "Test error message"`);
 
       const { status, data } = await restApi.getDiagnostics(plugin.slug);

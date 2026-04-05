@@ -18,10 +18,7 @@ export function GeneralTab({ settings, update }: TabProps) {
       />
       <SecretField
         label={__('Conversions API Access Token', 'headless-meta-pixel')}
-        help={__(
-          'Server-side access token from Meta Events Manager.',
-          'headless-meta-pixel',
-        )}
+        help={__('Server-side access token from Meta Events Manager.', 'headless-meta-pixel')}
         textDomain="headless-meta-pixel"
         value={settings.access_token}
         onChange={(v) => update('access_token', v)}

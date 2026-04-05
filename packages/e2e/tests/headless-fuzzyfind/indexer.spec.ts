@@ -1,14 +1,12 @@
-import { test, expect } from '../../fixtures/wordpress';
 import { request as playwrightRequest } from '@playwright/test';
+import { expect, test } from '../../fixtures/wordpress';
 
 const SLUG = 'headless-fuzzyfind';
 
 test.describe('Headless FuzzyFind — Indexer', () => {
   test('GET /index/status requires authentication', async () => {
     const ctx = await playwrightRequest.newContext();
-    const res = await ctx.get(
-      `http://localhost:8889/wp-json/${SLUG}/v1/index/status`,
-    );
+    const res = await ctx.get(`http://localhost:8889/wp-json/${SLUG}/v1/index/status`);
     expect(res.status()).toBe(401);
     await ctx.dispose();
   });
@@ -30,9 +28,7 @@ test.describe('Headless FuzzyFind — Indexer', () => {
 
   test('POST /index/rebuild requires authentication', async () => {
     const ctx = await playwrightRequest.newContext();
-    const res = await ctx.post(
-      `http://localhost:8889/wp-json/${SLUG}/v1/index/rebuild`,
-    );
+    const res = await ctx.post(`http://localhost:8889/wp-json/${SLUG}/v1/index/rebuild`);
     expect(res.status()).toBe(401);
     await ctx.dispose();
   });

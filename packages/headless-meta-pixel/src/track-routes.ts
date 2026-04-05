@@ -40,7 +40,7 @@ class MetaPixelTrack {
     };
 
     if (sourceUrl) {
-      event['event_source_url'] = sourceUrl;
+      event.event_source_url = sourceUrl;
     }
 
     const payload: any = {
@@ -49,11 +49,10 @@ class MetaPixelTrack {
 
     const testEventCode: string = getOption('headless_meta_pixel_test_event_code', '');
     if (testEventCode) {
-      payload['test_event_code'] = testEventCode;
+      payload.test_event_code = testEventCode;
     }
 
-    const url: string =
-      'https://graph.facebook.com/v25.0/' + pixelId + '/events?access_token=' + accessToken;
+    const url: string = `https://graph.facebook.com/v25.0/${pixelId}/events?access_token=${accessToken}`;
 
     const response: any = wpRemotePost(url, {
       body: jsonEncode(payload),
@@ -85,9 +84,9 @@ class MetaPixelTrack {
     } else if (rlRealIp) {
       rlIp = rlRealIp.trim();
     } else {
-      rlIp = $_SERVER['REMOTE_ADDR'] ?? '';
+      rlIp = $_SERVER.REMOTE_ADDR ?? '';
     }
-    const rlKey: string = 'hmp_rl_' + md5(rlIp);
+    const rlKey: string = `hmp_rl_${md5(rlIp)}`;
     const rlCount: any = getTransient(rlKey);
     if (rlCount && intval(rlCount) >= 60) {
       return new WP_Error('rate_limited', 'Too many requests. Please try again later.', {
@@ -125,11 +124,11 @@ class MetaPixelTrack {
     }
 
     // Type-check array fields to prevent malformed payloads
-    if (customData['contents'] !== undefined && !isArray(customData['contents'])) {
-      delete customData['contents'];
+    if (customData.contents !== undefined && !isArray(customData.contents)) {
+      delete customData.contents;
     }
-    if (customData['content_ids'] !== undefined && !isArray(customData['content_ids'])) {
-      delete customData['content_ids'];
+    if (customData.content_ids !== undefined && !isArray(customData.content_ids)) {
+      delete customData.content_ids;
     }
 
     if (!eventName || !eventId) {
@@ -152,7 +151,7 @@ class MetaPixelTrack {
       return new WP_Error('invalid_event', 'Event name is not supported.', { status: 400 });
     }
 
-    if (getOption('headless_meta_pixel_' + settingKey, '1') !== '1') {
+    if (getOption(`headless_meta_pixel_${settingKey}`, '1') !== '1') {
       return new WP_Error('event_disabled', 'This event type is disabled.', { status: 403 });
     }
 
@@ -162,19 +161,19 @@ class MetaPixelTrack {
     // Browser identifiers from frontend (not hashed)
     const fbp: string = sanitizeTextField(request.get_param('_fbp'));
     if (fbp) {
-      userData['fbp'] = fbp;
+      userData.fbp = fbp;
     }
 
     const fbc: string = sanitizeTextField(request.get_param('_fbc'));
     if (fbc) {
-      userData['fbc'] = fbc;
+      userData.fbc = fbc;
     }
 
     // Client IP and User Agent from server
     const headers: Record<string, string> = getallheaders();
     const userAgent: string = headers['User-Agent'] ?? '';
     if (userAgent) {
-      userData['client_user_agent'] = userAgent;
+      userData.client_user_agent = userAgent;
     }
 
     // Resolve real client IP behind proxies (for headless/reverse-proxy setups)
@@ -190,10 +189,10 @@ class MetaPixelTrack {
     } else if (realIp) {
       clientIp = realIp.trim();
     } else {
-      clientIp = $_SERVER['REMOTE_ADDR'] ?? '';
+      clientIp = $_SERVER.REMOTE_ADDR ?? '';
     }
     if (clientIp) {
-      userData['client_ip_address'] = clientIp;
+      userData.client_ip_address = clientIp;
     }
 
     // If user is logged in, add hashed PII
@@ -201,17 +200,17 @@ class MetaPixelTrack {
       const userId: number = getCurrentUserId();
       const userEmail: string = getTheAuthorMeta('user_email', userId);
       if (userEmail) {
-        userData['em'] = this.hashForCapi(userEmail);
+        userData.em = this.hashForCapi(userEmail);
       }
       const firstName: string = getUserMeta(userId, 'first_name', true);
       if (firstName) {
-        userData['fn'] = this.hashForCapi(firstName);
+        userData.fn = this.hashForCapi(firstName);
       }
       const lastName: string = getUserMeta(userId, 'last_name', true);
       if (lastName) {
-        userData['ln'] = this.hashForCapi(lastName);
+        userData.ln = this.hashForCapi(lastName);
       }
-      userData['external_id'] = this.hashForCapi(strval(userId));
+      userData.external_id = this.hashForCapi(strval(userId));
     }
 
     const result: any = this.sendCapiEvent(
@@ -222,6 +221,6 @@ class MetaPixelTrack {
       userData,
     );
 
-    return { success: result['success'], event_id: eventId };
+    return { success: result.success, event_id: eventId };
   }
 }

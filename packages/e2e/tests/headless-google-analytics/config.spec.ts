@@ -1,4 +1,4 @@
-import { test, expect } from '../../fixtures/wordpress';
+import { expect, test } from '../../fixtures/wordpress';
 
 const SLUG = 'headless-google-analytics';
 

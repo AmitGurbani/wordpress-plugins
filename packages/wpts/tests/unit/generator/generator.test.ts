@@ -632,9 +632,7 @@ describe('generatePlugin', () => {
     )!;
 
     // Extract the get_settings array body
-    const settingsMatch = restApi.content.match(
-      /\$settings = array\(\n([\s\S]*?)\n\t\t\);/,
-    );
+    const settingsMatch = restApi.content.match(/\$settings = array\(\n([\s\S]*?)\n\t\t\);/);
     expect(settingsMatch).not.toBeNull();
     const arrayLines = settingsMatch![1].split('\n').filter((l: string) => l.trim());
 
@@ -644,10 +642,18 @@ describe('generatePlugin', () => {
     }
 
     // Verify all branches produce correct expressions
-    expect(restApi.content).toContain("'site_name' => get_option( 'hello_greeter_site_name', '' ),");
-    expect(restApi.content).toContain("'api_key' => get_option( 'hello_greeter_api_key', '' ) ? '********' : '',");
-    expect(restApi.content).toContain("'enabled' => (bool) get_option( 'hello_greeter_enabled', true ),");
-    expect(restApi.content).toContain("'max_items' => get_option( 'hello_greeter_max_items', 10 ),");
+    expect(restApi.content).toContain(
+      "'site_name' => get_option( 'hello_greeter_site_name', '' ),",
+    );
+    expect(restApi.content).toContain(
+      "'api_key' => get_option( 'hello_greeter_api_key', '' ) ? '********' : '',",
+    );
+    expect(restApi.content).toContain(
+      "'enabled' => (bool) get_option( 'hello_greeter_enabled', true ),",
+    );
+    expect(restApi.content).toContain(
+      "'max_items' => get_option( 'hello_greeter_max_items', 10 ),",
+    );
   });
 
   it('uses hasAdminPages flag to register hooks only once', () => {

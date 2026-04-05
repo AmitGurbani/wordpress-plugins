@@ -68,7 +68,7 @@ export function toWPClassName(str: string): string {
  * "my-awesome-plugin" → "MY_AWESOME_PLUGIN_"
  */
 export function toConstantPrefix(str: string): string {
-  return toSnakeCase(str).toUpperCase() + '_';
+  return `${toSnakeCase(str).toUpperCase()}_`;
 }
 
 /**
@@ -77,7 +77,7 @@ export function toConstantPrefix(str: string): string {
  * "my-awesome-plugin" → "my_awesome_plugin_"
  */
 export function toFunctionPrefix(str: string): string {
-  return toSnakeCase(str) + '_';
+  return `${toSnakeCase(str)}_`;
 }
 
 /**

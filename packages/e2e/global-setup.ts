@@ -1,6 +1,6 @@
+import { execSync } from 'node:child_process';
 import { type FullConfig, request } from '@playwright/test';
 import { RequestUtils } from '@wordpress/e2e-test-utils-playwright';
-import { execSync } from 'node:child_process';
 
 /**
  * Run a WP-CLI command against the wp-env test instance.
@@ -21,8 +21,7 @@ function wpCli(command: string): string {
 
 async function globalSetup(config: FullConfig) {
   const { storageState, baseURL } = config.projects[0].use;
-  const storageStatePath =
-    typeof storageState === 'string' ? storageState : undefined;
+  const storageStatePath = typeof storageState === 'string' ? storageState : undefined;
 
   // 1. Authenticate as admin and save storage state
   const requestContext = await request.newContext({ baseURL });

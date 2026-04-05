@@ -1,18 +1,15 @@
-import {
-  test as base,
-  type APIRequestContext,
-  request as playwrightRequest,
-} from '@playwright/test';
 import { execSync } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
+import {
+  type APIRequestContext,
+  test as base,
+  request as playwrightRequest,
+} from '@playwright/test';
 
 const E2E_DIR = path.resolve(__dirname, '..');
 const BASE_URL = 'http://localhost:8889';
-const STORAGE_STATE = path.resolve(
-  E2E_DIR,
-  'artifacts/storage-states/admin.json',
-);
+const STORAGE_STATE = path.resolve(E2E_DIR, 'artifacts/storage-states/admin.json');
 
 /**
  * Run a WP-CLI command against the wp-env test instance.
@@ -33,31 +30,22 @@ export class RestApiClient {
   ) {}
 
   async getSettings(slug: string) {
-    const res = await this.request.get(
-      `${this.baseURL}/wp-json/${slug}/v1/settings`,
-    );
+    const res = await this.request.get(`${this.baseURL}/wp-json/${slug}/v1/settings`);
     return { status: res.status(), data: await res.json() };
   }
 
   async updateSettings(slug: string, data: Record<string, unknown>) {
-    const res = await this.request.post(
-      `${this.baseURL}/wp-json/${slug}/v1/settings`,
-      { data },
-    );
+    const res = await this.request.post(`${this.baseURL}/wp-json/${slug}/v1/settings`, { data });
     return { status: res.status(), data: await res.json() };
   }
 
   async getConfig(slug: string) {
-    const res = await this.request.get(
-      `${this.baseURL}/wp-json/${slug}/v1/config`,
-    );
+    const res = await this.request.get(`${this.baseURL}/wp-json/${slug}/v1/config`);
     return { status: res.status(), data: await res.json() };
   }
 
   async getDiagnostics(slug: string) {
-    const res = await this.request.get(
-      `${this.baseURL}/wp-json/${slug}/v1/diagnostics/last-error`,
-    );
+    const res = await this.request.get(`${this.baseURL}/wp-json/${slug}/v1/diagnostics/last-error`);
     return { status: res.status(), data: await res.json() };
   }
 

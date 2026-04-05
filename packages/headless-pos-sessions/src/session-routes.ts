@@ -34,7 +34,7 @@ class SessionRoutes {
       order_ids: orderIdsRaw ? jsonDecode(orderIdsRaw, true) : [],
       notes: getPostMeta(postId, '_notes', true),
       cashier_id: intval(getPostMeta(postId, '_cashier_id', true)),
-      created_at: post['post_date_gmt'],
+      created_at: post.post_date_gmt,
     };
   }
 
@@ -59,13 +59,17 @@ class SessionRoutes {
 
     const openingBalance: number = parseFloat(request.get_param('opening_balance'));
     if (openingBalance < 0) {
-      return new WP_Error('invalid_opening_balance', 'opening_balance must be >= 0.', { status: 400 });
+      return new WP_Error('invalid_opening_balance', 'opening_balance must be >= 0.', {
+        status: 400,
+      });
     }
 
     // Validate order_ids format if provided
     const orderIdsParam: any = request.get_param('order_ids');
     if (orderIdsParam && !isArray(orderIdsParam)) {
-      return new WP_Error('invalid_order_ids', 'order_ids must be an array of integers.', { status: 400 });
+      return new WP_Error('invalid_order_ids', 'order_ids must be an array of integers.', {
+        status: 400,
+      });
     }
 
     // Check duplicate UUID
@@ -79,7 +83,9 @@ class SessionRoutes {
     });
 
     if (existing.length > 0) {
-      return new WP_Error('duplicate_uuid', 'A session with this session_uuid already exists.', { status: 409 });
+      return new WP_Error('duplicate_uuid', 'A session with this session_uuid already exists.', {
+        status: 409,
+      });
     }
 
     // Determine status
@@ -88,7 +94,10 @@ class SessionRoutes {
 
     // Check max open sessions limit
     if (status === 'open') {
-      const maxOpen: number = Math.max(1, intval(getOption('headless_pos_sessions_max_open_sessions', 10)));
+      const maxOpen: number = Math.max(
+        1,
+        intval(getOption('headless_pos_sessions_max_open_sessions', 10)),
+      );
       const openSessions: any[] = getPosts({
         post_type: 'pos_session',
         post_status: 'publish',
@@ -98,14 +107,16 @@ class SessionRoutes {
         fields: 'ids',
       });
       if (openSessions.length >= maxOpen) {
-        return new WP_Error('max_open_exceeded', 'Maximum number of open sessions reached.', { status: 409 });
+        return new WP_Error('max_open_exceeded', 'Maximum number of open sessions reached.', {
+          status: 409,
+        });
       }
     }
 
     // Create post
     const postId: any = wpInsertPost({
       post_type: 'pos_session',
-      post_title: 'POS Session \u2014 ' + openedAt,
+      post_title: `POS Session \u2014 ${openedAt}`,
       post_status: 'publish',
     });
 
@@ -122,8 +133,16 @@ class SessionRoutes {
     updatePostMeta(id, '_opened_at', openedAt);
     updatePostMeta(id, '_closed_at', closedAt);
     updatePostMeta(id, '_opening_balance', strval(openingBalance));
-    updatePostMeta(id, '_closing_balance', sanitizeTextField(request.get_param('closing_balance') ?? '0'));
-    updatePostMeta(id, '_expected_balance', sanitizeTextField(request.get_param('expected_balance') ?? '0'));
+    updatePostMeta(
+      id,
+      '_closing_balance',
+      sanitizeTextField(request.get_param('closing_balance') ?? '0'),
+    );
+    updatePostMeta(
+      id,
+      '_expected_balance',
+      sanitizeTextField(request.get_param('expected_balance') ?? '0'),
+    );
     updatePostMeta(id, '_cash_in', sanitizeTextField(request.get_param('cash_in') ?? '0'));
     updatePostMeta(id, '_cash_out', sanitizeTextField(request.get_param('cash_out') ?? '0'));
     updatePostMeta(id, '_order_count', strval(intval(request.get_param('order_count') ?? '0')));
@@ -140,7 +159,10 @@ class SessionRoutes {
 
   @RestRoute('/sessions', { method: 'GET', capability: 'edit_shop_orders' })
   listSessions(request: any): any {
-    const perPage: number = Math.min(100, Math.max(1, intval(request.get_param('per_page') ?? '20')));
+    const perPage: number = Math.min(
+      100,
+      Math.max(1, intval(request.get_param('per_page') ?? '20')),
+    );
     const page: number = Math.max(1, intval(request.get_param('page') ?? '1'));
     const orderby: string = sanitizeTextField(request.get_param('orderby') ?? 'opened_at');
     const order: string = sanitizeTextField(request.get_param('order') ?? 'desc');
@@ -178,24 +200,24 @@ class SessionRoutes {
     }
 
     if (metaQuery.length > 0) {
-      queryArgs['meta_query'] = metaQuery;
+      queryArgs.meta_query = metaQuery;
     }
 
     // Sorting
     if (orderby === 'order_count') {
-      queryArgs['meta_key'] = '_order_count';
-      queryArgs['orderby'] = 'meta_value_num';
+      queryArgs.meta_key = '_order_count';
+      queryArgs.orderby = 'meta_value_num';
     } else if (orderby === 'closed_at') {
-      queryArgs['meta_key'] = '_closed_at';
-      queryArgs['orderby'] = 'meta_value';
+      queryArgs.meta_key = '_closed_at';
+      queryArgs.orderby = 'meta_value';
     } else {
-      queryArgs['meta_key'] = '_opened_at';
-      queryArgs['orderby'] = 'meta_value';
+      queryArgs.meta_key = '_opened_at';
+      queryArgs.orderby = 'meta_value';
     }
-    queryArgs['order'] = sortDir;
+    queryArgs.order = sortDir;
 
     // Get IDs for the current page
-    queryArgs['fields'] = 'ids';
+    queryArgs.fields = 'ids';
     const postIds: any[] = getPosts(queryArgs);
 
     const sessions: any[] = [];
@@ -214,7 +236,7 @@ class SessionRoutes {
       fields: 'ids',
     };
     if (metaQuery.length > 0) {
-      countArgs['meta_query'] = metaQuery;
+      countArgs.meta_query = metaQuery;
     }
     const allIds: any[] = getPosts(countArgs);
     const total: number = allIds.length;
@@ -258,15 +280,18 @@ class SessionRoutes {
 
     const params: any = request.get_json_params();
 
-    if (params['terminal_id'] !== undefined) {
-      updatePostMeta(postId, '_terminal_id', sanitizeTextField(params['terminal_id']));
+    if (params.terminal_id !== undefined) {
+      updatePostMeta(postId, '_terminal_id', sanitizeTextField(params.terminal_id));
     }
-    if (params['status'] !== undefined) {
-      const newStatus: string = sanitizeTextField(params['status']);
+    if (params.status !== undefined) {
+      const newStatus: string = sanitizeTextField(params.status);
       if (newStatus === 'open') {
         const currentStatus: string = getPostMeta(postId, '_session_status', true);
         if (currentStatus !== 'open') {
-          const maxOpen: number = Math.max(1, intval(getOption('headless_pos_sessions_max_open_sessions', 10)));
+          const maxOpen: number = Math.max(
+            1,
+            intval(getOption('headless_pos_sessions_max_open_sessions', 10)),
+          );
           const openSessions: any[] = getPosts({
             post_type: 'pos_session',
             post_status: 'publish',
@@ -276,44 +301,46 @@ class SessionRoutes {
             fields: 'ids',
           });
           if (openSessions.length >= maxOpen) {
-            return new WP_Error('max_open_exceeded', 'Maximum number of open sessions reached.', { status: 409 });
+            return new WP_Error('max_open_exceeded', 'Maximum number of open sessions reached.', {
+              status: 409,
+            });
           }
         }
       }
       updatePostMeta(postId, '_session_status', newStatus);
     }
-    if (params['opened_at'] !== undefined) {
-      updatePostMeta(postId, '_opened_at', sanitizeTextField(params['opened_at']));
+    if (params.opened_at !== undefined) {
+      updatePostMeta(postId, '_opened_at', sanitizeTextField(params.opened_at));
     }
-    if (params['closed_at'] !== undefined) {
-      updatePostMeta(postId, '_closed_at', sanitizeTextField(params['closed_at']));
+    if (params.closed_at !== undefined) {
+      updatePostMeta(postId, '_closed_at', sanitizeTextField(params.closed_at));
     }
-    if (params['opening_balance'] !== undefined) {
-      updatePostMeta(postId, '_opening_balance', strval(parseFloat(params['opening_balance'])));
+    if (params.opening_balance !== undefined) {
+      updatePostMeta(postId, '_opening_balance', strval(parseFloat(params.opening_balance)));
     }
-    if (params['closing_balance'] !== undefined) {
-      updatePostMeta(postId, '_closing_balance', strval(parseFloat(params['closing_balance'])));
+    if (params.closing_balance !== undefined) {
+      updatePostMeta(postId, '_closing_balance', strval(parseFloat(params.closing_balance)));
     }
-    if (params['expected_balance'] !== undefined) {
-      updatePostMeta(postId, '_expected_balance', strval(parseFloat(params['expected_balance'])));
+    if (params.expected_balance !== undefined) {
+      updatePostMeta(postId, '_expected_balance', strval(parseFloat(params.expected_balance)));
     }
-    if (params['cash_in'] !== undefined) {
-      updatePostMeta(postId, '_cash_in', strval(parseFloat(params['cash_in'])));
+    if (params.cash_in !== undefined) {
+      updatePostMeta(postId, '_cash_in', strval(parseFloat(params.cash_in)));
     }
-    if (params['cash_out'] !== undefined) {
-      updatePostMeta(postId, '_cash_out', strval(parseFloat(params['cash_out'])));
+    if (params.cash_out !== undefined) {
+      updatePostMeta(postId, '_cash_out', strval(parseFloat(params.cash_out)));
     }
-    if (params['order_ids'] !== undefined) {
-      updatePostMeta(postId, '_order_ids', jsonEncode(params['order_ids']));
+    if (params.order_ids !== undefined) {
+      updatePostMeta(postId, '_order_ids', jsonEncode(params.order_ids));
     }
-    if (params['order_count'] !== undefined) {
-      updatePostMeta(postId, '_order_count', strval(intval(params['order_count'])));
+    if (params.order_count !== undefined) {
+      updatePostMeta(postId, '_order_count', strval(intval(params.order_count)));
     }
-    if (params['notes'] !== undefined) {
-      updatePostMeta(postId, '_notes', sanitizeTextareaField(params['notes']));
+    if (params.notes !== undefined) {
+      updatePostMeta(postId, '_notes', sanitizeTextareaField(params.notes));
     }
-    if (params['cashier_id'] !== undefined) {
-      updatePostMeta(postId, '_cashier_id', strval(intval(params['cashier_id'])));
+    if (params.cashier_id !== undefined) {
+      updatePostMeta(postId, '_cashier_id', strval(intval(params.cashier_id)));
     }
 
     return this.formatSession(postId);

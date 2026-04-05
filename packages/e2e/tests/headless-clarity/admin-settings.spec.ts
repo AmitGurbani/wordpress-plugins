@@ -1,4 +1,4 @@
-import { test, expect } from '../../fixtures/wordpress';
+import { expect, test } from '../../fixtures/wordpress';
 
 const SLUG = 'headless-clarity';
 
@@ -10,19 +10,14 @@ test.describe('Headless Clarity — Admin Settings UI', () => {
     });
   });
 
-  test('can save and reload settings via admin UI', async ({
-    page,
-    restApi,
-  }) => {
+  test('can save and reload settings via admin UI', async ({ page, restApi }) => {
     // Reset to defaults first
     await restApi.updateSettings(SLUG, {
       project_id: '',
       enable_identify: true,
     });
 
-    await page.goto(
-      'http://localhost:8889/wp-admin/admin.php?page=headless-clarity-settings',
-    );
+    await page.goto('http://localhost:8889/wp-admin/admin.php?page=headless-clarity-settings');
     await expect(page.locator('#wpts-admin-app')).toBeVisible();
 
     // Fill in project ID
@@ -45,11 +40,7 @@ test.describe('Headless Clarity — Admin Settings UI', () => {
     await page.reload();
     await expect(page.locator('#wpts-admin-app')).toBeVisible();
 
-    await expect(page.getByLabel('Clarity Project ID')).toHaveValue(
-      'test123456',
-    );
-    await expect(
-      page.getByLabel('Enable user identification'),
-    ).not.toBeChecked();
+    await expect(page.getByLabel('Clarity Project ID')).toHaveValue('test123456');
+    await expect(page.getByLabel('Enable user identification')).not.toBeChecked();
   });
 });

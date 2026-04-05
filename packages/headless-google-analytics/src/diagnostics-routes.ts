@@ -10,7 +10,7 @@ import { DiagnosticsRoute, RestRoute } from 'wpts';
 @DiagnosticsRoute()
 class GoogleAnalyticsDiagnostics {
   @RestRoute('/diagnostics/test-event', { method: 'POST', capability: 'manage_options' })
-  testEvent(request: any): any {
+  testEvent(_request: any): any {
     const measurementId: string = getOption('headless_google_analytics_measurement_id', '');
     const apiSecret: string = getOption('headless_google_analytics_api_secret', '');
 
@@ -25,7 +25,7 @@ class GoogleAnalyticsDiagnostics {
       '&api_secret=' +
       apiSecret;
 
-    const clientId: string = strval(wpRand(1000000000, 9999999999)) + '.' + strval(time());
+    const clientId: string = `${strval(wpRand(1000000000, 9999999999))}.${strval(time())}`;
 
     const payload: any = {
       client_id: clientId,
@@ -55,8 +55,8 @@ class GoogleAnalyticsDiagnostics {
 
     // Debug endpoint returns { validationMessages: [...] }
     // Empty array = success, non-empty = validation errors
-    if (decoded && decoded['validationMessages'] !== undefined) {
-      const messages: any[] = decoded['validationMessages'];
+    if (decoded && decoded.validationMessages !== undefined) {
+      const messages: any[] = decoded.validationMessages;
       if (messages.length === 0) {
         return {
           success: true,
@@ -68,7 +68,7 @@ class GoogleAnalyticsDiagnostics {
       // Return validation errors
       let errorDetails: string = '';
       for (const msg of messages) {
-        errorDetails = errorDetails + msg['description'] + ' (' + msg['fieldPath'] + ')\n';
+        errorDetails = `${errorDetails + msg.description} (${msg.fieldPath})\n`;
       }
       return {
         success: false,
@@ -78,7 +78,7 @@ class GoogleAnalyticsDiagnostics {
     }
 
     if (code >= 200 && code < 300) {
-      return { success: true, message: 'Request sent successfully (HTTP ' + strval(code) + ').' };
+      return { success: true, message: `Request sent successfully (HTTP ${strval(code)}).` };
     }
 
     return { success: false, message: 'Unexpected response.', status: code, response: body };

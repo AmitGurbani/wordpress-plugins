@@ -20,7 +20,7 @@ export interface PluginOptions {
  * Marks a class as a WordPress plugin entry point.
  * Provides metadata for the plugin header.
  */
-export function Plugin(options: PluginOptions): (...args: any[]) => any {
+export function Plugin(_options: PluginOptions): (...args: any[]) => any {
   return (..._args: any[]) => {
     // No-op at runtime — metadata is extracted at compile time by the transpiler.
   };

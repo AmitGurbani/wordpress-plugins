@@ -1,5 +1,5 @@
-import { test, expect } from '../../fixtures/wordpress';
 import { request as playwrightRequest } from '@playwright/test';
+import { expect, test } from '../../fixtures/wordpress';
 
 const SLUG = 'headless-fuzzyfind';
 const BASE = `http://localhost:8889/wp-json/${SLUG}/v1`;

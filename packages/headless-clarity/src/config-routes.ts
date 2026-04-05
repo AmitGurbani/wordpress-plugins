@@ -9,7 +9,7 @@ import { RestRoute } from 'wpts';
 
 class ClarityConfig {
   @RestRoute('/config', { method: 'GET', public: true })
-  getConfig(request: any): any {
+  getConfig(_request: any): any {
     const projectId: string = getOption('headless_clarity_project_id', '');
 
     const response: any = {
@@ -20,7 +20,7 @@ class ClarityConfig {
     if (enableIdentify === '1') {
       const userId: number = getCurrentUserId();
       if (userId > 0) {
-        response['user'] = {
+        response.user = {
           id: strval(userId),
           display_name: getTheAuthorMeta('display_name', userId),
         };

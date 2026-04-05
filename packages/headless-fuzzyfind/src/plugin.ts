@@ -137,12 +137,12 @@ class FuzzyFind {
       return;
     }
 
-    requireOnce(ABSPATH + 'wp-admin/includes/upgrade.php');
+    requireOnce(`${ABSPATH}wp-admin/includes/upgrade.php`);
 
     const charsetCollate: string = wpdb.getCharsetCollate();
     const prefix: string = wpdb.prefix;
-    const indexTable: string = prefix + 'ff_search_index';
-    const logTable: string = prefix + 'ff_search_log';
+    const indexTable: string = `${prefix}ff_search_index`;
+    const logTable: string = `${prefix}ff_search_log`;
 
     const sqlIndex: string =
       'CREATE TABLE ' +

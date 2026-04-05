@@ -9,7 +9,7 @@ import { DiagnosticsRoute, RestRoute } from 'wpts';
 @DiagnosticsRoute({ errorOptionSuffix: 'last_capi_error' })
 class MetaPixelDiagnostics {
   @RestRoute('/diagnostics/test-capi', { method: 'POST', capability: 'manage_options' })
-  testCapi(request: any): any {
+  testCapi(_request: any): any {
     const pixelId: string = getOption('headless_meta_pixel_pixel_id', '');
     const accessToken: string = getOption('headless_meta_pixel_access_token', '');
 
@@ -22,15 +22,14 @@ class MetaPixelDiagnostics {
       return { success: false, message: 'Set a Test Event Code in settings first.' };
     }
 
-    const url: string =
-      'https://graph.facebook.com/v25.0/' + pixelId + '/events?access_token=' + accessToken;
+    const url: string = `https://graph.facebook.com/v25.0/${pixelId}/events?access_token=${accessToken}`;
 
     const payload: any = {
       data: [
         {
           event_name: 'PageView',
           event_time: time(),
-          event_id: 'test_' + strval(time()),
+          event_id: `test_${strval(time())}`,
           action_source: 'website',
           event_source_url: siteUrl(),
           user_data: {

@@ -1,7 +1,7 @@
-import { test, expect } from '../../fixtures/wordpress';
-import { request as playwrightRequest } from '@playwright/test';
 import fs from 'node:fs';
 import path from 'node:path';
+import { request as playwrightRequest } from '@playwright/test';
+import { expect, test } from '../../fixtures/wordpress';
 
 const STORAGE_STATE = path.resolve(__dirname, '../../artifacts/storage-states/admin.json');
 
@@ -126,9 +126,7 @@ test.describe('Headless POS Sessions — Sessions CRUD', () => {
   });
 
   test('GET /sessions filters by terminal_id', async ({ restApi }) => {
-    const { data } = await restApi.get(
-      `${SLUG}/v1/sessions?terminal_id=browser-test-001`,
-    );
+    const { data } = await restApi.get(`${SLUG}/v1/sessions?terminal_id=browser-test-001`);
     expect(data.data.length).toBeGreaterThanOrEqual(1);
     for (const s of data.data) {
       expect(s.terminal_id).toBe('browser-test-001');
@@ -167,9 +165,7 @@ test.describe('Headless POS Sessions — Sessions CRUD', () => {
     const ctx = await playwrightRequest.newContext({
       storageState: STORAGE_STATE,
       extraHTTPHeaders: {
-        'X-WP-Nonce': JSON.parse(
-          fs.readFileSync(STORAGE_STATE, 'utf-8'),
-        ).nonce,
+        'X-WP-Nonce': JSON.parse(fs.readFileSync(STORAGE_STATE, 'utf-8')).nonce,
       },
     });
     const res = await ctx.put(`${BASE}/sessions/${updateId}`, {
@@ -205,9 +201,7 @@ test.describe('Headless POS Sessions — Sessions CRUD', () => {
     const ctx = await playwrightRequest.newContext({
       storageState: STORAGE_STATE,
       extraHTTPHeaders: {
-        'X-WP-Nonce': JSON.parse(
-          fs.readFileSync(STORAGE_STATE, 'utf-8'),
-        ).nonce,
+        'X-WP-Nonce': JSON.parse(fs.readFileSync(STORAGE_STATE, 'utf-8')).nonce,
       },
     });
     const res = await ctx.delete(`${BASE}/sessions/${deleteId}`);
@@ -218,9 +212,7 @@ test.describe('Headless POS Sessions — Sessions CRUD', () => {
     await ctx.dispose();
 
     // Verify session is gone
-    const { status: getStatus } = await restApi.get(
-      `${SLUG}/v1/sessions/${deleteId}`,
-    );
+    const { status: getStatus } = await restApi.get(`${SLUG}/v1/sessions/${deleteId}`);
     expect(getStatus).toBe(404);
   });
 

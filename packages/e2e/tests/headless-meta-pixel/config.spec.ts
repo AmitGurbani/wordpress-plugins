@@ -1,4 +1,4 @@
-import { test, expect } from '../../fixtures/wordpress';
+import { expect, test } from '../../fixtures/wordpress';
 
 const SLUG = 'headless-meta-pixel';
 
@@ -15,9 +15,7 @@ test.describe('Headless Meta Pixel — Config Endpoint', () => {
     });
   });
 
-  test('GET /config returns pixel_id and event toggles', async ({
-    restApi,
-  }) => {
+  test('GET /config returns pixel_id and event toggles', async ({ restApi }) => {
     await restApi.updateSettings(SLUG, {
       pixel_id: '123456789012345',
       enable_view_content: false,

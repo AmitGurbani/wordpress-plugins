@@ -30,7 +30,7 @@ class GoogleAnalyticsServerTracking {
     };
 
     if (userId) {
-      payload['user_id'] = userId;
+      payload.user_id = userId;
     }
 
     const url: string =
@@ -56,7 +56,7 @@ class GoogleAnalyticsServerTracking {
   // ── WooCommerce Purchase Hook ─────────────────────────────────────────
 
   @Action('woocommerce_order_status_changed', { priority: 10, acceptedArgs: 4 })
-  onOrderStatusChanged(orderId: number, oldStatus: string, newStatus: string, order: any): void {
+  onOrderStatusChanged(orderId: number, _oldStatus: string, newStatus: string, order: any): void {
     // Only track statuses that represent a purchase
     const purchaseStatuses: string[] = ['processing', 'on-hold', 'completed'];
     if (!purchaseStatuses.includes(newStatus)) {
@@ -78,7 +78,7 @@ class GoogleAnalyticsServerTracking {
     }
 
     // Generate client_id for server-side events (no browser _ga cookie available)
-    const clientId: string = strval(wpRand(1000000000, 9999999999)) + '.' + strval(time());
+    const clientId: string = `${strval(wpRand(1000000000, 9999999999))}.${strval(time())}`;
 
     // Include user_id if customer is logged in
     const customerId: number = order.get_customer_id();
@@ -117,7 +117,7 @@ class GoogleAnalyticsServerTracking {
     const result: any = this.sendGa4Event('purchase', clientId, userId, params);
 
     // Only mark as sent on success — allows retry on next status change if GA4 was unreachable
-    if (result['success']) {
+    if (result.success) {
       order.update_meta_data('_headless_ga_sent', '1');
       order.save();
     }

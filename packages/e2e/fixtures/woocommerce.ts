@@ -10,10 +10,7 @@ function parseId(output: string): number {
   return id;
 }
 
-export function createOrder(opts: {
-  productId: number;
-  customerId?: number;
-}): number {
+export function createOrder(opts: { productId: number; customerId?: number }): number {
   const customer = opts.customerId ?? 1;
   const output = wpCli(
     `wc shop_order create --customer_id=${customer} --line_items='[{"product_id":${opts.productId},"quantity":1}]' --user=admin --porcelain`,
@@ -34,4 +31,3 @@ export function getOrderMeta(orderId: number, key: string): string {
 export function deleteOrder(orderId: number): void {
   wpCli(`wc shop_order delete ${orderId} --force --user=admin`);
 }
-

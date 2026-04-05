@@ -26,7 +26,7 @@ class OtpRoutes {
 
     // Rate limiting
     const phoneHash: string = md5(phone);
-    const attemptsKey: string = 'hoa_attempts_' + phoneHash;
+    const attemptsKey: string = `hoa_attempts_${phoneHash}`;
     const currentAttempts: any = getTransient(attemptsKey);
     const maxAttempts: number = Math.max(
       1,
@@ -40,7 +40,7 @@ class OtpRoutes {
     }
 
     // Resend cooldown
-    const cooldownKey: string = 'hoa_cooldown_' + phoneHash;
+    const cooldownKey: string = `hoa_cooldown_${phoneHash}`;
     const cooldownExpiry: any = getTransient(cooldownKey);
     if (cooldownExpiry) {
       const retryAfter: number = Math.max(0, intval(cooldownExpiry) - time());
@@ -60,7 +60,7 @@ class OtpRoutes {
     // Store hashed OTP
     const otpExpiry: number = Math.max(60, intval(getOption('headless_otp_auth_otp_expiry', 300)));
     const otpHash: string = wpHashPassword(otp);
-    setTransient('hoa_otp_' + phoneHash, otpHash, otpExpiry);
+    setTransient(`hoa_otp_${phoneHash}`, otpHash, otpExpiry);
 
     // Update attempt count (use rate limit window, not OTP expiry)
     const rateLimitWindow: number = Math.max(
@@ -163,14 +163,14 @@ class OtpRoutes {
     }
 
     const phoneHash: string = md5(phone);
-    const storedOtpHash: any = getTransient('hoa_otp_' + phoneHash);
+    const storedOtpHash: any = getTransient(`hoa_otp_${phoneHash}`);
 
     if (!storedOtpHash) {
       return new WP_Error('otp_expired', 'OTP has expired or was not requested.', { status: 400 });
     }
 
     // Brute-force protection: limit wrong verify attempts
-    const verifyKey: string = 'hoa_verify_' + phoneHash;
+    const verifyKey: string = `hoa_verify_${phoneHash}`;
     const verifyAttempts: any = getTransient(verifyKey);
     const maxVerify: number = Math.max(
       1,
@@ -178,7 +178,7 @@ class OtpRoutes {
     );
 
     if (verifyAttempts && intval(verifyAttempts) >= maxVerify) {
-      deleteTransient('hoa_otp_' + phoneHash);
+      deleteTransient(`hoa_otp_${phoneHash}`);
       return new WP_Error(
         'too_many_verify_attempts',
         'Too many failed attempts. Please request a new OTP.',
@@ -197,9 +197,9 @@ class OtpRoutes {
     }
 
     // OTP valid — clear transients
-    deleteTransient('hoa_otp_' + phoneHash);
-    deleteTransient('hoa_attempts_' + phoneHash);
-    deleteTransient('hoa_verify_' + phoneHash);
+    deleteTransient(`hoa_otp_${phoneHash}`);
+    deleteTransient(`hoa_attempts_${phoneHash}`);
+    deleteTransient(`hoa_verify_${phoneHash}`);
 
     // Look up existing user by phone (use fields:'ids' to avoid WP_User objects)
     let userIds: any[] = getUsers({
@@ -287,7 +287,7 @@ class OtpRoutes {
     // Generate registration token
     const regToken: string = wpGeneratePassword(32, false, false);
     const regTokenHash: string = md5(regToken);
-    setTransient('hoa_reg_' + regTokenHash, phone, 600);
+    setTransient(`hoa_reg_${regTokenHash}`, phone, 600);
 
     return {
       is_new_user: true,
@@ -296,7 +296,7 @@ class OtpRoutes {
   }
 
   @RestRoute('/otp/test-otp', { method: 'GET', capability: 'manage_options' })
-  getTestOtp(request: any): any {
+  getTestOtp(_request: any): any {
     const testMode: string = getOption('headless_otp_auth_otp_test_mode', '');
     if (testMode !== '1') {
       return { test_mode: false };
@@ -310,9 +310,9 @@ class OtpRoutes {
     const parsed: any = jsonDecode(data, true);
     return {
       test_mode: true,
-      otp: parsed['otp'],
-      phone: parsed['phone'],
-      created_at: parsed['created_at'],
+      otp: parsed.otp,
+      phone: parsed.phone,
+      created_at: parsed.created_at,
     };
   }
 }

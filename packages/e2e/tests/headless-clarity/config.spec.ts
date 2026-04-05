@@ -1,4 +1,4 @@
-import { test, expect } from '../../fixtures/wordpress';
+import { expect, test } from '../../fixtures/wordpress';
 
 const SLUG = 'headless-clarity';
 
@@ -18,9 +18,7 @@ test.describe('Headless Clarity — Config Endpoint', () => {
     expect(data.project_id).toBe('abc1234567');
   });
 
-  test('GET /config returns user info when identify enabled', async ({
-    restApi,
-  }) => {
+  test('GET /config returns user info when identify enabled', async ({ restApi }) => {
     await restApi.updateSettings(SLUG, {
       project_id: 'abc1234567',
       enable_identify: true,
@@ -33,9 +31,7 @@ test.describe('Headless Clarity — Config Endpoint', () => {
     expect(data.user.display_name).toBeTruthy();
   });
 
-  test('GET /config omits user info when identify disabled', async ({
-    restApi,
-  }) => {
+  test('GET /config omits user info when identify disabled', async ({ restApi }) => {
     await restApi.updateSettings(SLUG, {
       project_id: 'abc1234567',
       enable_identify: false,

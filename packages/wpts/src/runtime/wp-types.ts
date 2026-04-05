@@ -630,7 +630,12 @@ declare global {
   // Cron / Scheduling
   // ---------------------------------------------------------------------------
   function wpScheduleSingleEvent(timestamp: number, hook: string, args?: any[]): boolean;
-  function wpScheduleEvent(timestamp: number, recurrence: string, hook: string, args?: any[]): boolean;
+  function wpScheduleEvent(
+    timestamp: number,
+    recurrence: string,
+    hook: string,
+    args?: any[],
+  ): boolean;
   function wpNextScheduled(hook: string, args?: any[]): number | false;
   function wpUnscheduleEvent(timestamp: number, hook: string, args?: any[]): boolean;
   function wpClearScheduledHook(hook: string, args?: any[]): number | false;

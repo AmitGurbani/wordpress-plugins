@@ -1,5 +1,5 @@
-import { test, expect } from '../../fixtures/wordpress';
 import { request as playwrightRequest } from '@playwright/test';
+import { expect, test } from '../../fixtures/wordpress';
 
 const SLUG = 'headless-otp-auth';
 const BASE = `http://localhost:8889/wp-json/${SLUG}/v1`;
@@ -41,16 +41,12 @@ test.describe('Headless OTP Auth — Rate Limiting', () => {
     await ctx.dispose();
   });
 
-  test('brute force protection on wrong OTP verification', async ({
-    wpCli,
-  }) => {
+  test('brute force protection on wrong OTP verification', async ({ wpCli }) => {
     const phone = '+17777777777';
 
     // Create user with this phone
     try {
-      wpCli(
-        'user create bruteuser bruteuser@test.com --role=subscriber --user_pass=testpass123',
-      );
+      wpCli('user create bruteuser bruteuser@test.com --role=subscriber --user_pass=testpass123');
     } catch {
       // May exist
     }

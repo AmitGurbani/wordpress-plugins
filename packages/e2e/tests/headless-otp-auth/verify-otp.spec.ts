@@ -1,5 +1,5 @@
-import { test, expect } from '../../fixtures/wordpress';
 import { request as playwrightRequest } from '@playwright/test';
+import { expect, test } from '../../fixtures/wordpress';
 
 const SLUG = 'headless-otp-auth';
 const BASE = `http://localhost:8889/wp-json/${SLUG}/v1`;
@@ -27,16 +27,11 @@ test.describe('Headless OTP Auth — Verify OTP', () => {
     });
   });
 
-  test('full OTP flow: send → retrieve → verify → get tokens', async ({
-    restApi,
-    wpCli,
-  }) => {
+  test('full OTP flow: send → retrieve → verify → get tokens', async ({ restApi, wpCli }) => {
     // Create a test user with a known phone
     const phone = '+11111111111';
     try {
-      wpCli(
-        `user create otpuser1 otpuser1@test.com --role=subscriber --user_pass=testpass123`,
-      );
+      wpCli(`user create otpuser1 otpuser1@test.com --role=subscriber --user_pass=testpass123`);
     } catch {
       // User may already exist
     }

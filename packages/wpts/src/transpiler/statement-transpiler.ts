@@ -1,7 +1,6 @@
 import ts from 'typescript';
 import { toSnakeCase } from '../utils/naming.js';
 import { transpileExpression } from './expression-transpiler.js';
-import { mapType } from './type-mapper.js';
 
 /**
  * Transpile a TypeScript statement node to a PHP statement string.
@@ -278,7 +277,7 @@ function transpileForOfStatement(
     // Object destructuring: for (const { id, name } of items)
     if (ts.isObjectBindingPattern(decl.name)) {
       const tempVar = '$__item';
-      const innerIndent = indent + '\t';
+      const innerIndent = `${indent}\t`;
       const destructured = decl.name.elements
         .map((el) => {
           if (el.dotDotDotToken) {
@@ -305,7 +304,7 @@ function transpileForOfStatement(
     // Array destructuring: for (const [key, val] of entries)
     if (ts.isArrayBindingPattern(decl.name)) {
       const tempVar = '$__item';
-      const innerIndent = indent + '\t';
+      const innerIndent = `${indent}\t`;
       const destructured = decl.name.elements
         .map((el, i) => {
           if (ts.isOmittedExpression(el)) return '';
@@ -351,7 +350,7 @@ function transpileForInStatement(
     if (ts.isArrayBindingPattern(decl.name)) {
       const tempKey = '$__key';
       const tempVal = '$__value';
-      const innerIndent = indent + '\t';
+      const innerIndent = `${indent}\t`;
       const elements = decl.name.elements;
       const destructured: string[] = [];
       if (elements.length >= 1 && !ts.isOmittedExpression(elements[0])) {
@@ -397,8 +396,8 @@ function transpileSwitchStatement(
   indent: string,
 ): string {
   const expr = transpileExpression(node.expression, typeChecker);
-  const innerIndent = indent + '\t';
-  const caseIndent = innerIndent + '    ';
+  const innerIndent = `${indent}\t`;
+  const caseIndent = `${innerIndent}    `;
 
   const cases = node.caseBlock.clauses.map((clause) => {
     if (ts.isCaseClause(clause)) {
@@ -438,7 +437,7 @@ function transpileTryStatement(
   typeChecker: ts.TypeChecker,
   indent: string,
 ): string {
-  const tryBody = transpileBlock(node.tryBlock, typeChecker, indent + '\t');
+  const tryBody = transpileBlock(node.tryBlock, typeChecker, `${indent}\t`);
   let result = `${indent}try {\n${tryBody}\n${indent}}`;
 
   if (node.catchClause) {
@@ -447,12 +446,12 @@ function transpileTryStatement(
         ? `$${toSnakeCase((node.catchClause.variableDeclaration.name as ts.Identifier).text)}`
         : '$e'
       : '$e';
-    const catchBody = transpileBlock(node.catchClause.block, typeChecker, indent + '\t');
+    const catchBody = transpileBlock(node.catchClause.block, typeChecker, `${indent}\t`);
     result += ` catch ( \\Exception ${varName} ) {\n${catchBody}\n${indent}}`;
   }
 
   if (node.finallyBlock) {
-    const finallyBody = transpileBlock(node.finallyBlock, typeChecker, indent + '\t');
+    const finallyBody = transpileBlock(node.finallyBlock, typeChecker, `${indent}\t`);
     result += ` finally {\n${finallyBody}\n${indent}}`;
   }
 
@@ -465,7 +464,7 @@ function transpileEnumDeclaration(
   indent: string,
 ): string {
   const enumName = node.name.text;
-  const innerIndent = indent + '\t';
+  const innerIndent = `${indent}\t`;
   const lines: string[] = [];
 
   lines.push(`${indent}class ${enumName} {`);
@@ -505,7 +504,7 @@ function transpileStatementBody(
   typeChecker: ts.TypeChecker,
   indent: string,
 ): string {
-  const innerIndent = indent + '\t';
+  const innerIndent = `${indent}\t`;
   if (ts.isBlock(node)) {
     return transpileBlock(node, typeChecker, innerIndent);
   }

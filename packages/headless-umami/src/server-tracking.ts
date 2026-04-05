@@ -19,7 +19,7 @@ class UmamiServerTracking {
     }
 
     const siteUrlParsed: any = wpParseUrl(siteUrl());
-    const hostname: string = siteUrlParsed['host'] ?? '';
+    const hostname: string = siteUrlParsed.host ?? '';
 
     const innerPayload: any = {
       hostname: hostname,
@@ -33,7 +33,7 @@ class UmamiServerTracking {
     };
 
     if (eventData) {
-      innerPayload['data'] = eventData;
+      innerPayload.data = eventData;
     }
 
     const payload: any = {
@@ -41,7 +41,7 @@ class UmamiServerTracking {
       payload: innerPayload,
     };
 
-    const apiUrl: string = rtrim(umamiUrl, '/') + '/api/send';
+    const apiUrl: string = `${rtrim(umamiUrl, '/')}/api/send`;
 
     const response: any = wpSafeRemotePost(apiUrl, {
       body: jsonEncode(payload),
@@ -60,8 +60,8 @@ class UmamiServerTracking {
     const code: number = intval(wpRemoteRetrieveResponseCode(response));
     if (code < 200 || code >= 300) {
       const body: string = wpRemoteRetrieveBody(response);
-      updateOption('headless_umami_last_error', 'HTTP ' + strval(code) + ': ' + body);
-      return { success: false, message: 'Umami returned HTTP ' + strval(code) };
+      updateOption('headless_umami_last_error', `HTTP ${strval(code)}: ${body}`);
+      return { success: false, message: `Umami returned HTTP ${strval(code)}` };
     }
 
     return { success: true };
@@ -70,7 +70,7 @@ class UmamiServerTracking {
   // ── WooCommerce Purchase Hook ─────────────────────────────────────────
 
   @Action('woocommerce_order_status_changed', { priority: 10, acceptedArgs: 4 })
-  onOrderStatusChanged(orderId: number, oldStatus: string, newStatus: string, order: any): void {
+  onOrderStatusChanged(orderId: number, _oldStatus: string, newStatus: string, order: any): void {
     const purchaseStatuses: string[] = ['processing', 'on-hold', 'completed'];
     if (!purchaseStatuses.includes(newStatus)) {
       return;
@@ -122,12 +122,12 @@ class UmamiServerTracking {
     const result: any = this.sendUmamiEvent(
       'purchase',
       orderUrl,
-      'Purchase - Order #' + strval(orderId),
+      `Purchase - Order #${strval(orderId)}`,
       eventData,
     );
 
     // Only mark as sent on success — allows retry on next status change if Umami was unreachable
-    if (result['success']) {
+    if (result.success) {
       order.update_meta_data('_headless_umami_sent', '1');
       order.save();
     }

@@ -1,10 +1,10 @@
-import { test, expect } from '../../fixtures/wordpress';
 import {
   createOrder,
-  updateOrderStatus,
-  getOrderMeta,
   deleteOrder,
+  getOrderMeta,
+  updateOrderStatus,
 } from '../../fixtures/woocommerce';
+import { expect, test } from '../../fixtures/wordpress';
 
 const SLUG = 'headless-meta-pixel';
 
@@ -33,9 +33,7 @@ test.describe('Headless Meta Pixel — Purchase Tracking', () => {
     });
   });
 
-  test('purchase tracking hook fires on order completion', async ({
-    restApi,
-  }) => {
+  test('purchase tracking hook fires on order completion', async ({ restApi }) => {
     const orderId = createOrder({ productId });
 
     try {

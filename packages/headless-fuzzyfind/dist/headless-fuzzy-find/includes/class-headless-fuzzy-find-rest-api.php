@@ -330,7 +330,7 @@ class Headless_Fuzzyfind_Rest_Api {
 			$image_url = '';
 			if ( $image_id ) {
 				$image_src = wp_get_attachment_image_src( $image_id, 'thumbnail' );
-				if ( $image_src && $image_src[0] ) {
+				if ( ($image_src !== null ? $image_src[0] : null) ) {
 					$image_url = $image_src[0];
 				}
 			}
@@ -405,7 +405,7 @@ class Headless_Fuzzyfind_Rest_Api {
 			$image_url = '';
 			if ( $image_id ) {
 				$image_src = wp_get_attachment_image_src( $image_id, 'thumbnail' );
-				if ( $image_src && $image_src[0] ) {
+				if ( ($image_src !== null ? $image_src[0] : null) ) {
 					$image_url = $image_src[0];
 				}
 			}

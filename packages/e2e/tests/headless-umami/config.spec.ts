@@ -1,4 +1,4 @@
-import { test, expect } from '../../fixtures/wordpress';
+import { expect, test } from '../../fixtures/wordpress';
 
 const SLUG = 'headless-umami';
 
@@ -20,9 +20,7 @@ test.describe('Headless Umami — Config Endpoint', () => {
   });
 
   test('GET /config is publicly accessible', async ({ request }) => {
-    const res = await request.get(
-      'http://localhost:8889/wp-json/headless-umami/v1/config',
-    );
+    const res = await request.get('http://localhost:8889/wp-json/headless-umami/v1/config');
     expect(res.status()).toBe(200);
   });
 });

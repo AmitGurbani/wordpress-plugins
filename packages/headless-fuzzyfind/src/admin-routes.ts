@@ -10,7 +10,7 @@ class FfAdminRoutes {
   // ── Index Status ────────────────────────────────────────────────────
 
   @RestRoute('/index/status', { method: 'GET', capability: 'manage_options' })
-  getIndexStatus(request: any): any {
+  getIndexStatus(_request: any): any {
     const tableName: string = getOption('headless_fuzzyfind_index_table', '');
     const isIndexing: string = getOption('headless_fuzzyfind_reindex_in_progress', '');
     const lastIndexed: any = getOption('headless_fuzzyfind_last_indexed', '');
@@ -45,7 +45,7 @@ class FfAdminRoutes {
   // ── Rebuild Index ───────────────────────────────────────────────────
 
   @RestRoute('/index/rebuild', { method: 'POST', capability: 'manage_options' })
-  rebuildIndex(request: any): any {
+  rebuildIndex(_request: any): any {
     if (!classExists('WooCommerce')) {
       return new WP_Error('woocommerce_required', 'WooCommerce is not active.', { status: 400 });
     }
@@ -98,7 +98,7 @@ class FfAdminRoutes {
   // ── Delete Index ───────────────────────────────────────────────────
 
   @RestRoute('/index/delete', { method: 'POST', capability: 'manage_options' })
-  deleteIndex(request: any): any {
+  deleteIndex(_request: any): any {
     const tableName: string = getOption('headless_fuzzyfind_index_table', '');
     if (tableName) {
       wpdb.query(wpdb.prepare('TRUNCATE TABLE %i', tableName));
@@ -114,7 +114,7 @@ class FfAdminRoutes {
   // ── Analytics ───────────────────────────────────────────────────────
 
   @RestRoute('/analytics', { method: 'GET', capability: 'manage_options' })
-  getAnalytics(request: any): any {
+  getAnalytics(_request: any): any {
     const logTable: string = getOption('headless_fuzzyfind_log_table', '');
     if (!logTable) {
       return restEnsureResponse({ popular: [], zero_results: [] });
@@ -147,7 +147,7 @@ class FfAdminRoutes {
   // ── Clear Analytics ─────────────────────────────────────────────────
 
   @RestRoute('/analytics/clear', { method: 'POST', capability: 'manage_options' })
-  clearAnalytics(request: any): any {
+  clearAnalytics(_request: any): any {
     const logTable: string = getOption('headless_fuzzyfind_log_table', '');
     if (logTable) {
       wpdb.query(wpdb.prepare('TRUNCATE TABLE %i', logTable));

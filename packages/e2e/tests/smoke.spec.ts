@@ -1,4 +1,4 @@
-import { test, expect } from '../fixtures/wordpress';
+import { expect, test } from '../fixtures/wordpress';
 
 test('WordPress REST API is accessible', async ({ request }) => {
   const res = await request.get('http://localhost:8889/wp-json/');

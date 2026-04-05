@@ -1,4 +1,4 @@
-import { test, expect } from '../../fixtures/wordpress';
+import { expect, test } from '../../fixtures/wordpress';
 import { PLUGINS } from '../../utils/settings';
 
 for (const plugin of PLUGINS) {
@@ -7,9 +7,7 @@ for (const plugin of PLUGINS) {
       const errors: string[] = [];
       page.on('pageerror', (err) => errors.push(err.message));
 
-      await page.goto(
-        `http://localhost:8889/wp-admin/admin.php?page=${plugin.menuSlug}`,
-      );
+      await page.goto(`http://localhost:8889/wp-admin/admin.php?page=${plugin.menuSlug}`);
 
       // Wait for the React app container to be present
       await expect(page.locator('#wpts-admin-app')).toBeVisible();
@@ -19,9 +17,7 @@ for (const plugin of PLUGINS) {
     });
 
     test('tab navigation works', async ({ page }) => {
-      await page.goto(
-        `http://localhost:8889/wp-admin/admin.php?page=${plugin.menuSlug}`,
-      );
+      await page.goto(`http://localhost:8889/wp-admin/admin.php?page=${plugin.menuSlug}`);
 
       await expect(page.locator('#wpts-admin-app')).toBeVisible();
 

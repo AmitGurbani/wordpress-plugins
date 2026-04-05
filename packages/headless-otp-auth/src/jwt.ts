@@ -15,7 +15,7 @@ class JwtAuth {
   registerJwtHelper(): void {
     addFilter(
       'hoa_generate_jwt',
-      (value: string, userId: number, tokenType: string, expiry: number, secret: string) => {
+      (_value: string, userId: number, tokenType: string, expiry: number, secret: string) => {
         if (!secret) {
           return '';
         }
@@ -29,13 +29,13 @@ class JwtAuth {
         });
         const b64Header: string = strtr(rtrim(base64Encode(headerData), '='), '+/', '-_');
         const b64Payload: string = strtr(rtrim(base64Encode(payloadData), '='), '+/', '-_');
-        const headerPayload: string = b64Header + '.' + b64Payload;
+        const headerPayload: string = `${b64Header}.${b64Payload}`;
         const signature: string = strtr(
           rtrim(base64Encode(hashHmac('sha256', headerPayload, secret, true)), '='),
           '+/',
           '-_',
         );
-        return headerPayload + '.' + signature;
+        return `${headerPayload}.${signature}`;
       },
       10,
       5,
@@ -52,7 +52,7 @@ class JwtAuth {
     }
 
     const headers: Record<string, string> = getallheaders();
-    const origin: string = headers['Origin'] ?? '';
+    const origin: string = headers.Origin ?? '';
     if (!origin) {
       return served;
     }
@@ -66,7 +66,7 @@ class JwtAuth {
     }
 
     if (allowed) {
-      header('Access-Control-Allow-Origin: ' + origin);
+      header(`Access-Control-Allow-Origin: ${origin}`);
       header('Access-Control-Allow-Headers: Authorization, Content-Type');
       header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
       header('Access-Control-Allow-Credentials: true');
@@ -80,11 +80,12 @@ class JwtAuth {
   @Filter('determine_current_user', { priority: 20 })
   authenticateWithJwt(userId: number): number {
     const headers: Record<string, string> = getallheaders();
-    const authHeader: string = $_SERVER['HTTP_AUTHORIZATION']
-      ?? $_SERVER['REDIRECT_HTTP_AUTHORIZATION']
-      ?? headers['Authorization']
-      ?? headers['authorization']
-      ?? '';
+    const authHeader: string =
+      $_SERVER.HTTP_AUTHORIZATION ??
+      $_SERVER.REDIRECT_HTTP_AUTHORIZATION ??
+      headers.Authorization ??
+      headers.authorization ??
+      '';
     if (!authHeader) {
       return userId;
     }
@@ -109,7 +110,7 @@ class JwtAuth {
     }
 
     // Verify signature
-    const headerPayload: string = tokenParts[0] + '.' + tokenParts[1];
+    const headerPayload: string = `${tokenParts[0]}.${tokenParts[1]}`;
     const expectedSig: string = strtr(
       rtrim(base64Encode(hashHmac('sha256', headerPayload, secret, true)), '='),
       '+/',
@@ -127,23 +128,23 @@ class JwtAuth {
     if (!payload) {
       return userId;
     }
-    if (payload['exp'] < time()) {
+    if (payload.exp < time()) {
       return userId;
     }
-    if (payload['iss'] !== siteUrl()) {
+    if (payload.iss !== siteUrl()) {
       return userId;
     }
-    if (payload['type'] !== 'access') {
+    if (payload.type !== 'access') {
       return userId;
     }
 
-    const tokenUserId: number = intval(payload['sub']);
+    const tokenUserId: number = intval(payload.sub);
     if (!tokenUserId || !getUserBy('id', tokenUserId)) {
       return userId;
     }
 
     wpSetCurrentUser(tokenUserId);
-    $_SERVER['HOA_JWT_AUTHENTICATED'] = '1';
+    $_SERVER.HOA_JWT_AUTHENTICATED = '1';
     return tokenUserId;
   }
 
@@ -158,7 +159,7 @@ class JwtAuth {
       return result;
     }
 
-    if ($_SERVER['HOA_JWT_AUTHENTICATED'] === '1') {
+    if ($_SERVER.HOA_JWT_AUTHENTICATED === '1') {
       return true;
     }
 

@@ -1,7 +1,7 @@
-import { test, expect } from '../../fixtures/wordpress';
-import { request as playwrightRequest } from '@playwright/test';
 import fs from 'node:fs';
 import path from 'node:path';
+import { request as playwrightRequest } from '@playwright/test';
+import { expect, test } from '../../fixtures/wordpress';
 
 const STORAGE_STATE = path.resolve(__dirname, '../../artifacts/storage-states/admin.json');
 
@@ -17,7 +17,7 @@ test.describe('Headless Wishlist — Wishlist CRUD', () => {
     productIds = ids
       .split(' ')
       .map((id) => parseInt(id, 10))
-      .filter((id) => !isNaN(id));
+      .filter((id) => !Number.isNaN(id));
     expect(productIds.length).toBeGreaterThanOrEqual(2);
 
     // Clean leftover wishlist data from admin user (ID 1)

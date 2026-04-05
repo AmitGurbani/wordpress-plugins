@@ -17,8 +17,8 @@ export interface CustomPostTypeOptions {
  * The generated PHP calls `register_post_type()` on the `init` hook.
  */
 export function CustomPostType(
-  slug: string,
-  options: CustomPostTypeOptions,
+  _slug: string,
+  _options: CustomPostTypeOptions,
 ): (...args: any[]) => any {
   return (..._args: any[]) => {
     // No-op at runtime — metadata is extracted at compile time by the transpiler.

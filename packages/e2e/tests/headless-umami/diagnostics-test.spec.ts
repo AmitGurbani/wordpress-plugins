@@ -1,5 +1,5 @@
-import { test, expect } from '../../fixtures/wordpress';
 import { request as playwrightRequest } from '@playwright/test';
+import { expect, test } from '../../fixtures/wordpress';
 
 const SLUG = 'headless-umami';
 
@@ -13,17 +13,13 @@ test.describe('Headless Umami — Diagnostics', () => {
     await ctx.dispose();
   });
 
-  test('POST /diagnostics/test-connection returns response', async ({
-    restApi,
-  }) => {
+  test('POST /diagnostics/test-connection returns response', async ({ restApi }) => {
     await restApi.updateSettings(SLUG, {
       umami_url: 'http://localhost:19999',
       website_id: '550e8400-e29b-41d4-a716-446655440000',
     });
 
-    const { status, data } = await restApi.post(
-      `${SLUG}/v1/diagnostics/test-connection`,
-    );
+    const { status, data } = await restApi.post(`${SLUG}/v1/diagnostics/test-connection`);
     expect(status).toBe(200);
     expect(data).toBeDefined();
   });
