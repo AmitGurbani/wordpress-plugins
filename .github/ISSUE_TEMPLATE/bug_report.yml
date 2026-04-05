@@ -1,0 +1,76 @@
+name: Bug Report
+description: Report a bug in one of the packages
+labels: ["bug"]
+body:
+  - type: dropdown
+    id: package
+    attributes:
+      label: Package
+      description: Which package is affected?
+      options:
+        - wpts
+        - admin-ui
+        - headless-clarity
+        - headless-fuzzyfind
+        - headless-google-analytics
+        - headless-meta-pixel
+        - headless-otp-auth
+        - headless-pos-sessions
+        - headless-umami
+        - headless-wishlist
+        - e2e
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: A clear and concise description of the bug.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Steps to Reproduce
+      description: Step-by-step instructions to reproduce the issue.
+      placeholder: |
+        1. ...
+        2. ...
+        3. ...
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected Behavior
+      description: What did you expect to happen?
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual Behavior
+      description: What actually happened?
+    validations:
+      required: true
+  - type: input
+    id: wordpress-version
+    attributes:
+      label: WordPress Version
+      placeholder: "6.7"
+  - type: input
+    id: php-version
+    attributes:
+      label: PHP Version
+      placeholder: "8.2"
+  - type: input
+    id: woocommerce-version
+    attributes:
+      label: WooCommerce Version (if applicable)
+      placeholder: "9.4"
+  - type: textarea
+    id: additional
+    attributes:
+      label: Additional Context
+      description: Any other context, logs, or screenshots.

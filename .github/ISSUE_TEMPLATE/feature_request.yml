@@ -1,0 +1,49 @@
+name: Feature Request
+description: Suggest a new feature or enhancement
+labels: ["enhancement"]
+body:
+  - type: dropdown
+    id: package
+    attributes:
+      label: Package
+      description: Which package does this relate to?
+      options:
+        - wpts
+        - admin-ui
+        - headless-clarity
+        - headless-fuzzyfind
+        - headless-google-analytics
+        - headless-meta-pixel
+        - headless-otp-auth
+        - headless-pos-sessions
+        - headless-umami
+        - headless-wishlist
+        - e2e
+        - New package
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    id: use-case
+    attributes:
+      label: Use Case
+      description: What problem does this solve? Why is this needed?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed Solution
+      description: How would you like this to work?
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives Considered
+      description: Any alternative approaches you've considered.
+  - type: textarea
+    id: additional
+    attributes:
+      label: Additional Context
+      description: Any other context or examples.
