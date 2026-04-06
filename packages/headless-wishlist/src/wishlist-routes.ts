@@ -15,7 +15,7 @@ class WishlistRoutes {
     if (!raw) {
       return [];
     }
-    return jsonDecode(raw, true) || [];
+    return jsonDecode(raw, true) ?? [];
   }
 
   saveWishlist(userId: number, items: any[]): void {

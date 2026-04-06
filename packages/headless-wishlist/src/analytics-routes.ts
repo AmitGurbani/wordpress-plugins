@@ -24,7 +24,7 @@ class AnalyticsRoutes {
     let totalItems: number = 0;
 
     for (const row of rows) {
-      const items: any[] = jsonDecode(row.meta_value, true) || [];
+      const items: any[] = jsonDecode(row.meta_value, true) ?? [];
       for (const item of items) {
         const pid: string = strval(intval(item.product_id));
         if (counts[pid] === undefined) {

@@ -151,7 +151,7 @@ class Headless_Wishlist_Rest_Api {
 		$counts = array();
 		$total_items = 0;
 		foreach ( $rows as $row ) {
-			$items = json_decode( $row['meta_value'], true ) || array();
+			$items = json_decode( $row['meta_value'], true ) ?? array();
 			foreach ( $items as $item ) {
 				$pid = strval( intval( $item['product_id'] ) );
 				if ( ! isset( $counts[$pid] ) ) {
@@ -179,7 +179,7 @@ class Headless_Wishlist_Rest_Api {
 		if ( ! $raw ) {
 			return array();
 		}
-		return json_decode( $raw, true ) || array();
+		return json_decode( $raw, true ) ?? array();
 	}
 
 	public function save_wishlist( $user_id, $items ) {
