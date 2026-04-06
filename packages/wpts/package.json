@@ -6,15 +6,15 @@
   "main": "dist/src/index.js",
   "types": "dist/src/index.d.ts",
   "bin": {
-    "wpts": "dist/bin/wpts.js"
+    "wpts": "bin/wpts.js"
   },
   "scripts": {
     "build": "tsc -p tsconfig.build.json && rm -rf dist/src/templates && cp -r src/templates dist/src/templates",
     "dev": "tsc -p tsconfig.build.json --watch",
     "test": "vitest run",
     "test:watch": "vitest",
-    "lint": "biome lint src/ tests/ bin/",
-    "check": "biome check src/ tests/ bin/"
+    "lint": "biome lint src/ tests/",
+    "check": "biome check src/ tests/"
   },
   "keywords": [
     "wordpress",
