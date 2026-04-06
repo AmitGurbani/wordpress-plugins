@@ -250,6 +250,10 @@ class OtpRoutes {
       }
 
       const displayName: string = getTheAuthorMeta('display_name', existingUserId);
+      const email: string = getTheAuthorMeta('user_email', existingUserId);
+      const capKey: string = `${wpdb.prefix}capabilities`;
+      const caps: any = getUserMeta(existingUserId, capKey, true);
+      const roles: any = caps ? Object.keys(caps) : [];
 
       return {
         is_new_user: false,
@@ -258,7 +262,9 @@ class OtpRoutes {
         user: {
           id: existingUserId,
           name: displayName,
+          email: email,
           phone: phone,
+          roles: roles,
         },
       };
     }

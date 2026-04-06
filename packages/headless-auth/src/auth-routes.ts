@@ -140,13 +140,20 @@ class AuthRoutes {
     updateUserMeta(userId, 'ha_refresh_token_hash', wpHashPassword(refreshToken));
     updateUserMeta(userId, 'ha_refresh_token_expiry', strval(time() + refreshExpiry));
 
+    const email: string = getTheAuthorMeta('user_email', userId);
+    const capKey: string = `${wpdb.prefix}capabilities`;
+    const caps: any = getUserMeta(userId, capKey, true);
+    const roles: any = caps ? Object.keys(caps) : [];
+
     return {
       access_token: accessToken,
       refresh_token: refreshToken,
       user: {
         id: userId,
         name: name,
+        email: email,
         phone: phone,
+        roles: roles,
       },
     };
   }

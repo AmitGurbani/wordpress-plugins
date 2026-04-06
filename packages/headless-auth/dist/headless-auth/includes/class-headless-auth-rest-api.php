@@ -392,6 +392,7 @@ class Headless_Auth_Rest_Api {
 	}
 
 	public function verify_otp( $request ) {
+		global $wpdb;
 		$phone = sanitize_text_field( $request->get_param( 'phone' ) );
 		$otp = sanitize_text_field( $request->get_param( 'otp' ) );
 		if ( ! $phone || ! $otp ) {
@@ -442,7 +443,11 @@ class Headless_Auth_Rest_Api {
 				update_user_meta( $existing_user_id, 'billing_phone', $phone );
 			}
 			$display_name = get_the_author_meta( 'display_name', $existing_user_id );
-			return array( 'is_new_user' => false, 'access_token' => $access_token, 'refresh_token' => $refresh_token, 'user' => array( 'id' => $existing_user_id, 'name' => $display_name, 'phone' => $phone ) );
+			$email = get_the_author_meta( 'user_email', $existing_user_id );
+			$cap_key = $wpdb->prefix . 'capabilities';
+			$caps = get_user_meta( $existing_user_id, $cap_key, true );
+			$roles = $caps ? array_keys( $caps ) : array();
+			return array( 'is_new_user' => false, 'access_token' => $access_token, 'refresh_token' => $refresh_token, 'user' => array( 'id' => $existing_user_id, 'name' => $display_name, 'email' => $email, 'phone' => $phone, 'roles' => $roles ) );
 		}
 		$reg_enabled = get_option( 'headless_auth_enable_registration', '1' );
 		if ( $reg_enabled !== '1' ) {
@@ -468,6 +473,7 @@ class Headless_Auth_Rest_Api {
 	}
 
 	public function register_user( $request ) {
+		global $wpdb;
 		$reg_token = sanitize_text_field( $request->get_param( 'registration_token' ) );
 		$name = sanitize_text_field( $request->get_param( 'name' ) );
 		if ( ! $reg_token || ! $name ) {
@@ -535,7 +541,11 @@ class Headless_Auth_Rest_Api {
 		$refresh_token = apply_filters( 'ha_generate_jwt', '', $user_id, 'refresh', $refresh_expiry, $secret );
 		update_user_meta( $user_id, 'ha_refresh_token_hash', wp_hash_password( $refresh_token ) );
 		update_user_meta( $user_id, 'ha_refresh_token_expiry', strval( time() + $refresh_expiry ) );
-		return array( 'access_token' => $access_token, 'refresh_token' => $refresh_token, 'user' => array( 'id' => $user_id, 'name' => $name, 'phone' => $phone ) );
+		$email = get_the_author_meta( 'user_email', $user_id );
+		$cap_key = $wpdb->prefix . 'capabilities';
+		$caps = get_user_meta( $user_id, $cap_key, true );
+		$roles = $caps ? array_keys( $caps ) : array();
+		return array( 'access_token' => $access_token, 'refresh_token' => $refresh_token, 'user' => array( 'id' => $user_id, 'name' => $name, 'email' => $email, 'phone' => $phone, 'roles' => $roles ) );
 	}
 
 	public function refresh_token( $request ) {
@@ -647,10 +657,11 @@ class Headless_Auth_Rest_Api {
 		update_user_meta( $user_id, 'ha_refresh_token_expiry', strval( time() + $refresh_expiry ) );
 		$display_name = get_the_author_meta( 'display_name', $user_id );
 		$email = get_the_author_meta( 'user_email', $user_id );
+		$phone = get_user_meta( $user_id, 'phone_number', true );
 		$cap_key = $wpdb->prefix . 'capabilities';
 		$caps = get_user_meta( $user_id, $cap_key, true );
 		$roles = $caps ? array_keys( $caps ) : array();
-		return array( 'access_token' => $access_token, 'refresh_token' => $refresh_token, 'user' => array( 'id' => $user_id, 'name' => $display_name, 'email' => $email, 'roles' => $roles ) );
+		return array( 'access_token' => $access_token, 'refresh_token' => $refresh_token, 'user' => array( 'id' => $user_id, 'name' => $display_name, 'email' => $email, 'phone' => $phone, 'roles' => $roles ) );
 	}
 
 	public function escape_for_json( $value ) {

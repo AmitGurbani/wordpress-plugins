@@ -37,6 +37,8 @@ test.describe('Headless Auth — JWT Authentication', () => {
     expect(verifyRes.status()).toBe(200);
     const tokens = await verifyRes.json();
     expect(tokens.access_token).toBeTruthy();
+    expect(tokens.user.email).toBe('jwtuser@test.com');
+    expect(tokens.user.roles).toContain('subscriber');
 
     // Use access_token to call /auth/me
     const meRes = await ctx.get(`${BASE}/auth/me`, {

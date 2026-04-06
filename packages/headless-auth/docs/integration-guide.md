@@ -58,7 +58,7 @@ sequenceDiagram
     API-->>App: {is_new_user: false, access_token, refresh_token, user}
 
     App->>API: GET /auth/me (Bearer access_token)
-    API-->>App: {id, name, phone}
+    API-->>App: {id, name, email, phone, roles}
 ```
 
 ### Registration (New User)
@@ -100,7 +100,7 @@ sequenceDiagram
     Note right of App: Store both new tokens
 
     App->>API: GET /auth/me (Bearer new_access_token)
-    API-->>App: {id, name, phone}
+    API-->>App: {id, name, email, phone, roles}
 ```
 
 Both tokens are rotated on refresh. Always replace the old refresh token with the new one.
@@ -116,7 +116,7 @@ sequenceDiagram
     API-->>App: {access_token, refresh_token, user}
 
     App->>API: GET /auth/me (Bearer access_token)
-    API-->>App: {id, name, phone}
+    API-->>App: {id, name, email, phone, roles}
 ```
 
 The `username` field accepts both a WordPress username and an email address.
@@ -190,7 +190,9 @@ Verify an OTP. Returns JWT tokens for existing users, or a registration token fo
   "user": {
     "id": 123,
     "name": "John Doe",
-    "phone": "+919876543210"
+    "email": "john@example.com",
+    "phone": "+919876543210",
+    "roles": ["subscriber"]
   }
 }
 ```
@@ -259,6 +261,7 @@ Authenticate with username/email and password. Returns JWT tokens on success.
     "id": 123,
     "name": "John Doe",
     "email": "john@example.com",
+    "phone": "+919876543210",
     "roles": ["customer"]
   }
 }
@@ -306,7 +309,9 @@ Register a new user with a registration token from `/otp/verify`.
   "user": {
     "id": 456,
     "name": "Jane Smith",
-    "phone": "+919876543210"
+    "email": "jane@example.com",
+    "phone": "+919876543210",
+    "roles": ["subscriber"]
   }
 }
 ```

@@ -32,6 +32,7 @@ test.describe('Headless Auth — Password Login', () => {
     expect(data.user.id).toBeGreaterThan(0);
     expect(data.user.name).toBeTruthy();
     expect(data.user.email).toBe('loginuser@test.com');
+    expect(data.user.phone).toBeDefined();
     expect(data.user.roles).toContain('subscriber');
 
     await ctx.dispose();
