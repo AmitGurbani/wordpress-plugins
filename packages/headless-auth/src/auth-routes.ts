@@ -251,12 +251,18 @@ class AuthRoutes {
     }
 
     const displayName: string = getTheAuthorMeta('display_name', userId);
+    const email: string = getTheAuthorMeta('user_email', userId);
     const phone: string = getUserMeta(userId, 'phone_number', true);
+    const capKey: string = `${wpdb.prefix}capabilities`;
+    const caps: any = getUserMeta(userId, capKey, true);
+    const roles: any = caps ? Object.keys(caps) : [];
 
     return {
       id: userId,
       name: displayName,
+      email: email,
       phone: phone,
+      roles: roles,
     };
   }
 }

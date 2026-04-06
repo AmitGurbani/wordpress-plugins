@@ -94,6 +94,10 @@ class LoginRoutes {
     updateUserMeta(userId, 'ha_refresh_token_expiry', strval(time() + refreshExpiry));
 
     const displayName: string = getTheAuthorMeta('display_name', userId);
+    const email: string = getTheAuthorMeta('user_email', userId);
+    const capKey: string = `${wpdb.prefix}capabilities`;
+    const caps: any = getUserMeta(userId, capKey, true);
+    const roles: any = caps ? Object.keys(caps) : [];
 
     return {
       access_token: accessToken,
@@ -101,6 +105,8 @@ class LoginRoutes {
       user: {
         id: userId,
         name: displayName,
+        email: email,
+        roles: roles,
       },
     };
   }

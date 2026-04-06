@@ -48,6 +48,8 @@ test.describe('Headless Auth — JWT Authentication', () => {
 
     const meData = await meRes.json();
     expect(meData.id).toBe(Number(userId));
+    expect(meData.email).toBeTruthy();
+    expect(meData.roles).toBeInstanceOf(Array);
 
     await ctx.dispose();
   });

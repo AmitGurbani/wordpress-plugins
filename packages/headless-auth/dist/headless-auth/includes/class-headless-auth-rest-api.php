@@ -591,16 +591,22 @@ class Headless_Auth_Rest_Api {
 	}
 
 	public function get_profile( $request ) {
+		global $wpdb;
 		$user_id = get_current_user_id();
 		if ( ! $user_id ) {
 			return new WP_Error( 'not_authenticated', 'You must be logged in.', array( 'status' => 401 ) );
 		}
 		$display_name = get_the_author_meta( 'display_name', $user_id );
+		$email = get_the_author_meta( 'user_email', $user_id );
 		$phone = get_user_meta( $user_id, 'phone_number', true );
-		return array( 'id' => $user_id, 'name' => $display_name, 'phone' => $phone );
+		$cap_key = $wpdb->prefix . 'capabilities';
+		$caps = get_user_meta( $user_id, $cap_key, true );
+		$roles = $caps ? array_keys( $caps ) : array();
+		return array( 'id' => $user_id, 'name' => $display_name, 'email' => $email, 'phone' => $phone, 'roles' => $roles );
 	}
 
 	public function login( $request ) {
+		global $wpdb;
 		$enabled = get_option( 'headless_auth_enable_password_login', '1' );
 		if ( $enabled !== '1' ) {
 			return new WP_Error( 'login_disabled', 'Password login is disabled.', array( 'status' => 403 ) );
@@ -640,7 +646,11 @@ class Headless_Auth_Rest_Api {
 		update_user_meta( $user_id, 'ha_refresh_token_hash', wp_hash_password( $refresh_token ) );
 		update_user_meta( $user_id, 'ha_refresh_token_expiry', strval( time() + $refresh_expiry ) );
 		$display_name = get_the_author_meta( 'display_name', $user_id );
-		return array( 'access_token' => $access_token, 'refresh_token' => $refresh_token, 'user' => array( 'id' => $user_id, 'name' => $display_name ) );
+		$email = get_the_author_meta( 'user_email', $user_id );
+		$cap_key = $wpdb->prefix . 'capabilities';
+		$caps = get_user_meta( $user_id, $cap_key, true );
+		$roles = $caps ? array_keys( $caps ) : array();
+		return array( 'access_token' => $access_token, 'refresh_token' => $refresh_token, 'user' => array( 'id' => $user_id, 'name' => $display_name, 'email' => $email, 'roles' => $roles ) );
 	}
 
 	public function escape_for_json( $value ) {

@@ -31,6 +31,8 @@ test.describe('Headless Auth — Password Login', () => {
     expect(data.refresh_token).toBeTruthy();
     expect(data.user.id).toBeGreaterThan(0);
     expect(data.user.name).toBeTruthy();
+    expect(data.user.email).toBe('loginuser@test.com');
+    expect(data.user.roles).toContain('subscriber');
 
     await ctx.dispose();
   });
@@ -45,6 +47,7 @@ test.describe('Headless Auth — Password Login', () => {
     const data = await res.json();
     expect(data.access_token).toBeTruthy();
     expect(data.refresh_token).toBeTruthy();
+    expect(data.user.email).toBe('loginuser@test.com');
 
     await ctx.dispose();
   });

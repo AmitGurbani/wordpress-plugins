@@ -257,7 +257,9 @@ Authenticate with username/email and password. Returns JWT tokens on success.
   "refresh_token": "eyJ...",
   "user": {
     "id": 123,
-    "name": "John Doe"
+    "name": "John Doe",
+    "email": "john@example.com",
+    "roles": ["customer"]
   }
 }
 ```
@@ -385,7 +387,9 @@ Get the authenticated user's profile.
 {
   "id": 123,
   "name": "John Doe",
-  "phone": "+919876543210"
+  "email": "john@example.com",
+  "phone": "+919876543210",
+  "roles": ["customer"]
 }
 ```
 
