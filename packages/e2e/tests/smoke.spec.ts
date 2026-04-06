@@ -13,7 +13,7 @@ test('all plugins are active', async ({ wpCli }) => {
   expect(plugins).toContain('headless-google-analytics');
   expect(plugins).toContain('headless-meta-pixel');
   expect(plugins).toContain('headless-umami');
-  expect(plugins).toContain('headless-otp-auth');
+  expect(plugins).toContain('headless-auth');
   expect(plugins).toContain('headless-fuzzy-find');
   expect(plugins).toContain('headless-pos-sessions');
   expect(plugins).toContain('woocommerce');

@@ -99,9 +99,9 @@ export const PLUGINS: PluginConfig[] = [
     sensitiveKeys: [],
   },
   {
-    slug: 'headless-otp-auth',
-    name: 'Headless OTP Auth',
-    menuSlug: 'headless-otp-auth-settings',
+    slug: 'headless-auth',
+    name: 'Headless Auth',
+    menuSlug: 'headless-auth-settings',
     hasConfig: false,
     hasDiagnostics: false,
     settings: {
@@ -117,6 +117,8 @@ export const PLUGINS: PluginConfig[] = [
       rate_limit_window: 600,
       enable_registration: false,
       default_user_role: 'subscriber',
+      enable_password_login: true,
+      max_login_attempts: 5,
     },
     defaults: {
       otp_test_mode: false,
@@ -131,6 +133,8 @@ export const PLUGINS: PluginConfig[] = [
       rate_limit_window: 900,
       enable_registration: true,
       default_user_role: 'subscriber',
+      enable_password_login: true,
+      max_login_attempts: 5,
     },
     sensitiveKeys: [],
   },

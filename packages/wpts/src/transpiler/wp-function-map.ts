@@ -97,12 +97,14 @@ export const WP_FUNCTION_MAP: Record<string, string> = {
   getUserBy: 'get_user_by',
   getUsers: 'get_users',
   usernameExists: 'username_exists',
+  emailExists: 'email_exists',
   wpInsertUser: 'wp_insert_user',
   wpGetCurrentUser: 'wp_get_current_user',
   wpGeneratePassword: 'wp_generate_password',
   wpHashPassword: 'wp_hash_password',
   wpCheckPassword: 'wp_check_password',
   wpSetCurrentUser: 'wp_set_current_user',
+  wpAuthenticate: 'wp_authenticate',
   getTheAuthorMeta: 'get_the_author_meta',
 
   // Nonces

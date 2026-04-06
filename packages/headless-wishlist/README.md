@@ -7,11 +7,11 @@ REST API wishlist plugin for headless WordPress/WooCommerce stores. Stores wishl
 - WordPress 6.0+
 - PHP 8.0+
 - WooCommerce (required)
-- [Headless OTP Auth](../headless-otp-auth/) for JWT authentication
+- [Headless Auth](../headless-auth/) for JWT authentication
 
 ## API Reference
 
-All endpoints require `Authorization: Bearer <JWT>` header (issued by headless-otp-auth). Returns 401 if missing or invalid.
+All endpoints require `Authorization: Bearer <JWT>` header (issued by headless-auth). Returns 401 if missing or invalid.
 
 ### `GET /wp-json/headless-wishlist/v1/items`
 

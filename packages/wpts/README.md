@@ -157,7 +157,7 @@ listItems(request: any): any {
 
 All decorators (`@Action`, `@Filter`, `@Setting`, `@RestRoute`, `@AjaxHandler`, etc.) work in any file. The transpiler merges everything into the same generated plugin output.
 
-> See [`headless-otp-auth`](../headless-otp-auth/) for a real-world example using multi-file structure.
+> See [`headless-auth`](../headless-auth/) for a real-world example using multi-file structure.
 
 ## WordPress API Types
 

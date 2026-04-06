@@ -48,7 +48,7 @@ tests/
   headless-fuzzyfind/
   headless-google-analytics/
   headless-meta-pixel/
-  headless-otp-auth/
+  headless-auth/
   headless-umami/
 fixtures/
   woocommerce.ts             # WooCommerce test helpers

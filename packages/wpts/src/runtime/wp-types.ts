@@ -207,6 +207,7 @@ declare global {
   function getUserBy(field: string, value: string | number): any;
   function getUsers(args?: Record<string, any>): any[];
   function usernameExists(username: string): number | false;
+  function emailExists(email: string): any;
   function wpInsertUser(userdata: Record<string, any>): number | any;
   function wpGetCurrentUser(): any;
   function wpGeneratePassword(
@@ -217,6 +218,7 @@ declare global {
   function wpHashPassword(password: string): string;
   function wpCheckPassword(password: string, hash: string, userId?: number): boolean;
   function wpSetCurrentUser(id: number, name?: string): any;
+  function wpAuthenticate(username: string, password: string): any;
   function getTheAuthorMeta(field: string, userId?: number): string;
 
   // ---------------------------------------------------------------------------

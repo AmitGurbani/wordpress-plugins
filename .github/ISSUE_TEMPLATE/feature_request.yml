@@ -14,7 +14,7 @@ body:
         - headless-fuzzyfind
         - headless-google-analytics
         - headless-meta-pixel
-        - headless-otp-auth
+        - headless-auth
         - headless-pos-sessions
         - headless-umami
         - headless-wishlist

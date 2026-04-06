@@ -38,7 +38,7 @@ Namespace: `headless-wishlist/v1`
 
 ## Conventions
 
-- **Auth**: All `/items` endpoints require JWT (via headless-otp-auth's `determine_current_user` filter). `capability: 'read'` = any logged-in user
+- **Auth**: All `/items` endpoints require JWT (via headless-auth's `determine_current_user` filter). `capability: 'read'` = any logged-in user
 - **Option keys**: `headless_wishlist_version` (only option — no @Setting decorators)
 - **User meta key**: `_headless_wishlist` (underscore-prefixed, hidden from custom fields UI)
 - **Date storage**: ISO 8601 via `gmdate('c', time())`

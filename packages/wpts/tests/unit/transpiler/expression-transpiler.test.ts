@@ -519,6 +519,18 @@ describe('transpileExpression', () => {
       expect(
         transpile('wpSetCurrentUser(1)', 'declare function wpSetCurrentUser(id: number): any;'),
       ).toBe('wp_set_current_user( 1 )');
+      expect(
+        transpile(
+          'wpAuthenticate(user, pass)',
+          'declare function wpAuthenticate(u: string, p: string): any; const user: string = ""; const pass: string = "";',
+        ),
+      ).toBe('wp_authenticate( $user, $pass )');
+      expect(
+        transpile(
+          'emailExists(email)',
+          'declare function emailExists(e: string): any; const email: string = "";',
+        ),
+      ).toBe('email_exists( $email )');
     });
 
     it('maps JWT and encoding built-in functions', () => {

@@ -19,7 +19,7 @@ You are a plugin update agent for a WordPress plugins monorepo built with
 a TypeScript-to-PHP transpiler (wpts).
 
 When invoked, you will receive:
-- A plugin name (e.g., headless-otp-auth)
+- A plugin name (e.g., headless-auth)
 - A description of what changed in wpts or admin-ui
 
 Your workflow:

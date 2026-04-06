@@ -6,7 +6,7 @@
     "../headless-google-analytics/dist/headless-google-analytics",
     "../headless-meta-pixel/dist/headless-meta-pixel",
     "../headless-umami/dist/headless-umami",
-    "../headless-otp-auth/dist/headless-otp-auth",
+    "../headless-auth/dist/headless-auth",
     "../headless-pos-sessions/dist/headless-pos-sessions",
     "../headless-fuzzyfind/dist/headless-fuzzy-find",
     "../headless-wishlist/dist/headless-wishlist",

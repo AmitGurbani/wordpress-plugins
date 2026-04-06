@@ -59,8 +59,8 @@ async function globalSetup(config: FullConfig) {
     'wc product create --name="Premium Gadget" --regular_price=99.50 --sku=PREM-001 --status=publish --user=admin',
   );
 
-  // 7. Enable OTP auth test mode
-  wpCli('option update headless_otp_auth_otp_test_mode 1');
+  // 7. Enable auth test mode
+  wpCli('option update headless_auth_otp_test_mode 1');
 
   // 8. Flush rewrite rules
   wpCli('rewrite flush');
