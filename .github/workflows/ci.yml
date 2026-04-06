@@ -25,4 +25,4 @@ jobs:
           node-version: 20
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - run: turbo run check build test
+      - run: pnpm exec turbo run check build test
