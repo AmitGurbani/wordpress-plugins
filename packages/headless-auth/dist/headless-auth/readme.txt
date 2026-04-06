@@ -42,7 +42,7 @@ WooCommerce integration activates automatically when WooCommerce is installed: n
 1. Upload the plugin files to the `/wp-content/plugins/headless-auth` directory, or install the plugin through the WordPress plugins screen directly.
 2. Activate the plugin through the **Plugins** screen in WordPress.
 3. Go to **Settings > Permalinks** and click **Save Changes** to flush rewrite rules (recommended).
-4. Go to **OTP Auth** in the admin menu and configure your OTP delivery server URL and API key.
+4. Go to **Auth** in the admin menu to configure authentication settings (OTP delivery, password login, security, and more).
 
 A JWT secret key is generated automatically on activation. No manual key configuration is needed.
 
