@@ -5,7 +5,7 @@ const SLUG = 'headless-auth';
 const BASE = `http://localhost:8889/wp-json/${SLUG}/v1`;
 
 test.describe('Headless Auth — Rate Limiting', () => {
-  test.beforeAll(async ({ restApi }) => {
+  test.beforeAll(async ({ restApi, wpCli }) => {
     await restApi.updateSettings(SLUG, {
       otp_test_mode: true,
       max_otp_attempts: 3,
@@ -13,6 +13,15 @@ test.describe('Headless Auth — Rate Limiting', () => {
       otp_resend_cooldown: 1, // Set low for testing
       max_otp_verify_attempts: 3,
     });
+
+    // Create user for brute force test (before any HTTP traffic hits WP)
+    try {
+      wpCli('user create bruteuser bruteuser@test.com --role=subscriber --user_pass=testpass123');
+    } catch {
+      // May already exist from a previous test run
+    }
+    const userId = wpCli('user get bruteuser --field=ID');
+    wpCli(`user meta update ${userId} phone_number +17777777777`);
   });
 
   test('rate limits OTP send after max attempts', async ({ wpCli }) => {
@@ -44,15 +53,6 @@ test.describe('Headless Auth — Rate Limiting', () => {
   test('brute force protection on wrong OTP verification', async ({ wpCli }) => {
     const phone = '+17777777777';
 
-    // Create user with this phone
-    try {
-      wpCli('user create bruteuser bruteuser@test.com --role=subscriber --user_pass=testpass123');
-    } catch {
-      // May exist
-    }
-    const userId = wpCli('user get bruteuser --field=ID');
-    wpCli(`user meta update ${userId} phone_number ${phone}`);
-
     // Clear rate limit transients
     try {
       wpCli('transient delete --all');
@@ -60,7 +60,7 @@ test.describe('Headless Auth — Rate Limiting', () => {
       // Ignore
     }
 
-    // Send OTP
+    // Send OTP (user + phone already set up in beforeAll)
     const ctx = await playwrightRequest.newContext();
     await ctx.post(`${BASE}/otp/send`, { data: { phone } });
 
