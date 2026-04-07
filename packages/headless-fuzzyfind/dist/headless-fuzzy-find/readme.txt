@@ -1,8 +1,8 @@
 === Headless FuzzyFind ===
-Contributors: wpts
-Tags: woocommerce, search, fuzzy search, autocomplete, product search, headless
-Requires at least: 6.0
-Tested up to: 6.7
+Contributors: amitgurbani
+Tags: woocommerce, search, fuzzy search, autocomplete, headless
+Requires at least: 6.2
+Tested up to: 6.9
 Requires PHP: 8.0
 Stable tag: 1.0.0
 License: GPL-2.0+
@@ -30,7 +30,7 @@ The plugin provides public REST API endpoints — designed for headless storefro
 
 == Requirements ==
 
-* WordPress 6.0 or higher
+* WordPress 6.2 or higher
 * PHP 8.0 or higher
 * WooCommerce (required — search is WooCommerce product-specific)
 * MySQL/MariaDB with InnoDB engine (required for FULLTEXT index)
@@ -47,7 +47,7 @@ New products are indexed automatically on create/update. Deleted products are re
 
 = Does this replace the default WooCommerce search? =
 
-No. Headless FuzzyFind provides REST API endpoints (`/wp-json/headless-fuzzyfind/v1/search` and `/wp-json/headless-fuzzyfind/v1/autocomplete`) that you call from a custom search UI or headless frontend. The default WooCommerce search widget is unaffected.
+No. Headless FuzzyFind provides REST API endpoints (`/wp-json/headless-fuzzy-find/v1/search` and `/wp-json/headless-fuzzy-find/v1/autocomplete`) that you call from a custom search UI or headless frontend. The default WooCommerce search widget is unaffected.
 
 = How do I build the search index for existing products? =
 

@@ -19,7 +19,7 @@ class Headless_Fuzzyfind_Admin {
 			'Headless FuzzyFind Settings',
 			'FuzzyFind',
 			'manage_options',
-			'headless-fuzzyfind-settings',
+			'headless-fuzzy-find-settings',
 			array( $this, 'render_admin_page' ),
 			'dashicons-search',
 			null
@@ -34,7 +34,7 @@ class Headless_Fuzzyfind_Admin {
 
 	public function enqueue_admin_assets( $hook_suffix ) {
 		$admin_pages = array(
-			'toplevel_page_headless-fuzzyfind-settings',
+			'toplevel_page_headless-fuzzy-find-settings',
 		);
 
 		if ( ! in_array( $hook_suffix, $admin_pages, true ) ) {
@@ -50,7 +50,7 @@ class Headless_Fuzzyfind_Admin {
 		$asset = require $asset_file;
 
 		wp_enqueue_script(
-			'headless-fuzzyfind-admin',
+			'headless-fuzzy-find-admin',
 			HEADLESS_FUZZY_FIND_PLUGIN_URL . 'admin/js/build/index.js',
 			$asset['dependencies'],
 			$asset['version'],
@@ -59,7 +59,7 @@ class Headless_Fuzzyfind_Admin {
 
 		if ( file_exists( HEADLESS_FUZZY_FIND_PLUGIN_DIR . 'admin/js/build/index.css' ) ) {
 			wp_enqueue_style(
-				'headless-fuzzyfind-admin',
+				'headless-fuzzy-find-admin',
 				HEADLESS_FUZZY_FIND_PLUGIN_URL . 'admin/js/build/index.css',
 				array( 'wp-components' ),
 				$asset['version']
@@ -71,7 +71,7 @@ class Headless_Fuzzyfind_Admin {
 
 	public function register_settings() {
 		register_setting(
-			'headless-fuzzyfind_options',
+			'headless-fuzzy-find_options',
 			'headless_fuzzy_find_weight_title',
 			array(
 				'type'    => 'number',
@@ -80,7 +80,7 @@ class Headless_Fuzzyfind_Admin {
 			)
 		);
 		register_setting(
-			'headless-fuzzyfind_options',
+			'headless-fuzzy-find_options',
 			'headless_fuzzy_find_weight_sku',
 			array(
 				'type'    => 'number',
@@ -89,7 +89,7 @@ class Headless_Fuzzyfind_Admin {
 			)
 		);
 		register_setting(
-			'headless-fuzzyfind_options',
+			'headless-fuzzy-find_options',
 			'headless_fuzzy_find_weight_content',
 			array(
 				'type'    => 'number',
@@ -98,7 +98,7 @@ class Headless_Fuzzyfind_Admin {
 			)
 		);
 		register_setting(
-			'headless-fuzzyfind_options',
+			'headless-fuzzy-find_options',
 			'headless_fuzzy_find_fuzzy_enabled',
 			array(
 				'type'    => 'boolean',
@@ -107,7 +107,7 @@ class Headless_Fuzzyfind_Admin {
 			)
 		);
 		register_setting(
-			'headless-fuzzyfind_options',
+			'headless-fuzzy-find_options',
 			'headless_fuzzy_find_autocomplete_enabled',
 			array(
 				'type'    => 'boolean',
@@ -116,7 +116,7 @@ class Headless_Fuzzyfind_Admin {
 			)
 		);
 		register_setting(
-			'headless-fuzzyfind_options',
+			'headless-fuzzy-find_options',
 			'headless_fuzzy_find_analytics_enabled',
 			array(
 				'type'    => 'boolean',
@@ -125,7 +125,7 @@ class Headless_Fuzzyfind_Admin {
 			)
 		);
 		register_setting(
-			'headless-fuzzyfind_options',
+			'headless-fuzzy-find_options',
 			'headless_fuzzy_find_min_query_length',
 			array(
 				'type'    => 'number',
@@ -134,7 +134,7 @@ class Headless_Fuzzyfind_Admin {
 			)
 		);
 		register_setting(
-			'headless-fuzzyfind_options',
+			'headless-fuzzy-find_options',
 			'headless_fuzzy_find_autocomplete_limit',
 			array(
 				'type'    => 'number',
@@ -143,7 +143,7 @@ class Headless_Fuzzyfind_Admin {
 			)
 		);
 		register_setting(
-			'headless-fuzzyfind_options',
+			'headless-fuzzy-find_options',
 			'headless_fuzzy_find_did_you_mean_threshold',
 			array(
 				'type'    => 'number',
@@ -152,7 +152,7 @@ class Headless_Fuzzyfind_Admin {
 			)
 		);
 		register_setting(
-			'headless-fuzzyfind_options',
+			'headless-fuzzy-find_options',
 			'headless_fuzzy_find_synonyms',
 			array(
 				'type'    => 'string',
@@ -165,7 +165,7 @@ class Headless_Fuzzyfind_Admin {
 	public function woo_notice() {
 		if ( ! class_exists( 'WooCommerce' ) ) {
 			echo '<div class="notice notice-error"><p><strong>' . esc_html( 'Headless FuzzyFind' ) . ':</strong> ';
-			echo esc_html__( 'WooCommerce is required for this plugin to work.', 'headless-fuzzyfind' );
+			echo esc_html__( 'WooCommerce is required for this plugin to work.', 'headless-fuzzy-find' );
 			echo '</p></div>';
 		}
 	}

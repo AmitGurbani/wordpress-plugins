@@ -1,8 +1,8 @@
 === Headless Meta Pixel ===
-Contributors: wpts
-Tags: meta pixel, facebook pixel, conversions api, capi, woocommerce, headless
+Contributors: amitgurbani
+Tags: meta pixel, facebook pixel, conversions api, woocommerce, headless
 Requires at least: 6.0
-Tested up to: 6.7
+Tested up to: 6.9
 Requires PHP: 8.0
 Stable tag: 1.0.0
 License: GPL-2.0+
@@ -62,6 +62,19 @@ During development, set a Test Event Code from Meta Events Manager to verify you
 = How does event deduplication work? =
 
 Your frontend generates a UUID and passes it to both `fbq('track', eventName, data, { eventID: uuid })` and to the `/track` endpoint as `event_id`. Meta automatically deduplicates when it receives the same `event_name` + `event_id` pair from both browser and server within 48 hours.
+
+== Third Party Services ==
+
+This plugin sends event data to Meta (Facebook) via the [Conversions API](https://developers.facebook.com/docs/marketing-api/conversions-api):
+
+* **What is sent**: Event name, event parameters (product details, order value, currency), client IP address, User-Agent, and SHA-256 hashed PII (email, name, phone, address) for logged-in users and WooCommerce orders
+* **When**: On WooCommerce order status changes (Purchase events) and when your frontend proxies events via the `/track` endpoint
+* **Where**: `https://graph.facebook.com/v25.0/{pixel_id}/events` (Meta's Conversions API endpoint)
+
+All PII is SHA-256 hashed before transmission, following Meta's requirements. No data is sent until you configure a Pixel ID and Access Token.
+
+* [Meta Platform Terms](https://www.facebook.com/legal/terms)
+* [Meta Privacy Policy](https://www.facebook.com/privacy/policy)
 
 == Changelog ==
 

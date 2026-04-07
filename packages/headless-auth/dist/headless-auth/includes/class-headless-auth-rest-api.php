@@ -380,7 +380,7 @@ class Headless_Auth_Rest_Api {
 		$headers_json = str_replace( '{{siteUrl}}', $safe_site_url, $headers_json );
 		$custom_headers = json_decode( $headers_json, true );
 		$headers = array_merge( array( 'Content-Type' => 'application/json' ), $custom_headers );
-		$response = wp_remote_post( $server_url, array( 'body' => $payload, 'headers' => $headers, 'timeout' => 15 ) );
+		$response = wp_safe_remote_post( $server_url, array( 'body' => $payload, 'headers' => $headers, 'timeout' => 15 ) );
 		if ( is_wp_error( $response ) ) {
 			return new WP_Error( 'otp_send_failed', 'Failed to send OTP.', array( 'status' => 500 ) );
 		}

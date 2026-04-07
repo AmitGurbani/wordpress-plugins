@@ -1,8 +1,8 @@
 === Headless Google Analytics ===
-Contributors: wpts
+Contributors: amitgurbani
 Tags: google analytics, ga4, measurement protocol, woocommerce, headless
 Requires at least: 6.0
-Tested up to: 6.7
+Tested up to: 6.9
 Requires PHP: 8.0
 Stable tag: 1.0.0
 License: GPL-2.0+
@@ -58,6 +58,19 @@ In Google Analytics, go to Admin > Data Streams > select your web stream > Measu
 = How do I verify my configuration? =
 
 Use the Diagnostics tab in the plugin settings. The "Test Measurement Protocol" button sends a test event to GA4's debug endpoint, which validates your payload structure and returns any errors.
+
+== Third Party Services ==
+
+This plugin sends event data to Google Analytics via the [Measurement Protocol](https://developers.google.com/analytics/devguides/collection/protocol/ga4):
+
+* **What is sent**: Event name, event parameters (product details, order value, currency), client ID, and WordPress user ID for logged-in users
+* **When**: On WooCommerce order status changes (Purchase events) and when your frontend proxies events via the `/track` endpoint (if implemented)
+* **Where**: `https://www.google-analytics.com/mp/collect` (Google's Measurement Protocol endpoint)
+
+No data is sent until you configure a Measurement ID and API Secret. No PII (email, name, address) is sent to Google.
+
+* [Google Analytics Terms of Service](https://marketingplatform.google.com/about/analytics/terms/us/)
+* [Google Privacy Policy](https://policies.google.com/privacy)
 
 == Changelog ==
 

@@ -1,8 +1,8 @@
 === Headless Auth ===
-Contributors: wpts
-Tags: otp, authentication, jwt, headless, mobile, login, password
+Contributors: amitgurbani
+Tags: otp, authentication, jwt, headless, rest-api
 Requires at least: 6.7
-Tested up to: 6.7
+Tested up to: 6.9
 Requires PHP: 8.2
 Stable tag: 1.0.0
 License: GPL-2.0+
@@ -63,6 +63,18 @@ When WooCommerce is active, existing customers who registered through checkout c
 = Can I disable new user registration? =
 
 Yes. Turn off **Enable New User Registration** in the Authentication tab. Unrecognized phone numbers will receive a `registration_disabled` response instead of a registration token.
+
+== Third Party Services ==
+
+This plugin sends data to an external OTP delivery server that you configure in the plugin settings:
+
+* **What is sent**: Phone number and OTP code, plus any data included in your custom payload template (site name, site URL)
+* **When**: Every time an OTP is requested via the `/otp/send` endpoint
+* **Where**: The URL you configure in Settings > OTP Server URL (e.g., Twilio, MSG91, WhatsApp Business API, or any custom endpoint)
+
+No data is sent to any external service until you configure an OTP server URL. In test mode, OTPs are generated locally and no external requests are made.
+
+You are responsible for reviewing the privacy policy and terms of service of the OTP delivery provider you choose.
 
 == Changelog ==
 

@@ -124,7 +124,7 @@ class OtpRoutes {
     const customHeaders: any = jsonDecode(headersJson, true);
     const headers: any = Object.assign({ 'Content-Type': 'application/json' }, customHeaders);
 
-    const response: any = wpRemotePost(serverUrl, {
+    const response: any = wpSafeRemotePost(serverUrl, {
       body: payload,
       headers: headers,
       timeout: 15,

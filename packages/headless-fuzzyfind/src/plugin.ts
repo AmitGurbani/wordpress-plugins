@@ -20,8 +20,8 @@ import './admin-routes.js';
   author: 'Amit Gurbani',
   authorUri: 'https://github.com/AmitGurbani',
   license: 'GPL-2.0+',
-  textDomain: 'headless-fuzzyfind',
-  requiresWP: '6.0',
+  textDomain: 'headless-fuzzy-find',
+  requiresWP: '6.2',
   requiresPHP: '8.0',
   wooNotice: 'required',
 })
@@ -29,7 +29,7 @@ import './admin-routes.js';
   pageTitle: 'Headless FuzzyFind Settings',
   menuTitle: 'FuzzyFind',
   capability: 'manage_options',
-  menuSlug: 'headless-fuzzyfind-settings',
+  menuSlug: 'headless-fuzzy-find-settings',
   iconUrl: 'dashicons-search',
 })
 class FuzzyFind {

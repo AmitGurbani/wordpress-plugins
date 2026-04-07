@@ -12,7 +12,7 @@ class Headless_Fuzzyfind {
 
 	public function __construct() {
 		$this->version     = HEADLESS_FUZZY_FIND_VERSION;
-		$this->plugin_name = 'headless-fuzzyfind';
+		$this->plugin_name = 'headless-fuzzy-find';
 		$this->load_dependencies();
 		$this->define_admin_hooks();
 		$this->define_public_hooks();
@@ -30,7 +30,7 @@ class Headless_Fuzzyfind {
 		$admin = new Headless_Fuzzyfind_Admin( $this->plugin_name, $this->version );
 		$this->loader->add_action( 'admin_menu', $admin, 'register_admin_pages' );
 		$this->loader->add_action( 'admin_enqueue_scripts', $admin, 'enqueue_admin_assets' );
-		$rest_api = new Headless_Fuzzyfind_Rest_Api( 'headless-fuzzyfind' );
+		$rest_api = new Headless_Fuzzyfind_Rest_Api( 'headless-fuzzy-find' );
 		$this->loader->add_action( 'rest_api_init', $rest_api, 'register_routes' );
 		$this->loader->add_action( 'admin_init', $admin, 'register_settings' );
 		$this->loader->add_action( 'admin_notices', $admin, 'woo_notice', 10, 0 );

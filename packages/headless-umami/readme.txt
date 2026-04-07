@@ -1,8 +1,8 @@
 === Headless Umami ===
-Contributors: wpts
+Contributors: amitgurbani
 Tags: umami, analytics, woocommerce, headless, privacy
 Requires at least: 6.0
-Tested up to: 6.7
+Tested up to: 6.9
 Requires PHP: 8.0
 Stable tag: 1.0.0
 License: GPL-2.0+
@@ -63,6 +63,19 @@ Yes. Enter your self-hosted Umami instance URL in the settings (e.g., `https://a
 = Is this GDPR compliant? =
 
 Umami is designed to be privacy-friendly. It does not use cookies, does not collect personal information, and does not track users across websites. This plugin does not send any PII (email, phone, name, address) to Umami.
+
+== Third Party Services ==
+
+This plugin sends event data to your [Umami Analytics](https://umami.is) instance:
+
+* **What is sent**: Event name and event data (product details, order value, currency). No PII (email, phone, name, address) is ever sent.
+* **When**: On WooCommerce order status changes (Purchase events)
+* **Where**: The Umami URL you configure in plugin settings (e.g., `https://cloud.umami.is` for Umami Cloud or your self-hosted instance)
+
+No data is sent until you configure a Umami URL and Website ID. Umami is privacy-focused — no cookies, no personal data collection.
+
+* [Umami Privacy Policy](https://umami.is/privacy)
+* [Umami Terms of Service](https://umami.is/terms)
 
 == Changelog ==
 
