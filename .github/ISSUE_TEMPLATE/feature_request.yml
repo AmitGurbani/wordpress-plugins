@@ -11,7 +11,7 @@ body:
         - wpts
         - admin-ui
         - headless-clarity
-        - headless-fuzzyfind
+        - headless-fuzzy-find
         - headless-google-analytics
         - headless-meta-pixel
         - headless-auth

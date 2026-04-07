@@ -45,7 +45,7 @@ tests/
     diagnostics.spec.ts
     settings-crud.spec.ts
   headless-clarity/
-  headless-fuzzyfind/
+  headless-fuzzy-find/
   headless-google-analytics/
   headless-meta-pixel/
   headless-auth/
@@ -64,7 +64,7 @@ Plugin-specific tests live in `tests/<plugin-name>/`. Tests that apply across pl
 `global-setup.ts` runs once before the test suite and:
 
 1. Authenticates as the WordPress admin and saves session state
-2. Re-activates plugins that create DB tables on activation (e.g. headless-fuzzyfind)
+2. Re-activates plugins that create DB tables on activation (e.g. headless-fuzzy-find)
 3. Enables pretty permalinks (`/%postname%/`) for REST API routes
 4. Bypasses WooCommerce onboarding and installs default pages
 5. Configures WooCommerce store basics (address, currency)

@@ -8,7 +8,7 @@
     "../headless-umami/dist/headless-umami",
     "../headless-auth/dist/headless-auth",
     "../headless-pos-sessions/dist/headless-pos-sessions",
-    "../headless-fuzzyfind/dist/headless-fuzzy-find",
+    "../headless-fuzzy-find/dist/headless-fuzzy-find",
     "../headless-wishlist/dist/headless-wishlist",
     "https://downloads.wordpress.org/plugin/woocommerce.latest-stable.zip"
   ],

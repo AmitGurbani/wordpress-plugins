@@ -155,9 +155,9 @@ export const PLUGINS: PluginConfig[] = [
     sensitiveKeys: [],
   },
   {
-    slug: 'headless-fuzzyfind',
-    name: 'Headless FuzzyFind',
-    menuSlug: 'headless-fuzzyfind-settings',
+    slug: 'headless-fuzzy-find',
+    name: 'Headless Fuzzy Find',
+    menuSlug: 'headless-fuzzy-find-settings',
     hasConfig: false,
     hasDiagnostics: false,
     settings: {
