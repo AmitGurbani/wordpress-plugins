@@ -21,6 +21,12 @@ Turborepo monorepo for WordPress plugins and tooling, using pnpm workspaces.
 | [headless-wishlist](packages/headless-wishlist/) | REST API wishlist for headless WordPress/WooCommerce (built with wpts) | [README](packages/headless-wishlist/README.md) |
 | [e2e](packages/e2e/) | Playwright end-to-end tests for all plugins (wp-env) | [README](packages/e2e/README.md) |
 
+## Releases
+
+Each plugin is released independently via [GitHub Releases](https://github.com/AmitGurbani/wordpress-plugins/releases). Download the plugin ZIP from the latest release and install via **Plugins > Add New > Upload Plugin** in WordPress admin.
+
+Releases are managed through a [workflow_dispatch workflow](.github/workflows/release.yml) that handles version bumping, changelog generation, and ZIP asset upload.
+
 ## Getting Started
 
 ```bash

@@ -38,6 +38,12 @@ Path-scoped rules (`.claude/rules/`):
 - `headless-plugins.md` — Shared plugin authoring guardrails, loads for `packages/headless-*/src/**`
 - `dist-output.md` — Guards against editing generated output, loads for `packages/*/dist/**`
 
+## Releases
+
+- `./scripts/bump-version.sh <plugin> <patch|minor|major>` — Bump version in package.json, src/plugin.ts, readme.txt
+- Release workflow (`.github/workflows/release.yml`) — workflow_dispatch, bumps version, builds, generates changelog, tags (`<plugin>@<version>`), creates GitHub Release with ZIP
+- Run `/wp-plugin-review` on dist/ output before releasing
+
 ## Commits
 
 Format: `<type>(<scope>): <emoji> <subject>`

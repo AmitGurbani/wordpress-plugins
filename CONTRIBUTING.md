@@ -90,6 +90,20 @@ Examples:
 - `feat(wpts): ✨ add @Cron decorator support`
 - `fix(headless-meta-pixel): 🐛 handle missing currency in order data`
 
+## Releases & Versioning
+
+Plugins use [semantic versioning](https://semver.org/) and are released independently via GitHub Releases.
+
+**Version bump script** — updates `package.json`, `src/plugin.ts`, and `readme.txt`:
+
+```bash
+./scripts/bump-version.sh <plugin-name> <patch|minor|major>
+```
+
+**Release workflow** — triggered manually from GitHub Actions (**Actions > Release > Run workflow**). It bumps the version, builds the plugin, generates a changelog from commits, commits the changes, creates a git tag (`<plugin>@<version>`), and publishes a GitHub Release with the ZIP attached.
+
+Only maintainers can trigger releases.
+
 ## Pull Requests
 
 1. Fork the repository and create a branch from `main`
