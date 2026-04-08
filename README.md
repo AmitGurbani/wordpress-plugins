@@ -18,8 +18,14 @@ Turborepo monorepo for WordPress plugins and tooling, using pnpm workspaces.
 | [headless-google-analytics](packages/headless-google-analytics/) | Google Analytics (GA4) with WooCommerce Measurement Protocol for headless WordPress (built with wpts) | [Integration](packages/headless-google-analytics/docs/integration-guide.md) · [Admin](packages/headless-google-analytics/docs/admin-guide.md) |
 | [headless-clarity](packages/headless-clarity/) | Microsoft Clarity session recordings and heatmaps for headless WordPress (built with wpts) | [Integration](packages/headless-clarity/docs/integration-guide.md) · [Admin](packages/headless-clarity/docs/admin-guide.md) |
 | [headless-pos-sessions](packages/headless-pos-sessions/) | POS register session storage with REST API for headless WordPress (built with wpts) | [Integration](packages/headless-pos-sessions/docs/integration-guide.md) · [Admin](packages/headless-pos-sessions/docs/admin-guide.md) |
-| [headless-wishlist](packages/headless-wishlist/) | REST API wishlist for headless WordPress/WooCommerce (built with wpts) | [README](packages/headless-wishlist/README.md) |
+| [headless-wishlist](packages/headless-wishlist/) | REST API wishlist for headless WordPress/WooCommerce (built with wpts) | [Integration](packages/headless-wishlist/docs/integration-guide.md) · [Admin](packages/headless-wishlist/docs/admin-guide.md) |
 | [e2e](packages/e2e/) | Playwright end-to-end tests for all plugins (wp-env) | [README](packages/e2e/README.md) |
+
+## Documentation
+
+- **[Architecture Guide](docs/architecture.md)** — Package relationships, build pipeline, creating new plugins
+- **Plugin docs** — Each plugin has Integration and Admin guides (see Docs column above)
+- **[wpts Transpiler](packages/wpts/README.md)** — CLI, decorators, transpilation rules ([full docs](packages/wpts/docs/))
 
 ## Releases
 
@@ -65,6 +71,10 @@ pnpm biome check --write .   # Fix all auto-fixable lint + format issues
 ## Contributing
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for development setup, commit conventions, and PR guidelines.
+
+## CLAUDE.md Files
+
+Each package includes a `CLAUDE.md` with architecture details, conventions, and references for AI-assisted development. The [root CLAUDE.md](CLAUDE.md) covers monorepo-wide commands, commit format, and Claude Code agents/skills.
 
 ## License
 

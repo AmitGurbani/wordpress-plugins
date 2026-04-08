@@ -20,6 +20,7 @@ turbo run build
 ## Project Structure
 
 ```
+docs/                # Architecture guide
 packages/
   admin-ui/          # Shared React admin UI components
   wpts/              # TypeScript-to-WordPress-Plugin transpiler (MIT)

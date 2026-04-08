@@ -9,75 +9,31 @@ REST API wishlist plugin for headless WordPress/WooCommerce stores. Stores wishl
 - WooCommerce (required)
 - [Headless Auth](../headless-auth/) for JWT authentication
 
-## API Reference
+## Documentation
 
-All endpoints require `Authorization: Bearer <JWT>` header (issued by headless-auth). Returns 401 if missing or invalid.
+- **[Integration Guide](docs/integration-guide.md)** — REST API reference, authentication, curl examples, TypeScript client
+- **[Admin Guide](docs/admin-guide.md)** — Installation, analytics dashboard, data storage, troubleshooting
 
-### `GET /wp-json/headless-wishlist/v1/items`
+## REST API
 
-Returns the authenticated user's wishlist, ordered by most recently added.
+All `/items` endpoints require JWT authentication (`Authorization: Bearer <token>`).
 
-```json
-{
-  "items": [
-    { "product_id": 456, "slug": "brown-rice-5kg", "added_at": "2026-04-03T08:15:00+00:00" },
-    { "product_id": 123, "slug": "organic-honey", "added_at": "2026-04-02T10:30:00+00:00" }
-  ]
-}
+| Method | Route | Auth | Description |
+|--------|-------|------|-------------|
+| GET | `/items` | `read` | List user's wishlist (auto-cleans stale products) |
+| POST | `/items` | `read` | Add product (201 created, 409 duplicate) |
+| DELETE | `/items/{product_id}` | `read` | Remove specific product |
+| DELETE | `/items` | `read` | Clear entire wishlist |
+| GET | `/analytics/popular` | `manage_options` | Top 20 most wishlisted products (admin) |
+
+## Project Structure
+
 ```
-
-Products that no longer exist or are unpublished are automatically removed from the list.
-
-### `POST /wp-json/headless-wishlist/v1/items`
-
-Add a product to the wishlist.
-
-**Request:** `{ "product_id": 123 }`
-
-**Response (201):** `{ "success": true, "item": { "product_id": 123, "slug": "organic-honey", "added_at": "..." } }`
-
-**Errors:** 400 (missing product_id), 404 (product not found), 409 (already in wishlist)
-
-### `DELETE /wp-json/headless-wishlist/v1/items/{product_id}`
-
-Remove a product from the wishlist.
-
-**Response (200):** `{ "success": true }`
-
-**Errors:** 404 (not in wishlist)
-
-### `DELETE /wp-json/headless-wishlist/v1/items`
-
-Clear the entire wishlist.
-
-**Response (200):** `{ "success": true }`
-
-### `GET /wp-json/headless-wishlist/v1/analytics/popular` (admin only)
-
-Returns the most wishlisted products across all users. Requires `manage_options` capability.
-
-```json
-{
-  "popular": [
-    { "product_id": 123, "name": "Organic Honey", "slug": "organic-honey", "count": 42 }
-  ],
-  "total_users": 150,
-  "total_items": 487
-}
-```
-
-## Admin Page
-
-WordPress admin menu item "Wishlist" (dashicons-heart) shows an analytics dashboard with:
-- Summary cards: users with wishlists, total wishlisted items
-- Table: most wishlisted products ranked by count
-
-## Extensibility
-
-**`headless_wishlist_max_items`** filter — cap the maximum number of items per wishlist (default: 100).
-
-```php
-add_filter( 'headless_wishlist_max_items', function() { return 50; } );
+src/
+├── plugin.ts             # @Plugin, @AdminPage, @Activate
+├── wishlist-routes.ts    # GET/POST/DELETE /items endpoints
+├── analytics-routes.ts   # GET /analytics/popular (admin-only)
+└── admin/                # React analytics dashboard
 ```
 
 ## Development
