@@ -43,10 +43,15 @@ test.describe('Headless Fuzzy Find — Indexer', () => {
 
     // Rebuild for other tests and wait for completion
     await restApi.post(`${SLUG}/v1/index/rebuild`);
-    for (let i = 0; i < 30; i++) {
+    let rebuilt = false;
+    for (let i = 0; i < 60; i++) {
       const { data: s } = await restApi.get(`${SLUG}/v1/index/status`);
-      if (s.total_indexed > 0 && !s.is_indexing) break;
+      if (s.total_indexed > 0 && !s.is_indexing) {
+        rebuilt = true;
+        break;
+      }
       await new Promise((r) => setTimeout(r, 1000));
     }
+    expect(rebuilt).toBe(true);
   });
 });

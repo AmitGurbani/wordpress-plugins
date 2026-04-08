@@ -5,6 +5,9 @@ export default defineConfig({
   ...baseConfig,
   testDir: './tests',
   globalSetup: './global-setup.ts',
+  reporter: process.env.CI
+    ? [['github'], ['html', { outputFolder: 'playwright-report', open: 'never' }]]
+    : [['list']],
   webServer: {
     command: 'pnpm wp-env start',
     port: 8889,

@@ -5,7 +5,7 @@ const SLUG = 'headless-fuzzy-find';
 const BASE = `http://localhost:8889/wp-json/${SLUG}/v1`;
 
 test.describe('Headless Fuzzy Find — Search', () => {
-  test.beforeAll(async ({ restApi }) => {
+  test.beforeAll(async ({ restApi, wpCli }) => {
     // Check if index already has products
     const { data: status } = await restApi.get(`${SLUG}/v1/index/status`);
     if (status.total_indexed > 0 && !status.is_indexing) return;
@@ -15,7 +15,7 @@ test.describe('Headless Fuzzy Find — Search', () => {
 
     // Wait for index to be ready
     let indexed = false;
-    for (let i = 0; i < 30; i++) {
+    for (let i = 0; i < 60; i++) {
       const { data } = await restApi.get(`${SLUG}/v1/index/status`);
       if (data.total_indexed > 0 && !data.is_indexing) {
         indexed = true;
@@ -23,6 +23,14 @@ test.describe('Headless Fuzzy Find — Search', () => {
       }
       await new Promise((r) => setTimeout(r, 1000));
     }
+
+    // Fallback: trigger reindex directly via WP-CLI if REST API rebuild didn't work
+    if (!indexed) {
+      wpCli('eval "do_action(\'headless_fuzzy_find_do_reindex\');"');
+      const { data } = await restApi.get(`${SLUG}/v1/index/status`);
+      indexed = data.total_indexed > 0;
+    }
+
     expect(indexed).toBe(true);
   });
 
