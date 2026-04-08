@@ -1,0 +1,132 @@
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      plugin:
+        description: Plugin to release
+        required: true
+        type: choice
+        options:
+          - headless-auth
+          - headless-clarity
+          - headless-fuzzy-find
+          - headless-google-analytics
+          - headless-meta-pixel
+          - headless-pos-sessions
+          - headless-umami
+          - headless-wishlist
+      bump:
+        description: Version bump type
+        required: true
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Release ${{ inputs.plugin }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    concurrency:
+      group: release-${{ inputs.plugin }}
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - uses: pnpm/action-setup@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Bump version
+        id: bump
+        env:
+          PLUGIN: ${{ inputs.plugin }}
+          BUMP: ${{ inputs.bump }}
+        run: |
+          chmod +x scripts/bump-version.sh
+          NEW_VERSION=$(scripts/bump-version.sh "$PLUGIN" "$BUMP")
+          echo "version=$NEW_VERSION" >> "$GITHUB_OUTPUT"
+          echo "tag=${PLUGIN}@${NEW_VERSION}" >> "$GITHUB_OUTPUT"
+
+      - name: Build plugin
+        env:
+          PLUGIN: ${{ inputs.plugin }}
+        run: pnpm --filter "$PLUGIN" build
+
+      - name: Generate changelog
+        env:
+          PLUGIN: ${{ inputs.plugin }}
+        run: |
+          # Find previous tag for this plugin
+          PREV_TAG=$(git tag --list "${PLUGIN}@*" --sort=-v:refname | head -1)
+
+          # Build range args: empty = all history (first release), otherwise since last tag
+          RANGE_ARGS=()
+          if [ -n "$PREV_TAG" ]; then
+            RANGE_ARGS=("${PREV_TAG}..HEAD")
+          fi
+
+          # Collect commits by scope and by file path, deduplicate
+          CHANGELOG=$(
+            {
+              git log "${RANGE_ARGS[@]}" --oneline --grep="(${PLUGIN})" --pretty="format:- %s" 2>/dev/null || true
+              git log "${RANGE_ARGS[@]}" --oneline -- "packages/${PLUGIN}/" --pretty="format:- %s" 2>/dev/null || true
+            } | sort -u | sed 's/^- [a-z]*([^)]*): /- /'
+          )
+
+          if [ -z "$CHANGELOG" ]; then
+            CHANGELOG="- Version bump"
+          fi
+
+          # Write release notes
+          {
+            echo "## Changelog"
+            echo ""
+            echo "$CHANGELOG"
+            echo ""
+            echo "## Installation"
+            echo ""
+            echo "1. Download \`${PLUGIN}.zip\` below"
+            echo "2. In WordPress admin, go to **Plugins > Add New > Upload Plugin**"
+            echo "3. Upload the ZIP file and activate"
+          } > /tmp/release-notes.md
+
+      - name: Commit and tag
+        env:
+          PLUGIN: ${{ inputs.plugin }}
+          VERSION: ${{ steps.bump.outputs.version }}
+          TAG: ${{ steps.bump.outputs.tag }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "packages/${PLUGIN}/package.json" \
+                  "packages/${PLUGIN}/src/plugin.ts" \
+                  "packages/${PLUGIN}/readme.txt" \
+                  "packages/${PLUGIN}/dist/${PLUGIN}/"
+          git commit -m "release(${PLUGIN}): 🔖 v${VERSION}"
+          git tag "$TAG" -m "${PLUGIN} v${VERSION}"
+          git push origin HEAD --follow-tags
+
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PLUGIN: ${{ inputs.plugin }}
+          VERSION: ${{ steps.bump.outputs.version }}
+          TAG: ${{ steps.bump.outputs.tag }}
+        run: |
+          gh release create "$TAG" \
+            "packages/${PLUGIN}/dist/${PLUGIN}.zip" \
+            --title "${PLUGIN} v${VERSION}" \
+            --notes-file /tmp/release-notes.md
