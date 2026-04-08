@@ -20,6 +20,7 @@ Turborepo monorepo with pnpm workspaces.
 - Package manager: pnpm (not npm or yarn)
 - All packages live in `packages/`
 - Use turbo for orchestrating build/test/lint across packages
+- Pre-commit hook (simple-git-hooks + lint-staged) runs `biome check --write` on staged files automatically
 - Plugin packages track generated output in `dist/` (via `!dist/` in their `.gitignore`), excluding only ZIP archives. Rebuild plugins after wpts or admin-ui changes and commit the updated dist so diffs are reviewable.
 
 ## Agents, Skills & Rules

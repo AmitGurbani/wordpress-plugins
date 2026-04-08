@@ -19,10 +19,19 @@
     "test:e2e": "turbo run test:e2e",
     "lint": "turbo run lint",
     "format": "biome format --write .",
-    "check": "turbo run check"
+    "check": "turbo run check",
+    "prepare": "simple-git-hooks"
+  },
+  "simple-git-hooks": {
+    "pre-commit": "pnpm lint-staged"
+  },
+  "lint-staged": {
+    "*.{ts,tsx,js,jsx,json,css}": "biome check --write --no-errors-on-unmatched"
   },
   "devDependencies": {
     "@biomejs/biome": "2.4.9",
+    "lint-staged": "^16.4.0",
+    "simple-git-hooks": "^2.13.1",
     "turbo": "^2.8.0"
   }
 }
