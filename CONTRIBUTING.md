@@ -49,6 +49,8 @@ pnpm format                         # Auto-format everything
 pnpm biome check --write .          # Fix all auto-fixable issues
 ```
 
+A pre-commit hook (via `simple-git-hooks` + `lint-staged`) automatically runs `biome check --write` on staged files, so formatting and lint fixes are applied before every commit.
+
 ### E2E Tests
 
 Requires Docker for the [wp-env](https://developer.wordpress.org/block-editor/reference-guides/packages/packages-env/) WordPress instance.

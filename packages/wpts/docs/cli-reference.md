@@ -28,6 +28,7 @@ wpts build --clean                      # Clean output directory first
 |--------|-------------|---------|
 | `-o, --outDir <dir>` | Output directory | `./dist` |
 | `--clean` | Clean output before build | `false` |
+| `--zip` | Generate a `.zip` file for WordPress upload | `false` |
 
 Admin React builds cache `node_modules` in `.wpts-cache/` to avoid reinstalling dependencies on every build. The cache invalidates automatically when `package.json` dependencies change. Delete `.wpts-cache/` to force a fresh install.
 
