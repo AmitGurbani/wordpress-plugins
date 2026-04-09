@@ -39,10 +39,10 @@ const { tabs, id } = Astro.props;
   </div>
   {tabs.map((tab, i) => (
     <div
-      class:list={["[&_pre]:!rounded-none [&_pre]:!border-0 [&_pre]:!m-0 [&_pre]:font-mono", i !== 0 && "hidden"]}
+      class:list={["[&_pre]:!rounded-none [&_pre]:!border-0 [&_pre]:!m-0 [&_pre]:!py-5 [&_pre]:!px-5 [&_pre]:font-mono", i !== 0 && "hidden"]}
       data-tab-panel={i}
     >
-      <Code code={tab.code} lang={tab.lang} theme="github-dark" />
+      <Code code={tab.code} lang={tab.lang as any} theme="github-dark" />
     </div>
   ))}
 </div>

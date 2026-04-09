@@ -7,16 +7,18 @@ import CrossSell from "../../components/CrossSell.astro";
 import CodeTabs from "../../components/CodeTabs.astro";
 import { plugins } from "../../data/plugins";
 import { codeExamples } from "../../data/code-examples";
-import type { GetStaticPaths } from "astro";
+import type { GetStaticPaths, InferGetStaticPropsType } from "astro";
 
-export const getStaticPaths: GetStaticPaths = () => {
+export const getStaticPaths = (() => {
   return plugins.map((plugin) => ({
     params: { slug: plugin.slug },
     props: { plugin },
   }));
-};
+}) satisfies GetStaticPaths;
 
-const { plugin } = Astro.props;
+type Props = InferGetStaticPropsType<typeof getStaticPaths>;
+
+const { plugin } = Astro.props as Props;
 const example = codeExamples.find((e) => e.slug === plugin.slug);
 ---
 
