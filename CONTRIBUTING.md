@@ -25,6 +25,7 @@ packages/
   admin-ui/          # Shared React admin UI components
   wpts/              # TypeScript-to-WordPress-Plugin transpiler (MIT)
   headless-*/        # WordPress plugins built with wpts
+  website/           # Landing page (Astro 6 + Tailwind CSS 4)
   e2e/               # Playwright end-to-end tests
 ```
 

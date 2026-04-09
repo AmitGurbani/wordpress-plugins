@@ -9,6 +9,7 @@ This is a Turborepo monorepo using pnpm workspaces. All packages live in `packag
 | **Transpiler** | [wpts](../packages/wpts/) | TypeScript-to-WordPress-Plugin transpiler (MIT licensed) |
 | **Shared UI** | [admin-ui](../packages/admin-ui/) | React components and hooks for plugin admin pages |
 | **Plugins** | 8 `headless-*` packages | WordPress plugins built with wpts |
+| **Website** | [website](../packages/website/) | Landing page and plugin catalog (Astro 6 + Tailwind CSS 4) |
 | **Testing** | [e2e](../packages/e2e/) | Playwright end-to-end tests against wp-env |
 
 ## Package Map
@@ -38,7 +39,12 @@ This is a Turborepo monorepo using pnpm workspaces. All packages live in `packag
 │                    ┌──────────▼──────────┐                       │
 │                    │     e2e (tests)     │                       │
 │                    │ Playwright + wp-env │                       │
-│                    └────────────────────-┘                       │
+│                    └─────────────────────┘                       │
+│                                                                  │
+│  ┌──────────────────────────────────────────────────────────┐   │
+│  │  website (standalone — Astro 6 + Tailwind CSS 4)         │   │
+│  │  Landing page, plugin catalog, GitHub Pages deploy       │   │
+│  └──────────────────────────────────────────────────────────┘   │
 └──────────────────────────────────────────────────────────────────┘
 ```
 

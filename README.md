@@ -19,6 +19,7 @@ Turborepo monorepo for WordPress plugins and tooling, using pnpm workspaces.
 | [headless-clarity](packages/headless-clarity/) | Microsoft Clarity session recordings and heatmaps for headless WordPress (built with wpts) | [Integration](packages/headless-clarity/docs/integration-guide.md) · [Admin](packages/headless-clarity/docs/admin-guide.md) |
 | [headless-pos-sessions](packages/headless-pos-sessions/) | POS register session storage with REST API for headless WordPress (built with wpts) | [Integration](packages/headless-pos-sessions/docs/integration-guide.md) · [Admin](packages/headless-pos-sessions/docs/admin-guide.md) |
 | [headless-wishlist](packages/headless-wishlist/) | REST API wishlist for headless WordPress/WooCommerce (built with wpts) | [Integration](packages/headless-wishlist/docs/integration-guide.md) · [Admin](packages/headless-wishlist/docs/admin-guide.md) |
+| [website](packages/website/) | Landing page and plugin catalog (Astro 6 + Tailwind CSS 4) | [Live site](https://amitgurbani.github.io/wordpress-plugins/) |
 | [e2e](packages/e2e/) | Playwright end-to-end tests for all plugins (wp-env) | [README](packages/e2e/README.md) |
 
 ## Documentation
