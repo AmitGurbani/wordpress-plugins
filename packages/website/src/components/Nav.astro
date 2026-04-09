@@ -2,10 +2,11 @@
 const base = import.meta.env.BASE_URL;
 ---
 
-<nav class="border-b border-border/50 backdrop-blur-sm sticky top-0 z-50 bg-surface/80">
+<nav class="border-b border-border/30 backdrop-blur-md sticky top-0 z-50 bg-surface/70">
   <div class="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
-    <a href={base} class="font-semibold text-lg tracking-tight hover:text-accent transition-colors">
-      Headless WP Plugins
+    <a href={base} class="font-bold text-lg tracking-tight hover:text-accent transition-colors">
+      <span class="text-accent">&lt;</span>HWP<span class="text-accent">/&gt;</span>
+      <span class="ml-1.5 font-medium">Headless WP Plugins</span>
     </a>
     <div class="flex items-center gap-8">
       <a href={`${base}/plugins/`} class="text-sm text-text-muted hover:text-text transition-colors">

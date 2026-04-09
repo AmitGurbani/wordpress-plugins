@@ -2,23 +2,30 @@
 const base = import.meta.env.BASE_URL;
 ---
 
-<section class="pt-24 pb-20 px-6">
-  <div class="max-w-4xl mx-auto text-center">
-    <h1 class="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight mb-6">
+<section class="pt-28 pb-24 px-6 hero-gradient relative overflow-hidden">
+  <div class="absolute inset-0 bg-dot-grid opacity-30"></div>
+  <div class="max-w-4xl mx-auto text-center relative">
+    <div class="animate-fade-up">
+      <p class="inline-flex items-center gap-2 text-sm text-accent font-medium tracking-wide uppercase mb-6 border border-accent/20 rounded-full px-4 py-1.5 bg-accent/5">
+        <span class="w-1.5 h-1.5 rounded-full bg-accent animate-pulse"></span>
+        Open Source Plugin Suite
+      </p>
+    </div>
+    <h1 class="text-5xl sm:text-6xl lg:text-7xl font-bold tracking-tight mb-6 animate-fade-up delay-1">
       Headless plugins for
-      <span class="text-accent">WooCommerce</span> stores
+      <span class="text-transparent bg-clip-text bg-gradient-to-r from-accent to-sky-300">WooCommerce</span> stores
     </h1>
-    <p class="text-lg sm:text-xl text-text-muted max-w-2xl mx-auto mb-10 leading-relaxed">
+    <p class="text-lg sm:text-xl text-text-muted max-w-2xl mx-auto mb-12 leading-relaxed animate-fade-up delay-2">
       Lightweight WordPress plugins that expose REST APIs for decoupled frontends.
       Authentication, search, analytics, wishlists, and more &mdash; no bloat.
     </p>
-    <div class="flex flex-wrap items-center justify-center gap-4 mb-14">
+    <div class="flex flex-wrap items-center justify-center gap-4 mb-16 animate-fade-up delay-3">
       <a
         href={`${base}/plugins/`}
-        class="inline-flex items-center gap-2 bg-accent hover:bg-accent-light text-surface font-medium px-6 py-3 rounded-lg transition-colors"
+        class="group inline-flex items-center gap-2 bg-accent hover:bg-accent-light text-surface font-semibold px-7 py-3.5 rounded-xl transition-all hover:shadow-[0_0_30px_-5px] hover:shadow-accent/30"
       >
         Browse Plugins
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <svg class="w-4 h-4 transition-transform group-hover:translate-x-0.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
         </svg>
       </a>
@@ -26,7 +33,7 @@ const base = import.meta.env.BASE_URL;
         href="https://github.com/AmitGurbani/wordpress-plugins"
         target="_blank"
         rel="noopener noreferrer"
-        class="inline-flex items-center gap-2 border border-border hover:border-border-hover text-text font-medium px-6 py-3 rounded-lg transition-colors"
+        class="inline-flex items-center gap-2 border border-border hover:border-border-hover text-text font-medium px-7 py-3.5 rounded-xl transition-all hover:bg-surface-card"
       >
         <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
           <path fill-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" clip-rule="evenodd" />
@@ -34,20 +41,20 @@ const base = import.meta.env.BASE_URL;
         View on GitHub
       </a>
     </div>
-    <div class="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm text-text-muted">
-      <span class="flex items-center gap-1.5">
+    <div class="flex flex-wrap items-center justify-center gap-x-8 gap-y-3 text-sm text-text-muted animate-fade-in delay-4">
+      <span class="flex items-center gap-2">
         <span class="w-2 h-2 rounded-full bg-sky-400"></span>
         TypeScript
       </span>
-      <span class="flex items-center gap-1.5">
+      <span class="flex items-center gap-2">
         <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
         GPL-2.0
       </span>
-      <span class="flex items-center gap-1.5">
+      <span class="flex items-center gap-2">
         <span class="w-2 h-2 rounded-full bg-violet-400"></span>
         8 Plugins
       </span>
-      <span class="flex items-center gap-1.5">
+      <span class="flex items-center gap-2">
         <span class="w-2 h-2 rounded-full bg-amber-400"></span>
         REST API
       </span>

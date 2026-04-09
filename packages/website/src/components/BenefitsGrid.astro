@@ -34,7 +34,7 @@ const icons: Record<string, string> = {
   <div class="max-w-6xl mx-auto">
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
       {benefits.map((b) => (
-        <div class="rounded-xl border border-border bg-surface-card p-6">
+        <div class="card-glow rounded-xl border border-border bg-surface-card p-6 hover:border-border-hover transition-all">
           <div class="w-10 h-10 rounded-lg bg-accent/10 flex items-center justify-center mb-4">
             <svg class="w-5 h-5 text-accent" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
               <path d={icons[b.icon]} />
