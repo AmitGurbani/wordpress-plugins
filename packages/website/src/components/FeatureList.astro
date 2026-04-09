@@ -1,0 +1,64 @@
+---
+import type { Plugin } from "../data/plugins";
+
+interface Props {
+  plugin: Plugin;
+}
+
+const { plugin } = Astro.props;
+
+const methodColors = {
+  GET: "text-emerald-400",
+  POST: "text-sky-400",
+  PUT: "text-amber-400",
+  DELETE: "text-rose-400",
+} as Record<string, string>;
+---
+
+<section class="py-16 px-6">
+  <div class="max-w-4xl mx-auto">
+    <h2 class="text-2xl font-bold mb-8">Features</h2>
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      {plugin.features.map((feature) => (
+        <div class="flex gap-3 rounded-lg border border-border bg-surface-card p-4">
+          <svg class="w-5 h-5 text-accent shrink-0 mt-0.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+          </svg>
+          <span class="text-sm leading-relaxed">{feature}</span>
+        </div>
+      ))}
+    </div>
+
+    {plugin.endpoints.length > 0 && (
+      <div class="mt-12">
+        <h2 class="text-2xl font-bold mb-6">API Endpoints</h2>
+        <div class="rounded-xl border border-border overflow-hidden">
+          <table class="w-full text-sm">
+            <thead>
+              <tr class="bg-surface-alt/50 text-left text-text-muted">
+                <th class="px-4 py-3 font-medium w-24">Method</th>
+                <th class="px-4 py-3 font-medium">Path</th>
+                <th class="px-4 py-3 font-medium hidden sm:table-cell">Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              {plugin.endpoints.map((ep, i) => (
+                  <tr class:list={["border-t border-border/50", i % 2 === 0 ? "bg-surface-card" : "bg-surface-card/50"]}>
+                    <td class:list={["px-4 py-3 font-mono font-medium", methodColors[ep.method] || "text-text"]}>
+                      {ep.method}
+                    </td>
+                    <td class="px-4 py-3 font-mono text-text-muted">
+                      /{plugin.namespace}{ep.path}
+                    </td>
+                    <td class="px-4 py-3 text-text-muted hidden sm:table-cell">
+                      {ep.description}
+                    </td>
+                  </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    )}
+  </div>
+</section>

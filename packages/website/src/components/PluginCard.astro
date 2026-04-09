@@ -1,0 +1,43 @@
+---
+import Badge from "./Badge.astro";
+import { categories, type Plugin } from "../data/plugins";
+
+interface Props {
+  plugin: Plugin;
+}
+
+const { plugin } = Astro.props;
+const base = import.meta.env.BASE_URL;
+const cat = categories[plugin.category];
+
+const wooLabel = {
+  required: "Requires WooCommerce",
+  optional: "WooCommerce Optional",
+  none: null,
+} as const;
+---
+
+<a
+  href={`${base}/plugins/${plugin.slug}/`}
+  class="group block rounded-xl border border-border bg-surface-card p-6 transition-all hover:border-border-hover hover:bg-surface-alt"
+>
+  <div class="flex items-start justify-between gap-3 mb-3">
+    <h3 class="font-semibold text-text group-hover:text-accent transition-colors">
+      {plugin.name}
+    </h3>
+    <Badge variant={cat.color}>{cat.label}</Badge>
+  </div>
+  <p class="text-sm text-text-muted leading-relaxed mb-4">
+    {plugin.tagline}
+  </p>
+  <div class="flex flex-wrap gap-2">
+    {wooLabel[plugin.wooCommerce] && (
+      <Badge variant={plugin.wooCommerce === "required" ? "amber" : "slate"} size="sm">
+        {wooLabel[plugin.wooCommerce]}
+      </Badge>
+    )}
+    <Badge variant="sky" size="sm">
+      {plugin.endpoints.length} endpoint{plugin.endpoints.length !== 1 ? "s" : ""}
+    </Badge>
+  </div>
+</a>

@@ -1,0 +1,22 @@
+---
+import CodeTabs from "./CodeTabs.astro";
+import { wptsExample } from "../data/code-examples";
+---
+
+<section class="py-20 px-6">
+  <div class="max-w-4xl mx-auto">
+    <div class="text-center mb-12">
+      <h2 class="text-3xl font-bold mb-3">Built with wpts</h2>
+      <p class="text-text-muted max-w-xl mx-auto">
+        Write plugins in TypeScript with decorators. The <code class="text-accent">wpts</code> transpiler generates production-ready WordPress PHP.
+      </p>
+    </div>
+    <CodeTabs
+      id="wpts"
+      tabs={[
+        { label: "TypeScript (source)", code: wptsExample.typescript.code, lang: wptsExample.typescript.lang },
+        { label: "PHP (generated)", code: wptsExample.php.code, lang: wptsExample.php.lang },
+      ]}
+    />
+  </div>
+</section>

@@ -43,9 +43,26 @@
       }
     }
   },
+  "css": {
+    "parser": {
+      "cssModules": false,
+      "tailwindDirectives": true
+    },
+    "linter": {
+      "enabled": false
+    },
+    "formatter": {
+      "enabled": false
+    }
+  },
   "overrides": [
     {
       "includes": ["packages/wpts/src/templates/**", "packages/wpts/examples/**"],
+      "linter": { "enabled": false },
+      "formatter": { "enabled": false }
+    },
+    {
+      "includes": ["packages/website/.astro/**"],
       "linter": { "enabled": false },
       "formatter": { "enabled": false }
     }

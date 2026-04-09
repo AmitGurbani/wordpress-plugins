@@ -1,0 +1,44 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import PluginHero from "../../components/PluginHero.astro";
+import FeatureList from "../../components/FeatureList.astro";
+import FaqSection from "../../components/FaqSection.astro";
+import CrossSell from "../../components/CrossSell.astro";
+import CodeTabs from "../../components/CodeTabs.astro";
+import { plugins } from "../../data/plugins";
+import { codeExamples } from "../../data/code-examples";
+import type { GetStaticPaths } from "astro";
+
+export const getStaticPaths: GetStaticPaths = () => {
+  return plugins.map((plugin) => ({
+    params: { slug: plugin.slug },
+    props: { plugin },
+  }));
+};
+
+const { plugin } = Astro.props;
+const example = codeExamples.find((e) => e.slug === plugin.slug);
+---
+
+<Layout title={`${plugin.name} — Headless WP Plugins`} description={plugin.description}>
+  <PluginHero plugin={plugin} />
+  <FeatureList plugin={plugin} />
+
+  {example && (
+    <section class="py-16 px-6">
+      <div class="max-w-4xl mx-auto">
+        <h2 class="text-2xl font-bold mb-6">API Example</h2>
+        <CodeTabs
+          id={`plugin-${plugin.slug}`}
+          tabs={[
+            { label: "Request", code: example.request.code, lang: example.request.lang },
+            { label: "Response", code: example.response.code, lang: example.response.lang },
+          ]}
+        />
+      </div>
+    </section>
+  )}
+
+  <FaqSection faqs={plugin.faqs} />
+  <CrossSell currentSlug={plugin.slug} />
+</Layout>

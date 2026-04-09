@@ -1,0 +1,49 @@
+---
+const benefits = [
+  {
+    title: "Zero Bloat",
+    description: "Each plugin does one thing well. No custom tables unless necessary, minimal queries, tiny footprint.",
+    icon: "feather",
+  },
+  {
+    title: "REST-First",
+    description: "Every plugin exposes clean REST API endpoints. Use with Next.js, React Native, Flutter — any frontend.",
+    icon: "api",
+  },
+  {
+    title: "WooCommerce Native",
+    description: "Built on WooCommerce hooks and capabilities. Order tracking, purchase events, and product data — all integrated.",
+    icon: "cart",
+  },
+  {
+    title: "TypeScript Source",
+    description: "Written in TypeScript with decorators, transpiled to WordPress-standard PHP by the wpts compiler.",
+    icon: "code",
+  },
+];
+
+const icons: Record<string, string> = {
+  feather: "M20.24 12.24a6 6 0 0 0-8.49-8.49L5 10.5V19h8.5zM16 8L2 22M17.5 15H9",
+  api: "M13 10V3L4 14h7v7l9-11h-7z",
+  cart: "M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4zM3 6h18M16 10a4 4 0 0 1-8 0",
+  code: "M16 18l6-6-6-6M8 6l-6 6 6 6",
+};
+---
+
+<section class="py-20 px-6">
+  <div class="max-w-6xl mx-auto">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      {benefits.map((b) => (
+        <div class="rounded-xl border border-border bg-surface-card p-6">
+          <div class="w-10 h-10 rounded-lg bg-accent/10 flex items-center justify-center mb-4">
+            <svg class="w-5 h-5 text-accent" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+              <path d={icons[b.icon]} />
+            </svg>
+          </div>
+          <h3 class="font-semibold mb-2">{b.title}</h3>
+          <p class="text-sm text-text-muted leading-relaxed">{b.description}</p>
+        </div>
+      ))}
+    </div>
+  </div>
+</section>

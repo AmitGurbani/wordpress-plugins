@@ -1,0 +1,29 @@
+---
+import CodeTabs from "./CodeTabs.astro";
+import { codeExamples } from "../data/code-examples";
+---
+
+<section class="py-20 px-6">
+  <div class="max-w-4xl mx-auto">
+    <div class="text-center mb-12">
+      <h2 class="text-3xl font-bold mb-3">API in Action</h2>
+      <p class="text-text-muted max-w-xl mx-auto">
+        Real request and response examples. Copy, paste, and integrate.
+      </p>
+    </div>
+    <div class="space-y-8">
+      {codeExamples.map((example) => (
+        <div>
+          <h3 class="text-lg font-semibold mb-4">{example.label}</h3>
+          <CodeTabs
+            id={`api-${example.slug}`}
+            tabs={[
+              { label: "Request", code: example.request.code, lang: example.request.lang },
+              { label: "Response", code: example.response.code, lang: example.response.lang },
+            ]}
+          />
+        </div>
+      ))}
+    </div>
+  </div>
+</section>

@@ -1,0 +1,40 @@
+---
+const base = import.meta.env.BASE_URL;
+const year = new Date().getFullYear();
+---
+
+<footer class="border-t border-border/50 mt-24">
+  <div class="max-w-6xl mx-auto px-6 py-12">
+    <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-8">
+      <div>
+        <p class="font-semibold text-text mb-1">Headless WP Plugins</p>
+        <p class="text-sm text-text-muted">
+          Free and open source. Enterprise or custom work?
+          <a href="mailto:hello@example.com" class="text-accent hover:underline">Get in touch</a>.
+        </p>
+      </div>
+      <div class="flex items-center gap-6 text-sm text-text-muted">
+        <a href={`${base}/plugins/`} class="hover:text-text transition-colors">Plugins</a>
+        <a
+          href="https://github.com/AmitGurbani/wordpress-plugins"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="hover:text-text transition-colors"
+        >
+          GitHub
+        </a>
+        <a
+          href="https://github.com/AmitGurbani/wordpress-plugins/blob/main/LICENSE"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="hover:text-text transition-colors"
+        >
+          GPL-2.0
+        </a>
+      </div>
+    </div>
+    <div class="mt-8 pt-6 border-t border-border/30 text-xs text-text-muted">
+      &copy; {year} Amit Gurbani. Built with Astro.
+    </div>
+  </div>
+</footer>

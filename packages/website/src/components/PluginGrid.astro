@@ -1,0 +1,20 @@
+---
+import PluginCard from "./PluginCard.astro";
+import { plugins } from "../data/plugins";
+---
+
+<section class="py-20 px-6" id="plugins">
+  <div class="max-w-6xl mx-auto">
+    <div class="text-center mb-12">
+      <h2 class="text-3xl font-bold mb-3">The Plugin Suite</h2>
+      <p class="text-text-muted max-w-xl mx-auto">
+        Eight focused plugins covering authentication, analytics, search, and e-commerce for headless WordPress stores.
+      </p>
+    </div>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      {plugins.map((plugin) => (
+        <PluginCard plugin={plugin} />
+      ))}
+    </div>
+  </div>
+</section>

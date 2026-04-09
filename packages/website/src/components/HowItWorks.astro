@@ -1,0 +1,46 @@
+---
+const steps = [
+  {
+    step: "1",
+    title: "Install the Plugin",
+    description: "Install from WordPress.org or upload the ZIP. Activate from the WordPress admin.",
+  },
+  {
+    step: "2",
+    title: "Configure via Admin",
+    description: "Each plugin has a React-powered settings page. Enter API keys, toggle features, test connections.",
+  },
+  {
+    step: "3",
+    title: "Call the REST API",
+    description: "Your headless frontend calls the plugin's REST endpoints. Authentication, tracking, search — all via JSON.",
+  },
+];
+---
+
+<section class="py-20 px-6">
+  <div class="max-w-4xl mx-auto">
+    <div class="text-center mb-14">
+      <h2 class="text-3xl font-bold mb-3">How It Works</h2>
+      <p class="text-text-muted">Three steps from install to production.</p>
+    </div>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+      {steps.map((s) => (
+        <div class="text-center">
+          <div class="w-12 h-12 rounded-full bg-accent/10 border-2 border-accent/30 flex items-center justify-center text-accent font-bold text-lg mx-auto mb-4">
+            {s.step}
+          </div>
+          <h3 class="font-semibold mb-2">{s.title}</h3>
+          <p class="text-sm text-text-muted leading-relaxed">{s.description}</p>
+        </div>
+      ))}
+    </div>
+    <div class="mt-14 rounded-xl border border-border bg-surface-card p-6 text-center font-mono text-sm text-text-muted">
+      <span class="text-emerald-400">Frontend</span>
+      <span class="mx-3 text-border">&rarr;</span>
+      <span class="text-accent">REST API</span>
+      <span class="mx-3 text-border">&rarr;</span>
+      <span class="text-amber-400">WordPress / WooCommerce</span>
+    </div>
+  </div>
+</section>
