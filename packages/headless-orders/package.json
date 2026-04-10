@@ -1,0 +1,19 @@
+{
+  "name": "headless-orders",
+  "version": "1.0.0",
+  "private": true,
+  "description": "REST API for authenticated customers to list their WooCommerce orders",
+  "scripts": {
+    "build": "wpts build src/plugin.ts -o dist --clean --zip",
+    "dev": "wpts watch src/plugin.ts -o dist",
+    "wp-env:start": "wp-env start",
+    "wp-env:stop": "wp-env stop",
+    "wp-env:clean": "wp-env clean all",
+    "lint": "biome lint src/",
+    "check": "biome check src/"
+  },
+  "devDependencies": {
+    "@wordpress/env": "^10.0.0",
+    "wpts": "workspace:*"
+  }
+}

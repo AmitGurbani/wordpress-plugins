@@ -13,6 +13,7 @@ on:
           - headless-fuzzy-find
           - headless-google-analytics
           - headless-meta-pixel
+          - headless-orders
           - headless-pos-sessions
           - headless-umami
           - headless-wishlist

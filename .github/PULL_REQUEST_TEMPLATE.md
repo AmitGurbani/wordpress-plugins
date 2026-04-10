@@ -14,6 +14,7 @@
 - [ ] headless-fuzzy-find
 - [ ] headless-google-analytics
 - [ ] headless-meta-pixel
+- [ ] headless-orders
 - [ ] headless-auth
 - [ ] headless-pos-sessions
 - [ ] headless-umami

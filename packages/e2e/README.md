@@ -44,12 +44,15 @@ tests/
     admin-page-load.spec.ts
     diagnostics.spec.ts
     settings-crud.spec.ts
+  headless-auth/
   headless-clarity/
   headless-fuzzy-find/
   headless-google-analytics/
   headless-meta-pixel/
-  headless-auth/
+  headless-orders/
+  headless-pos-sessions/
   headless-umami/
+  headless-wishlist/
 fixtures/
   woocommerce.ts             # WooCommerce test helpers
   wordpress.ts               # WordPress test helpers
@@ -78,7 +81,7 @@ Plugin-specific tests live in `tests/<plugin-name>/`. Tests that apply across pl
 
 - **PHP 8.2**
 - **WP_DEBUG** and **WP_DEBUG_LOG** enabled
-- All six headless plugins loaded from their `dist/` directories
+- All nine headless plugins loaded from their `dist/` directories
 - WooCommerce installed from wordpress.org
 
 ## Adding Tests

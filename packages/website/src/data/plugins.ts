@@ -291,6 +291,44 @@ export const plugins: Plugin[] = [
     ],
   },
   {
+    slug: 'headless-orders',
+    name: 'Headless Orders',
+    tagline: 'Customer order history REST API',
+    description:
+      'REST API endpoint for authenticated customers to list their own WooCommerce orders. Supports pagination, status filtering, and returns billing/shipping addresses with line items. Pairs with the WooCommerce Store API single-order endpoint for a complete order-browsing experience.',
+    category: 'ecommerce',
+    wooCommerce: 'required',
+    namespace: 'headless-orders/v1',
+    githubPath: `${REPO}/tree/main/packages/headless-orders`,
+    features: [
+      'JWT Bearer-token authentication with proper 401 responses',
+      'Pagination with per_page and page query parameters',
+      'Filter by order status (pending, processing, completed, etc.)',
+      'Full billing and shipping address details',
+      'Line items with product ID, name, quantity, and totals',
+      'X-WP-Total and X-WP-TotalPages response headers',
+    ],
+    endpoints: [
+      {
+        method: 'GET',
+        path: '/orders',
+        description: 'List customer orders with pagination and status filtering',
+      },
+    ],
+    faqs: [
+      {
+        question: 'How does authentication work?',
+        answer:
+          'The plugin relies on JWT authentication provided by a companion plugin (e.g., Headless Auth). The JWT token must be sent as a Bearer token in the Authorization header. The plugin itself does not issue tokens.',
+      },
+      {
+        question: "Can a customer see other customers' orders?",
+        answer:
+          "No. The endpoint strictly filters by the authenticated user's ID. There is no way for one customer to access another's orders.",
+      },
+    ],
+  },
+  {
     slug: 'headless-wishlist',
     name: 'Headless Wishlist',
     tagline: 'Per-user product wishlist REST API',

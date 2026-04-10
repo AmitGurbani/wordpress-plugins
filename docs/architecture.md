@@ -8,7 +8,7 @@ This is a Turborepo monorepo using pnpm workspaces. All packages live in `packag
 |------|----------|---------|
 | **Transpiler** | [wpts](../packages/wpts/) | TypeScript-to-WordPress-Plugin transpiler (MIT licensed) |
 | **Shared UI** | [admin-ui](../packages/admin-ui/) | React components and hooks for plugin admin pages |
-| **Plugins** | 8 `headless-*` packages | WordPress plugins built with wpts |
+| **Plugins** | 9 `headless-*` packages | WordPress plugins built with wpts |
 | **Website** | [website](../packages/website/) | Landing page and plugin catalog (Astro 6 + Tailwind CSS 4) |
 | **Testing** | [e2e](../packages/e2e/) | Playwright end-to-end tests against wp-env |
 
@@ -26,12 +26,13 @@ This is a Turborepo monorepo using pnpm workspaces. All packages live in `packag
 │         │ transpiles TS→PHP │ imported by                        │
 │         │                   │                                    │
 │  ┌──────▼───────────────────▼────────────────────────────────┐  │
-│  │                   8 Headless Plugins                       │  │
+│  │                   9 Headless Plugins                       │  │
 │  │                                                            │  │
 │  │  headless-auth          headless-google-analytics          │  │
 │  │  headless-fuzzy-find    headless-umami                     │  │
 │  │  headless-meta-pixel    headless-pos-sessions              │  │
 │  │  headless-clarity       headless-wishlist                  │  │
+│  │  headless-orders                                           │  │
 │  └────────────────────────────┬───────────────────────────────┘  │
 │                               │                                  │
 │                               │ tested by                        │
@@ -59,7 +60,7 @@ Turbo's `dependsOn: ["^build"]` ensures packages build in the correct order:
 ```
 1. wpts         (TypeScript → dist/)
 2. admin-ui     (TypeScript → dist/)
-3. All 8 plugins build in parallel
+3. All 9 plugins build in parallel
    └── Each plugin: wpts build src/plugin.ts -o dist
 ```
 
