@@ -22,7 +22,7 @@ const { plugin } = Astro.props as Props;
 const example = codeExamples.find((e) => e.slug === plugin.slug);
 ---
 
-<Layout title={`${plugin.name} — Headless WP Plugins`} description={plugin.description}>
+<Layout title={`${plugin.name} — Headless WP Plugins`} description={plugin.description} pluginData={{ name: plugin.name, description: plugin.description, features: plugin.features }}>
   <PluginHero plugin={plugin} />
   <FeatureList plugin={plugin} />
 
