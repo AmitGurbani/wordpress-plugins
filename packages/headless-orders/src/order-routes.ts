@@ -147,6 +147,6 @@ class OrderRoutes {
       return new WP_Error('order_not_found', 'Order not found.', { status: 404 });
     }
 
-    return this.formatOrder(order);
+    return restEnsureResponse(this.formatOrder(order));
   }
 }

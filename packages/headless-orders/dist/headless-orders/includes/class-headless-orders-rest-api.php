@@ -85,7 +85,7 @@ class Headless_Orders_Rest_Api {
 		if ( $order->get_customer_id() !== $user_id ) {
 			return new WP_Error( 'order_not_found', 'Order not found.', array( 'status' => 404 ) );
 		}
-		return $this->format_order( $order );
+		return rest_ensure_response( $this->format_order( $order ) );
 	}
 
 	public function format_order( $order ) {
