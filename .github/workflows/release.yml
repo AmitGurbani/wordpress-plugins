@@ -64,7 +64,7 @@ jobs:
       - name: Build plugin
         env:
           PLUGIN: ${{ inputs.plugin }}
-        run: pnpm --filter "$PLUGIN" build
+        run: pnpm turbo run build --filter="$PLUGIN"
 
       - name: Generate changelog
         env:
