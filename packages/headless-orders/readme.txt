@@ -9,16 +9,18 @@ Requires Plugins: woocommerce
 License: GPL-2.0+
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-REST API for authenticated customers to list their WooCommerce orders.
+REST API for authenticated customers to view their WooCommerce orders.
 
 == Description ==
 
-Headless Orders adds a single REST endpoint that lets authenticated customers
-retrieve their own WooCommerce orders. It pairs with the existing WooCommerce
-Store API single-order endpoint (`/wc/store/v1/order/{id}`) to provide a
-complete order-browsing experience for headless storefronts.
+Headless Orders provides REST endpoints that let authenticated customers
+retrieve their own WooCommerce orders — both as a paginated list and
+individually by ID.
 
-**Endpoint:** `GET /wp-json/headless-orders/v1/orders`
+**Endpoints:**
+
+* `GET /wp-json/headless-orders/v1/orders` — List orders (paginated, filterable by status)
+* `GET /wp-json/headless-orders/v1/orders/{id}` — Get a single order by ID
 
 **Features:**
 
@@ -26,7 +28,7 @@ complete order-browsing experience for headless storefronts.
 * Pagination with `per_page` and `page` query parameters
 * Filter by order status (pending, processing, completed, etc.)
 * Returns billing/shipping addresses, line items, totals, and currency
-* `X-WP-Total` and `X-WP-TotalPages` response headers
+* `X-WP-Total` and `X-WP-TotalPages` response headers on list endpoint
 * Customers can only access their own orders — never other customers' data
 
 == Installation ==
@@ -35,7 +37,7 @@ complete order-browsing experience for headless storefronts.
 2. Activate the plugin through the **Plugins** menu in WordPress.
 3. Ensure **WooCommerce** is installed and active.
 4. Ensure a JWT authentication plugin (e.g., Headless Auth) is active.
-5. Make authenticated `GET` requests to `/wp-json/headless-orders/v1/orders`.
+5. Make authenticated `GET` requests to `/wp-json/headless-orders/v1/orders` or `/wp-json/headless-orders/v1/orders/{id}`.
 
 == Frequently Asked Questions ==
 

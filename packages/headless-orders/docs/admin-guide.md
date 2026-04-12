@@ -17,13 +17,13 @@ Setup guide for WordPress site administrators.
 
 ## Zero Configuration
 
-This plugin has no admin settings page and no configuration options. Once activated alongside WooCommerce and Headless Auth, the `/orders` endpoint is available immediately.
+This plugin has no admin settings page and no configuration options. Once activated alongside WooCommerce and Headless Auth, the `/orders` and `/orders/:id` endpoints are available immediately.
 
 ## How It Works
 
-1. A customer's frontend sends `GET /wp-json/headless-orders/v1/orders` with a JWT Bearer token
+1. A customer's frontend sends `GET /wp-json/headless-orders/v1/orders` (list) or `GET /wp-json/headless-orders/v1/orders/:id` (single) with a JWT Bearer token
 2. Headless Auth resolves the JWT to a WordPress user ID
-3. The plugin queries WooCommerce for that customer's orders via `wc_get_orders()`
+3. The plugin queries WooCommerce for that customer's orders via `wc_get_orders()` or `wc_get_order()`
 4. Orders are returned as JSON with billing, shipping, and line item details
 
 The plugin does not store any data of its own. It queries WooCommerce orders in real-time for the authenticated customer.
@@ -36,12 +36,16 @@ After installing and activating the plugin (along with WooCommerce and Headless 
 2. Test the API with a JWT token:
 
 ```bash
-# Get orders (should return empty array if customer has no orders)
+# List orders (should return empty array if customer has no orders)
 curl https://your-site.com/wp-json/headless-orders/v1/orders \
+  -H "Authorization: Bearer $JWT"
+
+# Get a single order by ID
+curl https://your-site.com/wp-json/headless-orders/v1/orders/1042 \
   -H "Authorization: Bearer $JWT"
 ```
 
-Expected response:
+Expected list response:
 
 ```json
 []

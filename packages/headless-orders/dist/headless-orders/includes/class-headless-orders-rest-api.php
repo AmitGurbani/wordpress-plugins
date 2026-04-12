@@ -19,7 +19,20 @@ class Headless_Orders_Rest_Api {
 			array(
 				'methods'             => 'GET',
 				'callback'            => array( $this, 'list_orders' ),
-				'permission_callback' => '__return_true',
+				'permission_callback' => function() {
+					return current_user_can( 'read' );
+				},
+			)
+		);
+		register_rest_route(
+			$this->namespace,
+			'/orders/(?P<id>\d+)',
+			array(
+				'methods'             => 'GET',
+				'callback'            => array( $this, 'get_order' ),
+				'permission_callback' => function() {
+					return current_user_can( 'read' );
+				},
 			)
 		);
 	}
@@ -30,9 +43,6 @@ class Headless_Orders_Rest_Api {
 			return new WP_Error( 'woocommerce_required', 'WooCommerce is not active.', array( 'status' => 503 ) );
 		}
 		$user_id = get_current_user_id();
-		if ( ! $user_id ) {
-			return new WP_Error( 'rest_not_logged_in', 'Authentication required.', array( 'status' => 401 ) );
-		}
 		$per_page = min( 100, max( 1, intval( $request->get_param( 'per_page' ) ?? '20' ) ) );
 		$page = max( 1, intval( $request->get_param( 'page' ) ?? '1' ) );
 		$status_param = sanitize_text_field( $request->get_param( 'status' ) ?? '' );
@@ -60,6 +70,22 @@ class Headless_Orders_Rest_Api {
 		$response->header( 'X-WP-Total', $total );
 		$response->header( 'X-WP-TotalPages', $total_pages );
 		return $response;
+	}
+
+	public function get_order( $request ) {
+		if ( ! class_exists( 'WooCommerce' ) ) {
+			return new WP_Error( 'woocommerce_required', 'WooCommerce is not active.', array( 'status' => 503 ) );
+		}
+		$user_id = get_current_user_id();
+		$order_id = intval( $request->get_param( 'id' ) );
+		$order = wc_get_order( $order_id );
+		if ( ! $order ) {
+			return new WP_Error( 'order_not_found', 'Order not found.', array( 'status' => 404 ) );
+		}
+		if ( $order->get_customer_id() !== $user_id ) {
+			return new WP_Error( 'order_not_found', 'Order not found.', array( 'status' => 404 ) );
+		}
+		return $this->format_order( $order );
 	}
 
 	public function format_order( $order ) {

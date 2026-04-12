@@ -1,6 +1,6 @@
 # Integration Guide
 
-Headless Orders provides a REST API endpoint for authenticated customers to retrieve their WooCommerce orders from a headless frontend. Orders are queried from WooCommerce's data store, filtered to the authenticated customer, and returned with pagination support.
+Headless Orders provides REST API endpoints for authenticated customers to retrieve their WooCommerce orders from a headless frontend. Orders are queried from WooCommerce's data store, filtered to the authenticated customer, and returned with pagination support.
 
 ## Overview
 
@@ -8,6 +8,7 @@ Headless Orders provides a REST API endpoint for authenticated customers to retr
 Frontend (Next.js, React Native, etc.)     WordPress + WooCommerce
 ───────────────────────────────────────    ──────────────────────────────
 GET /orders  ────────────────────────────→ List customer's orders (paginated)
+GET /orders/:id  ────────────────────────→ Get a single order by ID
 GET /orders?status=completed  ───────────→ Filter by order status
 GET /orders?per_page=10&page=2  ─────────→ Paginate through results
 ```
@@ -54,7 +55,14 @@ curl "https://your-site.com/wp-json/headless-orders/v1/orders?status=completed" 
   -H "Authorization: Bearer $JWT"
 ```
 
-### 3. Paginate
+### 3. Get a single order
+
+```bash
+curl https://your-site.com/wp-json/headless-orders/v1/orders/1042 \
+  -H "Authorization: Bearer $JWT"
+```
+
+### 4. Paginate
 
 ```bash
 curl "https://your-site.com/wp-json/headless-orders/v1/orders?per_page=10&page=2" \
@@ -157,9 +165,50 @@ curl "https://your-site.com/wp-json/headless-orders/v1/orders?per_page=10&status
 
 | Status | Code | Description |
 |--------|------|-------------|
-| 401 | `rest_not_logged_in` | Authentication required (no valid JWT) |
+| 401 | `rest_forbidden` | Authentication required (no valid JWT) |
 | 503 | `woocommerce_required` | WooCommerce is not active |
 | 400 | `invalid_status` | Invalid order status value |
+
+---
+
+### GET /orders/:id
+
+Returns a single order by ID, if it belongs to the authenticated customer. Returns the same order object shape as the list endpoint.
+
+#### Request
+
+```bash
+curl https://your-site.com/wp-json/headless-orders/v1/orders/1042 \
+  -H "Authorization: Bearer $JWT"
+```
+
+#### Success Response (200)
+
+```json
+{
+  "id": 1042,
+  "order_number": "1042",
+  "status": "completed",
+  "created_at": "2026-04-08T14:30:00+00:00",
+  "updated_at": "2026-04-09T09:15:00+00:00",
+  "total": "89.97",
+  "shipping_total": "5.99",
+  "currency": "USD",
+  "payment_method": "stripe",
+  "customer_note": "",
+  "billing": { ... },
+  "shipping": { ... },
+  "items": [ ... ]
+}
+```
+
+#### Error Responses
+
+| Status | Code | Description |
+|--------|------|-------------|
+| 401 | `rest_forbidden` | Authentication required (no valid JWT) |
+| 404 | `order_not_found` | Order does not exist or belongs to another customer |
+| 503 | `woocommerce_required` | WooCommerce is not active |
 
 ---
 
@@ -169,17 +218,18 @@ All errors follow the WordPress REST API error format:
 
 ```json
 {
-  "code": "rest_not_logged_in",
-  "message": "Authentication required.",
+  "code": "rest_forbidden",
+  "message": "Sorry, you are not allowed to do that.",
   "data": { "status": 401 }
 }
 ```
 
 | Code | Status | Description |
 |------|--------|-------------|
-| `rest_not_logged_in` | 401 | No valid JWT token provided |
+| `rest_forbidden` | 401 | No valid JWT token provided |
 | `woocommerce_required` | 503 | WooCommerce plugin is not active |
 | `invalid_status` | 400 | Status parameter is not a recognized order status |
+| `order_not_found` | 404 | Order does not exist or belongs to another customer |
 
 ---
 
@@ -265,6 +315,20 @@ async function fetchOrders(params?: {
     total: Number(res.headers.get('X-WP-Total') ?? '0'),
     totalPages: Number(res.headers.get('X-WP-TotalPages') ?? '1'),
   };
+}
+
+async function fetchOrder(id: number): Promise<Order> {
+  const token = getJwtToken();
+  const res = await fetch(`${BASE}/orders/${id}`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+
+  if (!res.ok) {
+    const err = await res.json();
+    throw new Error(err.message ?? `HTTP ${res.status}`);
+  }
+
+  return res.json();
 }
 ```
 

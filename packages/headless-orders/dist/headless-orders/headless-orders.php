@@ -2,7 +2,7 @@
 /**
  * Plugin Name:       Headless Orders
  * Plugin URI:        https://github.com/AmitGurbani/wordpress-plugins
- * Description:       REST API for authenticated customers to list their WooCommerce orders.
+ * Description:       REST API for authenticated customers to view their WooCommerce orders.
  * Version:           1.0.0
  * Author:            Amit Gurbani
  * Author URI:        https://github.com/AmitGurbani

@@ -163,7 +163,7 @@ test.describe('Headless Orders — List Orders', () => {
     const res = await ctx.get(`${BASE}/orders`);
     expect(res.status()).toBe(401);
     const body = await res.json();
-    expect(body.code).toBe('rest_not_logged_in');
+    expect(body.code).toBe('rest_forbidden');
     await ctx.dispose();
   });
 });

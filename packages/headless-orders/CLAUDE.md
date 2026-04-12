@@ -1,6 +1,6 @@
 # Headless Orders
 
-REST API for authenticated customers to list their WooCommerce orders. Built with [wpts](../wpts/).
+REST API for authenticated customers to view their WooCommerce orders. Built with [wpts](../wpts/).
 
 ## Commands
 
@@ -14,7 +14,7 @@ REST API for authenticated customers to list their WooCommerce orders. Built wit
 Minimal wpts plugin with 2 source files (no admin UI, no settings):
 
 - `src/plugin.ts` — Entry file: @Plugin(`wooNotice: 'required'`), no @Setting or @AdminPage
-- `src/order-routes.ts` — GET /orders endpoint with formatOrder helper
+- `src/order-routes.ts` — GET /orders and GET /orders/:id endpoints with formatOrder helper
 
 ## REST API
 
@@ -22,7 +22,8 @@ Namespace: `headless-orders/v1`
 
 | Method | Route | Permission | Purpose |
 |--------|-------|-----------|---------|
-| GET | `/orders` | public (JWT checked in handler) | List authenticated customer's orders |
+| GET | `/orders` | `read` capability | List authenticated customer's orders |
+| GET | `/orders/:id` | `read` capability | Get single order for authenticated customer |
 
 Query params: `per_page` (int, default 20, max 100), `page` (int, default 1), `status` (string, optional filter).
 
@@ -30,8 +31,8 @@ Response headers: `X-WP-Total`, `X-WP-TotalPages`.
 
 ## Conventions
 
-- **Auth**: `public: true` on @RestRoute + manual `getCurrentUserId()` check → 401 if unauthenticated. JWT resolved by headless-auth's `determine_current_user` filter.
-- **Data source**: `wcGetOrders()` with `customer: userId` — never returns other customers' orders
+- **Auth**: `capability: 'read'` on @RestRoute — WordPress enforces authentication via permission callback (`current_user_can('read')`). All WooCommerce Customer accounts have the `read` capability. JWT resolved by `determine_current_user` filter before the permission callback runs.
+- **Data source**: `wcGetOrders()` / `wcGetOrder()` with customer scoping — never returns other customers' orders
 - **Two queries**: page data query (with limit/page) + count query (with `return: 'ids'`, `limit: -1`) for pagination headers
 - **Status validation**: allowlist checked via `.includes()` (→ `in_array()` in PHP)
 - **Date format**: ISO 8601 via WC_DateTime `.date('c')`

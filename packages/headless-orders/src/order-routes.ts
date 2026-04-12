@@ -1,7 +1,8 @@
 /**
- * Order REST API Endpoint
+ * Order REST API Endpoints
  *
- * GET /orders — List WooCommerce orders for the authenticated customer.
+ * GET /orders      — List WooCommerce orders for the authenticated customer.
+ * GET /orders/:id  — Fetch a single WooCommerce order for the authenticated customer.
  * Namespace: headless-orders/v1
  */
 
@@ -63,16 +64,13 @@ class OrderRoutes {
     };
   }
 
-  @RestRoute('/orders', { method: 'GET', public: true })
+  @RestRoute('/orders', { method: 'GET', capability: 'read' })
   listOrders(request: any): any {
     if (!classExists('WooCommerce')) {
       return new WP_Error('woocommerce_required', 'WooCommerce is not active.', { status: 503 });
     }
 
     const userId: number = getCurrentUserId();
-    if (!userId) {
-      return new WP_Error('rest_not_logged_in', 'Authentication required.', { status: 401 });
-    }
 
     const perPage: number = Math.min(
       100,
@@ -129,5 +127,26 @@ class OrderRoutes {
     response.header('X-WP-Total', total);
     response.header('X-WP-TotalPages', totalPages);
     return response;
+  }
+
+  @RestRoute('/orders/(?P<id>\\d+)', { method: 'GET', capability: 'read' })
+  getOrder(request: any): any {
+    if (!classExists('WooCommerce')) {
+      return new WP_Error('woocommerce_required', 'WooCommerce is not active.', { status: 503 });
+    }
+
+    const userId: number = getCurrentUserId();
+
+    const orderId: number = intval(request.get_param('id'));
+    const order: any = wcGetOrder(orderId);
+    if (!order) {
+      return new WP_Error('order_not_found', 'Order not found.', { status: 404 });
+    }
+
+    if (order.get_customer_id() !== userId) {
+      return new WP_Error('order_not_found', 'Order not found.', { status: 404 });
+    }
+
+    return this.formatOrder(order);
   }
 }
