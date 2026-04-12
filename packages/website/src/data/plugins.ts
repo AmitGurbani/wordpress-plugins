@@ -295,7 +295,7 @@ export const plugins: Plugin[] = [
     name: 'Headless Orders',
     tagline: 'Customer order history REST API',
     description:
-      'REST API endpoint for authenticated customers to list their own WooCommerce orders. Supports pagination, status filtering, and returns billing/shipping addresses with line items. Pairs with the WooCommerce Store API single-order endpoint for a complete order-browsing experience.',
+      'REST API endpoints for authenticated customers to list and view their own WooCommerce orders. Supports pagination, status filtering, and returns billing/shipping addresses with line items. Fetch all orders or a single order by ID.',
     category: 'ecommerce',
     wooCommerce: 'required',
     namespace: 'headless-orders/v1',
@@ -313,6 +313,11 @@ export const plugins: Plugin[] = [
         method: 'GET',
         path: '/orders',
         description: 'List customer orders with pagination and status filtering',
+      },
+      {
+        method: 'GET',
+        path: '/orders/:id',
+        description: 'Get a single order by ID',
       },
     ],
     faqs: [
