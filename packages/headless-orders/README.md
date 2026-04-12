@@ -1,6 +1,6 @@
 # Headless Orders
 
-REST API for authenticated customers to list their WooCommerce orders in headless storefronts. Returns paginated order data with billing, shipping, and line item details.
+REST API for authenticated customers to view their WooCommerce orders in headless storefronts. Returns paginated order data with billing, shipping, and line item details.
 
 ## Requirements
 
@@ -16,18 +16,19 @@ REST API for authenticated customers to list their WooCommerce orders in headles
 
 ## REST API
 
-The `/orders` endpoint requires JWT authentication (`Authorization: Bearer <token>`).
+The `/orders` and `/orders/:id` endpoints require JWT authentication (`Authorization: Bearer <token>`).
 
 | Method | Route | Auth | Description |
 |--------|-------|------|-------------|
 | GET | `/orders` | JWT | List authenticated customer's WooCommerce orders |
+| GET | `/orders/:id` | JWT | Get single order for authenticated customer |
 
 ## Project Structure
 
 ```
 src/
 ├── plugin.ts          # @Plugin (wooNotice: 'required'), no settings
-└── order-routes.ts    # GET /orders endpoint with formatOrder helper
+└── order-routes.ts    # GET /orders and GET /orders/:id endpoints with formatOrder helper
 ```
 
 ## Development

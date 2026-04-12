@@ -2,7 +2,7 @@
   "name": "headless-orders",
   "version": "1.0.0",
   "private": true,
-  "description": "REST API for authenticated customers to list their WooCommerce orders",
+  "description": "REST API for authenticated customers to view their WooCommerce orders",
   "scripts": {
     "build": "wpts build src/plugin.ts -o dist --clean --zip",
     "dev": "wpts watch src/plugin.ts -o dist",
