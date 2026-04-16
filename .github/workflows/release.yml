@@ -117,8 +117,22 @@ jobs:
                   "packages/${PLUGIN}/readme.txt" \
                   "packages/${PLUGIN}/dist/${PLUGIN}/"
           git commit -m "release(${PLUGIN}): 🔖 v${VERSION}"
-          git tag "$TAG" -m "${PLUGIN} v${VERSION}"
-          git push origin HEAD --follow-tags
+
+          # Retry with rebase to handle concurrent pushes from sibling release runs.
+          # Each plugin touches only its own packages/<plugin>/ paths, so rebases are conflict-free.
+          # Tag is created after a successful branch push to avoid orphan tags on push failure.
+          for attempt in 1 2 3 4 5; do
+            git fetch origin main
+            git rebase origin/main || { git rebase --abort; exit 1; }
+            if git push origin HEAD; then
+              git tag "$TAG" -m "${PLUGIN} v${VERSION}"
+              git push origin "$TAG"
+              exit 0
+            fi
+            sleep $((RANDOM % 5 + 2))
+          done
+          echo "Failed to push after 5 attempts"
+          exit 1
 
       - name: Create GitHub Release
         env:
