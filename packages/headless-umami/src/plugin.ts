@@ -17,7 +17,7 @@ import './diagnostics-routes.js';
   name: 'Headless Umami',
   uri: 'https://github.com/AmitGurbani/wordpress-plugins',
   description: 'Umami Analytics with WooCommerce purchase tracking for headless WordPress.',
-  version: '1.0.0',
+  version: '1.1.0',
   author: 'Amit Gurbani',
   authorUri: 'https://github.com/AmitGurbani',
   license: 'GPL-2.0+',
