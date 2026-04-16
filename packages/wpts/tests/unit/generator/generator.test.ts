@@ -656,6 +656,83 @@ describe('generatePlugin', () => {
     );
   });
 
+  describe('@Plugin({ githubRepo }) — auto-updater', () => {
+    it('does not emit updater file or Update URI header when githubRepo is unset', () => {
+      const ir = createTestIR();
+      const files = generatePlugin(ir);
+      const paths = files.map((f) => f.relativePath);
+
+      expect(paths).not.toContain('hello-greeter/includes/class-hello-greeter-updater.php');
+
+      const mainFile = files.find((f) => f.relativePath === 'hello-greeter/hello-greeter.php')!;
+      expect(mainFile.content).not.toContain('Update URI:');
+      expect(mainFile.content).not.toContain('class-hello-greeter-updater.php');
+      expect(mainFile.content).not.toContain('Hello_Greeter_Updater');
+    });
+
+    it('emits updater file + Update URI header + require + bootstrap when githubRepo is set', () => {
+      const ir = createTestIR();
+      ir.metadata.githubRepo = 'AmitGurbani/wordpress-plugins';
+      ir.metadata.updateUri =
+        'https://github.com/AmitGurbani/wordpress-plugins/releases?plugin=hello-greeter';
+      ir.metadata.updateUriHost = 'github.com';
+
+      const files = generatePlugin(ir);
+      const paths = files.map((f) => f.relativePath);
+
+      expect(paths).toContain('hello-greeter/includes/class-hello-greeter-updater.php');
+
+      const mainFile = files.find((f) => f.relativePath === 'hello-greeter/hello-greeter.php')!;
+      expect(mainFile.content).toContain(
+        'Update URI:       https://github.com/AmitGurbani/wordpress-plugins/releases?plugin=hello-greeter',
+      );
+      expect(mainFile.content).toContain("'includes/class-hello-greeter-updater.php'");
+      expect(mainFile.content).toContain(
+        '( new Hello_Greeter_Updater( __FILE__, HELLO_GREETER_VERSION ) )->register();',
+      );
+
+      const updater = files.find(
+        (f) => f.relativePath === 'hello-greeter/includes/class-hello-greeter-updater.php',
+      )!;
+      expect(updater.content).toContain('class Hello_Greeter_Updater');
+      expect(updater.content).toContain("const GITHUB_REPO = 'AmitGurbani/wordpress-plugins';");
+      expect(updater.content).toContain("const TAG_PREFIX  = 'hello-greeter@';");
+      expect(updater.content).toContain(
+        "const UPDATE_URI  = 'https://github.com/AmitGurbani/wordpress-plugins/releases?plugin=hello-greeter';",
+      );
+      expect(updater.content).toContain("const ZIP_NAME    = 'hello-greeter.zip';");
+      expect(updater.content).toContain("const CACHE_KEY   = 'hello_greeter_gh_release_cache';");
+      expect(updater.content).toContain(
+        "const API_URL     = 'https://api.github.com/repos/AmitGurbani/wordpress-plugins/releases?per_page=100';",
+      );
+      expect(updater.content).toContain("add_filter( 'update_plugins_github.com'");
+      expect(updater.content).toContain("add_filter( 'plugins_api'");
+      // Mandatory UpdateURI collision gate
+      expect(updater.content).toContain("$plugin_data['UpdateURI'] !== self::UPDATE_URI");
+    });
+
+    it('uninstall.php deletes the release cache transient when githubRepo is set', () => {
+      const ir = createTestIR();
+      ir.metadata.githubRepo = 'AmitGurbani/wordpress-plugins';
+      ir.metadata.updateUri =
+        'https://github.com/AmitGurbani/wordpress-plugins/releases?plugin=hello-greeter';
+      ir.metadata.updateUriHost = 'github.com';
+
+      const files = generatePlugin(ir);
+      const uninstall = files.find((f) => f.relativePath === 'hello-greeter/uninstall.php')!;
+
+      expect(uninstall.content).toContain("delete_transient( 'hello_greeter_gh_release_cache' );");
+    });
+
+    it('uninstall.php omits release cache cleanup when githubRepo is unset', () => {
+      const ir = createTestIR();
+      const files = generatePlugin(ir);
+      const uninstall = files.find((f) => f.relativePath === 'hello-greeter/uninstall.php')!;
+
+      expect(uninstall.content).not.toContain('gh_release_cache');
+    });
+  });
+
   it('uses hasAdminPages flag to register hooks only once', () => {
     const ir = createTestIR();
     ir.adminPages.push({

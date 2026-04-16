@@ -166,6 +166,10 @@ export function generatePlugin(ir: PluginIR): GeneratedFile[] {
       : [],
     deactivationCode: ir.deactivation?.phpCode ?? null,
     diagnosticsErrorOption: ir.diagnosticsErrorOption,
+    githubRepo: metadata.githubRepo ?? '',
+    updateUri: metadata.updateUri ?? '',
+    updateUriHost: metadata.updateUriHost ?? '',
+    hasAutoUpdate: Boolean(metadata.githubRepo),
   };
 
   // Main plugin file
@@ -215,6 +219,14 @@ export function generatePlugin(ir: PluginIR): GeneratedFile[] {
     files.push({
       relativePath: `${fp}/includes/class-${fp}-rest-api.php`,
       content: loadTemplate('class-rest-api')(data),
+    });
+  }
+
+  // Updater (GitHub Releases auto-updates)
+  if (data.hasAutoUpdate) {
+    files.push({
+      relativePath: `${fp}/includes/class-${fp}-updater.php`,
+      content: loadTemplate('class-updater')(data),
     });
   }
 

@@ -410,6 +410,65 @@ class PluginRoutes {
     expect(restContent).toContain('get_posts');
   });
 
+  it('builds a plugin with githubRepo and emits a working updater class', async () => {
+    const pluginTs = `
+function Plugin(opts: any): ClassDecorator { return (t) => {}; }
+
+@Plugin({
+  name: 'Auto Update Demo',
+  description: 'Demo plugin opting into GitHub Releases auto-updates.',
+  version: '1.2.3',
+  author: 'Tester',
+  license: 'GPL-2.0+',
+  textDomain: 'auto-update-demo',
+  githubRepo: 'AmitGurbani/wordpress-plugins',
+})
+class AutoUpdateDemo {}
+`;
+    const inputFile = path.join(fixtureDir, 'plugin.ts');
+    await fs.writeFile(inputFile, pluginTs);
+
+    const outDir = path.join(tmpDir, 'dist');
+    const result = await build({ entry: inputFile, outDir, clean: true, skipAdminBuild: true });
+
+    expect(result.success).toBe(true);
+
+    // Main file carries the Update URI header derived from githubRepo + slug
+    const mainContent = await fs.readFile(
+      path.join(outDir, 'auto-update-demo', 'auto-update-demo.php'),
+      'utf-8',
+    );
+    expect(mainContent).toContain(
+      'Update URI:       https://github.com/AmitGurbani/wordpress-plugins/releases?plugin=auto-update-demo',
+    );
+    expect(mainContent).toContain("'includes/class-auto-update-demo-updater.php'");
+    expect(mainContent).toContain(
+      '( new Auto_Update_Demo_Updater( __FILE__, AUTO_UPDATE_DEMO_VERSION ) )->register();',
+    );
+
+    // Updater class is emitted with pipeline-derived hostname in the filter name
+    const updaterPath = path.join(
+      outDir,
+      'auto-update-demo',
+      'includes',
+      'class-auto-update-demo-updater.php',
+    );
+    expect(await fs.pathExists(updaterPath)).toBe(true);
+    const updaterContent = await fs.readFile(updaterPath, 'utf-8');
+    expect(updaterContent).toContain('class Auto_Update_Demo_Updater');
+    expect(updaterContent).toContain("add_filter( 'update_plugins_github.com'");
+    expect(updaterContent).toContain("const TAG_PREFIX  = 'auto-update-demo@';");
+    expect(updaterContent).toContain("const CACHE_KEY   = 'auto_update_demo_gh_release_cache';");
+    expect(updaterContent).toContain("$plugin_data['UpdateURI'] !== self::UPDATE_URI");
+
+    // Uninstall cleans up the release cache transient
+    const uninstallContent = await fs.readFile(
+      path.join(outDir, 'auto-update-demo', 'uninstall.php'),
+      'utf-8',
+    );
+    expect(uninstallContent).toContain("delete_transient( 'auto_update_demo_gh_release_cache' );");
+  });
+
   it('reports error for missing @Plugin decorator', async () => {
     const inputFile = path.join(fixtureDir, 'bad.ts');
     await fs.writeFile(inputFile, 'class Foo {}');

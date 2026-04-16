@@ -21,6 +21,7 @@ import './diagnostics-routes.js';
   authorUri: 'https://github.com/AmitGurbani',
   license: 'GPL-2.0+',
   textDomain: 'headless-clarity',
+  githubRepo: 'AmitGurbani/wordpress-plugins',
   requiresWP: '6.0',
   requiresPHP: '8.0',
 })

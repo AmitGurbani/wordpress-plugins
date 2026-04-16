@@ -12,6 +12,7 @@
  * Domain Path:       /languages
  * Requires at least: 6.7
  * Requires PHP:      8.2
+ * Update URI:       https://github.com/AmitGurbani/wordpress-plugins/releases?plugin=headless-auth
  */
 
 // If this file is called directly, abort.
@@ -46,11 +47,13 @@ register_deactivation_hook( __FILE__, 'deactivate_headless_auth' );
  * Core plugin class.
  */
 require_once HEADLESS_AUTH_PLUGIN_DIR . 'includes/class-headless-auth.php';
+require_once HEADLESS_AUTH_PLUGIN_DIR . 'includes/class-headless-auth-updater.php';
 
 /**
  * Begin plugin execution.
  */
 function run_headless_auth() {
+	( new Headless_Auth_Updater( __FILE__, HEADLESS_AUTH_VERSION ) )->register();
 	$plugin = new Headless_Auth();
 	$plugin->run();
 }

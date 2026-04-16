@@ -12,6 +12,9 @@
  * Domain Path:       {{domainPath}}
  * Requires at least: {{requiresWP}}
  * Requires PHP:      {{requiresPHP}}
+{{#if updateUri}}
+ * Update URI:       {{updateUri}}
+{{/if}}
  */
 
 // If this file is called directly, abort.
@@ -57,11 +60,17 @@ register_deactivation_hook( __FILE__, 'deactivate_{{pluginSlug}}' );
  * Core plugin class.
  */
 require_once {{constantPrefix}}PLUGIN_DIR . 'includes/class-{{filePrefix}}.php';
+{{#if githubRepo}}
+require_once {{constantPrefix}}PLUGIN_DIR . 'includes/class-{{filePrefix}}-updater.php';
+{{/if}}
 
 /**
  * Begin plugin execution.
  */
 function run_{{pluginSlug}}() {
+{{#if githubRepo}}
+	( new {{className}}_Updater( __FILE__, {{constantPrefix}}VERSION ) )->register();
+{{/if}}
 	$plugin = new {{className}}();
 	$plugin->run();
 }

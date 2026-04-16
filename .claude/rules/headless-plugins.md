@@ -19,6 +19,7 @@ These guardrails apply to all wpts-based headless plugins.
 - `@Setting({ exposeInConfig: true })` — auto-generates public GET /config route (skipped if manual @RestRoute('/config') exists)
 - `@Setting({ wooCurrencyDefault: true })` — auto-detects WooCommerce currency as default
 - `@Plugin({ wooNotice: 'recommended' | 'required' })` — auto-generates WooCommerce dependency admin notice
+- `@Plugin({ githubRepo: '<owner>/<repo>' })` — opts into GitHub Releases auto-updates via WP 5.8+ `Update URI` header; emits a dedicated `class-<slug>-updater.php` that hooks `update_plugins_{hostname}` + `plugins_api`
 
 ## WooCommerce Integration
 

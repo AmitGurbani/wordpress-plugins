@@ -73,6 +73,95 @@ describe('extractDecorators', () => {
       expect(diagnostics.hasErrors()).toBe(true);
       expect(diagnostics.getErrors()[0].code).toBe('WPTS012');
     });
+
+    describe('auto-update (githubRepo / updateUri)', () => {
+      const base = `name: 'Test', description: '', version: '1.0.0', author: '', license: 'GPL'`;
+
+      it('extracts githubRepo when valid', () => {
+        const { result, diagnostics } = extract(`
+          ${decoratorDefs}
+          @Plugin({ ${base}, githubRepo: 'AmitGurbani/wordpress-plugins' })
+          class TestPlugin {}
+        `);
+        expect(diagnostics.hasErrors()).toBe(false);
+        expect(result.plugin!.githubRepo).toBe('AmitGurbani/wordpress-plugins');
+        expect(result.plugin!.updateUri).toBeUndefined();
+      });
+
+      it('extracts both githubRepo and updateUri', () => {
+        const { result, diagnostics } = extract(`
+          ${decoratorDefs}
+          @Plugin({
+            ${base},
+            githubRepo: 'AmitGurbani/wordpress-plugins',
+            updateUri: 'https://updates.example.com/my-plugin'
+          })
+          class TestPlugin {}
+        `);
+        expect(diagnostics.hasErrors()).toBe(false);
+        expect(result.plugin!.githubRepo).toBe('AmitGurbani/wordpress-plugins');
+        expect(result.plugin!.updateUri).toBe('https://updates.example.com/my-plugin');
+      });
+
+      it('emits WPTS013 for malformed githubRepo', () => {
+        const { diagnostics } = extract(`
+          ${decoratorDefs}
+          @Plugin({ ${base}, githubRepo: 'just-a-name' })
+          class TestPlugin {}
+        `);
+        expect(diagnostics.hasErrors()).toBe(true);
+        expect(diagnostics.getErrors()[0].code).toBe('WPTS013');
+      });
+
+      it('emits WPTS015 when updateUri is set without githubRepo', () => {
+        const { diagnostics } = extract(`
+          ${decoratorDefs}
+          @Plugin({ ${base}, updateUri: 'https://example.com/x' })
+          class TestPlugin {}
+        `);
+        expect(diagnostics.hasErrors()).toBe(true);
+        expect(diagnostics.getErrors()[0].code).toBe('WPTS015');
+      });
+
+      it('emits WPTS014 when updateUri hostname is wordpress.org', () => {
+        const { diagnostics } = extract(`
+          ${decoratorDefs}
+          @Plugin({
+            ${base},
+            githubRepo: 'foo/bar',
+            updateUri: 'https://wordpress.org/plugins/my-plugin/'
+          })
+          class TestPlugin {}
+        `);
+        expect(diagnostics.hasErrors()).toBe(true);
+        expect(diagnostics.getErrors()[0].code).toBe('WPTS014');
+      });
+
+      it('emits WPTS014 when updateUri is not a valid URL', () => {
+        const { diagnostics } = extract(`
+          ${decoratorDefs}
+          @Plugin({
+            ${base},
+            githubRepo: 'foo/bar',
+            updateUri: 'not a url'
+          })
+          class TestPlugin {}
+        `);
+        expect(diagnostics.hasErrors()).toBe(true);
+        expect(diagnostics.getErrors()[0].code).toBe('WPTS014');
+      });
+
+      it('does not flag plugins that omit both options', () => {
+        const { result, diagnostics } = extract(`
+          ${decoratorDefs}
+          @Plugin({ ${base} })
+          class TestPlugin {}
+        `);
+        expect(diagnostics.hasErrors()).toBe(false);
+        expect(result.plugin!.githubRepo).toBeUndefined();
+        expect(result.plugin!.updateUri).toBeUndefined();
+      });
+    });
   });
 
   describe('@Action', () => {

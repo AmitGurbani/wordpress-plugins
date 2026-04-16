@@ -12,6 +12,7 @@
  * Domain Path:       /languages
  * Requires at least: 6.0
  * Requires PHP:      8.0
+ * Update URI:       https://github.com/AmitGurbani/wordpress-plugins/releases?plugin=headless-google-analytics
  */
 
 // If this file is called directly, abort.
@@ -55,11 +56,13 @@ register_deactivation_hook( __FILE__, 'deactivate_headless_google_analytics' );
  * Core plugin class.
  */
 require_once HEADLESS_GOOGLE_ANALYTICS_PLUGIN_DIR . 'includes/class-headless-google-analytics.php';
+require_once HEADLESS_GOOGLE_ANALYTICS_PLUGIN_DIR . 'includes/class-headless-google-analytics-updater.php';
 
 /**
  * Begin plugin execution.
  */
 function run_headless_google_analytics() {
+	( new Headless_Google_Analytics_Updater( __FILE__, HEADLESS_GOOGLE_ANALYTICS_VERSION ) )->register();
 	$plugin = new Headless_Google_Analytics();
 	$plugin->run();
 }

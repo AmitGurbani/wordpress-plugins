@@ -22,3 +22,4 @@ delete_option( 'headless_auth_default_user_role' );
 delete_option( 'headless_auth_enable_password_login' );
 delete_option( 'headless_auth_max_login_attempts' );
 delete_option( 'headless_auth_jwt_secret_key' );
+delete_transient( 'headless_auth_gh_release_cache' );

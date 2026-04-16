@@ -342,6 +342,48 @@ function extractPluginDecorator(
 
   const wooNotice = getStringProp(obj, 'wooNotice') as 'recommended' | 'required' | undefined;
 
+  const githubRepo = getStringProp(obj, 'githubRepo');
+  const updateUri = getStringProp(obj, 'updateUri');
+
+  if (githubRepo && !/^[^/\s]+\/[^/\s]+$/.test(githubRepo)) {
+    diagnostics.error(
+      'WPTS013',
+      `@Plugin "githubRepo" must be "<owner>/<repo>", got "${githubRepo}".`,
+      getLocation(decorator, sourceFile),
+    );
+    return null;
+  }
+
+  if (updateUri) {
+    if (!githubRepo) {
+      diagnostics.error(
+        'WPTS015',
+        '@Plugin "updateUri" requires "githubRepo" to be set.',
+        getLocation(decorator, sourceFile),
+      );
+      return null;
+    }
+    let host: string;
+    try {
+      host = new URL(updateUri).hostname;
+    } catch {
+      diagnostics.error(
+        'WPTS014',
+        `@Plugin "updateUri" must be a valid URL, got "${updateUri}".`,
+        getLocation(decorator, sourceFile),
+      );
+      return null;
+    }
+    if (host === 'wordpress.org' || host === 'w.org' || host.endsWith('.wordpress.org')) {
+      diagnostics.error(
+        'WPTS014',
+        '@Plugin "updateUri" hostname must not be wordpress.org (WP core short-circuits to its own update path).',
+        getLocation(decorator, sourceFile),
+      );
+      return null;
+    }
+  }
+
   return {
     name,
     slug: getStringProp(obj, 'slug'),
@@ -357,6 +399,8 @@ function extractPluginDecorator(
     requiresWP: getStringProp(obj, 'requiresWP'),
     requiresPHP: getStringProp(obj, 'requiresPHP'),
     wooNotice,
+    githubRepo,
+    updateUri,
   };
 }
 

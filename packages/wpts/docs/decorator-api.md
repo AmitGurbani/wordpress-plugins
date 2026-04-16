@@ -34,6 +34,8 @@ class MyPlugin { ... }
 | `requiresWP` | `string` | No | Minimum WordPress version (default: `6.7`) |
 | `requiresPHP` | `string` | No | Minimum PHP version (default: `8.2`) |
 | `wooNotice` | `'recommended' \| 'required'` | No | Auto-generate a WooCommerce dependency admin notice. `'recommended'` shows a warning; `'required'` shows an error. |
+| `githubRepo` | `string` | No | Opt into GitHub Releases auto-updates. Format `<owner>/<repo>` (case-sensitive). Emits the `Update URI` plugin header and a self-contained updater class that hooks `update_plugins_{hostname}` + `plugins_api` (WP 5.8+). |
+| `updateUri` | `string` | No | Override the `Update URI` value. Derived from `githubRepo` + `slug` when omitted. Hostname must not be `wordpress.org` (WP core short-circuits). Requires `githubRepo`. |
 
 ## `@Setting(options)`
 

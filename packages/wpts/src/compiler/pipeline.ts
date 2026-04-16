@@ -140,6 +140,17 @@ function buildIR(
   const raw = rawData.plugin!;
   const slug = raw.slug ?? toSlugCase(raw.name);
 
+  let updateUri: string | undefined;
+  let updateUriHost: string | undefined;
+  if (raw.githubRepo) {
+    updateUri = raw.updateUri ?? `https://github.com/${raw.githubRepo}/releases?plugin=${slug}`;
+    try {
+      updateUriHost = new URL(updateUri).hostname;
+    } catch {
+      // Extractor already validated; unreachable in practice.
+    }
+  }
+
   const metadata: PluginMetadata = {
     name: raw.name,
     slug,
@@ -155,6 +166,9 @@ function buildIR(
     requiresWP: raw.requiresWP ?? '6.7',
     requiresPHP: raw.requiresPHP ?? '8.2',
     wooNotice: raw.wooNotice,
+    githubRepo: raw.githubRepo,
+    updateUri,
+    updateUriHost,
     className: toWPClassName(raw.name),
     constantPrefix: toConstantPrefix(raw.name),
     functionPrefix: toFunctionPrefix(raw.name),

@@ -20,6 +20,7 @@ import './cron-tasks.js';
   authorUri: 'https://github.com/AmitGurbani',
   license: 'GPL-2.0+',
   textDomain: 'headless-pos-sessions',
+  githubRepo: 'AmitGurbani/wordpress-plugins',
   wooNotice: 'required',
 })
 @CustomPostType('pos_session', {

@@ -14,6 +14,18 @@ export interface PluginOptions {
   requiresPHP?: string;
   /** Auto-generate a WooCommerce dependency admin notice. */
   wooNotice?: 'recommended' | 'required';
+  /**
+   * GitHub repo ("<owner>/<repo>") to enable auto-updates from GitHub Releases.
+   * Case-sensitive. Generates the `Update URI` plugin header and a self-contained
+   * updater class that hooks `update_plugins_{hostname}` and `plugins_api` (WP 5.8+).
+   */
+  githubRepo?: string;
+  /**
+   * Override the Update URI. Derived from githubRepo + slug when omitted.
+   * The hostname becomes the filter suffix; the full URI is the per-plugin identity
+   * key enforced by the generated updater's `UpdateURI` string check.
+   */
+  updateUri?: string;
 }
 
 /**

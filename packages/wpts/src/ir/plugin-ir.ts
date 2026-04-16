@@ -38,6 +38,10 @@ export interface PluginMetadata {
   requiresPHP: string;
   // WooCommerce
   wooNotice?: 'recommended' | 'required';
+  // Auto-update (GitHub Releases)
+  githubRepo?: string;
+  updateUri?: string;
+  updateUriHost?: string;
   // Derived names
   className: string;
   constantPrefix: string;
@@ -216,6 +220,8 @@ export interface RawPluginDecorator {
   requiresWP?: string;
   requiresPHP?: string;
   wooNotice?: 'recommended' | 'required';
+  githubRepo?: string;
+  updateUri?: string;
 }
 
 export interface RawActionDecorator {

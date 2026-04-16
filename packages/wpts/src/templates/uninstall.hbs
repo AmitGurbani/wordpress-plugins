@@ -13,6 +13,9 @@ delete_option( '{{this}}' );
 {{#if diagnosticsErrorOption}}
 delete_option( '{{diagnosticsErrorOption}}' );
 {{/if}}
+{{#if hasAutoUpdate}}
+delete_transient( '{{functionPrefix}}gh_release_cache' );
+{{/if}}
 {{#each customPostTypes}}
 
 // Delete all {{singularName}} posts and their meta
