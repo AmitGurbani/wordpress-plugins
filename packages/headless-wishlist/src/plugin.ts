@@ -15,7 +15,7 @@ import './analytics-routes.js';
   name: 'Headless Wishlist',
   uri: 'https://github.com/AmitGurbani/wordpress-plugins',
   description: 'REST API wishlist for headless WordPress stores.',
-  version: '1.0.0',
+  version: '1.1.0',
   author: 'Amit Gurbani',
   authorUri: 'https://github.com/AmitGurbani',
   license: 'GPL-2.0+',
