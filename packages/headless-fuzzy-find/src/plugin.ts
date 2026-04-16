@@ -16,7 +16,7 @@ import './admin-routes.js';
   name: 'Headless Fuzzy Find',
   uri: 'https://github.com/AmitGurbani/wordpress-plugins',
   description: 'Weighted, fuzzy WooCommerce product search with autocomplete and analytics.',
-  version: '1.0.0',
+  version: '1.1.0',
   author: 'Amit Gurbani',
   authorUri: 'https://github.com/AmitGurbani',
   license: 'GPL-2.0+',

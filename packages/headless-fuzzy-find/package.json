@@ -1,6 +1,6 @@
 {
   "name": "headless-fuzzy-find",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "private": true,
   "description": "Headless Fuzzy Find — weighted, fuzzy product search with autocomplete",
   "scripts": {
