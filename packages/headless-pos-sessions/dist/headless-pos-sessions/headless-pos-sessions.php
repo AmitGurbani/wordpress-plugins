@@ -3,7 +3,7 @@
  * Plugin Name:       Headless POS Sessions
  * Plugin URI:        https://github.com/AmitGurbani/wordpress-plugins
  * Description:       POS register session storage with REST API for headless WordPress.
- * Version:           1.0.0
+ * Version:           1.1.0
  * Author:            Amit Gurbani
  * Author URI:        https://github.com/AmitGurbani
  * License:           GPL-2.0+
@@ -20,7 +20,7 @@ if ( ! defined( 'WPINC' ) ) {
 	die;
 }
 
-define( 'HEADLESS_POS_SESSIONS_VERSION', '1.0.0' );
+define( 'HEADLESS_POS_SESSIONS_VERSION', '1.1.0' );
 define( 'HEADLESS_POS_SESSIONS_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'HEADLESS_POS_SESSIONS_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
 

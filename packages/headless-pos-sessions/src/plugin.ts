@@ -15,7 +15,7 @@ import './cron-tasks.js';
   name: 'Headless POS Sessions',
   uri: 'https://github.com/AmitGurbani/wordpress-plugins',
   description: 'POS register session storage with REST API for headless WordPress.',
-  version: '1.0.0',
+  version: '1.1.0',
   author: 'Amit Gurbani',
   authorUri: 'https://github.com/AmitGurbani',
   license: 'GPL-2.0+',
