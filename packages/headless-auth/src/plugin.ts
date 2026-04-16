@@ -18,7 +18,7 @@ import './login-routes.js';
   name: 'Headless Auth',
   uri: 'https://github.com/AmitGurbani/wordpress-plugins',
   description: 'OTP and password authentication with JWT for headless WordPress stores.',
-  version: '1.0.0',
+  version: '1.1.0',
   author: 'Amit Gurbani',
   authorUri: 'https://github.com/AmitGurbani',
   license: 'GPL-2.0+',
