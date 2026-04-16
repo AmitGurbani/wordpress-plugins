@@ -17,7 +17,7 @@ import './diagnostics-routes.js';
   uri: 'https://github.com/AmitGurbani/wordpress-plugins',
   description:
     'Google Analytics (GA4) with WooCommerce integration and Measurement Protocol for headless WordPress.',
-  version: '1.0.0',
+  version: '1.1.0',
   author: 'Amit Gurbani',
   authorUri: 'https://github.com/AmitGurbani',
   license: 'GPL-2.0+',
