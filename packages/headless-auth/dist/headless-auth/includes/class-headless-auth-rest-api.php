@@ -89,6 +89,17 @@ class Headless_Auth_Rest_Api {
 		);
 		register_rest_route(
 			$this->namespace,
+			'/auth/me',
+			array(
+				'methods'             => 'PUT',
+				'callback'            => array( $this, 'update_profile' ),
+				'permission_callback' => function() {
+					return current_user_can( 'read' );
+				},
+			)
+		);
+		register_rest_route(
+			$this->namespace,
 			'/auth/login',
 			array(
 				'methods'             => 'POST',
@@ -608,11 +619,117 @@ class Headless_Auth_Rest_Api {
 		}
 		$display_name = get_the_author_meta( 'display_name', $user_id );
 		$email = get_the_author_meta( 'user_email', $user_id );
+		$first_name = get_the_author_meta( 'first_name', $user_id );
+		$last_name = get_the_author_meta( 'last_name', $user_id );
 		$phone = get_user_meta( $user_id, 'phone_number', true );
 		$cap_key = $wpdb->prefix . 'capabilities';
 		$caps = get_user_meta( $user_id, $cap_key, true );
 		$roles = $caps ? array_keys( $caps ) : array();
-		return array( 'id' => $user_id, 'name' => $display_name, 'email' => $email, 'phone' => $phone, 'roles' => $roles );
+		return array( 'id' => $user_id, 'first_name' => $first_name, 'last_name' => $last_name, 'name' => $display_name, 'email' => $email, 'phone' => $phone, 'roles' => $roles );
+	}
+
+	public function update_profile( $request ) {
+		global $wpdb;
+		$user_id = get_current_user_id();
+		if ( ! $user_id ) {
+			return new WP_Error( 'not_authenticated', 'You must be logged in.', array( 'status' => 401 ) );
+		}
+		if ( ! current_user_can( 'edit_user', $user_id ) ) {
+			return new WP_Error( 'cannot_edit', 'You are not allowed to edit this profile.', array( 'status' => 403 ) );
+		}
+		$raw_name = $request->get_param( 'name' );
+		$raw_first_name = $request->get_param( 'first_name' );
+		$raw_last_name = $request->get_param( 'last_name' );
+		$raw_email = $request->get_param( 'email' );
+		$raw_phone = $request->get_param( 'phone' );
+		$user_data = array( 'ID' => $user_id );
+		$has_core_updates = false;
+		if ( $raw_name ) {
+			$name = sanitize_text_field( $raw_name );
+			if ( $name ) {
+				$user_data['display_name'] = $name;
+				$has_core_updates = true;
+			}
+		}
+		if ( $raw_first_name ) {
+			$first_name = sanitize_text_field( $raw_first_name );
+			if ( $first_name ) {
+				$user_data['first_name'] = $first_name;
+				$has_core_updates = true;
+			}
+		}
+		if ( $raw_last_name ) {
+			$last_name = sanitize_text_field( $raw_last_name );
+			if ( $last_name ) {
+				$user_data['last_name'] = $last_name;
+				$has_core_updates = true;
+			}
+		}
+		if ( $raw_email ) {
+			$email = sanitize_email( $raw_email );
+			if ( ! $email ) {
+				return new WP_Error( 'invalid_email', 'Invalid email address.', array( 'status' => 400 ) );
+			}
+			$current_email = get_the_author_meta( 'user_email', $user_id );
+			if ( $email !== $current_email ) {
+				$existing_id = email_exists( $email );
+				if ( $existing_id && intval( $existing_id ) !== $user_id ) {
+					return new WP_Error( 'email_exists', 'This email address is already in use.', array( 'status' => 409 ) );
+				}
+				$user_data['user_email'] = $email;
+				$has_core_updates = true;
+			}
+		}
+		$phone_updated = false;
+		$sanitized_phone = '';
+		if ( $raw_phone ) {
+			$sanitized_phone = sanitize_text_field( $raw_phone );
+			if ( $sanitized_phone ) {
+				$current_phone = get_user_meta( $user_id, 'phone_number', true );
+				if ( $sanitized_phone !== $current_phone ) {
+					$existing_phone_ids = get_users( array( 'meta_key' => 'phone_number', 'meta_value' => $sanitized_phone, 'number' => 1, 'fields' => 'ids' ) );
+					if ( count( $existing_phone_ids ) === 0 && class_exists( 'WooCommerce' ) ) {
+						$existing_phone_ids = get_users( array( 'meta_key' => 'billing_phone', 'meta_value' => $sanitized_phone, 'number' => 1, 'fields' => 'ids' ) );
+					}
+					if ( count( $existing_phone_ids ) > 0 && intval( $existing_phone_ids[0] ) !== $user_id ) {
+						return new WP_Error( 'phone_exists', 'This phone number is already in use.', array( 'status' => 409 ) );
+					}
+					$phone_updated = true;
+				}
+			}
+		}
+		if ( ! $has_core_updates && ! $phone_updated ) {
+			return new WP_Error( 'no_changes', 'No valid fields provided for update.', array( 'status' => 400 ) );
+		}
+		if ( $has_core_updates ) {
+			$result = wp_update_user( $user_data );
+			if ( is_wp_error( $result ) ) {
+				return new WP_Error( 'update_failed', 'Failed to update profile.', array( 'status' => 500 ) );
+			}
+		}
+		if ( $phone_updated ) {
+			update_user_meta( $user_id, 'phone_number', $sanitized_phone );
+			if ( class_exists( 'WooCommerce' ) ) {
+				update_user_meta( $user_id, 'billing_phone', $sanitized_phone );
+			}
+		}
+		if ( class_exists( 'WooCommerce' ) ) {
+			if ( isset( $user_data['first_name'] ) ) {
+				update_user_meta( $user_id, 'billing_first_name', $user_data['first_name'] );
+			}
+			if ( isset( $user_data['last_name'] ) ) {
+				update_user_meta( $user_id, 'billing_last_name', $user_data['last_name'] );
+			}
+		}
+		$display_name = get_the_author_meta( 'display_name', $user_id );
+		$email_out = get_the_author_meta( 'user_email', $user_id );
+		$first_name_out = get_the_author_meta( 'first_name', $user_id );
+		$last_name_out = get_the_author_meta( 'last_name', $user_id );
+		$phone = get_user_meta( $user_id, 'phone_number', true );
+		$cap_key = $wpdb->prefix . 'capabilities';
+		$caps = get_user_meta( $user_id, $cap_key, true );
+		$roles = $caps ? array_keys( $caps ) : array();
+		return array( 'id' => $user_id, 'first_name' => $first_name_out, 'last_name' => $last_name_out, 'name' => $display_name, 'email' => $email_out, 'phone' => $phone, 'roles' => $roles );
 	}
 
 	public function login( $request ) {

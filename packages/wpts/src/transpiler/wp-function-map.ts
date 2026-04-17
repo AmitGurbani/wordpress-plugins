@@ -99,6 +99,7 @@ export const WP_FUNCTION_MAP: Record<string, string> = {
   usernameExists: 'username_exists',
   emailExists: 'email_exists',
   wpInsertUser: 'wp_insert_user',
+  wpUpdateUser: 'wp_update_user',
   wpGetCurrentUser: 'wp_get_current_user',
   wpGeneratePassword: 'wp_generate_password',
   wpHashPassword: 'wp_hash_password',

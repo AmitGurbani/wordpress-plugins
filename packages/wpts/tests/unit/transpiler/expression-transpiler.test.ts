@@ -495,6 +495,12 @@ describe('transpileExpression', () => {
           'declare function wpInsertUser(d: any): any;',
         ),
       ).toBe("wp_insert_user( array( 'user_login' => 'john' ) )");
+      expect(
+        transpile(
+          'wpUpdateUser({ ID: 1, display_name: "John" })',
+          'declare function wpUpdateUser(d: any): any;',
+        ),
+      ).toBe("wp_update_user( array( 'ID' => 1, 'display_name' => 'John' ) )");
       expect(transpile('wpGetCurrentUser()', 'declare function wpGetCurrentUser(): any;')).toBe(
         'wp_get_current_user()',
       );

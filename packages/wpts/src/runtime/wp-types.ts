@@ -209,6 +209,7 @@ declare global {
   function usernameExists(username: string): number | false;
   function emailExists(email: string): any;
   function wpInsertUser(userdata: Record<string, any>): number | any;
+  function wpUpdateUser(userdata: Record<string, any>): number | any;
   function wpGetCurrentUser(): any;
   function wpGeneratePassword(
     length?: number,

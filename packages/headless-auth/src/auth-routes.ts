@@ -259,6 +259,8 @@ class AuthRoutes {
 
     const displayName: string = getTheAuthorMeta('display_name', userId);
     const email: string = getTheAuthorMeta('user_email', userId);
+    const firstName: string = getTheAuthorMeta('first_name', userId);
+    const lastName: string = getTheAuthorMeta('last_name', userId);
     const phone: string = getUserMeta(userId, 'phone_number', true);
     const capKey: string = `${wpdb.prefix}capabilities`;
     const caps: any = getUserMeta(userId, capKey, true);
@@ -266,8 +268,169 @@ class AuthRoutes {
 
     return {
       id: userId,
+      first_name: firstName,
+      last_name: lastName,
       name: displayName,
       email: email,
+      phone: phone,
+      roles: roles,
+    };
+  }
+
+  @RestRoute('/auth/me', { method: 'PUT', capability: 'read' })
+  updateProfile(request: any): any {
+    const userId: number = getCurrentUserId();
+
+    if (!userId) {
+      return new WP_Error('not_authenticated', 'You must be logged in.', { status: 401 });
+    }
+
+    // Defense-in-depth: edit_user meta capability allows self-editing via map_meta_cap()
+    if (!currentUserCan('edit_user', userId)) {
+      return new WP_Error('cannot_edit', 'You are not allowed to edit this profile.', {
+        status: 403,
+      });
+    }
+
+    // Read optional fields from request
+    const rawName: string = request.get_param('name');
+    const rawFirstName: string = request.get_param('first_name');
+    const rawLastName: string = request.get_param('last_name');
+    const rawEmail: string = request.get_param('email');
+    const rawPhone: string = request.get_param('phone');
+
+    // Build wp_update_user data
+    const userData: any = { ID: userId };
+    let hasCoreUpdates: boolean = false;
+
+    // -- Display name --
+    if (rawName) {
+      const name: string = sanitizeTextField(rawName);
+      if (name) {
+        userData.display_name = name;
+        hasCoreUpdates = true;
+      }
+    }
+
+    // -- First name --
+    if (rawFirstName) {
+      const firstName: string = sanitizeTextField(rawFirstName);
+      if (firstName) {
+        userData.first_name = firstName;
+        hasCoreUpdates = true;
+      }
+    }
+
+    // -- Last name --
+    if (rawLastName) {
+      const lastName: string = sanitizeTextField(rawLastName);
+      if (lastName) {
+        userData.last_name = lastName;
+        hasCoreUpdates = true;
+      }
+    }
+
+    // -- Email --
+    if (rawEmail) {
+      const email: string = sanitizeEmail(rawEmail);
+      if (!email) {
+        return new WP_Error('invalid_email', 'Invalid email address.', { status: 400 });
+      }
+      const currentEmail: string = getTheAuthorMeta('user_email', userId);
+      if (email !== currentEmail) {
+        const existingId: any = emailExists(email);
+        if (existingId && intval(existingId) !== userId) {
+          return new WP_Error('email_exists', 'This email address is already in use.', {
+            status: 409,
+          });
+        }
+        userData.user_email = email;
+        hasCoreUpdates = true;
+      }
+    }
+
+    // -- Phone --
+    let phoneUpdated: boolean = false;
+    let sanitizedPhone: string = '';
+    if (rawPhone) {
+      sanitizedPhone = sanitizeTextField(rawPhone);
+      if (sanitizedPhone) {
+        const currentPhone: string = getUserMeta(userId, 'phone_number', true);
+        if (sanitizedPhone !== currentPhone) {
+          // Check for duplicate phone (mirrors registration pattern)
+          let existingPhoneIds: any[] = getUsers({
+            meta_key: 'phone_number',
+            meta_value: sanitizedPhone,
+            number: 1,
+            fields: 'ids',
+          });
+
+          if (existingPhoneIds.length === 0 && classExists('WooCommerce')) {
+            existingPhoneIds = getUsers({
+              meta_key: 'billing_phone',
+              meta_value: sanitizedPhone,
+              number: 1,
+              fields: 'ids',
+            });
+          }
+
+          if (existingPhoneIds.length > 0 && intval(existingPhoneIds[0]) !== userId) {
+            return new WP_Error('phone_exists', 'This phone number is already in use.', {
+              status: 409,
+            });
+          }
+
+          phoneUpdated = true;
+        }
+      }
+    }
+
+    if (!hasCoreUpdates && !phoneUpdated) {
+      return new WP_Error('no_changes', 'No valid fields provided for update.', { status: 400 });
+    }
+
+    // Update core WP user fields
+    if (hasCoreUpdates) {
+      const result: any = wpUpdateUser(userData);
+      if (isWpError(result)) {
+        return new WP_Error('update_failed', 'Failed to update profile.', { status: 500 });
+      }
+    }
+
+    // Update phone meta
+    if (phoneUpdated) {
+      updateUserMeta(userId, 'phone_number', sanitizedPhone);
+      if (classExists('WooCommerce')) {
+        updateUserMeta(userId, 'billing_phone', sanitizedPhone);
+      }
+    }
+
+    // Sync WooCommerce billing name meta
+    if (classExists('WooCommerce')) {
+      if (userData.first_name !== undefined) {
+        updateUserMeta(userId, 'billing_first_name', userData.first_name);
+      }
+      if (userData.last_name !== undefined) {
+        updateUserMeta(userId, 'billing_last_name', userData.last_name);
+      }
+    }
+
+    // Return updated profile (same shape as GET /auth/me)
+    const displayName: string = getTheAuthorMeta('display_name', userId);
+    const emailOut: string = getTheAuthorMeta('user_email', userId);
+    const firstNameOut: string = getTheAuthorMeta('first_name', userId);
+    const lastNameOut: string = getTheAuthorMeta('last_name', userId);
+    const phone: string = getUserMeta(userId, 'phone_number', true);
+    const capKey: string = `${wpdb.prefix}capabilities`;
+    const caps: any = getUserMeta(userId, capKey, true);
+    const roles: any = caps ? Object.keys(caps) : [];
+
+    return {
+      id: userId,
+      first_name: firstNameOut,
+      last_name: lastNameOut,
+      name: displayName,
+      email: emailOut,
       phone: phone,
       roles: roles,
     };

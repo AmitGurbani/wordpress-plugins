@@ -89,7 +89,7 @@ All functions are written in camelCase in TypeScript and transpiled to snake_cas
 | **Settings API** | `registerSetting`, `addSettingsSection`, `addSettingsField`, `settingsFields`, `doSettingsSections`, `submitButton` |
 | **Admin Pages** | `addMenuPage`, `addSubmenuPage`, `addOptionsPage` |
 | **Conditionals** | `isSingle`, `isPage`, `isAdmin`, `isFrontPage`, `isHome`, `isArchive`, `isCategory`, `isTag`, `isSingular`, `isSearch`, `getSearchQuery`, `getQueriedObjectId` |
-| **User** | `currentUserCan`, `getCurrentUserId`, `isUserLoggedIn`, `getUserBy`, `getUsers`, `usernameExists`, `emailExists`, `wpInsertUser`, `wpGetCurrentUser`, `wpGeneratePassword`, `wpHashPassword`, `wpCheckPassword`, `wpSetCurrentUser`, `wpAuthenticate`, `getTheAuthorMeta` |
+| **User** | `currentUserCan`, `getCurrentUserId`, `isUserLoggedIn`, `getUserBy`, `getUsers`, `usernameExists`, `emailExists`, `wpInsertUser`, `wpUpdateUser`, `wpGetCurrentUser`, `wpGeneratePassword`, `wpHashPassword`, `wpCheckPassword`, `wpSetCurrentUser`, `wpAuthenticate`, `getTheAuthorMeta` |
 | **Nonces** | `wpCreateNonce`, `wpVerifyNonce`, `wpNonceField`, `checkAdminReferer` |
 | **Transients** | `getTransient`, `setTransient`, `deleteTransient` |
 | **Posts** | `getPost`, `getPostType`, `getPosts`, `wpInsertPost`, `wpUpdatePost`, `getTheId`, `getTheTitle`, `getTheContent`, `getPermalink`, `wpGetPostParentId` |

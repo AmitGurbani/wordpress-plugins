@@ -51,6 +51,7 @@ export const plugins: Plugin[] = [
       { method: 'POST', path: '/auth/register', description: 'Register new user' },
       { method: 'POST', path: '/auth/refresh', description: 'Refresh JWT token pair' },
       { method: 'GET', path: '/auth/me', description: 'Get current user' },
+      { method: 'PUT', path: '/auth/me', description: 'Update current user profile' },
     ],
     faqs: [
       {

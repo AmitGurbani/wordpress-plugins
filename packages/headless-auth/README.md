@@ -39,7 +39,7 @@ src/
 ├── jwt.ts             # JWT generation helper, CORS, auth filter
 ├── otp-routes.ts      # /otp/send, /otp/verify, /otp/test-otp
 ├── login-routes.ts    # /auth/login (username/email + password)
-├── auth-routes.ts     # /auth/register, /auth/refresh, /auth/me
+├── auth-routes.ts     # /auth/register, /auth/refresh, /auth/me (GET/PUT)
 └── admin/index.tsx    # React settings UI
 ```
 
@@ -57,6 +57,7 @@ All endpoints are under `/headless-auth/v1/`.
 | `/auth/register` | POST | Public | Register new user with registration token |
 | `/auth/refresh` | POST | Public | Refresh expired access token |
 | `/auth/me` | GET | Bearer token | Get current user profile |
+| `/auth/me` | PUT | Bearer token | Update current user profile |
 | `/otp/test-otp` | GET | Admin | Get latest test OTP (test mode only) |
 
 See the [Integration Guide](./docs/integration-guide.md) for detailed request/response examples, error codes, and code samples.
@@ -92,7 +93,7 @@ Configured via WordPress admin page (Auth menu):
 - **Rate limiting**: Transient-based per phone number hash with separate send cooldown, verify attempt limit, and configurable rate limit window
 - **Brute-force protection**: OTP verify attempts limited (default 3, per OWASP). Lockout deletes the OTP and forces re-request
 - **Registration control**: Toggle to enable/disable new user registration, configurable default role. Username derived from display name
-- **WooCommerce compatibility**: Auto-detects WooCommerce. Falls back to `billing_phone` meta for existing WooCommerce users, syncs `billing_phone`/`billing_first_name`/`billing_last_name` on registration, defaults role to `customer`
+- **WooCommerce compatibility**: Auto-detects WooCommerce. Falls back to `billing_phone` meta for existing WooCommerce users, syncs `billing_phone`/`billing_first_name`/`billing_last_name` on registration and profile updates, defaults role to `customer`
 - **Refresh tokens**: Stored as hashed user meta, supports rotation
 
 ## License
