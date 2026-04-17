@@ -93,7 +93,7 @@ Configured via WordPress admin page (Auth menu):
 - **Rate limiting**: Transient-based per phone number hash with separate send cooldown, verify attempt limit, and configurable rate limit window
 - **Brute-force protection**: OTP verify attempts limited (default 3, per OWASP). Lockout deletes the OTP and forces re-request
 - **Registration control**: Toggle to enable/disable new user registration, configurable default role. Username derived from display name
-- **WooCommerce compatibility**: Auto-detects WooCommerce. Falls back to `billing_phone` meta for existing WooCommerce users, syncs `billing_phone`/`billing_first_name`/`billing_last_name` on registration and profile updates, defaults role to `customer`
+- **WooCommerce compatibility**: Auto-detects WooCommerce. Falls back to `billing_phone` meta for existing WooCommerce users, syncs `billing_phone`/`billing_first_name`/`billing_last_name` on registration, syncs `billing_first_name`/`billing_last_name` on profile updates, defaults role to `customer`
 - **Refresh tokens**: Stored as hashed user meta, supports rotation
 
 ## License

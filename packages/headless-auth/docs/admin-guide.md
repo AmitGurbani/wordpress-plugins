@@ -96,7 +96,7 @@ The plugin automatically detects WooCommerce and adapts its behavior:
 
 - **Default role**: New users are assigned the `customer` role instead of `subscriber` (overridable via the Default User Role setting)
 - **Phone lookup fallback**: When looking up users by phone, falls back to the `billing_phone` meta field if `phone_number` is not found — this matches existing WooCommerce customers who registered through checkout
-- **Billing meta sync**: On registration and profile updates, `billing_phone`, `billing_first_name`, and `billing_last_name` are populated so WooCommerce checkout forms are pre-filled
+- **Billing meta sync**: On registration, `billing_phone`, `billing_first_name`, and `billing_last_name` are populated. On profile updates, `billing_first_name` and `billing_last_name` are kept in sync. This ensures WooCommerce checkout forms are pre-filled
 - **Username generation**: Usernames are derived from the display name (e.g., `john_doe`) instead of random strings, with phone suffix appended if the name is taken
 
 No configuration is required — WooCommerce support activates automatically when WooCommerce is installed and active.

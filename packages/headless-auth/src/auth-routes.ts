@@ -292,12 +292,11 @@ class AuthRoutes {
       });
     }
 
-    // Read optional fields from request
+    // Read optional fields from request (profile data only — credential changes
+    // like email/phone require re-authentication and are handled separately)
     const rawName: string = request.get_param('name');
     const rawFirstName: string = request.get_param('first_name');
     const rawLastName: string = request.get_param('last_name');
-    const rawEmail: string = request.get_param('email');
-    const rawPhone: string = request.get_param('phone');
 
     // Build wp_update_user data
     const userData: any = { ID: userId };
@@ -330,79 +329,14 @@ class AuthRoutes {
       }
     }
 
-    // -- Email --
-    if (rawEmail) {
-      const email: string = sanitizeEmail(rawEmail);
-      if (!email) {
-        return new WP_Error('invalid_email', 'Invalid email address.', { status: 400 });
-      }
-      const currentEmail: string = getTheAuthorMeta('user_email', userId);
-      if (email !== currentEmail) {
-        const existingId: any = emailExists(email);
-        if (existingId && intval(existingId) !== userId) {
-          return new WP_Error('email_exists', 'This email address is already in use.', {
-            status: 409,
-          });
-        }
-        userData.user_email = email;
-        hasCoreUpdates = true;
-      }
-    }
-
-    // -- Phone --
-    let phoneUpdated: boolean = false;
-    let sanitizedPhone: string = '';
-    if (rawPhone) {
-      sanitizedPhone = sanitizeTextField(rawPhone);
-      if (sanitizedPhone) {
-        const currentPhone: string = getUserMeta(userId, 'phone_number', true);
-        if (sanitizedPhone !== currentPhone) {
-          // Check for duplicate phone (mirrors registration pattern)
-          let existingPhoneIds: any[] = getUsers({
-            meta_key: 'phone_number',
-            meta_value: sanitizedPhone,
-            number: 1,
-            fields: 'ids',
-          });
-
-          if (existingPhoneIds.length === 0 && classExists('WooCommerce')) {
-            existingPhoneIds = getUsers({
-              meta_key: 'billing_phone',
-              meta_value: sanitizedPhone,
-              number: 1,
-              fields: 'ids',
-            });
-          }
-
-          if (existingPhoneIds.length > 0 && intval(existingPhoneIds[0]) !== userId) {
-            return new WP_Error('phone_exists', 'This phone number is already in use.', {
-              status: 409,
-            });
-          }
-
-          phoneUpdated = true;
-        }
-      }
-    }
-
-    if (!hasCoreUpdates && !phoneUpdated) {
+    if (!hasCoreUpdates) {
       return new WP_Error('no_changes', 'No valid fields provided for update.', { status: 400 });
     }
 
     // Update core WP user fields
-    if (hasCoreUpdates) {
-      const result: any = wpUpdateUser(userData);
-      if (isWpError(result)) {
-        return new WP_Error('update_failed', 'Failed to update profile.', { status: 500 });
-      }
-    }
-
-    // Update phone meta
-    if (phoneUpdated) {
-      updateUserMeta(userId, 'phone_number', sanitizedPhone);
-      if (classExists('WooCommerce')) {
-        updateUserMeta(userId, 'billing_phone', sanitizedPhone);
-      }
+    const result: any = wpUpdateUser(userData);
+    if (isWpError(result)) {
+      return new WP_Error('update_failed', 'Failed to update profile.', { status: 500 });
     }
 
     // Sync WooCommerce billing name meta

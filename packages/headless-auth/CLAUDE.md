@@ -45,7 +45,7 @@ Multi-file wpts plugin with 5 source files:
 
 - **Transient keys**: `ha_otp_<hash>`, `ha_attempts_<hash>`, `ha_reg_<hash>`, `ha_cooldown_<hash>`, `ha_verify_<hash>` (phone hash is `md5(phone)`), `ha_test_otp_latest` (test mode OTP display), `ha_login_attempts_<hash>` (login hash is `md5(username/email)`)
 - **Option keys**: `headless_auth_` prefix (e.g., `headless_auth_jwt_secret_key` — hidden option, not a @Setting)
-- **User meta**: `phone_number`, `ha_refresh_token_hash`, `ha_refresh_token_expiry`. When WooCommerce is active: `billing_phone`, `billing_first_name`, `billing_last_name` (synced on both registration and profile updates)
+- **User meta**: `phone_number`, `ha_refresh_token_hash`, `ha_refresh_token_expiry`. When WooCommerce is active: `billing_phone`, `billing_first_name`, `billing_last_name` (all synced on registration; `billing_first_name`/`billing_last_name` also synced on profile updates)
 - **JWT**: HS256, base64url-encoded, issued by `siteUrl()`, types: `access` and `refresh`
 - **Rate limiting**: Transient-based per phone/login hash. Send rate limit window (default 900s) is separate from OTP expiry (300s). Resend cooldown (60s) prevents rapid re-sends. Verify attempts (max 3) protect against brute-force — lockout deletes the OTP. Password login: max 5 attempts per username/email, shares rate_limit_window setting.
 - **Registration**: Toggleable via `enable_registration` setting. Default user role configurable via `default_user_role` (defaults to `customer` when WooCommerce is active, `subscriber` otherwise). Username derived from display name (not random). Existing WooCommerce users are matched by `billing_phone` fallback if `phone_number` meta is missing.

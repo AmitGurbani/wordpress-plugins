@@ -428,8 +428,8 @@ Update the authenticated user's profile. All fields are optional — only provid
 | `name` | string | Display name |
 | `first_name` | string | First name |
 | `last_name` | string | Last name |
-| `email` | string | Email address (must be unique) |
-| `phone` | string | Phone number (must be unique) |
+
+> **Note:** Email and phone number changes are not supported via this endpoint. These are login credentials and require dedicated flows with re-authentication (coming in a future release).
 
 **Success Response (200):**
 
@@ -451,9 +451,6 @@ Update the authenticated user's profile. All fields are optional — only provid
 |------|--------|------|
 | `not_authenticated` | 401 | No valid access token provided |
 | `cannot_edit` | 403 | User lacks permission to edit profile |
-| `invalid_email` | 400 | Email failed sanitization |
-| `email_exists` | 409 | Email already in use by another account |
-| `phone_exists` | 409 | Phone already in use by another account |
 | `no_changes` | 400 | No valid fields provided |
 | `update_failed` | 500 | Server error updating profile |
 
@@ -514,10 +511,7 @@ Some errors include extra fields in `data` (e.g., `retry_after` for cooldown err
 | `config_error` | 403 | /auth/refresh | JWT secret key not configured | Contact site admin |
 | `not_authenticated` | 401 | /auth/me | No valid access token | Include `Authorization: Bearer <token>` header. Refresh if expired |
 | `cannot_edit` | 403 | /auth/me (PUT) | User lacks edit_user capability | Contact site admin — user may be restricted |
-| `invalid_email` | 400 | /auth/me (PUT) | Email failed sanitization | Provide a valid email address |
-| `email_exists` | 409 | /auth/me (PUT) | Email used by another account | Use a different email address |
-| `phone_exists` | 409 | /auth/me (PUT) | Phone used by another account | Use a different phone number |
-| `no_changes` | 400 | /auth/me (PUT) | No valid fields in request body | Include at least one of: `name`, `first_name`, `last_name`, `email`, `phone` |
+| `no_changes` | 400 | /auth/me (PUT) | No valid fields in request body | Include at least one of: `name`, `first_name`, `last_name` |
 | `update_failed` | 500 | /auth/me (PUT) | Server error updating user | Retry or contact site admin |
 
 ## Token Management
