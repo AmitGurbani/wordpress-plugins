@@ -82,8 +82,8 @@ jobs:
           # Collect commits by scope and by file path, deduplicate
           CHANGELOG=$(
             {
-              git log "${RANGE_ARGS[@]}" --pretty="format:- %s" --grep="(${PLUGIN})" 2>/dev/null || true
-              git log "${RANGE_ARGS[@]}" --pretty="format:- %s" -- "packages/${PLUGIN}/" 2>/dev/null || true
+              git log "${RANGE_ARGS[@]}" --pretty="tformat:- %s" --grep="(${PLUGIN})" 2>/dev/null || true
+              git log "${RANGE_ARGS[@]}" --pretty="tformat:- %s" -- "packages/${PLUGIN}/" 2>/dev/null || true
             } | sort -u | sed 's/^- [a-z]*([^)]*): /- /'
           )
 
