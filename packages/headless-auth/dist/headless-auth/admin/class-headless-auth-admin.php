@@ -94,7 +94,7 @@ class Headless_Auth_Admin {
 			array(
 				'type'    => 'string',
 				'default' => '{}',
-				'sanitize_callback' => 'sanitize_text_field',
+				'sanitize_callback' => 'sanitize_textarea_field',
 			)
 		);
 		register_setting(
@@ -103,7 +103,7 @@ class Headless_Auth_Admin {
 			array(
 				'type'    => 'string',
 				'default' => '{}',
-				'sanitize_callback' => 'sanitize_text_field',
+				'sanitize_callback' => 'sanitize_textarea_field',
 			)
 		);
 		register_setting(

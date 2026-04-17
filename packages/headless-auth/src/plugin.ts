@@ -60,6 +60,7 @@ class HeadlessAuth {
     label: 'OTP Server Headers Template',
     description:
       'JSON headers template. Placeholders: {{phone}}, {{otp}}, {{siteName}}, {{siteUrl}}.',
+    sanitize: 'sanitize_textarea_field',
   })
   otpServerHeadersTemplate: string = '{}';
 
@@ -69,6 +70,7 @@ class HeadlessAuth {
     default: '{}',
     label: 'OTP Server Payload Template',
     description: 'JSON body template. Placeholders: {{phone}}, {{otp}}, {{siteName}}, {{siteUrl}}.',
+    sanitize: 'sanitize_textarea_field',
   })
   otpServerPayloadTemplate: string = '{}';
 

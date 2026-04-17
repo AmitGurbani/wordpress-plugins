@@ -98,13 +98,16 @@ test.describe('Headless Auth — Profile Update (PUT /auth/me)', () => {
   });
 
   test('updates email address', async ({ restApi, wpCli }) => {
-    const { ctx, accessToken } = await getTokenForUser(
+    const { ctx, accessToken, userId } = await getTokenForUser(
       'profileuser3',
       'profile3@test.com',
       '+15550100003',
       restApi,
       wpCli,
     );
+
+    // Reset email so test is idempotent across re-runs
+    wpCli(`user update ${userId} --user_email=profile3@test.com`);
 
     const res = await ctx.put(`${BASE}/auth/me`, {
       headers: { Authorization: `Bearer ${accessToken}` },

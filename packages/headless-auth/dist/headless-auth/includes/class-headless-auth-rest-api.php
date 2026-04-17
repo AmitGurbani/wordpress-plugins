@@ -163,7 +163,7 @@ class Headless_Auth_Rest_Api {
 			update_option( 'headless_auth_otp_server_url', $value );
 		}
 		if ( isset( $params['otp_server_headers_template'] ) ) {
-			$value = sanitize_text_field( $params['otp_server_headers_template'] );
+			$value = sanitize_textarea_field( $params['otp_server_headers_template'] );
 			if ( null === $value ) {
 				return new \WP_Error(
 					'invalid_otp_server_headers_template',
@@ -174,7 +174,7 @@ class Headless_Auth_Rest_Api {
 			update_option( 'headless_auth_otp_server_headers_template', $value );
 		}
 		if ( isset( $params['otp_server_payload_template'] ) ) {
-			$value = sanitize_text_field( $params['otp_server_payload_template'] );
+			$value = sanitize_textarea_field( $params['otp_server_payload_template'] );
 			if ( null === $value ) {
 				return new \WP_Error(
 					'invalid_otp_server_payload_template',

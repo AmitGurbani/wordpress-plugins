@@ -159,7 +159,7 @@ class JwtAuth {
       return result;
     }
 
-    if ($_SERVER.HA_JWT_AUTHENTICATED === '1') {
+    if (($_SERVER.HA_JWT_AUTHENTICATED ?? '') === '1') {
       return true;
     }
 
