@@ -19,6 +19,7 @@ export interface PluginIR {
   helperMethods: HelperMethodIR[];
   activation: FunctionBodyIR | null;
   deactivation: FunctionBodyIR | null;
+  uninstall: FunctionBodyIR | null;
   diagnosticsErrorOption: string | null;
 }
 
@@ -191,6 +192,7 @@ export interface RawPluginData {
   helperMethods: RawHelperMethod[];
   activation: RawLifecycleDecorator | null;
   deactivation: RawLifecycleDecorator | null;
+  uninstall: RawLifecycleDecorator | null;
   diagnosticsRoute: RawDiagnosticsRouteDecorator | null;
 }
 

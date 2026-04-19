@@ -24,6 +24,7 @@ function AdminPage(opts: any): any { return (t: any, p?: any, d?: any) => {}; }
 function Shortcode(tag: string): MethodDecorator { return (t, p, d) => {}; }
 function Activate(): MethodDecorator { return (t, p, d) => {}; }
 function Deactivate(): MethodDecorator { return (t, p, d) => {}; }
+function Uninstall(): MethodDecorator { return (t, p, d) => {}; }
 `;
 
 describe('extractDecorators', () => {
@@ -409,6 +410,20 @@ describe('extractDecorators', () => {
 
       expect(result.deactivation).not.toBeNull();
       expect(result.deactivation!.methodName).toBe('onDeactivation');
+    });
+
+    it('extracts uninstall hook', () => {
+      const { result } = extract(`
+        ${decoratorDefs}
+        @Plugin({ name: 'Test', description: '', version: '1.0.0', author: '', license: 'GPL' })
+        class TestPlugin {
+          @Uninstall()
+          onUninstall(): void {}
+        }
+      `);
+
+      expect(result.uninstall).not.toBeNull();
+      expect(result.uninstall!.methodName).toBe('onUninstall');
     });
   });
 
@@ -820,6 +835,9 @@ describe('extractDecorators', () => {
           @Deactivate()
           onDeactivation(): void {}
 
+          @Uninstall()
+          onUninstall(): void {}
+
           @Action('init')
           initialize(): void {}
 
@@ -839,6 +857,7 @@ describe('extractDecorators', () => {
       expect(result.shortcodes).toHaveLength(1);
       expect(result.activation).not.toBeNull();
       expect(result.deactivation).not.toBeNull();
+      expect(result.uninstall).not.toBeNull();
     });
   });
 });

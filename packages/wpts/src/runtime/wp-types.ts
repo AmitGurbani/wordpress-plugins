@@ -526,6 +526,8 @@ declare global {
   // ---------------------------------------------------------------------------
   function classExists(className: string): boolean;
   function functionExists(functionName: string): boolean;
+  function defined(constantName: string): boolean;
+  function errorLog(message: string): boolean;
   function md5(str: string): string;
   function intval(value: any): number;
   function strval(value: any): string;
@@ -581,6 +583,9 @@ declare global {
   /** WordPress ABSPATH constant — path to WordPress installation directory. */
   const ABSPATH: string;
 
+  /** WordPress WP_DEBUG_LOG constant — whether debug logging is enabled. */
+  const WP_DEBUG_LOG: boolean;
+
   /** WordPress database object ($wpdb). Use wpdb.prepare(), wpdb.query(), wpdb.getResults(), etc. */
   var wpdb: {
     prefix: string;
@@ -591,6 +596,7 @@ declare global {
     terms: string;
     term_taxonomy: string;
     term_relationships: string;
+    termmeta: string;
     prepare(query: string, ...args: any[]): string;
     query(query: string): number | false;
     getResults(query: string, output?: string): any[];
@@ -628,6 +634,7 @@ declare global {
     iconForMimeType?: boolean,
   ): any[] | false;
   function wpGetAttachmentUrl(attachmentId: number): string | false;
+  function wpDeleteAttachment(attachmentId: number, forceDelete?: boolean): any;
 
   // ---------------------------------------------------------------------------
   // Cron / Scheduling

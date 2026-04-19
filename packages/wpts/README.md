@@ -53,7 +53,7 @@ The `@Setting` decorators automatically generate a REST API endpoint (`/your-plu
 ## Documentation
 
 - **[CLI Reference](docs/cli-reference.md)** — `init`, `build`, `validate`, `watch` commands and `wpts.config.json` configuration
-- **[Decorator API](docs/decorator-api.md)** — All 14 decorators: @Plugin, @Setting, @Action, @Filter, @AdminPage, @CustomPostType, @CustomTaxonomy, @RestRoute, @AjaxHandler, @Shortcode, @Activate, @Deactivate, @DiagnosticsRoute, and helper methods
+- **[Decorator API](docs/decorator-api.md)** — All 15 decorators: @Plugin, @Setting, @Action, @Filter, @AdminPage, @CustomPostType, @CustomTaxonomy, @RestRoute, @AjaxHandler, @Shortcode, @Activate, @Deactivate, @Uninstall, @DiagnosticsRoute, and helper methods
 - **[Admin Pages](docs/admin-pages.md)** — React admin UI pattern, admin-ui components, development mode
 - **[Transpilation](docs/transpilation.md)** — TypeScript to PHP rules, supported constructs, 680+ WordPress/WooCommerce/PHP functions, JavaScript method mappings
 

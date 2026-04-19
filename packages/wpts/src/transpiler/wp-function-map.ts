@@ -261,6 +261,7 @@ export const WP_FUNCTION_MAP: Record<string, string> = {
   // Media
   wpGetAttachmentImageSrc: 'wp_get_attachment_image_src',
   wpGetAttachmentUrl: 'wp_get_attachment_url',
+  wpDeleteAttachment: 'wp_delete_attachment',
 
   // Cron / Scheduling
   wpScheduleSingleEvent: 'wp_schedule_single_event',
@@ -304,6 +305,7 @@ export const WP_FUNCTION_MAP: Record<string, string> = {
   // PHP Built-ins (general)
   classExists: 'class_exists',
   functionExists: 'function_exists',
+  defined: 'defined',
   md5: 'md5',
   intval: 'intval',
   strval: 'strval',
@@ -319,6 +321,7 @@ export const WP_FUNCTION_MAP: Record<string, string> = {
   arrayValues: 'array_values',
   arsort: 'arsort',
   arraySlice: 'array_slice',
+  errorLog: 'error_log',
 
   // Misc
   wpDie: 'wp_die',
@@ -338,6 +341,7 @@ export const WP_FUNCTION_MAP: Record<string, string> = {
  */
 export const WP_CONST_MAP: Record<string, string> = {
   ABSPATH: 'ABSPATH',
+  WP_DEBUG_LOG: 'WP_DEBUG_LOG',
 };
 
 /**
@@ -348,6 +352,8 @@ export interface MethodMapping {
   phpFunc: string;
   /** 'swap' means the object becomes the last argument, 'prepend' means it becomes the first */
   objectPosition: 'first' | 'last' | 'swap';
+  /** Extra literal arguments appended after all other arguments */
+  extraArgs?: string[];
 }
 
 export const JS_METHOD_MAP: Record<string, MethodMapping> = {
@@ -357,7 +363,7 @@ export const JS_METHOD_MAP: Record<string, MethodMapping> = {
   shift: { phpFunc: 'array_shift', objectPosition: 'first' },
   unshift: { phpFunc: 'array_unshift', objectPosition: 'first' },
   indexOf: { phpFunc: 'array_search', objectPosition: 'last' },
-  includes: { phpFunc: 'in_array', objectPosition: 'last' },
+  includes: { phpFunc: 'in_array', objectPosition: 'last', extraArgs: ['true'] },
   join: { phpFunc: 'implode', objectPosition: 'last' },
   reverse: { phpFunc: 'array_reverse', objectPosition: 'first' },
   slice: { phpFunc: 'array_slice', objectPosition: 'first' },

@@ -17,3 +17,13 @@ export function Deactivate(): (...args: any[]) => any {
     // No-op at runtime — metadata is extracted at compile time by the transpiler.
   };
 }
+
+/**
+ * Marks a method whose body is included in uninstall.php.
+ * Runs when the plugin is deleted from the WordPress admin.
+ */
+export function Uninstall(): (...args: any[]) => any {
+  return (..._args: any[]) => {
+    // No-op at runtime — metadata is extracted at compile time by the transpiler.
+  };
+}

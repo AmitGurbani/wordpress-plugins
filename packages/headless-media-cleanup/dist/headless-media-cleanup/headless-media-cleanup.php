@@ -1,0 +1,69 @@
+<?php
+/**
+ * Plugin Name:       Headless Media Cleanup
+ * Plugin URI:        https://github.com/AmitGurbani/wordpress-plugins
+ * Description:       Auto-delete orphaned WooCommerce media when images are removed from products, variations, and taxonomy terms.
+ * Version:           1.0.0
+ * Author:            Amit Gurbani
+ * Author URI:        https://github.com/AmitGurbani
+ * License:           GPL-2.0+
+ * License URI:       http://www.gnu.org/licenses/gpl-2.0.txt
+ * Text Domain:       headless-media-cleanup
+ * Domain Path:       /languages
+ * Requires at least: 6.2
+ * Requires PHP:      8.0
+ * Update URI:       https://github.com/AmitGurbani/wordpress-plugins/releases?plugin=headless-media-cleanup
+ */
+
+// If this file is called directly, abort.
+if ( ! defined( 'WPINC' ) ) {
+	die;
+}
+
+define( 'HEADLESS_MEDIA_CLEANUP_VERSION', '1.0.0' );
+define( 'HEADLESS_MEDIA_CLEANUP_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
+define( 'HEADLESS_MEDIA_CLEANUP_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
+
+/**
+ * Declare WooCommerce HPOS compatibility.
+ */
+add_action( 'before_woocommerce_init', function() {
+	if ( class_exists( \Automattic\WooCommerce\Utilities\FeaturesUtil::class ) ) {
+		\Automattic\WooCommerce\Utilities\FeaturesUtil::declare_compatibility( 'custom_order_tables', __FILE__, true );
+	}
+} );
+
+/**
+ * Plugin activation.
+ */
+function activate_headless_media_cleanup() {
+	require_once HEADLESS_MEDIA_CLEANUP_PLUGIN_DIR . 'includes/class-headless-media-cleanup-activator.php';
+	Headless_Media_Cleanup_Activator::activate();
+}
+
+/**
+ * Plugin deactivation.
+ */
+function deactivate_headless_media_cleanup() {
+	require_once HEADLESS_MEDIA_CLEANUP_PLUGIN_DIR . 'includes/class-headless-media-cleanup-deactivator.php';
+	Headless_Media_Cleanup_Deactivator::deactivate();
+}
+
+register_activation_hook( __FILE__, 'activate_headless_media_cleanup' );
+register_deactivation_hook( __FILE__, 'deactivate_headless_media_cleanup' );
+
+/**
+ * Core plugin class.
+ */
+require_once HEADLESS_MEDIA_CLEANUP_PLUGIN_DIR . 'includes/class-headless-media-cleanup.php';
+require_once HEADLESS_MEDIA_CLEANUP_PLUGIN_DIR . 'includes/class-headless-media-cleanup-updater.php';
+
+/**
+ * Begin plugin execution.
+ */
+function run_headless_media_cleanup() {
+	( new Headless_Media_Cleanup_Updater( __FILE__, HEADLESS_MEDIA_CLEANUP_VERSION ) )->register();
+	$plugin = new Headless_Media_Cleanup();
+	$plugin->run();
+}
+run_headless_media_cleanup();

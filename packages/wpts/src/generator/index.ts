@@ -165,6 +165,7 @@ export function generatePlugin(ir: PluginIR): GeneratedFile[] {
         )
       : [],
     deactivationCode: ir.deactivation?.phpCode ?? null,
+    uninstallCode: ir.uninstall?.phpCode ?? null,
     diagnosticsErrorOption: ir.diagnosticsErrorOption,
     githubRepo: metadata.githubRepo ?? '',
     updateUri: metadata.updateUri ?? '',

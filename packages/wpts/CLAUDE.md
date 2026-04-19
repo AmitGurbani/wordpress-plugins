@@ -48,7 +48,7 @@ To add a new WordPress function mapping:
 - Admin template: `get_current_screen()` null-guarded with ternary
 - Admin auto-build: pipeline runs `pnpm exec wp-scripts build` from the plugin directory using workspace-level `@wordpress/scripts`
 - Integration tests use `skipAdminBuild: true` to avoid timeouts
-- Decorators: @Plugin, @Action, @Filter, @Setting, @AdminPage, @Shortcode, @Activate, @Deactivate, @CustomPostType, @CustomTaxonomy, @RestRoute, @AjaxHandler, @DiagnosticsRoute
+- Decorators: @Plugin, @Action, @Filter, @Setting, @AdminPage, @Shortcode, @Activate, @Deactivate, @Uninstall, @CustomPostType, @CustomTaxonomy, @RestRoute, @AjaxHandler, @DiagnosticsRoute
 - Helper methods: non-decorated class methods are auto-captured; placed in public class by default, or REST API class if the class has @RestRoute
 - `global $wpdb;`: auto-injected by `injectGlobalWpdb()` in `function-transpiler.ts` when transpiled PHP contains `$wpdb`
 - Action parameters: extracted same as filter parameters; `acceptedArgs` defaults to method parameter count
@@ -59,4 +59,5 @@ To add a new WordPress function mapping:
 - `@Plugin({ githubRepo: '<owner>/<repo>' })`: opts into GitHub Releases auto-updates. Emits the `Update URI:` header and a dedicated `class-<slug>-updater.php` that hooks `update_plugins_{hostname}` + `plugins_api` (WP 5.8+). Optional `updateUri` overrides the derived URI; otherwise it's `https://github.com/<owner>/<repo>/releases?plugin=<slug>`. Filter handlers gate on `$plugin_data['UpdateURI']` to avoid collision between plugins sharing the `github.com` hostname.
 - `@DiagnosticsRoute({ errorOptionSuffix?: string })`: class decorator that auto-generates a `GET /diagnostics/last-error` admin REST route. Default suffix: `'last_error'`.
 - Undefined array key checks: `obj['key'] !== undefined` transpiles to `isset( $obj['key'] )` (not `$obj['key'] !== null`) for PHP 8 compatibility. Only applies to element/property access, not plain variables.
-- Uninstall template: auto-cleans `@Setting` options, `@Activate` manual options, `@DiagnosticsRoute` error option, and `@CustomPostType` posts (deletes all posts of each registered CPT on uninstall).
+- Uninstall template: auto-cleans `@Setting` options, `@Activate` manual options, `@DiagnosticsRoute` error option, and `@CustomPostType` posts (deletes all posts of each registered CPT on uninstall). `@Uninstall` method body is appended for custom cleanup (e.g., bulk meta deletion).
+- `@Uninstall()`: method decorator whose transpiled PHP body is injected into `uninstall.php`. Use for custom cleanup not covered by auto-generated cleanup (e.g., `$wpdb->query()` to delete plugin-specific post/term meta).

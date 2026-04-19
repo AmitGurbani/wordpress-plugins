@@ -301,6 +301,9 @@ function buildIR(
     deactivation: rawData.deactivation
       ? transpileMethodBody(rawData.deactivation.bodyNode, parsed.typeChecker)
       : null,
+    uninstall: rawData.uninstall
+      ? transpileMethodBody(rawData.uninstall.bodyNode, parsed.typeChecker)
+      : null,
     diagnosticsErrorOption: rawData.diagnosticsRoute
       ? `${metadata.functionPrefix}${rawData.diagnosticsRoute.errorOptionSuffix}`
       : null,

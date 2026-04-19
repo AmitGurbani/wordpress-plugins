@@ -273,6 +273,24 @@ onDeactivation(): void {
 
 Options created via `addOption()` or `updateOption()` in `@Activate()` methods are automatically detected and added to the generated `uninstall.php` cleanup. Options already covered by `@Setting` are excluded to avoid duplicates.
 
+## `@Uninstall()`
+
+Method decorator. Runs custom cleanup code when the plugin is deleted from WordPress admin. The method body is transpiled and injected into `uninstall.php`, after the auto-generated cleanup for `@Setting` options, `@Activate` options, and `@CustomPostType` posts.
+
+Use this for cleanup not covered by auto-generated logic, such as bulk deletion of plugin-specific post meta or term meta.
+
+```typescript
+@Uninstall()
+onUninstall(): void {
+  wpdb.query(
+    wpdb.prepare(`DELETE FROM ${wpdb.postmeta} WHERE meta_key = %s`, '_my_plugin_data'),
+  );
+  wpdb.query(
+    wpdb.prepare(`DELETE FROM ${wpdb.termmeta} WHERE meta_key = %s`, '_my_plugin_term_data'),
+  );
+}
+```
+
 ## `@DiagnosticsRoute(options?)`
 
 Class decorator. Auto-generates a `GET /diagnostics/last-error` admin REST endpoint that returns the value of a stored error option.

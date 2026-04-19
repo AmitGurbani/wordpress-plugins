@@ -21,7 +21,7 @@
 | `this.prop` | `$this->prop` |
 | `arr.push(x)` | `array_push( $arr, $x )` |
 | `arr.map(fn)` | `array_map( $fn, $arr )` |
-| `arr.includes(x)` | `in_array( $x, $arr )` |
+| `arr.includes(x)` | `in_array( $x, $arr, true )` |
 | `str.trim()` | `trim( $str )` |
 | `str.split(',')` | `explode( ',', $str )` |
 | `str.toLowerCase()` | `strtolower( $str )` |
@@ -103,10 +103,10 @@ All functions are written in camelCase in TypeScript and transpiled to snake_cas
 | **JSON Response** | `wpSendJson`, `wpSendJsonSuccess`, `wpSendJsonError` |
 | **REST API** | `restEnsureResponse` |
 | **Utility** | `wpRand` |
-| **PHP Built-ins** | `classExists`, `functionExists`, `isArray`, `jsonEncode`, `jsonDecode`, `base64Encode`, `base64Decode`, `hashHmac`, `hashEquals`, `hash`, `md5`, `uniqid`, `numberFormat`, `intval`, `strval`, `strtolower`, `strtr`, `rtrim`, `time`, `gmdate`, `getallheaders`, `header`, `levenshtein`, `arrayUnique`, `arrayValues`, `requireOnce` · JS built-in `parseFloat()` → PHP `floatval()` |
-| **Misc** | `wpDie`, `wpRedirect`, `wpSafeRedirect`, `absint`, `wpUnslash`, `echo`, `ABSPATH` |
+| **PHP Built-ins** | `classExists`, `functionExists`, `defined`, `errorLog`, `isArray`, `jsonEncode`, `jsonDecode`, `base64Encode`, `base64Decode`, `hashHmac`, `hashEquals`, `hash`, `md5`, `uniqid`, `numberFormat`, `intval`, `strval`, `strtolower`, `strtr`, `rtrim`, `time`, `gmdate`, `getallheaders`, `header`, `levenshtein`, `arrayUnique`, `arrayValues`, `requireOnce` · JS built-in `parseFloat()` → PHP `floatval()` |
+| **Misc** | `wpDie`, `wpRedirect`, `wpSafeRedirect`, `absint`, `wpUnslash`, `echo`, `ABSPATH`, `WP_DEBUG_LOG` |
 | **Content** | `wpStripAllTags` |
-| **Media** | `wpGetAttachmentImageSrc`, `wpGetAttachmentUrl` |
+| **Media** | `wpGetAttachmentImageSrc`, `wpGetAttachmentUrl`, `wpDeleteAttachment` |
 | **Cron** | `wpScheduleSingleEvent`, `wpScheduleEvent`, `wpNextScheduled`, `wpUnscheduleEvent`, `wpClearScheduledHook` |
 | **Taxonomy** | `getTerms`, `getTheTerms`, `wpGetObjectTerms` |
 | **WooCommerce Conditionals** | `isWoocommerce`, `isShop`, `isProduct`, `isCart`, `isCheckout`, `isAccountPage`, `isWcEndpointUrl` |
@@ -117,7 +117,7 @@ All functions are written in camelCase in TypeScript and transpiled to snake_cas
 | **WooCommerce Notices** | `wcAddNotice`, `wcPrintNotices`, `wcHasNotice` |
 | **WooCommerce Taxonomy** | `wcGetAttributeTaxonomies`, `wcGetProductTerms` |
 | **WooCommerce Templates** | `wcGetTemplatePart`, `wcGetTemplate` |
-| **Database** | `wpdb.prefix`, `wpdb.posts`, `wpdb.prepare()`, `wpdb.query()`, `wpdb.getVar()`, `wpdb.getRow()`, `wpdb.getResults()`, `wpdb.insert()`, `wpdb.update()`, `wpdb.delete()`, `wpdb.escLike()`, `dbDelta` |
+| **Database** | `wpdb.prefix`, `wpdb.posts`, `wpdb.postmeta`, `wpdb.users`, `wpdb.usermeta`, `wpdb.terms`, `wpdb.term_taxonomy`, `wpdb.term_relationships`, `wpdb.termmeta`, `wpdb.prepare()`, `wpdb.query()`, `wpdb.getVar()`, `wpdb.getRow()`, `wpdb.getResults()`, `wpdb.getCol()`, `wpdb.insert()`, `wpdb.update()`, `wpdb.delete()`, `wpdb.replace()`, `wpdb.escLike()`, `wpdb.getCharsetCollate()`, `dbDelta` |
 
 Full type declarations are in `src/runtime/wp-types.ts` for IDE autocompletion.
 

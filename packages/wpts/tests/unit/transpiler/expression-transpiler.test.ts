@@ -134,6 +134,24 @@ describe('transpileExpression', () => {
       ).toBe("wp_update_post( array( 'ID' => 1, 'post_title' => 'Updated' ) )");
     });
 
+    it('maps media functions', () => {
+      expect(
+        transpile(
+          'wpDeleteAttachment(42, true)',
+          'declare function wpDeleteAttachment(id: number, force?: boolean): any;',
+        ),
+      ).toBe('wp_delete_attachment( 42, true )');
+    });
+
+    it('maps PHP built-in defined and errorLog', () => {
+      expect(
+        transpile('defined("WP_DEBUG_LOG")', 'declare function defined(name: string): boolean;'),
+      ).toBe("defined( 'WP_DEBUG_LOG' )");
+      expect(
+        transpile('errorLog("test message")', 'declare function errorLog(msg: string): boolean;'),
+      ).toBe("error_log( 'test message' )");
+    });
+
     it('maps cron scheduling functions', () => {
       expect(
         transpile(
@@ -696,9 +714,9 @@ describe('transpileExpression', () => {
       expect(result).toBe('array_push( $arr, 1 )');
     });
 
-    it('maps arr.includes', () => {
+    it('maps arr.includes with strict mode', () => {
       const result = transpile('arr.includes(1)', 'const arr: number[] = [];');
-      expect(result).toBe('in_array( 1, $arr )');
+      expect(result).toBe('in_array( 1, $arr, true )');
     });
 
     it('maps arr.map', () => {
@@ -871,9 +889,9 @@ describe('transpileExpression', () => {
       expect(result).toBe("str_contains( $str, 'x' )");
     });
 
-    it('maps arr.includes to in_array (fallthrough)', () => {
+    it('maps arr.includes to in_array with strict mode (fallthrough)', () => {
       const result = transpile('arr.includes(1)', 'const arr: number[] = [];');
-      expect(result).toBe('in_array( 1, $arr )');
+      expect(result).toBe('in_array( 1, $arr, true )');
     });
 
     it('maps str.lastIndexOf to strrpos', () => {

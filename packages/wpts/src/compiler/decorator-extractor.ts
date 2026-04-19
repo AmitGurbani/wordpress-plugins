@@ -30,6 +30,7 @@ function createEmptyRawData(): RawPluginData {
     helperMethods: [],
     activation: null,
     deactivation: null,
+    uninstall: null,
     diagnosticsRoute: null,
   };
 }
@@ -278,6 +279,17 @@ function extractMethodDecorators(
           );
         }
         result.deactivation = { methodName, bodyNode: method.body ?? method };
+        break;
+      }
+      case 'Uninstall': {
+        if (result.uninstall) {
+          diagnostics.warning(
+            'WPTS005',
+            'Multiple @Uninstall decorators found. Only the last one will be used.',
+            getLocation(decorator, sourceFile),
+          );
+        }
+        result.uninstall = { methodName, bodyNode: method.body ?? method };
         break;
       }
     }

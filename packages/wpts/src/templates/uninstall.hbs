@@ -24,3 +24,7 @@ foreach ( ${{slug}}_posts as $id ) {
 	wp_delete_post( $id, true );
 }
 {{/each}}
+{{#if uninstallCode}}
+
+{{{uninstallCode}}}
+{{/if}}

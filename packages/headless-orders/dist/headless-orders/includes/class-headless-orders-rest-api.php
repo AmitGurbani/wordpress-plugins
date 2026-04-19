@@ -47,7 +47,7 @@ class Headless_Orders_Rest_Api {
 		$page = max( 1, intval( $request->get_param( 'page' ) ?? '1' ) );
 		$status_param = sanitize_text_field( $request->get_param( 'status' ) ?? '' );
 		$valid_statuses = array( 'pending', 'processing', 'completed', 'cancelled', 'refunded', 'failed', 'on-hold' );
-		if ( $status_param && ! in_array( $status_param, $valid_statuses ) ) {
+		if ( $status_param && ! in_array( $status_param, $valid_statuses, true ) ) {
 			return new WP_Error( 'invalid_status', 'Invalid order status.', array( 'status' => 400 ) );
 		}
 		$query_args = array( 'customer' => $user_id, 'limit' => $per_page, 'page' => $page, 'orderby' => 'date', 'order' => 'DESC' );

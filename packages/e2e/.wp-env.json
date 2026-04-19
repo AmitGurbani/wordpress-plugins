@@ -11,6 +11,7 @@
     "../headless-fuzzy-find/dist/headless-fuzzy-find",
     "../headless-wishlist/dist/headless-wishlist",
     "../headless-orders/dist/headless-orders",
+    "../headless-media-cleanup/dist/headless-media-cleanup",
     "https://downloads.wordpress.org/plugin/woocommerce.latest-stable.zip"
   ],
   "config": {

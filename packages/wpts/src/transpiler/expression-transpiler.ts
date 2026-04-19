@@ -561,13 +561,14 @@ function transpileCallExpression(node: ts.CallExpression, typeChecker: ts.TypeCh
       const mapping = JS_METHOD_MAP[methodName];
       const objStr = transpileExpression(obj, typeChecker);
 
+      const extra = mapping.extraArgs ?? [];
       switch (mapping.objectPosition) {
         case 'first':
-          return phpCall(mapping.phpFunc, [objStr, ...args]);
+          return phpCall(mapping.phpFunc, [objStr, ...args, ...extra]);
         case 'last':
-          return phpCall(mapping.phpFunc, [...args, objStr]);
+          return phpCall(mapping.phpFunc, [...args, objStr, ...extra]);
         case 'swap':
-          return phpCall(mapping.phpFunc, [...args, objStr]);
+          return phpCall(mapping.phpFunc, [...args, objStr, ...extra]);
       }
     }
 

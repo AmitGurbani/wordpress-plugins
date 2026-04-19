@@ -10,7 +10,7 @@ export type { DiagnosticsRouteOptions } from './diagnostics.js';
 export { DiagnosticsRoute } from './diagnostics.js';
 export type { HookOptions } from './hooks.js';
 export { Action, Filter } from './hooks.js';
-export { Activate, Deactivate } from './lifecycle.js';
+export { Activate, Deactivate, Uninstall } from './lifecycle.js';
 export type { PluginOptions } from './plugin.js';
 export { Plugin } from './plugin.js';
 export type { RestRouteOptions } from './rest-route.js';
