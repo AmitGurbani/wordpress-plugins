@@ -157,6 +157,10 @@ class Headless_Media_Cleanup_Rest_Api {
 				$skipped = $skipped + 1;
 				continue;
 			}
+			if ( $this->is_attachment_referenced( $attachment_id ) ) {
+				$skipped = $skipped + 1;
+				continue;
+			}
 			$result = wp_delete_attachment( $attachment_id, true );
 			if ( $result ) {
 				$deleted = $deleted + 1;
@@ -165,6 +169,24 @@ class Headless_Media_Cleanup_Rest_Api {
 			}
 		}
 		return rest_ensure_response( array( 'deleted' => $deleted, 'skipped' => $skipped, 'errors' => $errors ) );
+	}
+
+	public function is_attachment_referenced( $attachment_id ) {
+		global $wpdb;
+		$id_str = strval( $attachment_id );
+		$featured_count = $wpdb->get_var( $wpdb->prepare( 'SELECT COUNT(*) FROM ' . $wpdb->postmeta . ' WHERE meta_key = \'_thumbnail_id\' AND meta_value = %s', $id_str ) );
+		if ( intval( $featured_count ) > 0 ) {
+			return true;
+		}
+		$gallery_count = $wpdb->get_var( $wpdb->prepare( 'SELECT COUNT(*) FROM ' . $wpdb->postmeta . ' WHERE meta_key = \'_product_image_gallery\' AND FIND_IN_SET(%s, meta_value) > 0', $id_str ) );
+		if ( intval( $gallery_count ) > 0 ) {
+			return true;
+		}
+		$term_count = $wpdb->get_var( $wpdb->prepare( 'SELECT COUNT(*) FROM ' . $wpdb->termmeta . ' WHERE meta_key = \'thumbnail_id\' AND meta_value = %s', $id_str ) );
+		if ( intval( $term_count ) > 0 ) {
+			return true;
+		}
+		return false;
 	}
 
 }

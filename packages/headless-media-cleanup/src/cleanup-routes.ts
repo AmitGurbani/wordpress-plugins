@@ -171,6 +171,13 @@ class CleanupRoutes {
         continue;
       }
 
+      // Re-check references before deleting (TOCTOU guard — image may have been
+      // assigned to a product between the orphan query and this iteration)
+      if (this.isAttachmentReferenced(attachmentId)) {
+        skipped = skipped + 1;
+        continue;
+      }
+
       const result: any = wpDeleteAttachment(attachmentId, true);
       if (result) {
         deleted = deleted + 1;
@@ -184,5 +191,41 @@ class CleanupRoutes {
       skipped: skipped,
       errors: errors,
     });
+  }
+
+  isAttachmentReferenced(attachmentId: number): boolean {
+    const idStr: string = strval(attachmentId);
+
+    const featuredCount: string | null = wpdb.getVar(
+      wpdb.prepare(
+        `SELECT COUNT(*) FROM ${wpdb.postmeta} WHERE meta_key = '_thumbnail_id' AND meta_value = %s`,
+        idStr,
+      ),
+    );
+    if (intval(featuredCount) > 0) {
+      return true;
+    }
+
+    const galleryCount: string | null = wpdb.getVar(
+      wpdb.prepare(
+        `SELECT COUNT(*) FROM ${wpdb.postmeta} WHERE meta_key = '_product_image_gallery' AND FIND_IN_SET(%s, meta_value) > 0`,
+        idStr,
+      ),
+    );
+    if (intval(galleryCount) > 0) {
+      return true;
+    }
+
+    const termCount: string | null = wpdb.getVar(
+      wpdb.prepare(
+        `SELECT COUNT(*) FROM ${wpdb.termmeta} WHERE meta_key = 'thumbnail_id' AND meta_value = %s`,
+        idStr,
+      ),
+    );
+    if (intval(termCount) > 0) {
+      return true;
+    }
+
+    return false;
   }
 }
