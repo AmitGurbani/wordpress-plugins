@@ -4,7 +4,7 @@ Tags: otp, authentication, jwt, headless, rest-api
 Requires at least: 6.7
 Tested up to: 6.9
 Requires PHP: 8.2
-Stable tag: 1.3.0
+Stable tag: 1.4.0
 License: GPL-2.0+
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 

@@ -3,7 +3,7 @@
  * Plugin Name:       Headless Auth
  * Plugin URI:        https://github.com/AmitGurbani/wordpress-plugins
  * Description:       OTP and password authentication with JWT for headless WordPress stores.
- * Version:           1.3.0
+ * Version:           1.4.0
  * Author:            Amit Gurbani
  * Author URI:        https://github.com/AmitGurbani
  * License:           GPL-2.0+
@@ -20,7 +20,7 @@ if ( ! defined( 'WPINC' ) ) {
 	die;
 }
 
-define( 'HEADLESS_AUTH_VERSION', '1.3.0' );
+define( 'HEADLESS_AUTH_VERSION', '1.4.0' );
 define( 'HEADLESS_AUTH_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'HEADLESS_AUTH_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
 
