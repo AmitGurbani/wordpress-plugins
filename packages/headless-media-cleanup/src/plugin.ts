@@ -7,7 +7,7 @@ import './cleanup-routes.js';
   uri: 'https://github.com/AmitGurbani/wordpress-plugins',
   description:
     'Auto-delete orphaned WooCommerce media when images are removed from products, variations, and taxonomy terms.',
-  version: '1.0.0',
+  version: '1.1.0',
   author: 'Amit Gurbani',
   authorUri: 'https://github.com/AmitGurbani',
   license: 'GPL-2.0+',

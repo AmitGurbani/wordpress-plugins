@@ -3,7 +3,7 @@
  * Plugin Name:       Headless Media Cleanup
  * Plugin URI:        https://github.com/AmitGurbani/wordpress-plugins
  * Description:       Auto-delete orphaned WooCommerce media when images are removed from products, variations, and taxonomy terms.
- * Version:           1.0.0
+ * Version:           1.1.0
  * Author:            Amit Gurbani
  * Author URI:        https://github.com/AmitGurbani
  * License:           GPL-2.0+
@@ -19,7 +19,7 @@ if ( ! defined( 'WPINC' ) ) {
 	die;
 }
 
-define( 'HEADLESS_MEDIA_CLEANUP_VERSION', '1.0.0' );
+define( 'HEADLESS_MEDIA_CLEANUP_VERSION', '1.1.0' );
 define( 'HEADLESS_MEDIA_CLEANUP_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'HEADLESS_MEDIA_CLEANUP_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
 

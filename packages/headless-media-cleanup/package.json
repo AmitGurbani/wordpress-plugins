@@ -1,6 +1,6 @@
 {
   "name": "headless-media-cleanup",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "private": true,
   "description": "Auto-delete orphaned WooCommerce media when images are removed from products, variations, and taxonomy terms",
   "scripts": {
