@@ -13,7 +13,7 @@ import './order-routes.js';
   name: 'Headless Orders',
   uri: 'https://github.com/AmitGurbani/wordpress-plugins',
   description: 'REST API for authenticated customers to view their WooCommerce orders.',
-  version: '1.2.0',
+  version: '1.3.0',
   author: 'Amit Gurbani',
   authorUri: 'https://github.com/AmitGurbani',
   license: 'GPL-2.0+',

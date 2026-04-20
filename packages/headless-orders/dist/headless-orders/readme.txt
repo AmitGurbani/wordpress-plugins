@@ -4,7 +4,7 @@ Tags: woocommerce, orders, rest-api, headless, jwt
 Requires at least: 6.2
 Tested up to: 6.9
 Requires PHP: 8.0
-Stable tag: 1.2.0
+Stable tag: 1.3.0
 Requires Plugins: woocommerce
 License: GPL-2.0+
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
