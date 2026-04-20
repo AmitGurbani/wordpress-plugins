@@ -18,6 +18,16 @@ Each session tracks opening and closing balances, cash movements (in/out), linke
 
 **Headless-first design.** This plugin does not provide a POS frontend — it is the backend API layer for your custom POS application. Your frontend (React, Flutter, etc.) manages the register UI and calls these endpoints.
 
+== Source Code ==
+
+The full source code, including uncompiled JavaScript and build tooling, is available at:
+https://github.com/AmitGurbani/wordpress-plugins/tree/main/packages/headless-pos-sessions
+
+To build the admin JavaScript from source, clone the repository and run:
+
+    pnpm install
+    pnpm --filter headless-pos-sessions build
+
 == Features ==
 
 * Full CRUD REST API for register sessions (create, list, get, update, delete)
@@ -62,10 +72,15 @@ Creating, listing, and updating sessions requires the `edit_shop_orders` WooComm
 
 == Changelog ==
 
+= 1.1.0 =
+* Prefixed CPT slug to `hpss_pos_session` for WP.org unique prefix compliance
+* Prefixed cron hooks to `headless_pos_sessions_daily_cleanup` and `headless_pos_sessions_daily_auto_close`
+* Added Source Code section to readme with GitHub repository link
+
 = 1.0.0 =
 * Initial release
 * REST endpoints: POST/GET/PUT/DELETE /sessions with pagination, filtering, and sorting
-* Custom Post Type `pos_session` with structured meta fields
+* Custom Post Type `hpss_pos_session` with structured meta fields
 * UUID deduplication for offline sync
 * Daily cron: retention cleanup and orphan auto-close
 * Admin settings page with retention and auto-close configuration

@@ -9,7 +9,7 @@ import { Action } from 'wpts';
 class CronTasks {
   // ── Daily cleanup: delete closed sessions older than retention_days ────
 
-  @Action('hps_daily_cleanup')
+  @Action('headless_pos_sessions_daily_cleanup')
   cleanupOldSessions(): void {
     const retentionDays: number = intval(getOption('headless_pos_sessions_retention_days', 90));
     if (retentionDays <= 0) {
@@ -20,7 +20,7 @@ class CronTasks {
     const cutoffDate: string = gmdate('c', cutoffTimestamp);
 
     const oldSessions: any[] = getPosts({
-      post_type: 'pos_session',
+      post_type: 'hpss_pos_session',
       post_status: 'publish',
       posts_per_page: 100,
       meta_query: [
@@ -37,13 +37,13 @@ class CronTasks {
 
   // ── Daily auto-close: close orphaned open sessions older than 24h ─────
 
-  @Action('hps_daily_auto_close')
+  @Action('headless_pos_sessions_daily_auto_close')
   autoCloseOrphanedSessions(): void {
     const cutoffTimestamp: number = time() - 86400;
     const cutoffDate: string = gmdate('c', cutoffTimestamp);
 
     const orphanedSessions: any[] = getPosts({
-      post_type: 'pos_session',
+      post_type: 'hpss_pos_session',
       post_status: 'publish',
       posts_per_page: 100,
       meta_query: [

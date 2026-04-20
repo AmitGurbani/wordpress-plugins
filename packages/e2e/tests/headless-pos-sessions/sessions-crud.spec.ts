@@ -29,7 +29,7 @@ test.describe('Headless POS Sessions — Sessions CRUD', () => {
 
   test.beforeAll(async ({ wpCli }) => {
     // Clean up leftover sessions from previous test runs
-    const ids = wpCli('post list --post_type=pos_session --format=ids');
+    const ids = wpCli('post list --post_type=hpss_pos_session --format=ids');
     if (ids.trim()) {
       wpCli(`post delete ${ids.trim()} --force`);
     }

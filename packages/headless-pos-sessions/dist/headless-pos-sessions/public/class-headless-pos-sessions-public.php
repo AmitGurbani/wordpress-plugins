@@ -21,7 +21,7 @@ class Headless_Pos_Sessions_Public {
 		}
 		$cutoff_timestamp = time() - $retention_days * 86400;
 		$cutoff_date = gmdate( 'c', $cutoff_timestamp );
-		$old_sessions = get_posts( array( 'post_type' => 'pos_session', 'post_status' => 'publish', 'posts_per_page' => 100, 'meta_query' => array( array( 'key' => '_session_status', 'value' => 'closed' ), array( 'key' => '_closed_at', 'value' => $cutoff_date, 'compare' => '<', 'type' => 'CHAR' ) ), 'fields' => 'ids' ) );
+		$old_sessions = get_posts( array( 'post_type' => 'hpss_pos_session', 'post_status' => 'publish', 'posts_per_page' => 100, 'meta_query' => array( array( 'key' => '_session_status', 'value' => 'closed' ), array( 'key' => '_closed_at', 'value' => $cutoff_date, 'compare' => '<', 'type' => 'CHAR' ) ), 'fields' => 'ids' ) );
 		foreach ( $old_sessions as $session_id ) {
 			wp_delete_post( intval( $session_id ), true );
 		}
@@ -30,7 +30,7 @@ class Headless_Pos_Sessions_Public {
 	public function auto_close_orphaned_sessions() {
 		$cutoff_timestamp = time() - 86400;
 		$cutoff_date = gmdate( 'c', $cutoff_timestamp );
-		$orphaned_sessions = get_posts( array( 'post_type' => 'pos_session', 'post_status' => 'publish', 'posts_per_page' => 100, 'meta_query' => array( array( 'key' => '_session_status', 'value' => 'open' ), array( 'key' => '_opened_at', 'value' => $cutoff_date, 'compare' => '<', 'type' => 'CHAR' ) ), 'fields' => 'ids' ) );
+		$orphaned_sessions = get_posts( array( 'post_type' => 'hpss_pos_session', 'post_status' => 'publish', 'posts_per_page' => 100, 'meta_query' => array( array( 'key' => '_session_status', 'value' => 'open' ), array( 'key' => '_opened_at', 'value' => $cutoff_date, 'compare' => '<', 'type' => 'CHAR' ) ), 'fields' => 'ids' ) );
 		$now = gmdate( 'c', time() );
 		foreach ( $orphaned_sessions as $session_id ) {
 			$id = intval( $session_id );
@@ -41,16 +41,16 @@ class Headless_Pos_Sessions_Public {
 	}
 
 	public function schedule_cron_jobs() {
-		if ( ! wp_next_scheduled( 'hps_daily_cleanup' ) ) {
-			wp_schedule_event( time(), 'daily', 'hps_daily_cleanup' );
+		if ( ! wp_next_scheduled( 'headless_pos_sessions_daily_cleanup' ) ) {
+			wp_schedule_event( time(), 'daily', 'headless_pos_sessions_daily_cleanup' );
 		}
-		if ( ! wp_next_scheduled( 'hps_daily_auto_close' ) ) {
-			wp_schedule_event( time(), 'daily', 'hps_daily_auto_close' );
+		if ( ! wp_next_scheduled( 'headless_pos_sessions_daily_auto_close' ) ) {
+			wp_schedule_event( time(), 'daily', 'headless_pos_sessions_daily_auto_close' );
 		}
 	}
 
 	public function register_custom_post_types() {
-		register_post_type( 'pos_session', array(
+		register_post_type( 'hpss_pos_session', array(
 			'labels' => array(
 				'name'               => __( 'POS Sessions', 'headless-pos-sessions' ),
 				'singular_name'      => __( 'POS Session', 'headless-pos-sessions' ),

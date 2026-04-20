@@ -149,7 +149,7 @@ class Headless_Pos_Sessions_Rest_Api {
 		if ( $order_ids_param && ! is_array( $order_ids_param ) ) {
 			return new WP_Error( 'invalid_order_ids', 'order_ids must be an array of integers.', array( 'status' => 400 ) );
 		}
-		$existing = get_posts( array( 'post_type' => 'pos_session', 'post_status' => 'publish', 'meta_key' => '_session_uuid', 'meta_value' => $uuid, 'posts_per_page' => 1, 'fields' => 'ids' ) );
+		$existing = get_posts( array( 'post_type' => 'hpss_pos_session', 'post_status' => 'publish', 'meta_key' => '_session_uuid', 'meta_value' => $uuid, 'posts_per_page' => 1, 'fields' => 'ids' ) );
 		if ( count( $existing ) > 0 ) {
 			return new WP_Error( 'duplicate_uuid', 'A session with this session_uuid already exists.', array( 'status' => 409 ) );
 		}
@@ -157,12 +157,12 @@ class Headless_Pos_Sessions_Rest_Api {
 		$status = $closed_at ? 'closed' : 'open';
 		if ( $status === 'open' ) {
 			$max_open = max( 1, intval( get_option( 'headless_pos_sessions_max_open_sessions', 10 ) ) );
-			$open_sessions = get_posts( array( 'post_type' => 'pos_session', 'post_status' => 'publish', 'meta_key' => '_session_status', 'meta_value' => 'open', 'posts_per_page' => -1, 'fields' => 'ids' ) );
+			$open_sessions = get_posts( array( 'post_type' => 'hpss_pos_session', 'post_status' => 'publish', 'meta_key' => '_session_status', 'meta_value' => 'open', 'posts_per_page' => -1, 'fields' => 'ids' ) );
 			if ( count( $open_sessions ) >= $max_open ) {
 				return new WP_Error( 'max_open_exceeded', 'Maximum number of open sessions reached.', array( 'status' => 409 ) );
 			}
 		}
-		$post_id = wp_insert_post( array( 'post_type' => 'pos_session', 'post_title' => 'POS Session — ' . $opened_at, 'post_status' => 'publish' ) );
+		$post_id = wp_insert_post( array( 'post_type' => 'hpss_pos_session', 'post_title' => 'POS Session — ' . $opened_at, 'post_status' => 'publish' ) );
 		if ( is_wp_error( $post_id ) ) {
 			return new WP_Error( 'create_failed', 'Failed to create session.', array( 'status' => 500 ) );
 		}
@@ -191,7 +191,7 @@ class Headless_Pos_Sessions_Rest_Api {
 		$orderby = sanitize_text_field( $request->get_param( 'orderby' ) ?? 'opened_at' );
 		$order = sanitize_text_field( $request->get_param( 'order' ) ?? 'desc' );
 		$sort_dir = strtoupper( $order ) === 'ASC' ? 'ASC' : 'DESC';
-		$query_args = array( 'post_type' => 'pos_session', 'post_status' => 'publish', 'posts_per_page' => $per_page, 'paged' => $page );
+		$query_args = array( 'post_type' => 'hpss_pos_session', 'post_status' => 'publish', 'posts_per_page' => $per_page, 'paged' => $page );
 		$meta_query = array();
 		$status_filter = sanitize_text_field( $request->get_param( 'status' ) ?? '' );
 		if ( $status_filter ) {
@@ -232,7 +232,7 @@ class Headless_Pos_Sessions_Rest_Api {
 				array_push( $sessions, $session );
 			}
 		}
-		$count_args = array( 'post_type' => 'pos_session', 'post_status' => 'publish', 'posts_per_page' => -1, 'fields' => 'ids' );
+		$count_args = array( 'post_type' => 'hpss_pos_session', 'post_status' => 'publish', 'posts_per_page' => -1, 'fields' => 'ids' );
 		if ( count( $meta_query ) > 0 ) {
 			$count_args['meta_query'] = $meta_query;
 		}
@@ -245,7 +245,7 @@ class Headless_Pos_Sessions_Rest_Api {
 	public function get_session( $request ) {
 		$post_id = intval( $request->get_param( 'id' ) );
 		$post = get_post( $post_id );
-		if ( ! $post || get_post_type( $post_id ) !== 'pos_session' ) {
+		if ( ! $post || get_post_type( $post_id ) !== 'hpss_pos_session' ) {
 			return new WP_Error( 'not_found', 'Session not found.', array( 'status' => 404 ) );
 		}
 		return $this->format_session( $post_id );
@@ -254,7 +254,7 @@ class Headless_Pos_Sessions_Rest_Api {
 	public function update_session( $request ) {
 		$post_id = intval( $request->get_param( 'id' ) );
 		$post = get_post( $post_id );
-		if ( ! $post || get_post_type( $post_id ) !== 'pos_session' ) {
+		if ( ! $post || get_post_type( $post_id ) !== 'hpss_pos_session' ) {
 			return new WP_Error( 'not_found', 'Session not found.', array( 'status' => 404 ) );
 		}
 		$params = $request->get_json_params();
@@ -267,7 +267,7 @@ class Headless_Pos_Sessions_Rest_Api {
 				$current_status = get_post_meta( $post_id, '_session_status', true );
 				if ( $current_status !== 'open' ) {
 					$max_open = max( 1, intval( get_option( 'headless_pos_sessions_max_open_sessions', 10 ) ) );
-					$open_sessions = get_posts( array( 'post_type' => 'pos_session', 'post_status' => 'publish', 'meta_key' => '_session_status', 'meta_value' => 'open', 'posts_per_page' => -1, 'fields' => 'ids' ) );
+					$open_sessions = get_posts( array( 'post_type' => 'hpss_pos_session', 'post_status' => 'publish', 'meta_key' => '_session_status', 'meta_value' => 'open', 'posts_per_page' => -1, 'fields' => 'ids' ) );
 					if ( count( $open_sessions ) >= $max_open ) {
 						return new WP_Error( 'max_open_exceeded', 'Maximum number of open sessions reached.', array( 'status' => 409 ) );
 					}
@@ -314,7 +314,7 @@ class Headless_Pos_Sessions_Rest_Api {
 	public function delete_session( $request ) {
 		$post_id = intval( $request->get_param( 'id' ) );
 		$post = get_post( $post_id );
-		if ( ! $post || get_post_type( $post_id ) !== 'pos_session' ) {
+		if ( ! $post || get_post_type( $post_id ) !== 'hpss_pos_session' ) {
 			return new WP_Error( 'not_found', 'Session not found.', array( 'status' => 404 ) );
 		}
 		$result = wp_delete_post( $post_id, true );

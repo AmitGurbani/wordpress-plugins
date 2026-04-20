@@ -15,12 +15,12 @@ Multi-file wpts plugin with 3 source files:
 
 - `src/plugin.ts` — Entry file: @Plugin, @CustomPostType, @AdminPage, 2 @Settings, @Activate/@Deactivate, cron scheduling via @Action('init')
 - `src/session-routes.ts` — POST/GET/PUT/DELETE /sessions endpoints, formatSession helper
-- `src/cron-tasks.ts` — @Action('hps_daily_cleanup'), @Action('hps_daily_auto_close')
+- `src/cron-tasks.ts` — @Action('headless_pos_sessions_daily_cleanup'), @Action('headless_pos_sessions_daily_auto_close')
 - `src/admin/` — React settings page (not transpiled, bundled by wp-scripts)
 
 ## Data Model
 
-Custom Post Type `pos_session` with `post_status: 'publish'`. Session state tracked in `_session_status` meta (open/closed).
+Custom Post Type `hpss_pos_session` with `post_status: 'publish'`. Session state tracked in `_session_status` meta (open/closed).
 
 Meta fields: `_session_uuid`, `_terminal_id`, `_session_status`, `_opened_at`, `_closed_at`, `_opening_balance`, `_closing_balance`, `_expected_balance`, `_cash_in`, `_cash_out`, `_order_count`, `_order_ids` (JSON array), `_notes`, `_cashier_id`
 
@@ -42,7 +42,7 @@ Namespace: `headless-pos-sessions/v1`
 
 - **Option keys**: `headless_pos_sessions_` prefix (e.g., `headless_pos_sessions_retention_days`)
 - **Meta keys**: Underscore-prefixed (hidden from custom fields UI): `_session_uuid`, `_terminal_id`, etc.
-- **Cron hooks**: `hps_daily_cleanup` (retention cleanup), `hps_daily_auto_close` (orphan auto-close)
+- **Cron hooks**: `headless_pos_sessions_daily_cleanup` (retention cleanup), `headless_pos_sessions_daily_auto_close` (orphan auto-close)
 - **UUID deduplication**: `session_uuid` field enables idempotent syncing — POST returns 409 Conflict on duplicate
 - **Balance storage**: Stored as strings in post meta, returned as floats via `floatval()` in API responses
 - **Date storage**: ISO 8601 strings, lexicographically sortable for meta_query comparisons

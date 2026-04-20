@@ -38,8 +38,8 @@ class Headless_Pos_Sessions {
 
 	private function define_public_hooks() {
 		$public = new Headless_Pos_Sessions_Public( $this->plugin_name, $this->version );
-		$this->loader->add_action( 'hps_daily_cleanup', $public, 'cleanup_old_sessions', 10, 0 );
-		$this->loader->add_action( 'hps_daily_auto_close', $public, 'auto_close_orphaned_sessions', 10, 0 );
+		$this->loader->add_action( 'headless_pos_sessions_daily_cleanup', $public, 'cleanup_old_sessions', 10, 0 );
+		$this->loader->add_action( 'headless_pos_sessions_daily_auto_close', $public, 'auto_close_orphaned_sessions', 10, 0 );
 		$this->loader->add_action( 'init', $public, 'schedule_cron_jobs', 10, 0 );
 		$this->loader->add_action( 'init', $public, 'register_custom_post_types' );
 	}

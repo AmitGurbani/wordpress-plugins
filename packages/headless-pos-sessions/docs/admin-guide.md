@@ -30,11 +30,11 @@ Access settings via the **POS Sessions** menu in WordPress admin.
 
 The plugin schedules two daily WordPress cron tasks that run automatically:
 
-### Retention Cleanup (`hps_daily_cleanup`)
+### Retention Cleanup (`headless_pos_sessions_daily_cleanup`)
 
 Deletes closed sessions older than the configured **Retention Days** value. Processes up to 100 sessions per run. Disabled when Retention Days is set to `0`.
 
-### Orphan Auto-Close (`hps_daily_auto_close`)
+### Orphan Auto-Close (`headless_pos_sessions_daily_auto_close`)
 
 Automatically closes open sessions that have been open for more than 24 hours. This catches forgotten/abandoned register sessions. Auto-closed sessions receive the note "Auto-closed: orphaned session".
 
@@ -42,7 +42,7 @@ Both cron tasks are unscheduled when the plugin is deactivated. All session data
 
 ## Data Storage
 
-Sessions are stored as a private Custom Post Type (`pos_session`) with metadata in the standard `wp_postmeta` table. No custom database tables are created. This means:
+Sessions are stored as a private Custom Post Type (`hpss_pos_session`) with metadata in the standard `wp_postmeta` table. No custom database tables are created. This means:
 
 - Sessions appear in standard WordPress backup tools
 - No database migration needed on updates

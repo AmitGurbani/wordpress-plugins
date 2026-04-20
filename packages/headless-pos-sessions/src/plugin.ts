@@ -20,10 +20,9 @@ import './cron-tasks.js';
   authorUri: 'https://github.com/AmitGurbani',
   license: 'GPL-2.0+',
   textDomain: 'headless-pos-sessions',
-  githubRepo: 'AmitGurbani/wordpress-plugins',
   wooNotice: 'required',
 })
-@CustomPostType('pos_session', {
+@CustomPostType('hpss_pos_session', {
   singularName: 'POS Session',
   pluralName: 'POS Sessions',
   public: false,
@@ -63,11 +62,11 @@ class HeadlessPosSessionsPlugin {
 
   @Action('init')
   scheduleCronJobs(): void {
-    if (!wpNextScheduled('hps_daily_cleanup')) {
-      wpScheduleEvent(time(), 'daily', 'hps_daily_cleanup');
+    if (!wpNextScheduled('headless_pos_sessions_daily_cleanup')) {
+      wpScheduleEvent(time(), 'daily', 'headless_pos_sessions_daily_cleanup');
     }
-    if (!wpNextScheduled('hps_daily_auto_close')) {
-      wpScheduleEvent(time(), 'daily', 'hps_daily_auto_close');
+    if (!wpNextScheduled('headless_pos_sessions_daily_auto_close')) {
+      wpScheduleEvent(time(), 'daily', 'headless_pos_sessions_daily_auto_close');
     }
   }
 
@@ -81,7 +80,7 @@ class HeadlessPosSessionsPlugin {
 
   @Deactivate()
   onDeactivation(): void {
-    wpClearScheduledHook('hps_daily_cleanup');
-    wpClearScheduledHook('hps_daily_auto_close');
+    wpClearScheduledHook('headless_pos_sessions_daily_cleanup');
+    wpClearScheduledHook('headless_pos_sessions_daily_auto_close');
   }
 }

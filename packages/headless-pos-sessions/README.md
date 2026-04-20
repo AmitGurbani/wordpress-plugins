@@ -98,7 +98,7 @@ Configured via WordPress admin page (**POS Sessions** menu):
 ```
 POS Frontend (React, etc.)              WordPress
 ────────────────────────────            ──────────────────────────────
-POST /sessions (open register) ───────→ Creates pos_session CPT + meta
+POST /sessions (open register) ───────→ Creates hpss_pos_session CPT + meta
 GET  /sessions (shift history) ───────→ Paginated list with filters
 PUT  /sessions/:id (close register) ──→ Updates meta (closing balance, etc.)
 DELETE /sessions/:id (admin cleanup) ─→ Removes post + meta (admin-only)
@@ -106,14 +106,14 @@ DELETE /sessions/:id (admin cleanup) ─→ Removes post + meta (admin-only)
 
 ### Data Model
 
-Sessions are stored as a Custom Post Type (`pos_session`) with all fields in post meta. No custom database tables — uses standard WordPress APIs for portability and compatibility.
+Sessions are stored as a Custom Post Type (`hpss_pos_session`) with all fields in post meta. No custom database tables — uses standard WordPress APIs for portability and compatibility.
 
 ### Cron Tasks
 
 Two daily scheduled tasks run automatically:
 
-- **`hps_daily_cleanup`** — Deletes closed sessions older than the configured retention period
-- **`hps_daily_auto_close`** — Auto-closes orphaned open sessions older than 24 hours
+- **`headless_pos_sessions_daily_cleanup`** — Deletes closed sessions older than the configured retention period
+- **`headless_pos_sessions_daily_auto_close`** — Auto-closes orphaned open sessions older than 24 hours
 
 Both are unscheduled on plugin deactivation and all session data is removed on uninstall.
 

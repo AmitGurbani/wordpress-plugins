@@ -74,7 +74,7 @@ class SessionRoutes {
 
     // Check duplicate UUID
     const existing: any[] = getPosts({
-      post_type: 'pos_session',
+      post_type: 'hpss_pos_session',
       post_status: 'publish',
       meta_key: '_session_uuid',
       meta_value: uuid,
@@ -99,7 +99,7 @@ class SessionRoutes {
         intval(getOption('headless_pos_sessions_max_open_sessions', 10)),
       );
       const openSessions: any[] = getPosts({
-        post_type: 'pos_session',
+        post_type: 'hpss_pos_session',
         post_status: 'publish',
         meta_key: '_session_status',
         meta_value: 'open',
@@ -115,7 +115,7 @@ class SessionRoutes {
 
     // Create post
     const postId: any = wpInsertPost({
-      post_type: 'pos_session',
+      post_type: 'hpss_pos_session',
       post_title: `POS Session \u2014 ${openedAt}`,
       post_status: 'publish',
     });
@@ -170,7 +170,7 @@ class SessionRoutes {
 
     // Build query args
     const queryArgs: Record<string, any> = {
-      post_type: 'pos_session',
+      post_type: 'hpss_pos_session',
       post_status: 'publish',
       posts_per_page: perPage,
       paged: page,
@@ -230,7 +230,7 @@ class SessionRoutes {
 
     // Total count for pagination (all matching IDs, no pagination)
     const countArgs: Record<string, any> = {
-      post_type: 'pos_session',
+      post_type: 'hpss_pos_session',
       post_status: 'publish',
       posts_per_page: -1,
       fields: 'ids',
@@ -260,7 +260,7 @@ class SessionRoutes {
     const postId: number = intval(request.get_param('id'));
     const post: any = getPost(postId);
 
-    if (!post || getPostType(postId) !== 'pos_session') {
+    if (!post || getPostType(postId) !== 'hpss_pos_session') {
       return new WP_Error('not_found', 'Session not found.', { status: 404 });
     }
 
@@ -274,7 +274,7 @@ class SessionRoutes {
     const postId: number = intval(request.get_param('id'));
     const post: any = getPost(postId);
 
-    if (!post || getPostType(postId) !== 'pos_session') {
+    if (!post || getPostType(postId) !== 'hpss_pos_session') {
       return new WP_Error('not_found', 'Session not found.', { status: 404 });
     }
 
@@ -293,7 +293,7 @@ class SessionRoutes {
             intval(getOption('headless_pos_sessions_max_open_sessions', 10)),
           );
           const openSessions: any[] = getPosts({
-            post_type: 'pos_session',
+            post_type: 'hpss_pos_session',
             post_status: 'publish',
             meta_key: '_session_status',
             meta_value: 'open',
@@ -353,7 +353,7 @@ class SessionRoutes {
     const postId: number = intval(request.get_param('id'));
     const post: any = getPost(postId);
 
-    if (!post || getPostType(postId) !== 'pos_session') {
+    if (!post || getPostType(postId) !== 'hpss_pos_session') {
       return new WP_Error('not_found', 'Session not found.', { status: 404 });
     }
 
