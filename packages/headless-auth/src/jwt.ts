@@ -129,6 +129,7 @@ class JwtAuth {
       return userId;
     }
     if (payload.exp < time()) {
+      $_SERVER.HA_JWT_EXPIRED = '1';
       return userId;
     }
     if (payload.iss !== siteUrl()) {
@@ -161,6 +162,14 @@ class JwtAuth {
 
     if (($_SERVER.HA_JWT_AUTHENTICATED ?? '') === '1') {
       return true;
+    }
+
+    // Signal expired JWT to clients instead of falling through to a confusing
+    // WooCommerce/REST "permission denied" error.  getCurrentUserId() runs
+    // first to trigger determine_current_user (which sets the HA_JWT_EXPIRED
+    // flag via authenticateWithJwt) before we check it.
+    if (!getCurrentUserId() && ($_SERVER.HA_JWT_EXPIRED ?? '') === '1') {
+      return new WP_Error('token_expired', 'Access token has expired.', { status: 401 });
     }
 
     return result;

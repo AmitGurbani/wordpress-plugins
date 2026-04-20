@@ -94,7 +94,7 @@ Configured via WordPress admin page (Auth menu):
 - **Brute-force protection**: OTP verify attempts limited (default 3, per OWASP). Lockout deletes the OTP and forces re-request
 - **Registration control**: Toggle to enable/disable new user registration, configurable default role. Username derived from display name
 - **WooCommerce compatibility**: Auto-detects WooCommerce. Falls back to `billing_phone` meta for existing WooCommerce users, syncs `billing_phone`/`billing_first_name`/`billing_last_name` on registration, syncs `billing_first_name`/`billing_last_name` on profile updates, defaults role to `customer`
-- **Refresh tokens**: Stored as hashed user meta, supports rotation
+- **Refresh tokens**: Stored as hashed user meta, supports rotation with 30-second idempotent grace period (old token returns same response within window). Expired access tokens return explicit `token_expired` error
 
 ## License
 

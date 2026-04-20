@@ -38,12 +38,14 @@ Multi-file wpts plugin with 5 source files:
 
 ### Token Lifecycle
 
-4. Access token expires → `/auth/refresh` rotates both tokens
-5. All authenticated endpoints use `Authorization: Bearer <access_token>` header
+4. Access token expires → client gets `401 token_expired` error → calls `/auth/refresh`
+5. `/auth/refresh` rotates both tokens; old refresh token stays valid for 30s grace period (idempotent — returns same response on reuse within window, matching Auth0/Okta pattern)
+6. All authenticated endpoints use `Authorization: Bearer <access_token>` header
+7. Login/register/OTP verify clear any active grace period transient
 
 ## Conventions
 
-- **Transient keys**: `ha_otp_<hash>`, `ha_attempts_<hash>`, `ha_reg_<hash>`, `ha_cooldown_<hash>`, `ha_verify_<hash>` (phone hash is `md5(phone)`), `ha_test_otp_latest` (test mode OTP display), `ha_login_attempts_<hash>` (login hash is `md5(username/email)`)
+- **Transient keys**: `ha_otp_<hash>`, `ha_attempts_<hash>`, `ha_reg_<hash>`, `ha_cooldown_<hash>`, `ha_verify_<hash>` (phone hash is `md5(phone)`), `ha_test_otp_latest` (test mode OTP display), `ha_login_attempts_<hash>` (login hash is `md5(username/email)`), `ha_refresh_grace_<userId>` (30s grace period cache for refresh token rotation)
 - **Option keys**: `headless_auth_` prefix (e.g., `headless_auth_jwt_secret_key` — hidden option, not a @Setting)
 - **User meta**: `phone_number`, `ha_refresh_token_hash`, `ha_refresh_token_expiry`. When WooCommerce is active: `billing_phone`, `billing_first_name`, `billing_last_name` (all synced on registration; `billing_first_name`/`billing_last_name` also synced on profile updates)
 - **JWT**: HS256, base64url-encoded, issued by `siteUrl()`, types: `access` and `refresh`

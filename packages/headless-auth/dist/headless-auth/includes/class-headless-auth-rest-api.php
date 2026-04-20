@@ -450,6 +450,7 @@ class Headless_Auth_Rest_Api {
 			$refresh_token = apply_filters( 'ha_generate_jwt', '', $existing_user_id, 'refresh', $refresh_expiry, $secret );
 			update_user_meta( $existing_user_id, 'ha_refresh_token_hash', wp_hash_password( $refresh_token ) );
 			update_user_meta( $existing_user_id, 'ha_refresh_token_expiry', strval( time() + $refresh_expiry ) );
+			delete_transient( 'ha_refresh_grace_' . $existing_user_id );
 			if ( class_exists( 'WooCommerce' ) ) {
 				update_user_meta( $existing_user_id, 'billing_phone', $phone );
 			}
@@ -552,6 +553,7 @@ class Headless_Auth_Rest_Api {
 		$refresh_token = apply_filters( 'ha_generate_jwt', '', $user_id, 'refresh', $refresh_expiry, $secret );
 		update_user_meta( $user_id, 'ha_refresh_token_hash', wp_hash_password( $refresh_token ) );
 		update_user_meta( $user_id, 'ha_refresh_token_expiry', strval( time() + $refresh_expiry ) );
+		delete_transient( 'ha_refresh_grace_' . $user_id );
 		$email = get_the_author_meta( 'user_email', $user_id );
 		$cap_key = $wpdb->prefix . 'capabilities';
 		$caps = get_user_meta( $user_id, $cap_key, true );
@@ -593,7 +595,15 @@ class Headless_Auth_Rest_Api {
 			return new WP_Error( 'invalid_token', 'Invalid user in token.', array( 'status' => 400 ) );
 		}
 		$stored_hash = get_user_meta( $user_id, 'ha_refresh_token_hash', true );
-		if ( ! $stored_hash || ! wp_check_password( $refresh_token_str, $stored_hash ) ) {
+		$hash_matches = ! ! ($stored_hash && wp_check_password( $refresh_token_str, $stored_hash ));
+		if ( ! $hash_matches ) {
+			$grace_data = get_transient( 'ha_refresh_grace_' . $user_id );
+			if ( $grace_data ) {
+				$grace = json_decode( $grace_data, true );
+				if ( $grace && $grace['prev_hash'] && wp_check_password( $refresh_token_str, $grace['prev_hash'] ) ) {
+					return array( 'access_token' => $grace['access_token'], 'refresh_token' => $grace['refresh_token'] );
+				}
+			}
 			return new WP_Error( 'invalid_token', 'Refresh token has been revoked.', array( 'status' => 401 ) );
 		}
 		$stored_expiry = intval( get_user_meta( $user_id, 'ha_refresh_token_expiry', true ) );
@@ -608,6 +618,7 @@ class Headless_Auth_Rest_Api {
 		$new_refresh_token = apply_filters( 'ha_generate_jwt', '', $user_id, 'refresh', $refresh_expiry, $secret );
 		update_user_meta( $user_id, 'ha_refresh_token_hash', wp_hash_password( $new_refresh_token ) );
 		update_user_meta( $user_id, 'ha_refresh_token_expiry', strval( time() + $refresh_expiry ) );
+		set_transient( 'ha_refresh_grace_' . $user_id, wp_json_encode( array( 'prev_hash' => $stored_hash, 'access_token' => $new_access_token, 'refresh_token' => $new_refresh_token ) ), 30 );
 		return array( 'access_token' => $new_access_token, 'refresh_token' => $new_refresh_token );
 	}
 
@@ -729,6 +740,7 @@ class Headless_Auth_Rest_Api {
 		$refresh_token = apply_filters( 'ha_generate_jwt', '', $user_id, 'refresh', $refresh_expiry, $secret );
 		update_user_meta( $user_id, 'ha_refresh_token_hash', wp_hash_password( $refresh_token ) );
 		update_user_meta( $user_id, 'ha_refresh_token_expiry', strval( time() + $refresh_expiry ) );
+		delete_transient( 'ha_refresh_grace_' . $user_id );
 		$display_name = get_the_author_meta( 'display_name', $user_id );
 		$email = get_the_author_meta( 'user_email', $user_id );
 		$phone = get_user_meta( $user_id, 'phone_number', true );

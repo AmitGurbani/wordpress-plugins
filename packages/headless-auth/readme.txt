@@ -4,7 +4,7 @@ Tags: otp, authentication, jwt, headless, rest-api
 Requires at least: 6.7
 Tested up to: 6.9
 Requires PHP: 8.2
-Stable tag: 1.2.2
+Stable tag: 1.3.0
 License: GPL-2.0+
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -77,6 +77,11 @@ No data is sent to any external service until you configure an OTP server URL. I
 You are responsible for reviewing the privacy policy and terms of service of the OTP delivery provider you choose.
 
 == Changelog ==
+
+= 1.3.0 =
+* Expired access tokens now return an explicit `token_expired` error (401) instead of a generic permission error
+* Added 30-second grace period for refresh token rotation — old refresh tokens return the same response within the window, preventing concurrent refresh failures (matches Auth0/Okta pattern)
+* New logins clear any active grace period to prevent stale session reuse
 
 = 1.0.0 =
 * Initial release

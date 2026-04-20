@@ -139,6 +139,7 @@ class AuthRoutes {
 
     updateUserMeta(userId, 'ha_refresh_token_hash', wpHashPassword(refreshToken));
     updateUserMeta(userId, 'ha_refresh_token_expiry', strval(time() + refreshExpiry));
+    deleteTransient(`ha_refresh_grace_${userId}`);
 
     const email: string = getTheAuthorMeta('user_email', userId);
     const capKey: string = `${wpdb.prefix}capabilities`;
@@ -208,7 +209,21 @@ class AuthRoutes {
 
     // Verify against stored hash
     const storedHash: string = getUserMeta(userId, 'ha_refresh_token_hash', true);
-    if (!storedHash || !wpCheckPassword(refreshTokenStr, storedHash)) {
+    const hashMatches: boolean = !!(storedHash && wpCheckPassword(refreshTokenStr, storedHash));
+
+    if (!hashMatches) {
+      // Grace period: if the token was recently rotated, allow idempotent reuse
+      // and return the same response (Auth0/Okta pattern, 30s window).
+      const graceData: any = getTransient(`ha_refresh_grace_${userId}`);
+      if (graceData) {
+        const grace: any = jsonDecode(graceData, true);
+        if (grace && grace.prev_hash && wpCheckPassword(refreshTokenStr, grace.prev_hash)) {
+          return {
+            access_token: grace.access_token,
+            refresh_token: grace.refresh_token,
+          };
+        }
+      }
       return new WP_Error('invalid_token', 'Refresh token has been revoked.', { status: 401 });
     }
 
@@ -242,6 +257,18 @@ class AuthRoutes {
 
     updateUserMeta(userId, 'ha_refresh_token_hash', wpHashPassword(newRefreshToken));
     updateUserMeta(userId, 'ha_refresh_token_expiry', strval(time() + refreshExpiry));
+
+    // Cache response for grace period (30s) — allows idempotent reuse of the
+    // old refresh token by concurrent requests (e.g. multiple browser tabs).
+    setTransient(
+      `ha_refresh_grace_${userId}`,
+      jsonEncode({
+        prev_hash: storedHash,
+        access_token: newAccessToken,
+        refresh_token: newRefreshToken,
+      }),
+      30,
+    );
 
     return {
       access_token: newAccessToken,

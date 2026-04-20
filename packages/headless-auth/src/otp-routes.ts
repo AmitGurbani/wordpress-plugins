@@ -243,6 +243,7 @@ class OtpRoutes {
 
       updateUserMeta(existingUserId, 'ha_refresh_token_hash', wpHashPassword(refreshToken));
       updateUserMeta(existingUserId, 'ha_refresh_token_expiry', strval(time() + refreshExpiry));
+      deleteTransient(`ha_refresh_grace_${existingUserId}`);
 
       // Sync to WooCommerce billing_phone
       if (classExists('WooCommerce')) {

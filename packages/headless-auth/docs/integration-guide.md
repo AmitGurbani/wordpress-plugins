@@ -92,7 +92,7 @@ sequenceDiagram
     participant API
 
     App->>API: GET /auth/me (Bearer expired_token)
-    API-->>App: 401 Unauthorized
+    API-->>App: 401 {code: "token_expired"}
 
     App->>API: POST /auth/refresh {refresh_token}
     API-->>App: {access_token, refresh_token}
@@ -104,6 +104,8 @@ sequenceDiagram
 ```
 
 Both tokens are rotated on refresh. Always replace the old refresh token with the new one.
+
+**Grace period:** After rotation, the old refresh token remains valid for **30 seconds** and returns the same tokens (idempotent). This handles concurrent refresh calls (e.g., multiple browser tabs detecting an expired access token at the same time). After 30 seconds, reusing the old token returns a `401 invalid_token` error.
 
 ### Password Login
 
@@ -358,7 +360,7 @@ Get new access and refresh tokens using a valid refresh token.
 }
 ```
 
-Both tokens are new. Store the new refresh token — the old one is invalidated.
+Both tokens are new. Store the new refresh token — the old one is invalidated after a 30-second grace period. During the grace period, reusing the old refresh token returns the same new tokens (idempotent).
 
 **Errors:**
 
@@ -366,7 +368,7 @@ Both tokens are new. Store the new refresh token — the old one is invalidated.
 |------|--------|------|
 | `missing_token` | 400 | Refresh token not provided |
 | `invalid_token` | 400 | Token format invalid, wrong type, or issuer mismatch |
-| `invalid_token` | 401 | Signature verification failed or token revoked |
+| `invalid_token` | 401 | Signature verification failed or token revoked (grace period expired) |
 | `token_expired` | 401 | Refresh token has expired |
 | `config_error` | 403 | JWT secret key is not configured on the server |
 
@@ -404,6 +406,7 @@ Get the authenticated user's profile.
 
 | Code | Status | When |
 |------|--------|------|
+| `token_expired` | 401 | Access token has expired — refresh it via `/auth/refresh` |
 | `not_authenticated` | 401 | No valid access token provided |
 
 **Example:**
@@ -509,6 +512,7 @@ Some errors include extra fields in `data` (e.g., `retry_after` for cooldown err
 | `config_error` | 403 | /otp/verify | JWT secret key not configured | Contact site admin |
 | `config_error` | 403 | /auth/register | JWT secret key not configured | Contact site admin |
 | `config_error` | 403 | /auth/refresh | JWT secret key not configured | Contact site admin |
+| `token_expired` | 401 | /auth/me | Access token has expired | Call `/auth/refresh` with your refresh token to get new tokens |
 | `not_authenticated` | 401 | /auth/me | No valid access token | Include `Authorization: Bearer <token>` header. Refresh if expired |
 | `cannot_edit` | 403 | /auth/me (PUT) | User lacks edit_user capability | Contact site admin — user may be restricted |
 | `no_changes` | 400 | /auth/me (PUT) | No valid fields in request body | Include at least one of: `name`, `first_name`, `last_name` |
@@ -541,9 +545,10 @@ Tokens are signed with HS256 (HMAC-SHA256). The payload contains:
 
 1. **Decode the access token** (base64, no verification needed) and check `exp` before making requests
 2. **If expired**, call `/auth/refresh` with your stored refresh token
-3. **Store both new tokens** — the old refresh token is invalidated
-4. **If refresh fails** with 401, the user must re-authenticate with OTP
-5. **Handle 401 reactively** — if any API call returns 401, attempt a refresh before prompting the user
+3. **Store both new tokens** — the old refresh token is invalidated after a 30-second grace period
+4. **If refresh fails** with 401, the user must re-authenticate with OTP or password
+5. **Handle `token_expired` reactively** — if any API call returns `401` with `code: "token_expired"`, attempt a refresh before prompting the user
+6. **Deduplicate refresh calls** — if multiple requests detect an expired token at the same time, queue them behind a single `/auth/refresh` call. The 30-second grace period is a server-side safety net, not a substitute for client-side deduplication
 
 ### Token Storage Recommendations
 
@@ -699,6 +704,8 @@ async function refresh() {
 }
 
 // Authenticated request with auto-refresh
+let refreshPromise = null;
+
 async function authenticatedFetch(path, options = {}) {
   const makeRequest = () =>
     apiCall(path, {
@@ -709,8 +716,12 @@ async function authenticatedFetch(path, options = {}) {
   try {
     return await makeRequest();
   } catch (err) {
-    if (err.status === 401 && refreshToken) {
-      await refresh();
+    if (err.code === 'token_expired' && refreshToken) {
+      // Deduplicate: if a refresh is already in progress, wait for it
+      if (!refreshPromise) {
+        refreshPromise = refresh().finally(() => { refreshPromise = null; });
+      }
+      await refreshPromise;
       return makeRequest();
     }
     throw err;

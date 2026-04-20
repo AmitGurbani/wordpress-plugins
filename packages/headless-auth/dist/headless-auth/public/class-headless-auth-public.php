@@ -88,6 +88,7 @@ class Headless_Auth_Public {
 			return $user_id;
 		}
 		if ( $payload['exp'] < time() ) {
+			$_SERVER['HA_JWT_EXPIRED'] = '1';
 			return $user_id;
 		}
 		if ( $payload['iss'] !== site_url() ) {
@@ -111,6 +112,9 @@ class Headless_Auth_Public {
 		}
 		if ( ($_SERVER['HA_JWT_AUTHENTICATED'] ?? '') === '1' ) {
 			return true;
+		}
+		if ( ! get_current_user_id() && ($_SERVER['HA_JWT_EXPIRED'] ?? '') === '1' ) {
+			return new WP_Error( 'token_expired', 'Access token has expired.', array( 'status' => 401 ) );
 		}
 		return $result;
 	}

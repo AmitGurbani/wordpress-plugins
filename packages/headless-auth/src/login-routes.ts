@@ -92,6 +92,7 @@ class LoginRoutes {
 
     updateUserMeta(userId, 'ha_refresh_token_hash', wpHashPassword(refreshToken));
     updateUserMeta(userId, 'ha_refresh_token_expiry', strval(time() + refreshExpiry));
+    deleteTransient(`ha_refresh_grace_${userId}`);
 
     const displayName: string = getTheAuthorMeta('display_name', userId);
     const email: string = getTheAuthorMeta('user_email', userId);

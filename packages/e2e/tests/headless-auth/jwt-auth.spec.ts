@@ -9,6 +9,7 @@ test.describe('Headless Auth — JWT Authentication', () => {
     await restApi.updateSettings(SLUG, {
       otp_test_mode: true,
       enable_registration: true,
+      enable_password_login: true,
     });
   });
 
@@ -71,5 +72,41 @@ test.describe('Headless Auth — JWT Authentication', () => {
       expect(res.status()).toBe(401);
     }
     await ctx.dispose();
+  });
+
+  test('expired access token returns 401 token_expired error', async ({ wpCli }) => {
+    // Set access token expiry to 1 second so it expires quickly
+    wpCli('option update headless_auth_jwt_access_expiry 1');
+
+    try {
+      const ctx = await playwrightRequest.newContext();
+
+      // Login to get a short-lived access token
+      const loginRes = await ctx.post(`${BASE}/auth/login`, {
+        data: { username: 'jwtuser', password: 'testpass123' },
+      });
+      expect(loginRes.status()).toBe(200);
+      const loginData = await loginRes.json();
+      const accessToken = loginData.access_token;
+      expect(accessToken).toBeTruthy();
+
+      // Wait for the token to expire
+      await new Promise((r) => setTimeout(r, 2000));
+
+      // Use expired token — should get explicit token_expired error.
+      // Use a raw fetch to ensure no extra headers/cookies are sent.
+      const meRes = await fetch(`${BASE}/auth/me`, {
+        headers: { Authorization: `Bearer ${accessToken}` },
+      });
+      expect(meRes.status).toBe(401);
+
+      const error = await meRes.json();
+      expect(error.code).toBe('token_expired');
+
+      await ctx.dispose();
+    } finally {
+      // Restore default expiry
+      wpCli('option update headless_auth_jwt_access_expiry 3600');
+    }
   });
 });
