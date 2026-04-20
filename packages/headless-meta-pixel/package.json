@@ -1,6 +1,6 @@
 {
   "name": "headless-meta-pixel",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "private": true,
   "description": "Headless Meta Pixel with WooCommerce integration and Conversions API for headless WordPress",
   "scripts": {

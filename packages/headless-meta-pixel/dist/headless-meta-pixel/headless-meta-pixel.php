@@ -3,7 +3,7 @@
  * Plugin Name:       Headless Meta Pixel
  * Plugin URI:        https://github.com/AmitGurbani/wordpress-plugins
  * Description:       Meta Pixel with WooCommerce integration and Conversions API for headless WordPress.
- * Version:           1.1.0
+ * Version:           1.2.0
  * Author:            Amit Gurbani
  * Author URI:        https://github.com/AmitGurbani
  * License:           GPL-2.0+
@@ -19,7 +19,7 @@ if ( ! defined( 'WPINC' ) ) {
 	die;
 }
 
-define( 'HEADLESS_META_PIXEL_VERSION', '1.1.0' );
+define( 'HEADLESS_META_PIXEL_VERSION', '1.2.0' );
 define( 'HEADLESS_META_PIXEL_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'HEADLESS_META_PIXEL_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
 
