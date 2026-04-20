@@ -22,7 +22,7 @@ pnpm build
 
 Upload the generated `dist/headless-fuzzy-find.zip` via **WordPress Admin > Plugins > Add New > Upload Plugin**.
 
-On activation the plugin creates two database tables (`wp_ff_search_index` and `wp_ff_search_log`) and is ready to use.
+On activation the plugin creates two database tables (`wp_headless_fuzzy_find_search_index` and `wp_headless_fuzzy_find_search_log`) and is ready to use.
 
 ## Features
 

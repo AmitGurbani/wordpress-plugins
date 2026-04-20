@@ -23,7 +23,6 @@ import './login-routes.js';
   authorUri: 'https://github.com/AmitGurbani',
   license: 'GPL-2.0+',
   textDomain: 'headless-auth',
-  githubRepo: 'AmitGurbani/wordpress-plugins',
 })
 @AdminPage({
   pageTitle: 'Headless Auth Settings',

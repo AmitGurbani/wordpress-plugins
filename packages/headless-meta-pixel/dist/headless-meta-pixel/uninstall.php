@@ -16,4 +16,3 @@ delete_option( 'headless_meta_pixel_enable_search' );
 delete_option( 'headless_meta_pixel_enable_capi' );
 delete_option( 'headless_meta_pixel_version' );
 delete_option( 'headless_meta_pixel_last_capi_error' );
-delete_transient( 'headless_meta_pixel_gh_release_cache' );

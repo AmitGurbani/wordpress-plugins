@@ -15,7 +15,7 @@ class Headless_Auth_Public {
 	}
 
 	public function register_jwt_helper() {
-		add_filter( 'ha_generate_jwt', function( $value, $user_id, $token_type, $expiry, $secret ) {
+		add_filter( 'headless_auth_generate_jwt', function( $value, $user_id, $token_type, $expiry, $secret ) {
 		if ( ! $secret ) {
 			return '';
 		}
@@ -88,7 +88,7 @@ class Headless_Auth_Public {
 			return $user_id;
 		}
 		if ( $payload['exp'] < time() ) {
-			$_SERVER['HA_JWT_EXPIRED'] = '1';
+			$_SERVER['HEADLESS_AUTH_JWT_EXPIRED'] = '1';
 			return $user_id;
 		}
 		if ( $payload['iss'] !== site_url() ) {
@@ -102,7 +102,7 @@ class Headless_Auth_Public {
 			return $user_id;
 		}
 		wp_set_current_user( $token_user_id );
-		$_SERVER['HA_JWT_AUTHENTICATED'] = '1';
+		$_SERVER['HEADLESS_AUTH_JWT_AUTHENTICATED'] = '1';
 		return $token_user_id;
 	}
 
@@ -110,10 +110,10 @@ class Headless_Auth_Public {
 		if ( $result ) {
 			return $result;
 		}
-		if ( ($_SERVER['HA_JWT_AUTHENTICATED'] ?? '') === '1' ) {
+		if ( ($_SERVER['HEADLESS_AUTH_JWT_AUTHENTICATED'] ?? '') === '1' ) {
 			return true;
 		}
-		if ( ! get_current_user_id() && ($_SERVER['HA_JWT_EXPIRED'] ?? '') === '1' ) {
+		if ( ! get_current_user_id() && ($_SERVER['HEADLESS_AUTH_JWT_EXPIRED'] ?? '') === '1' ) {
 			return new WP_Error( 'token_expired', 'Access token has expired.', array( 'status' => 401 ) );
 		}
 		return $result;

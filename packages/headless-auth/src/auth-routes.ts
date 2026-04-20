@@ -27,7 +27,7 @@ class AuthRoutes {
     }
 
     const regTokenHash: string = md5(regToken);
-    const phone: string = getTransient(`ha_reg_${regTokenHash}`);
+    const phone: string = getTransient(`headless_auth_reg_${regTokenHash}`);
 
     if (!phone) {
       return new WP_Error('invalid_token', 'Registration token is invalid or expired.', {
@@ -58,7 +58,7 @@ class AuthRoutes {
     }
 
     if (existingIds.length > 0) {
-      deleteTransient(`ha_reg_${regTokenHash}`);
+      deleteTransient(`headless_auth_reg_${regTokenHash}`);
       return new WP_Error('user_exists', 'An account with this phone number already exists.', {
         status: 409,
       });
@@ -110,7 +110,7 @@ class AuthRoutes {
       updateUserMeta(userId, 'billing_first_name', firstName);
       updateUserMeta(userId, 'billing_last_name', lastName);
     }
-    deleteTransient(`ha_reg_${regTokenHash}`);
+    deleteTransient(`headless_auth_reg_${regTokenHash}`);
 
     // Generate tokens
     const secret: string = getOption('headless_auth_jwt_secret_key', '');
@@ -121,7 +121,7 @@ class AuthRoutes {
     const refreshExpiry: number = intval(getOption('headless_auth_jwt_refresh_expiry', 604800));
 
     const accessToken: string = applyFilters(
-      'ha_generate_jwt',
+      'headless_auth_generate_jwt',
       '',
       userId,
       'access',
@@ -129,7 +129,7 @@ class AuthRoutes {
       secret,
     );
     const refreshToken: string = applyFilters(
-      'ha_generate_jwt',
+      'headless_auth_generate_jwt',
       '',
       userId,
       'refresh',
@@ -137,9 +137,9 @@ class AuthRoutes {
       secret,
     );
 
-    updateUserMeta(userId, 'ha_refresh_token_hash', wpHashPassword(refreshToken));
-    updateUserMeta(userId, 'ha_refresh_token_expiry', strval(time() + refreshExpiry));
-    deleteTransient(`ha_refresh_grace_${userId}`);
+    updateUserMeta(userId, 'headless_auth_refresh_token_hash', wpHashPassword(refreshToken));
+    updateUserMeta(userId, 'headless_auth_refresh_token_expiry', strval(time() + refreshExpiry));
+    deleteTransient(`headless_auth_refresh_grace_${userId}`);
 
     const email: string = getTheAuthorMeta('user_email', userId);
     const capKey: string = `${wpdb.prefix}capabilities`;
@@ -208,13 +208,13 @@ class AuthRoutes {
     }
 
     // Verify against stored hash
-    const storedHash: string = getUserMeta(userId, 'ha_refresh_token_hash', true);
+    const storedHash: string = getUserMeta(userId, 'headless_auth_refresh_token_hash', true);
     const hashMatches: boolean = !!(storedHash && wpCheckPassword(refreshTokenStr, storedHash));
 
     if (!hashMatches) {
       // Grace period: if the token was recently rotated, allow idempotent reuse
       // and return the same response (Auth0/Okta pattern, 30s window).
-      const graceData: any = getTransient(`ha_refresh_grace_${userId}`);
+      const graceData: any = getTransient(`headless_auth_refresh_grace_${userId}`);
       if (graceData) {
         const grace: any = jsonDecode(graceData, true);
         if (grace && grace.prev_hash && wpCheckPassword(refreshTokenStr, grace.prev_hash)) {
@@ -227,10 +227,12 @@ class AuthRoutes {
       return new WP_Error('invalid_token', 'Refresh token has been revoked.', { status: 401 });
     }
 
-    const storedExpiry: number = intval(getUserMeta(userId, 'ha_refresh_token_expiry', true));
+    const storedExpiry: number = intval(
+      getUserMeta(userId, 'headless_auth_refresh_token_expiry', true),
+    );
     if (storedExpiry < time()) {
-      deleteUserMeta(userId, 'ha_refresh_token_hash');
-      deleteUserMeta(userId, 'ha_refresh_token_expiry');
+      deleteUserMeta(userId, 'headless_auth_refresh_token_hash');
+      deleteUserMeta(userId, 'headless_auth_refresh_token_expiry');
       return new WP_Error('token_expired', 'Refresh token has expired.', { status: 401 });
     }
 
@@ -239,7 +241,7 @@ class AuthRoutes {
     const refreshExpiry: number = intval(getOption('headless_auth_jwt_refresh_expiry', 604800));
 
     const newAccessToken: string = applyFilters(
-      'ha_generate_jwt',
+      'headless_auth_generate_jwt',
       '',
       userId,
       'access',
@@ -247,7 +249,7 @@ class AuthRoutes {
       secret,
     );
     const newRefreshToken: string = applyFilters(
-      'ha_generate_jwt',
+      'headless_auth_generate_jwt',
       '',
       userId,
       'refresh',
@@ -255,13 +257,13 @@ class AuthRoutes {
       secret,
     );
 
-    updateUserMeta(userId, 'ha_refresh_token_hash', wpHashPassword(newRefreshToken));
-    updateUserMeta(userId, 'ha_refresh_token_expiry', strval(time() + refreshExpiry));
+    updateUserMeta(userId, 'headless_auth_refresh_token_hash', wpHashPassword(newRefreshToken));
+    updateUserMeta(userId, 'headless_auth_refresh_token_expiry', strval(time() + refreshExpiry));
 
     // Cache response for grace period (30s) — allows idempotent reuse of the
     // old refresh token by concurrent requests (e.g. multiple browser tabs).
     setTransient(
-      `ha_refresh_grace_${userId}`,
+      `headless_auth_refresh_grace_${userId}`,
       jsonEncode({
         prev_hash: storedHash,
         access_token: newAccessToken,

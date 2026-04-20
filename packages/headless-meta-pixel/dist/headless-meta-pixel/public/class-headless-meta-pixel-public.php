@@ -16,7 +16,7 @@ class Headless_Meta_Pixel_Public {
 
 	public function on_order_status_changed( $order_id, $old_status, $new_status, $order ) {
 		$purchase_statuses = array( 'processing', 'on-hold', 'completed' );
-		if ( ! in_array( $new_status, $purchase_statuses ) ) {
+		if ( ! in_array( $new_status, $purchase_statuses, true ) ) {
 			return;
 		}
 		if ( get_option( 'headless_meta_pixel_enable_capi', '1' ) !== '1' ) {

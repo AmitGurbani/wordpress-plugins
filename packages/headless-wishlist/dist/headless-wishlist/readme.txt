@@ -18,6 +18,16 @@ Wishlist data is stored in user meta as a JSON array. Stale products (deleted or
 
 **Headless-first design.** This plugin does not add wishlist buttons or pages to your WordPress theme. Your frontend application (Next.js, React Native, etc.) calls the REST endpoints directly.
 
+== Source Code ==
+
+The full source code, including uncompiled JavaScript and build tooling, is available at:
+https://github.com/AmitGurbani/wordpress-plugins/tree/main/packages/headless-wishlist
+
+To build the admin JavaScript from source, clone the repository and run:
+
+    pnpm install
+    pnpm --filter headless-wishlist build
+
 == Features ==
 
 * REST API endpoints to add, remove, list, and clear wishlist items

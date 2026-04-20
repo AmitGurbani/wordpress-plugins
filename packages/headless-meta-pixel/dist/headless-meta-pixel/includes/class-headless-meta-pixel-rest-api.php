@@ -225,7 +225,7 @@ class Headless_Meta_Pixel_Rest_Api {
 		} else {
 			$rl_ip = $_SERVER['REMOTE_ADDR'] ?? '';
 		}
-		$rl_key = 'hmp_rl_' . md5( $rl_ip );
+		$rl_key = 'headless_meta_pixel_rl_' . md5( $rl_ip );
 		$rl_count = get_transient( $rl_key );
 		if ( $rl_count && intval( $rl_count ) >= 60 ) {
 			return new WP_Error( 'rate_limited', 'Too many requests. Please try again later.', array( 'status' => 429 ) );

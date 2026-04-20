@@ -21,7 +21,6 @@ import './admin-routes.js';
   authorUri: 'https://github.com/AmitGurbani',
   license: 'GPL-2.0+',
   textDomain: 'headless-fuzzy-find',
-  githubRepo: 'AmitGurbani/wordpress-plugins',
   requiresWP: '6.2',
   requiresPHP: '8.0',
   wooNotice: 'required',
@@ -142,8 +141,8 @@ class FuzzyFind {
 
     const charsetCollate: string = wpdb.getCharsetCollate();
     const prefix: string = wpdb.prefix;
-    const indexTable: string = `${prefix}ff_search_index`;
-    const logTable: string = `${prefix}ff_search_log`;
+    const indexTable: string = `${prefix}headless_fuzzy_find_search_index`;
+    const logTable: string = `${prefix}headless_fuzzy_find_search_log`;
 
     const sqlIndex: string =
       'CREATE TABLE ' +

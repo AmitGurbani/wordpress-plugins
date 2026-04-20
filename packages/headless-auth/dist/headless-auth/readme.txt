@@ -18,6 +18,16 @@ The plugin generates OTPs locally and delivers them via a configurable external 
 
 WooCommerce integration activates automatically when WooCommerce is installed: new users receive the `customer` role, billing metadata is pre-populated from their profile, and existing WooCommerce customers can authenticate by their billing phone number.
 
+== Source Code ==
+
+The full source code, including uncompiled JavaScript and build tooling, is available at:
+https://github.com/AmitGurbani/wordpress-plugins/tree/main/packages/headless-auth
+
+To build the admin JavaScript from source, clone the repository and run:
+
+    pnpm install
+    pnpm --filter headless-auth build
+
 == Features ==
 
 * Username/email + password login via REST API

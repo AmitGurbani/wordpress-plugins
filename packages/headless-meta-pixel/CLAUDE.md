@@ -38,6 +38,6 @@ Multi-file wpts plugin with 4 source files:
 - **Allowed custom_data keys** (whitelist on `/track`): `currency`, `value`, `content_type`, `contents`, `content_ids`, `search_string`, `num_items`, `order_id`. All others silently dropped
 - **Supported events**: `ViewContent`, `AddToCart`, `InitiateCheckout`, `Purchase`, `Search` — each has an independent enable/disable setting
 - **Currency default**: auto-generated via `@Setting({ wooCurrencyDefault: true })` — `default_option_headless_meta_pixel_currency` filter returns WooCommerce currency when active
-- **Rate limiting**: `/track` endpoint is rate-limited to 60 requests/minute per client IP using WordPress transients. Uses `X-Forwarded-For` header for real client IP (supports reverse proxy/CDN setups). Transient key: `hmp_rl_` + MD5(IP), 60s TTL.
+- **Rate limiting**: `/track` endpoint is rate-limited to 60 requests/minute per client IP using WordPress transients. Uses `X-Forwarded-For` header for real client IP (supports reverse proxy/CDN setups). Transient key: `headless_meta_pixel_rl_` + MD5(IP), 60s TTL.
 - **Sensitive settings**: `access_token` uses `sensitive: true` on @Setting — GET /settings returns `'********'` instead of the raw token
 - **Array type validation**: `contents` and `content_ids` in `/track` custom_data are validated with `is_array()` and dropped if not arrays

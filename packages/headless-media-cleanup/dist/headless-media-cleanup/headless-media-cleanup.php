@@ -12,7 +12,6 @@
  * Domain Path:       /languages
  * Requires at least: 6.2
  * Requires PHP:      8.0
- * Update URI:       https://github.com/AmitGurbani/wordpress-plugins/releases?plugin=headless-media-cleanup
  */
 
 // If this file is called directly, abort.
@@ -56,13 +55,11 @@ register_deactivation_hook( __FILE__, 'deactivate_headless_media_cleanup' );
  * Core plugin class.
  */
 require_once HEADLESS_MEDIA_CLEANUP_PLUGIN_DIR . 'includes/class-headless-media-cleanup.php';
-require_once HEADLESS_MEDIA_CLEANUP_PLUGIN_DIR . 'includes/class-headless-media-cleanup-updater.php';
 
 /**
  * Begin plugin execution.
  */
 function run_headless_media_cleanup() {
-	( new Headless_Media_Cleanup_Updater( __FILE__, HEADLESS_MEDIA_CLEANUP_VERSION ) )->register();
 	$plugin = new Headless_Media_Cleanup();
 	$plugin->run();
 }

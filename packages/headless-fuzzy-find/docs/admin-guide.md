@@ -9,7 +9,7 @@ Setup and configuration guide for WordPress site administrators.
 3. Upload the zip and click **Install Now**
 4. Click **Activate**
 
-The plugin creates two database tables on activation (`wp_ff_search_index` and `wp_ff_search_log`) and is ready to use immediately.
+The plugin creates two database tables on activation (`wp_headless_fuzzy_find_search_index` and `wp_headless_fuzzy_find_search_log`) and is ready to use immediately.
 
 **Requirements:**
 - WordPress 6.0+

@@ -14,7 +14,7 @@ OTP and password authentication with JWT for headless WordPress. Built with [wpt
 Multi-file wpts plugin with 5 source files:
 
 - `src/plugin.ts` — Entry file: @Plugin, @AdminPage, 17 @Settings, @Activate/@Deactivate
-- `src/jwt.ts` — JWT generation via `ha_generate_jwt` filter, CORS headers, `determine_current_user` auth filter
+- `src/jwt.ts` — JWT generation via `headless_auth_generate_jwt` filter, CORS headers, `determine_current_user` auth filter
 - `src/otp-routes.ts` — POST /otp/send, POST /otp/verify, GET /otp/test-otp (admin-only)
 - `src/login-routes.ts` — POST /auth/login (username/email + password)
 - `src/auth-routes.ts` — POST /auth/register, POST /auth/refresh, GET /auth/me, PUT /auth/me
@@ -45,12 +45,12 @@ Multi-file wpts plugin with 5 source files:
 
 ## Conventions
 
-- **Transient keys**: `ha_otp_<hash>`, `ha_attempts_<hash>`, `ha_reg_<hash>`, `ha_cooldown_<hash>`, `ha_verify_<hash>` (phone hash is `md5(phone)`), `ha_test_otp_latest` (test mode OTP display), `ha_login_attempts_<hash>` (login hash is `md5(username/email)`), `ha_refresh_grace_<userId>` (30s grace period cache for refresh token rotation)
+- **Transient keys**: `headless_auth_otp_<hash>`, `headless_auth_attempts_<hash>`, `headless_auth_reg_<hash>`, `headless_auth_cooldown_<hash>`, `headless_auth_verify_<hash>` (phone hash is `md5(phone)`), `headless_auth_test_otp_latest` (test mode OTP display), `headless_auth_login_attempts_<hash>` (login hash is `md5(username/email)`), `headless_auth_refresh_grace_<userId>` (30s grace period cache for refresh token rotation)
 - **Option keys**: `headless_auth_` prefix (e.g., `headless_auth_jwt_secret_key` — hidden option, not a @Setting)
-- **User meta**: `phone_number`, `ha_refresh_token_hash`, `ha_refresh_token_expiry`. When WooCommerce is active: `billing_phone`, `billing_first_name`, `billing_last_name` (all synced on registration; `billing_first_name`/`billing_last_name` also synced on profile updates)
+- **User meta**: `phone_number`, `headless_auth_refresh_token_hash`, `headless_auth_refresh_token_expiry`. When WooCommerce is active: `billing_phone`, `billing_first_name`, `billing_last_name` (all synced on registration; `billing_first_name`/`billing_last_name` also synced on profile updates)
 - **JWT**: HS256, base64url-encoded, issued by `siteUrl()`, types: `access` and `refresh`
 - **Rate limiting**: Transient-based per phone/login hash. Send rate limit window (default 900s) is separate from OTP expiry (300s). Resend cooldown (60s) prevents rapid re-sends. Verify attempts (max 3) protect against brute-force — lockout deletes the OTP. Password login: max 5 attempts per username/email, shares rate_limit_window setting.
 - **Registration**: Toggleable via `enable_registration` setting. Default user role configurable via `default_user_role` (defaults to `customer` when WooCommerce is active, `subscriber` otherwise). Username derived from display name (not random). Existing WooCommerce users are matched by `billing_phone` fallback if `phone_number` meta is missing.
 - **Password login**: Toggleable via `enable_password_login` setting. Uses WordPress `wp_authenticate()` which accepts both username and email. Password is NOT sanitized before authentication (sanitize_text_field would strip special characters). Returns generic `invalid_credentials` error for both wrong username and wrong password to prevent user enumeration.
-- **Test mode**: `otp_test_mode` setting skips external OTP delivery, stores plain OTP in `ha_test_otp_latest` transient for admin display. Rate limiting still applies.
+- **Test mode**: `otp_test_mode` setting skips external OTP delivery, stores plain OTP in `headless_auth_test_otp_latest` transient for admin display. Rate limiting still applies.
 - **OTP server templates**: Headers and payload are fully generic JSON templates (`otp_server_headers_template`, `otp_server_payload_template`, both default to `{}`). Available placeholders: `{{phone}}` (phone number), `{{otp}}` (OTP code), `{{siteName}}` (WP site title), `{{siteUrl}}` (WP site URL). All values are JSON-escaped before substitution via `escapeForJson` helper (`json_encode` + strip outer quotes) to prevent JSON injection. Admin UI has info icon popovers with placeholder reference and examples.

@@ -14,7 +14,7 @@ class JwtAuth {
   @Action('init')
   registerJwtHelper(): void {
     addFilter(
-      'ha_generate_jwt',
+      'headless_auth_generate_jwt',
       (_value: string, userId: number, tokenType: string, expiry: number, secret: string) => {
         if (!secret) {
           return '';
@@ -129,7 +129,7 @@ class JwtAuth {
       return userId;
     }
     if (payload.exp < time()) {
-      $_SERVER.HA_JWT_EXPIRED = '1';
+      $_SERVER.HEADLESS_AUTH_JWT_EXPIRED = '1';
       return userId;
     }
     if (payload.iss !== siteUrl()) {
@@ -145,7 +145,7 @@ class JwtAuth {
     }
 
     wpSetCurrentUser(tokenUserId);
-    $_SERVER.HA_JWT_AUTHENTICATED = '1';
+    $_SERVER.HEADLESS_AUTH_JWT_AUTHENTICATED = '1';
     return tokenUserId;
   }
 
@@ -160,15 +160,15 @@ class JwtAuth {
       return result;
     }
 
-    if (($_SERVER.HA_JWT_AUTHENTICATED ?? '') === '1') {
+    if (($_SERVER.HEADLESS_AUTH_JWT_AUTHENTICATED ?? '') === '1') {
       return true;
     }
 
     // Signal expired JWT to clients instead of falling through to a confusing
     // WooCommerce/REST "permission denied" error.  getCurrentUserId() runs
-    // first to trigger determine_current_user (which sets the HA_JWT_EXPIRED
+    // first to trigger determine_current_user (which sets the HEADLESS_AUTH_JWT_EXPIRED
     // flag via authenticateWithJwt) before we check it.
-    if (!getCurrentUserId() && ($_SERVER.HA_JWT_EXPIRED ?? '') === '1') {
+    if (!getCurrentUserId() && ($_SERVER.HEADLESS_AUTH_JWT_EXPIRED ?? '') === '1') {
       return new WP_Error('token_expired', 'Access token has expired.', { status: 401 });
     }
 

@@ -42,7 +42,7 @@ export function setProductGallery(productId: number, attachmentIds: number[]): v
 
 /** Get a product's tracked images meta. */
 export function getTrackedImages(productId: number): string {
-  return wpCli(`post meta get ${productId} _hmc_tracked_images`);
+  return wpCli(`post meta get ${productId} _headless_media_cleanup_tracked_images`);
 }
 
 /** Set a term's thumbnail. */

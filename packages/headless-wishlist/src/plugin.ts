@@ -20,7 +20,6 @@ import './analytics-routes.js';
   authorUri: 'https://github.com/AmitGurbani',
   license: 'GPL-2.0+',
   textDomain: 'headless-wishlist',
-  githubRepo: 'AmitGurbani/wordpress-plugins',
   requiresWP: '6.0',
   requiresPHP: '8.0',
   wooNotice: 'required',

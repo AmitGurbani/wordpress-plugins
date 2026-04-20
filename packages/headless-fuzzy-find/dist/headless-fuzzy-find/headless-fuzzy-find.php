@@ -12,7 +12,6 @@
  * Domain Path:       /languages
  * Requires at least: 6.2
  * Requires PHP:      8.0
- * Update URI:       https://github.com/AmitGurbani/wordpress-plugins/releases?plugin=headless-fuzzy-find
  */
 
 // If this file is called directly, abort.
@@ -56,13 +55,11 @@ register_deactivation_hook( __FILE__, 'deactivate_headless_fuzzy_find' );
  * Core plugin class.
  */
 require_once HEADLESS_FUZZY_FIND_PLUGIN_DIR . 'includes/class-headless-fuzzy-find.php';
-require_once HEADLESS_FUZZY_FIND_PLUGIN_DIR . 'includes/class-headless-fuzzy-find-updater.php';
 
 /**
  * Begin plugin execution.
  */
 function run_headless_fuzzy_find() {
-	( new Headless_Fuzzy_Find_Updater( __FILE__, HEADLESS_FUZZY_FIND_VERSION ) )->register();
 	$plugin = new Headless_Fuzzy_Find();
 	$plugin->run();
 }

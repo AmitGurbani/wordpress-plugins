@@ -19,13 +19,13 @@ class Headless_Media_Cleanup_Public {
 			return;
 		}
 		$images = $this->get_product_image_ids( $product_id );
-		update_post_meta( $product_id, '_hmc_tracked_images', wp_json_encode( $images ) );
+		update_post_meta( $product_id, '_headless_media_cleanup_tracked_images', wp_json_encode( $images ) );
 	}
 
 	public function on_variation_create( $variation_id ) {
 		$featured_id = intval( get_post_meta( $variation_id, '_thumbnail_id', true ) );
 		$images = $featured_id > 0 ? array( $featured_id ) : array();
-		update_post_meta( $variation_id, '_hmc_tracked_images', wp_json_encode( $images ) );
+		update_post_meta( $variation_id, '_headless_media_cleanup_tracked_images', wp_json_encode( $images ) );
 	}
 
 	public function on_product_update( $product_id ) {
@@ -68,16 +68,16 @@ class Headless_Media_Cleanup_Public {
 		}
 		$images = $this->get_product_image_ids( $post_id );
 		if ( count( $images ) > 0 ) {
-			set_transient( 'hmc_deleting_' . strval( $post_id ), wp_json_encode( $images ), 60 );
+			set_transient( 'headless_media_cleanup_deleting_' . strval( $post_id ), wp_json_encode( $images ), 60 );
 		}
 	}
 
 	public function on_deleted_post( $post_id, $post ) {
-		$raw = get_transient( 'hmc_deleting_' . strval( $post_id ) );
+		$raw = get_transient( 'headless_media_cleanup_deleting_' . strval( $post_id ) );
 		if ( ! $raw ) {
 			return;
 		}
-		delete_transient( 'hmc_deleting_' . strval( $post_id ) );
+		delete_transient( 'headless_media_cleanup_deleting_' . strval( $post_id ) );
 		$images = json_decode( $raw, true ) ?? array();
 		foreach ( $images as $attachment_id ) {
 			$this->maybe_delete_attachment( intval( $attachment_id ) );
@@ -93,7 +93,7 @@ class Headless_Media_Cleanup_Public {
 		}
 		$thumbnail_id = intval( strval( $meta_value ) );
 		if ( $thumbnail_id > 0 ) {
-			update_term_meta( $object_id, '_hmc_tracked_image', strval( $thumbnail_id ) );
+			update_term_meta( $object_id, '_headless_media_cleanup_tracked_image', strval( $thumbnail_id ) );
 		}
 	}
 
@@ -104,9 +104,9 @@ class Headless_Media_Cleanup_Public {
 		if ( ! $this->is_tracked_taxonomy( $object_id ) ) {
 			return;
 		}
-		$previous_id = intval( get_term_meta( $object_id, '_hmc_tracked_image', true ) );
+		$previous_id = intval( get_term_meta( $object_id, '_headless_media_cleanup_tracked_image', true ) );
 		$current_id = intval( strval( $meta_value ) );
-		update_term_meta( $object_id, '_hmc_tracked_image', strval( $current_id ) );
+		update_term_meta( $object_id, '_headless_media_cleanup_tracked_image', strval( $current_id ) );
 		if ( $previous_id > 0 && $previous_id !== $current_id ) {
 			$this->maybe_delete_attachment( $previous_id );
 		}
@@ -119,8 +119,8 @@ class Headless_Media_Cleanup_Public {
 		if ( ! $this->is_tracked_taxonomy( $object_id ) ) {
 			return;
 		}
-		$previous_id = intval( get_term_meta( $object_id, '_hmc_tracked_image', true ) );
-		delete_term_meta( $object_id, '_hmc_tracked_image' );
+		$previous_id = intval( get_term_meta( $object_id, '_headless_media_cleanup_tracked_image', true ) );
+		delete_term_meta( $object_id, '_headless_media_cleanup_tracked_image' );
 		if ( $previous_id > 0 ) {
 			$this->maybe_delete_attachment( $previous_id );
 		}
@@ -133,16 +133,16 @@ class Headless_Media_Cleanup_Public {
 		}
 		$thumbnail_id = get_term_meta( $term_id, 'thumbnail_id', true );
 		if ( intval( $thumbnail_id ) > 0 ) {
-			set_transient( 'hmc_term_deleting_' . strval( $term_id ), $thumbnail_id, 60 );
+			set_transient( 'headless_media_cleanup_term_deleting_' . strval( $term_id ), $thumbnail_id, 60 );
 		}
 	}
 
 	public function on_delete_term( $term_id, $tt_id, $taxonomy, $deleted_term, $object_ids ) {
-		$raw = get_transient( 'hmc_term_deleting_' . strval( $term_id ) );
+		$raw = get_transient( 'headless_media_cleanup_term_deleting_' . strval( $term_id ) );
 		if ( ! $raw ) {
 			return;
 		}
-		delete_transient( 'hmc_term_deleting_' . strval( $term_id ) );
+		delete_transient( 'headless_media_cleanup_term_deleting_' . strval( $term_id ) );
 		$thumbnail_id = intval( strval( $raw ) );
 		if ( $thumbnail_id > 0 ) {
 			$this->maybe_delete_attachment( $thumbnail_id );
@@ -170,9 +170,9 @@ class Headless_Media_Cleanup_Public {
 
 	public function diff_and_clean_product_images( $post_id ) {
 		$current_images = $this->get_product_image_ids( $post_id );
-		$previous_raw = get_post_meta( $post_id, '_hmc_tracked_images', true );
+		$previous_raw = get_post_meta( $post_id, '_headless_media_cleanup_tracked_images', true );
 		$previous_images = $previous_raw ? (json_decode( $previous_raw, true ) ?? array()) : array();
-		update_post_meta( $post_id, '_hmc_tracked_images', wp_json_encode( $current_images ) );
+		update_post_meta( $post_id, '_headless_media_cleanup_tracked_images', wp_json_encode( $current_images ) );
 		foreach ( $previous_images as $old_id ) {
 			$attachment_id = intval( $old_id );
 			if ( $attachment_id > 0 && ! in_array( $attachment_id, $current_images, true ) ) {

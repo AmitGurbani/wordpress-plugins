@@ -12,7 +12,6 @@ import './cleanup-routes.js';
   authorUri: 'https://github.com/AmitGurbani',
   license: 'GPL-2.0+',
   textDomain: 'headless-media-cleanup',
-  githubRepo: 'AmitGurbani/wordpress-plugins',
   requiresWP: '6.2',
   requiresPHP: '8.0',
   wooNotice: 'required',
@@ -26,10 +25,16 @@ class HeadlessMediaCleanup {
   @Uninstall()
   onUninstall(): void {
     wpdb.query(
-      wpdb.prepare(`DELETE FROM ${wpdb.postmeta} WHERE meta_key = %s`, '_hmc_tracked_images'),
+      wpdb.prepare(
+        `DELETE FROM ${wpdb.postmeta} WHERE meta_key = %s`,
+        '_headless_media_cleanup_tracked_images',
+      ),
     );
     wpdb.query(
-      wpdb.prepare(`DELETE FROM ${wpdb.termmeta} WHERE meta_key = %s`, '_hmc_tracked_image'),
+      wpdb.prepare(
+        `DELETE FROM ${wpdb.termmeta} WHERE meta_key = %s`,
+        '_headless_media_cleanup_tracked_image',
+      ),
     );
   }
 }

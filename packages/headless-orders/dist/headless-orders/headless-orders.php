@@ -12,7 +12,6 @@
  * Domain Path:       /languages
  * Requires at least: 6.2
  * Requires PHP:      8.0
- * Update URI:       https://github.com/AmitGurbani/wordpress-plugins/releases?plugin=headless-orders
  */
 
 // If this file is called directly, abort.
@@ -56,13 +55,11 @@ register_deactivation_hook( __FILE__, 'deactivate_headless_orders' );
  * Core plugin class.
  */
 require_once HEADLESS_ORDERS_PLUGIN_DIR . 'includes/class-headless-orders.php';
-require_once HEADLESS_ORDERS_PLUGIN_DIR . 'includes/class-headless-orders-updater.php';
 
 /**
  * Begin plugin execution.
  */
 function run_headless_orders() {
-	( new Headless_Orders_Updater( __FILE__, HEADLESS_ORDERS_VERSION ) )->register();
 	$plugin = new Headless_Orders();
 	$plugin->run();
 }

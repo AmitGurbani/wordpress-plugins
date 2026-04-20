@@ -16,7 +16,7 @@ class Headless_Umami_Public {
 
 	public function on_order_status_changed( $order_id, $old_status, $new_status, $order ) {
 		$purchase_statuses = array( 'processing', 'on-hold', 'completed' );
-		if ( ! in_array( $new_status, $purchase_statuses ) ) {
+		if ( ! in_array( $new_status, $purchase_statuses, true ) ) {
 			return;
 		}
 		if ( get_option( 'headless_umami_enable_purchase', '1' ) !== '1' ) {

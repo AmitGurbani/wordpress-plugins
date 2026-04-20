@@ -17,4 +17,3 @@ delete_option( 'headless_fuzzy_find_synonyms' );
 delete_option( 'headless_fuzzy_find_index_table' );
 delete_option( 'headless_fuzzy_find_log_table' );
 delete_option( 'headless_fuzzy_find_db_version' );
-delete_transient( 'headless_fuzzy_find_gh_release_cache' );

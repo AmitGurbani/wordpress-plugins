@@ -18,6 +18,16 @@ The plugin provides REST endpoints your frontend uses to initialize gtag.js (fet
 
 **Headless-first design.** This plugin does not inject any JavaScript into your WordPress theme. It is intended for stores where the storefront is a separate application and WordPress/WooCommerce is used as a backend.
 
+== Source Code ==
+
+The full source code, including uncompiled JavaScript and build tooling, is available at:
+https://github.com/AmitGurbani/wordpress-plugins/tree/main/packages/headless-google-analytics
+
+To build the admin JavaScript from source, clone the repository and run:
+
+    pnpm install
+    pnpm --filter headless-google-analytics build
+
 == Features ==
 
 * REST endpoint to expose Measurement ID for frontend gtag.js initialization

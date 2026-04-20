@@ -86,7 +86,7 @@ class MetaPixelTrack {
     } else {
       rlIp = $_SERVER.REMOTE_ADDR ?? '';
     }
-    const rlKey: string = `hmp_rl_${md5(rlIp)}`;
+    const rlKey: string = `headless_meta_pixel_rl_${md5(rlIp)}`;
     const rlCount: any = getTransient(rlKey);
     if (rlCount && intval(rlCount) >= 60) {
       return new WP_Error('rate_limited', 'Too many requests. Please try again later.', {

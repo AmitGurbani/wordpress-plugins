@@ -18,7 +18,6 @@ import './order-routes.js';
   authorUri: 'https://github.com/AmitGurbani',
   license: 'GPL-2.0+',
   textDomain: 'headless-orders',
-  githubRepo: 'AmitGurbani/wordpress-plugins',
   requiresWP: '6.2',
   requiresPHP: '8.0',
   wooNotice: 'required',

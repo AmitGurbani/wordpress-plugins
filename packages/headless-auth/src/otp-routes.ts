@@ -26,7 +26,7 @@ class OtpRoutes {
 
     // Rate limiting
     const phoneHash: string = md5(phone);
-    const attemptsKey: string = `ha_attempts_${phoneHash}`;
+    const attemptsKey: string = `headless_auth_attempts_${phoneHash}`;
     const currentAttempts: any = getTransient(attemptsKey);
     const maxAttempts: number = Math.max(1, intval(getOption('headless_auth_max_otp_attempts', 3)));
 
@@ -37,7 +37,7 @@ class OtpRoutes {
     }
 
     // Resend cooldown
-    const cooldownKey: string = `ha_cooldown_${phoneHash}`;
+    const cooldownKey: string = `headless_auth_cooldown_${phoneHash}`;
     const cooldownExpiry: any = getTransient(cooldownKey);
     if (cooldownExpiry) {
       const retryAfter: number = Math.max(0, intval(cooldownExpiry) - time());
@@ -57,7 +57,7 @@ class OtpRoutes {
     // Store hashed OTP
     const otpExpiry: number = Math.max(60, intval(getOption('headless_auth_otp_expiry', 300)));
     const otpHash: string = wpHashPassword(otp);
-    setTransient(`ha_otp_${phoneHash}`, otpHash, otpExpiry);
+    setTransient(`headless_auth_otp_${phoneHash}`, otpHash, otpExpiry);
 
     // Update attempt count (use rate limit window, not OTP expiry)
     const rateLimitWindow: number = Math.max(
@@ -78,7 +78,7 @@ class OtpRoutes {
     const testMode: string = getOption('headless_auth_otp_test_mode', '');
     if (testMode === '1') {
       setTransient(
-        'ha_test_otp_latest',
+        'headless_auth_test_otp_latest',
         jsonEncode({
           otp: otp,
           phone: phone,
@@ -154,14 +154,14 @@ class OtpRoutes {
     }
 
     const phoneHash: string = md5(phone);
-    const storedOtpHash: any = getTransient(`ha_otp_${phoneHash}`);
+    const storedOtpHash: any = getTransient(`headless_auth_otp_${phoneHash}`);
 
     if (!storedOtpHash) {
       return new WP_Error('otp_expired', 'OTP has expired or was not requested.', { status: 400 });
     }
 
     // Brute-force protection: limit wrong verify attempts
-    const verifyKey: string = `ha_verify_${phoneHash}`;
+    const verifyKey: string = `headless_auth_verify_${phoneHash}`;
     const verifyAttempts: any = getTransient(verifyKey);
     const maxVerify: number = Math.max(
       1,
@@ -169,7 +169,7 @@ class OtpRoutes {
     );
 
     if (verifyAttempts && intval(verifyAttempts) >= maxVerify) {
-      deleteTransient(`ha_otp_${phoneHash}`);
+      deleteTransient(`headless_auth_otp_${phoneHash}`);
       return new WP_Error(
         'too_many_verify_attempts',
         'Too many failed attempts. Please request a new OTP.',
@@ -188,9 +188,9 @@ class OtpRoutes {
     }
 
     // OTP valid — clear transients
-    deleteTransient(`ha_otp_${phoneHash}`);
-    deleteTransient(`ha_attempts_${phoneHash}`);
-    deleteTransient(`ha_verify_${phoneHash}`);
+    deleteTransient(`headless_auth_otp_${phoneHash}`);
+    deleteTransient(`headless_auth_attempts_${phoneHash}`);
+    deleteTransient(`headless_auth_verify_${phoneHash}`);
 
     // Look up existing user by phone (use fields:'ids' to avoid WP_User objects)
     let userIds: any[] = getUsers({
@@ -225,7 +225,7 @@ class OtpRoutes {
       const refreshExpiry: number = intval(getOption('headless_auth_jwt_refresh_expiry', 604800));
 
       const accessToken: string = applyFilters(
-        'ha_generate_jwt',
+        'headless_auth_generate_jwt',
         '',
         existingUserId,
         'access',
@@ -233,7 +233,7 @@ class OtpRoutes {
         secret,
       );
       const refreshToken: string = applyFilters(
-        'ha_generate_jwt',
+        'headless_auth_generate_jwt',
         '',
         existingUserId,
         'refresh',
@@ -241,9 +241,17 @@ class OtpRoutes {
         secret,
       );
 
-      updateUserMeta(existingUserId, 'ha_refresh_token_hash', wpHashPassword(refreshToken));
-      updateUserMeta(existingUserId, 'ha_refresh_token_expiry', strval(time() + refreshExpiry));
-      deleteTransient(`ha_refresh_grace_${existingUserId}`);
+      updateUserMeta(
+        existingUserId,
+        'headless_auth_refresh_token_hash',
+        wpHashPassword(refreshToken),
+      );
+      updateUserMeta(
+        existingUserId,
+        'headless_auth_refresh_token_expiry',
+        strval(time() + refreshExpiry),
+      );
+      deleteTransient(`headless_auth_refresh_grace_${existingUserId}`);
 
       // Sync to WooCommerce billing_phone
       if (classExists('WooCommerce')) {
@@ -283,7 +291,7 @@ class OtpRoutes {
     // Generate registration token
     const regToken: string = wpGeneratePassword(32, false, false);
     const regTokenHash: string = md5(regToken);
-    setTransient(`ha_reg_${regTokenHash}`, phone, 600);
+    setTransient(`headless_auth_reg_${regTokenHash}`, phone, 600);
 
     return {
       is_new_user: true,
@@ -298,7 +306,7 @@ class OtpRoutes {
       return { test_mode: false };
     }
 
-    const data: any = getTransient('ha_test_otp_latest');
+    const data: any = getTransient('headless_auth_test_otp_latest');
     if (!data) {
       return { test_mode: true, otp: null };
     }

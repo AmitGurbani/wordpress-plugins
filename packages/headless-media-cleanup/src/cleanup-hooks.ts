@@ -9,14 +9,14 @@ class CleanupHooks {
       return;
     }
     const images: number[] = this.getProductImageIds(productId);
-    updatePostMeta(productId, '_hmc_tracked_images', jsonEncode(images));
+    updatePostMeta(productId, '_headless_media_cleanup_tracked_images', jsonEncode(images));
   }
 
   @Action('woocommerce_new_product_variation')
   onVariationCreate(variationId: number): void {
     const featuredId: number = intval(getPostMeta(variationId, '_thumbnail_id', true));
     const images: number[] = featuredId > 0 ? [featuredId] : [];
-    updatePostMeta(variationId, '_hmc_tracked_images', jsonEncode(images));
+    updatePostMeta(variationId, '_headless_media_cleanup_tracked_images', jsonEncode(images));
   }
 
   // ── Product & Variation: Update (diff & clean) ─────────────────────
@@ -70,17 +70,17 @@ class CleanupHooks {
     }
     const images: number[] = this.getProductImageIds(postId);
     if (images.length > 0) {
-      setTransient(`hmc_deleting_${strval(postId)}`, jsonEncode(images), 60);
+      setTransient(`headless_media_cleanup_deleting_${strval(postId)}`, jsonEncode(images), 60);
     }
   }
 
   @Action('deleted_post', { acceptedArgs: 2 })
   onDeletedPost(postId: number, _post: any): void {
-    const raw: any = getTransient(`hmc_deleting_${strval(postId)}`);
+    const raw: any = getTransient(`headless_media_cleanup_deleting_${strval(postId)}`);
     if (!raw) {
       return;
     }
-    deleteTransient(`hmc_deleting_${strval(postId)}`);
+    deleteTransient(`headless_media_cleanup_deleting_${strval(postId)}`);
 
     const images: any[] = jsonDecode(raw, true) ?? [];
     for (const attachmentId of images) {
@@ -100,7 +100,7 @@ class CleanupHooks {
     }
     const thumbnailId: number = intval(strval(metaValue));
     if (thumbnailId > 0) {
-      updateTermMeta(objectId, '_hmc_tracked_image', strval(thumbnailId));
+      updateTermMeta(objectId, '_headless_media_cleanup_tracked_image', strval(thumbnailId));
     }
   }
 
@@ -114,10 +114,12 @@ class CleanupHooks {
     if (!this.isTrackedTaxonomy(objectId)) {
       return;
     }
-    const previousId: number = intval(getTermMeta(objectId, '_hmc_tracked_image', true));
+    const previousId: number = intval(
+      getTermMeta(objectId, '_headless_media_cleanup_tracked_image', true),
+    );
     const currentId: number = intval(strval(metaValue));
 
-    updateTermMeta(objectId, '_hmc_tracked_image', strval(currentId));
+    updateTermMeta(objectId, '_headless_media_cleanup_tracked_image', strval(currentId));
 
     if (previousId > 0 && previousId !== currentId) {
       this.maybeDeleteAttachment(previousId);
@@ -134,8 +136,10 @@ class CleanupHooks {
     if (!this.isTrackedTaxonomy(objectId)) {
       return;
     }
-    const previousId: number = intval(getTermMeta(objectId, '_hmc_tracked_image', true));
-    deleteTermMeta(objectId, '_hmc_tracked_image');
+    const previousId: number = intval(
+      getTermMeta(objectId, '_headless_media_cleanup_tracked_image', true),
+    );
+    deleteTermMeta(objectId, '_headless_media_cleanup_tracked_image');
 
     if (previousId > 0) {
       this.maybeDeleteAttachment(previousId);
@@ -156,7 +160,7 @@ class CleanupHooks {
     }
     const thumbnailId: string = getTermMeta(termId, 'thumbnail_id', true);
     if (intval(thumbnailId) > 0) {
-      setTransient(`hmc_term_deleting_${strval(termId)}`, thumbnailId, 60);
+      setTransient(`headless_media_cleanup_term_deleting_${strval(termId)}`, thumbnailId, 60);
     }
   }
 
@@ -168,11 +172,11 @@ class CleanupHooks {
     _deletedTerm: any,
     _objectIds: any,
   ): void {
-    const raw: any = getTransient(`hmc_term_deleting_${strval(termId)}`);
+    const raw: any = getTransient(`headless_media_cleanup_term_deleting_${strval(termId)}`);
     if (!raw) {
       return;
     }
-    deleteTransient(`hmc_term_deleting_${strval(termId)}`);
+    deleteTransient(`headless_media_cleanup_term_deleting_${strval(termId)}`);
 
     const thumbnailId: number = intval(strval(raw));
     if (thumbnailId > 0) {
@@ -207,10 +211,10 @@ class CleanupHooks {
   diffAndCleanProductImages(postId: number): void {
     const currentImages: number[] = this.getProductImageIds(postId);
 
-    const previousRaw: string = getPostMeta(postId, '_hmc_tracked_images', true);
+    const previousRaw: string = getPostMeta(postId, '_headless_media_cleanup_tracked_images', true);
     const previousImages: any[] = previousRaw ? (jsonDecode(previousRaw, true) ?? []) : [];
 
-    updatePostMeta(postId, '_hmc_tracked_images', jsonEncode(currentImages));
+    updatePostMeta(postId, '_headless_media_cleanup_tracked_images', jsonEncode(currentImages));
 
     for (const oldId of previousImages) {
       const attachmentId: number = intval(oldId);

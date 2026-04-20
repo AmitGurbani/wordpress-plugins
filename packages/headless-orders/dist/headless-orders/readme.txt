@@ -31,6 +31,16 @@ individually by ID.
 * `X-WP-Total` and `X-WP-TotalPages` response headers on list endpoint
 * Customers can only access their own orders — never other customers' data
 
+== Source Code ==
+
+The full source code, including uncompiled JavaScript and build tooling, is available at:
+https://github.com/AmitGurbani/wordpress-plugins/tree/main/packages/headless-orders
+
+To build the admin JavaScript from source, clone the repository and run:
+
+    pnpm install
+    pnpm --filter headless-orders build
+
 == Installation ==
 
 1. Upload the `headless-orders` folder to `/wp-content/plugins/`.

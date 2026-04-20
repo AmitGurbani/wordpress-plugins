@@ -22,8 +22,8 @@ Multi-file wpts plugin with 3 source files (no admin UI, no settings):
 ### State Tracking
 
 The plugin tracks the last-known image set per entity using meta:
-- Products/variations: `_hmc_tracked_images` post meta (JSON array of attachment IDs)
-- Terms: `_hmc_tracked_image` term meta (single attachment ID string)
+- Products/variations: `_headless_media_cleanup_tracked_images` post meta (JSON array of attachment IDs)
+- Terms: `_headless_media_cleanup_tracked_image` term meta (single attachment ID string)
 
 On each save, compares current images with tracked state to find removed IDs. On entity creation, records the baseline.
 

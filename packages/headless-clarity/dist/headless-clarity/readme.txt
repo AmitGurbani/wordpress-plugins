@@ -23,6 +23,16 @@ In a headless setup, your frontend (Next.js, Nuxt, etc.) loads the Clarity track
 
 **No server-side tracking.** Clarity is a client-side tool — session recordings and heatmaps require a browser. There is no server-side event API. All tracking is handled by your frontend via the Clarity JavaScript API.
 
+== Source Code ==
+
+The full source code, including uncompiled JavaScript and build tooling, is available at:
+https://github.com/AmitGurbani/wordpress-plugins/tree/main/packages/headless-clarity
+
+To build the admin JavaScript from source, clone the repository and run:
+
+    pnpm install
+    pnpm --filter headless-clarity build
+
 == Features ==
 
 * REST endpoint to expose Clarity Project ID for frontend script initialization

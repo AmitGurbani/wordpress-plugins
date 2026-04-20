@@ -87,7 +87,7 @@ Configured via WordPress admin page (Auth menu):
 
 ## Architecture
 
-- **JWT**: HS256 tokens generated via WordPress filter (`ha_generate_jwt`) for reusability. Secret key is auto-generated on activation and stored as a hidden option (not exposed in the admin UI)
+- **JWT**: HS256 tokens generated via WordPress filter (`headless_auth_generate_jwt`) for reusability. Secret key is auto-generated on activation and stored as a hidden option (not exposed in the admin UI)
 - **CORS**: Configurable allowed origins via `rest_pre_serve_request` filter
 - **Auth**: `determine_current_user` filter validates Bearer tokens on every REST request
 - **Rate limiting**: Transient-based per phone number hash with separate send cooldown, verify attempt limit, and configurable rate limit window

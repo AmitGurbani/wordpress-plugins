@@ -18,6 +18,16 @@ Search results are ranked by a configurable weighted score across product title,
 
 The plugin provides public REST API endpoints — designed for headless storefronts or custom search UIs. It does not modify the default WooCommerce search widget, making it safe to add to any site.
 
+== Source Code ==
+
+The full source code, including uncompiled JavaScript and build tooling, is available at:
+https://github.com/AmitGurbani/wordpress-plugins/tree/main/packages/headless-fuzzy-find
+
+To build the admin JavaScript from source, clone the repository and run:
+
+    pnpm install
+    pnpm --filter headless-fuzzy-find build
+
 == Features ==
 
 * FULLTEXT index with weighted relevance scoring across title, SKU, descriptions, attributes, categories, and tags

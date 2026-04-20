@@ -38,6 +38,16 @@ anywhere else.
 * `GET /wp-json/headless-media-cleanup/v1/orphans` — List orphaned images
 * `POST /wp-json/headless-media-cleanup/v1/orphans/cleanup` — Delete all orphans
 
+== Source Code ==
+
+The full source code, including uncompiled JavaScript and build tooling, is available at:
+https://github.com/AmitGurbani/wordpress-plugins/tree/main/packages/headless-media-cleanup
+
+To build the admin JavaScript from source, clone the repository and run:
+
+    pnpm install
+    pnpm --filter headless-media-cleanup build
+
 == Installation ==
 
 1. Upload the `headless-media-cleanup` folder to `/wp-content/plugins/`.

@@ -20,6 +20,16 @@ For WooCommerce stores, Purchase events are tracked automatically server-side vi
 
 **Headless-first design.** This plugin does not inject any JavaScript into your WordPress theme. It is intended for stores where the storefront is a separate application and WordPress/WooCommerce is used as a backend.
 
+== Source Code ==
+
+The full source code, including uncompiled JavaScript and build tooling, is available at:
+https://github.com/AmitGurbani/wordpress-plugins/tree/main/packages/headless-meta-pixel
+
+To build the admin JavaScript from source, clone the repository and run:
+
+    pnpm install
+    pnpm --filter headless-meta-pixel build
+
 == Features ==
 
 * REST endpoint to expose Pixel ID for frontend `fbq('init')` initialization

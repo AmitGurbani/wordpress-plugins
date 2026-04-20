@@ -27,7 +27,7 @@ class LoginRoutes {
 
     // Rate limiting by login hash
     const loginHash: string = md5(login);
-    const attemptsKey: string = `ha_login_attempts_${loginHash}`;
+    const attemptsKey: string = `headless_auth_login_attempts_${loginHash}`;
     const currentAttempts: any = getTransient(attemptsKey);
     const maxAttempts: number = Math.max(
       1,
@@ -74,7 +74,7 @@ class LoginRoutes {
     const refreshExpiry: number = intval(getOption('headless_auth_jwt_refresh_expiry', 604800));
 
     const accessToken: string = applyFilters(
-      'ha_generate_jwt',
+      'headless_auth_generate_jwt',
       '',
       userId,
       'access',
@@ -82,7 +82,7 @@ class LoginRoutes {
       secret,
     );
     const refreshToken: string = applyFilters(
-      'ha_generate_jwt',
+      'headless_auth_generate_jwt',
       '',
       userId,
       'refresh',
@@ -90,9 +90,9 @@ class LoginRoutes {
       secret,
     );
 
-    updateUserMeta(userId, 'ha_refresh_token_hash', wpHashPassword(refreshToken));
-    updateUserMeta(userId, 'ha_refresh_token_expiry', strval(time() + refreshExpiry));
-    deleteTransient(`ha_refresh_grace_${userId}`);
+    updateUserMeta(userId, 'headless_auth_refresh_token_hash', wpHashPassword(refreshToken));
+    updateUserMeta(userId, 'headless_auth_refresh_token_expiry', strval(time() + refreshExpiry));
+    deleteTransient(`headless_auth_refresh_grace_${userId}`);
 
     const displayName: string = getTheAuthorMeta('display_name', userId);
     const email: string = getTheAuthorMeta('user_email', userId);

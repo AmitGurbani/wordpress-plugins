@@ -46,7 +46,7 @@ Namespace: `headless-fuzzy-find/v1`
 ## Conventions
 
 - **Option keys**: `headless_fuzzy_find_*` prefix. e.g., `headless_fuzzy_find_weight_title`, `headless_fuzzy_find_fuzzy_enabled`, `headless_fuzzy_find_synonyms`, `headless_fuzzy_find_index_table`, `headless_fuzzy_find_log_table`, `headless_fuzzy_find_db_version`, `headless_fuzzy_find_last_indexed`, `headless_fuzzy_find_reindex_in_progress`, `headless_fuzzy_find_reindex_started`
-- **Database tables**: `{prefix}ff_search_index` (FULLTEXT index), `{prefix}ff_search_log` (analytics). Created on activation, table names stored in options
+- **Database tables**: `{prefix}headless_fuzzy_find_search_index` (FULLTEXT index), `{prefix}headless_fuzzy_find_search_log` (analytics). Created on activation, table names stored in options
 - **Index sync hooks**: `woocommerce_new_product` (priority 20), `woocommerce_update_product` (priority 20), `woocommerce_new_product_variation`, `woocommerce_update_product_variation`, `before_delete_post`, `wp_trash_post`, `untrashed_post`. Skips unpublished, hidden, or catalog-only products
 - **Custom action**: `headless_fuzzy_find_do_reindex` — batch reindex all published products. Fired synchronously for ≤500 products, scheduled via `wp_schedule_single_event` for larger stores
 - **Reindex guard**: `headless_fuzzy_find_reindex_in_progress` flag with 10-minute staleness timeout prevents concurrent reindexes
