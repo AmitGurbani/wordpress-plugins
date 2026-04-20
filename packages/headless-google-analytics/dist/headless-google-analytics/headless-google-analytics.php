@@ -3,7 +3,7 @@
  * Plugin Name:       Headless Google Analytics
  * Plugin URI:        https://github.com/AmitGurbani/wordpress-plugins
  * Description:       Google Analytics (GA4) with WooCommerce integration and Measurement Protocol for headless WordPress.
- * Version:           1.1.0
+ * Version:           1.2.0
  * Author:            Amit Gurbani
  * Author URI:        https://github.com/AmitGurbani
  * License:           GPL-2.0+
@@ -19,7 +19,7 @@ if ( ! defined( 'WPINC' ) ) {
 	die;
 }
 
-define( 'HEADLESS_GOOGLE_ANALYTICS_VERSION', '1.1.0' );
+define( 'HEADLESS_GOOGLE_ANALYTICS_VERSION', '1.2.0' );
 define( 'HEADLESS_GOOGLE_ANALYTICS_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'HEADLESS_GOOGLE_ANALYTICS_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
 
