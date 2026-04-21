@@ -30,39 +30,43 @@ async function globalSetup(config: FullConfig) {
   await requestContext.dispose();
 
   // 2. Ensure all plugins are active (wp-env may miss activations if the
-  //    Docker container is unstable during startup — retry up to 3 times)
-  const allPlugins =
-    'headless-clarity headless-google-analytics headless-meta-pixel headless-umami headless-auth headless-pos-sessions headless-fuzzy-find headless-wishlist headless-orders headless-media-cleanup';
+  //    Docker container OOMs during startup — retry up to 3 times).
+  //    Do NOT use deactivate/activate cycles: they OOM-kill the container
+  //    on GitHub Actions (exit code 137) and leave plugins permanently inactive.
+  const allPlugins = [
+    'headless-clarity',
+    'headless-google-analytics',
+    'headless-meta-pixel',
+    'headless-umami',
+    'headless-auth',
+    'headless-pos-sessions',
+    'headless-fuzzy-find',
+    'headless-wishlist',
+    'headless-orders',
+    'headless-media-cleanup',
+  ];
   for (let attempt = 0; attempt < 3; attempt++) {
-    wpCli(`plugin activate ${allPlugins}`);
+    wpCli(`plugin activate ${allPlugins.join(' ')}`);
     const active = wpCli('plugin list --status=active --field=name');
-    if (active.includes('headless-fuzzy-find') && active.includes('headless-pos-sessions')) break;
+    if (allPlugins.every((p) => active.includes(p))) break;
   }
 
-  // 3. Re-activate plugins that create DB tables on activation
-  //    (wp-env marks them active but may not fire activation hooks;
-  //    register_activation_hook only fires via wp plugin activate)
-  wpCli('plugin deactivate headless-fuzzy-find');
-  wpCli('plugin activate headless-fuzzy-find');
-  wpCli('plugin deactivate headless-pos-sessions');
-  wpCli('plugin activate headless-pos-sessions');
-
-  // 4. Enable pretty permalinks (required for REST API /wp-json/ URLs)
+  // 3. Enable pretty permalinks (required for REST API /wp-json/ URLs)
   wpCli('rewrite structure "/%postname%/"');
 
-  // 5. Bypass WooCommerce onboarding
+  // 4. Bypass WooCommerce onboarding
   wpCli('option patch insert woocommerce_onboarding_profile skipped 1');
   wpCli('option update woocommerce_task_list_hidden yes');
   wpCli('option update woocommerce_task_list_complete yes');
   wpCli('wc tool run install_pages --user=admin');
 
-  // 6. Configure WooCommerce basics
+  // 5. Configure WooCommerce basics
   wpCli('option update woocommerce_store_address "123 Test St"');
   wpCli('option update woocommerce_store_city "Test City"');
   wpCli('option update woocommerce_default_country "US:CA"');
   wpCli('option update woocommerce_currency "USD"');
 
-  // 7. Create test products (silently ignores duplicate SKU errors)
+  // 6. Create test products (silently ignores duplicate SKU errors)
   wpCli(
     'wc product create --name="Test Widget" --regular_price=25.00 --sku=TEST-001 --status=publish --user=admin',
   );
@@ -70,18 +74,20 @@ async function globalSetup(config: FullConfig) {
     'wc product create --name="Premium Gadget" --regular_price=99.50 --sku=PREM-001 --status=publish --user=admin',
   );
 
-  // 8. Ensure fuzzy-find activation completed (may have been OOM-killed in step 3)
-  //    Calls the plugin's activation function in a fresh WP-CLI process with clean memory.
-  //    Idempotent: dbDelta + update_option are safe to re-run.
+  // 7. Ensure fuzzy-find and pos-sessions DB tables exist.
+  //    Calls each plugin's activation function directly — idempotent
+  //    (dbDelta + update_option are safe to re-run). Must run AFTER
+  //    WooCommerce is set up (activation checks class_exists('WooCommerce')).
   wpCli('eval "activate_headless_fuzzy_find();"');
+  wpCli('eval "activate_headless_pos_sessions();"');
 
-  // 9. Trigger fuzzy-find reindex so search tests have data ready
+  // 8. Trigger fuzzy-find reindex so search tests have data ready
   wpCli('eval "do_action(\'headless_fuzzy_find_do_reindex\');"');
 
-  // 10. Enable auth test mode
+  // 9. Enable auth test mode
   wpCli('option update headless_auth_otp_test_mode 1');
 
-  // 11. Flush rewrite rules
+  // 10. Flush rewrite rules
   wpCli('rewrite flush');
 }
 
