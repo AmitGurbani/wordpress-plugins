@@ -39,12 +39,13 @@ async function globalSetup(config: FullConfig) {
     if (active.includes('headless-fuzzy-find') && active.includes('headless-pos-sessions')) break;
   }
 
-  // 3. Fire activation hooks for plugins that create DB tables.
-  //    Uses wp eval instead of deactivate/activate cycle — idempotent
-  //    (dbDelta + update_option) and doesn't risk leaving a plugin
-  //    deactivated if re-activation fails.
-  wpCli('eval "activate_headless_fuzzy_find();"');
-  wpCli('eval "activate_headless_pos_sessions();"');
+  // 3. Re-activate plugins that create DB tables on activation
+  //    (wp-env marks them active but may not fire activation hooks;
+  //    register_activation_hook only fires via wp plugin activate)
+  wpCli('plugin deactivate headless-fuzzy-find');
+  wpCli('plugin activate headless-fuzzy-find');
+  wpCli('plugin deactivate headless-pos-sessions');
+  wpCli('plugin activate headless-pos-sessions');
 
   // 4. Enable pretty permalinks (required for REST API /wp-json/ URLs)
   wpCli('rewrite structure "/%postname%/"');
@@ -69,13 +70,18 @@ async function globalSetup(config: FullConfig) {
     'wc product create --name="Premium Gadget" --regular_price=99.50 --sku=PREM-001 --status=publish --user=admin',
   );
 
-  // 8. Trigger fuzzy-find reindex so search tests have data ready
+  // 8. Ensure fuzzy-find activation completed (may have been OOM-killed in step 3)
+  //    Calls the plugin's activation function in a fresh WP-CLI process with clean memory.
+  //    Idempotent: dbDelta + update_option are safe to re-run.
+  wpCli('eval "activate_headless_fuzzy_find();"');
+
+  // 9. Trigger fuzzy-find reindex so search tests have data ready
   wpCli('eval "do_action(\'headless_fuzzy_find_do_reindex\');"');
 
-  // 9. Enable auth test mode
+  // 10. Enable auth test mode
   wpCli('option update headless_auth_otp_test_mode 1');
 
-  // 10. Flush rewrite rules
+  // 11. Flush rewrite rules
   wpCli('rewrite flush');
 }
 
