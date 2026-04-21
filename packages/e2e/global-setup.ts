@@ -29,29 +29,35 @@ async function globalSetup(config: FullConfig) {
   await requestUtils.setupRest();
   await requestContext.dispose();
 
-  // 2. Re-activate plugins that create DB tables on activation
+  // 2. Ensure all custom plugins are active (wp-env may miss activations
+  //    if the Docker container crashes during startup)
+  wpCli(
+    'plugin activate headless-clarity headless-google-analytics headless-meta-pixel headless-umami headless-auth headless-pos-sessions headless-fuzzy-find headless-wishlist headless-orders headless-media-cleanup',
+  );
+
+  // 3. Re-activate plugins that create DB tables on activation
   //    (wp-env marks them active but may not fire activation hooks)
   wpCli('plugin deactivate headless-fuzzy-find');
   wpCli('plugin activate headless-fuzzy-find');
   wpCli('plugin deactivate headless-pos-sessions');
   wpCli('plugin activate headless-pos-sessions');
 
-  // 3. Enable pretty permalinks (required for REST API /wp-json/ URLs)
+  // 4. Enable pretty permalinks (required for REST API /wp-json/ URLs)
   wpCli('rewrite structure "/%postname%/"');
 
-  // 4. Bypass WooCommerce onboarding
+  // 5. Bypass WooCommerce onboarding
   wpCli('option patch insert woocommerce_onboarding_profile skipped 1');
   wpCli('option update woocommerce_task_list_hidden yes');
   wpCli('option update woocommerce_task_list_complete yes');
   wpCli('wc tool run install_pages --user=admin');
 
-  // 5. Configure WooCommerce basics
+  // 6. Configure WooCommerce basics
   wpCli('option update woocommerce_store_address "123 Test St"');
   wpCli('option update woocommerce_store_city "Test City"');
   wpCli('option update woocommerce_default_country "US:CA"');
   wpCli('option update woocommerce_currency "USD"');
 
-  // 6. Create test products (silently ignores duplicate SKU errors)
+  // 7. Create test products (silently ignores duplicate SKU errors)
   wpCli(
     'wc product create --name="Test Widget" --regular_price=25.00 --sku=TEST-001 --status=publish --user=admin',
   );
@@ -59,18 +65,18 @@ async function globalSetup(config: FullConfig) {
     'wc product create --name="Premium Gadget" --regular_price=99.50 --sku=PREM-001 --status=publish --user=admin',
   );
 
-  // 7. Ensure fuzzy-find activation completed (may have been OOM-killed in step 2)
+  // 8. Ensure fuzzy-find activation completed (may have been OOM-killed in step 3)
   //    Calls the plugin's activation function in a fresh WP-CLI process with clean memory.
   //    Idempotent: dbDelta + update_option are safe to re-run.
   wpCli('eval "activate_headless_fuzzy_find();"');
 
-  // 8. Trigger fuzzy-find reindex so search tests have data ready
+  // 9. Trigger fuzzy-find reindex so search tests have data ready
   wpCli('eval "do_action(\'headless_fuzzy_find_do_reindex\');"');
 
-  // 9. Enable auth test mode
+  // 10. Enable auth test mode
   wpCli('option update headless_auth_otp_test_mode 1');
 
-  // 10. Flush rewrite rules
+  // 11. Flush rewrite rules
   wpCli('rewrite flush');
 }
 

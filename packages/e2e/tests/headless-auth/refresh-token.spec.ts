@@ -96,6 +96,10 @@ test.describe('Headless Auth — Token Refresh', () => {
     expect(loginRes.status()).toBe(200);
     const { refresh_token: oldRefreshToken } = await loginRes.json();
 
+    // Wait so the refresh generates tokens with a different iat (JWT is
+    // deterministic for same-second inputs — same iat = identical token)
+    await new Promise((r) => setTimeout(r, 1100));
+
     // Refresh — rotates tokens, caches grace period
     const refreshRes = await ctx.post(`${BASE}/auth/refresh`, {
       data: { refresh_token: oldRefreshToken },
