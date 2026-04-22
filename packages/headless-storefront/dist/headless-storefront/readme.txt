@@ -4,7 +4,7 @@ Tags: wordpress, plugin
 Requires at least: 6.8
 Tested up to: 6.9
 Requires PHP: 8.2
-Stable tag: 1.0.0
+Stable tag: 0.1.0
 License: GPL-2.0+
 License URI: http://www.gnu.org/licenses/gpl-2.0.txt
 
@@ -22,5 +22,5 @@ Store branding and configuration REST API for headless WordPress with WooCommerc
 
 == Changelog ==
 
-= 1.0.0 =
+= 0.1.0 =
 * Initial release.

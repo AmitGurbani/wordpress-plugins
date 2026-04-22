@@ -16,6 +16,7 @@ on:
           - headless-orders
           - headless-pos-sessions
           - headless-media-cleanup
+          - headless-storefront
           - headless-umami
           - headless-wishlist
       bump:

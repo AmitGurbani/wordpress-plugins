@@ -1,6 +1,6 @@
 {
   "name": "headless-storefront",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "private": true,
   "description": "Headless storefront branding and configuration for headless WordPress with WooCommerce",
   "scripts": {
