@@ -1,4 +1,4 @@
-import { Activate, Plugin, Uninstall } from 'wpts';
+import { Activate, Plugin, Uninstall } from '@amitgurbani/wpts';
 import './cleanup-hooks.js';
 import './cleanup-routes.js';
 

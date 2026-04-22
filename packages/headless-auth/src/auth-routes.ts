@@ -4,7 +4,7 @@
  * REST routes for user registration, token refresh, and profile retrieval.
  */
 
-import { RestRoute } from 'wpts';
+import { RestRoute } from '@amitgurbani/wpts';
 
 class AuthRoutes {
   @RestRoute('/auth/register', { method: 'POST', public: true })

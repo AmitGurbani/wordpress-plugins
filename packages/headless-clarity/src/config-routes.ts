@@ -5,7 +5,7 @@
  * to the headless frontend for initializing the Clarity tracking script.
  */
 
-import { RestRoute } from 'wpts';
+import { RestRoute } from '@amitgurbani/wpts';
 
 class ClarityConfig {
   @RestRoute('/config', { method: 'GET', public: true })

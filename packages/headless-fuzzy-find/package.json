@@ -22,6 +22,6 @@
     "@wordpress/i18n": "^6.13.0",
     "@wordpress/scripts": "^31.5.0",
     "admin-ui": "workspace:*",
-    "wpts": "workspace:*"
+    "@amitgurbani/wpts": "workspace:*"
   }
 }

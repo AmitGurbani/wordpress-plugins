@@ -1,12 +1,28 @@
 {
-  "name": "wpts",
+  "name": "@amitgurbani/wpts",
   "version": "0.1.0",
   "description": "TypeScript-to-WordPress-Plugin transpiler",
   "type": "module",
   "main": "dist/src/index.js",
   "types": "dist/src/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/src/index.d.ts",
+      "import": "./dist/src/index.js"
+    },
+    "./package.json": "./package.json"
+  },
   "bin": {
     "wpts": "bin/wpts.js"
+  },
+  "files": [
+    "dist/",
+    "bin/",
+    "LICENSE",
+    "README.md"
+  ],
+  "publishConfig": {
+    "access": "public"
   },
   "scripts": {
     "build": "tsc -p tsconfig.build.json && rm -rf dist/src/templates && cp -r src/templates dist/src/templates",
@@ -14,7 +30,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "lint": "biome lint src/ tests/",
-    "check": "biome check src/ tests/"
+    "check": "biome check src/ tests/",
+    "prepublishOnly": "pnpm run build && pnpm run test"
   },
   "keywords": [
     "wordpress",

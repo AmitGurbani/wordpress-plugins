@@ -7,7 +7,7 @@
  * Queries the FULLTEXT index table directly via SQL — no WP_Query hooks.
  */
 
-import { RestRoute } from 'wpts';
+import { RestRoute } from '@amitgurbani/wpts';
 
 class FfSearchRoutes {
   // ── Search Endpoint ──────────────────────────────────────────────────

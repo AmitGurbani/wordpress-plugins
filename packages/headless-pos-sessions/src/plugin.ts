@@ -7,7 +7,15 @@
  * Build: npx wpts build src/plugin.ts -o dist --clean
  */
 
-import { Action, Activate, AdminPage, CustomPostType, Deactivate, Plugin, Setting } from 'wpts';
+import {
+  Action,
+  Activate,
+  AdminPage,
+  CustomPostType,
+  Deactivate,
+  Plugin,
+  Setting,
+} from '@amitgurbani/wpts';
 import './session-routes.js';
 import './cron-tasks.js';
 

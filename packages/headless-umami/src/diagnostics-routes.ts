@@ -4,7 +4,7 @@
  * Provides endpoints to test the Umami connection and view the last error.
  */
 
-import { DiagnosticsRoute, RestRoute } from 'wpts';
+import { DiagnosticsRoute, RestRoute } from '@amitgurbani/wpts';
 
 @DiagnosticsRoute()
 class UmamiDiagnostics {

@@ -148,7 +148,7 @@ Requires Docker to be running.
    ```json
    {
      "devDependencies": {
-       "wpts": "workspace:*",
+       "@amitgurbani/wpts": "workspace:*",
        "admin-ui": "workspace:*",
        "@wordpress/scripts": "^31.5.0",
        "@wordpress/components": "^32.2.0",

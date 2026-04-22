@@ -5,7 +5,7 @@
  * to Meta's Conversions API with server-side data enrichment.
  */
 
-import { RestRoute } from 'wpts';
+import { RestRoute } from '@amitgurbani/wpts';
 
 class MetaPixelTrack {
   hashForCapi(value: string): string {

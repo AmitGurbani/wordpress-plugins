@@ -5,7 +5,7 @@
  * plugin source files (.ts). They are NOT executed at runtime — the transpiler
  * maps each camelCase function to its snake_case PHP equivalent.
  *
- * Usage: Automatically available in any project that imports from 'wpts'.
+ * Usage: Automatically available in any project that imports from '@amitgurbani/wpts'.
  * The `declare global` block augments the global scope when the module is loaded.
  */
 

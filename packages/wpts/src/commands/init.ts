@@ -15,7 +15,7 @@ export async function initProject(
   await ensureDir(path.join(projectDir, 'src', 'admin'));
 
   // Create plugin.ts
-  const pluginTs = `import { Plugin, Action, Filter, AdminPage, Setting, Activate, Shortcode } from 'wpts';
+  const pluginTs = `import { Plugin, Action, Filter, AdminPage, Setting, Activate, Shortcode } from '@amitgurbani/wpts';
 
 @Plugin({
   name: '${pluginName}',

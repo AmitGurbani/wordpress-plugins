@@ -5,7 +5,7 @@
  * Namespace: headless-pos-sessions/v1
  */
 
-import { RestRoute } from 'wpts';
+import { RestRoute } from '@amitgurbani/wpts';
 
 class SessionRoutes {
   // ── Helper: format session post into API response ─────────────────────

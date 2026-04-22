@@ -46,7 +46,7 @@ turbo run test
 Run a script in a specific package:
 
 ```bash
-pnpm --filter wpts test
+pnpm --filter @amitgurbani/wpts test
 pnpm --filter headless-auth build
 ```
 

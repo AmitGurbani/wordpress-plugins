@@ -1,4 +1,4 @@
-import { RestRoute } from 'wpts';
+import { RestRoute } from '@amitgurbani/wpts';
 
 class CleanupRoutes {
   @RestRoute('/orphans', { method: 'GET', capability: 'manage_options' })

@@ -5,7 +5,7 @@
  * Namespace: headless-wishlist/v1
  */
 
-import { RestRoute } from 'wpts';
+import { RestRoute } from '@amitgurbani/wpts';
 
 class WishlistRoutes {
   // ── Helpers ──────────────────────────────────────────────────────────

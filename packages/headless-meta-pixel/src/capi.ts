@@ -5,7 +5,7 @@
  * the WooCommerce Purchase hook for automatic server-side tracking.
  */
 
-import { Action } from 'wpts';
+import { Action } from '@amitgurbani/wpts';
 
 class MetaPixelCapi {
   // ── Helper Methods ────────────────────────────────────────────────────

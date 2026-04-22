@@ -1,0 +1,118 @@
+name: Release wpts
+
+on:
+  workflow_dispatch:
+    inputs:
+      bump:
+        description: Version bump type
+        required: true
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
+
+permissions:
+  contents: write
+  id-token: write
+
+jobs:
+  release:
+    name: Release wpts
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    concurrency:
+      group: release-wpts
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - uses: pnpm/action-setup@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: pnpm
+          registry-url: 'https://registry.npmjs.org'
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Build
+        run: pnpm --filter @amitgurbani/wpts build
+
+      - name: Test
+        run: pnpm --filter @amitgurbani/wpts test
+
+      - name: Bump version
+        id: bump
+        env:
+          BUMP: ${{ inputs.bump }}
+        run: |
+          cd packages/wpts
+          npm version "$BUMP" --no-git-tag-version
+          NEW_VERSION=$(node -e "console.log(require('./package.json').version)")
+          echo "version=$NEW_VERSION" >> "$GITHUB_OUTPUT"
+          echo "tag=wpts@$NEW_VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Rebuild with new version
+        run: pnpm --filter @amitgurbani/wpts build
+
+      - name: Verify package contents
+        run: |
+          cd packages/wpts
+          npm pack --dry-run 2>&1
+          # Fail if tests, examples, or .turbo leak in
+          npm pack --dry-run 2>&1 | grep -E '(tests/|\.turbo/|examples/)' && exit 1 || true
+
+      - name: Publish to npm
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          cd packages/wpts
+          npm publish --provenance --access public
+
+      - name: Commit and tag
+        env:
+          TAG: ${{ steps.bump.outputs.tag }}
+          VERSION: ${{ steps.bump.outputs.version }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add packages/wpts/package.json
+          git commit -m "release(wpts): v${VERSION}"
+          git tag "$TAG" -m "wpts v${VERSION}"
+          git push origin HEAD
+          git push origin "$TAG"
+
+      - name: Generate changelog
+        run: |
+          PREV_TAG=$(git tag --list "wpts@*" --sort=-v:refname | sed -n '2p')
+          RANGE_ARGS=""
+          if [ -n "$PREV_TAG" ]; then
+            RANGE_ARGS="${PREV_TAG}..HEAD"
+          fi
+          CHANGELOG=$(git log ${RANGE_ARGS} --pretty="tformat:- %s" -- "packages/wpts/" 2>/dev/null | sort -u || echo "- Version bump")
+          {
+            echo "## Changelog"
+            echo ""
+            echo "$CHANGELOG"
+            echo ""
+            echo "## Installation"
+            echo ""
+            echo '```bash'
+            echo "npm install -g @amitgurbani/wpts"
+            echo "# or"
+            echo "npx @amitgurbani/wpts init my-plugin"
+            echo '```'
+          } > /tmp/release-notes.md
+
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ steps.bump.outputs.tag }}
+          VERSION: ${{ steps.bump.outputs.version }}
+        run: |
+          gh release create "$TAG" \
+            --title "wpts v$VERSION" \
+            --notes-file /tmp/release-notes.md

@@ -5,7 +5,7 @@
  * in sync. Also provides batch reindexing via WP-Cron.
  */
 
-import { Action } from 'wpts';
+import { Action } from '@amitgurbani/wpts';
 
 class FfIndexer {
   // ── Real-time Indexing ──────────────────────────────────────────────

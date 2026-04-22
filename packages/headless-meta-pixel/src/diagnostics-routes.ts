@@ -4,7 +4,7 @@
  * Test CAPI connection and retrieve error logs.
  */
 
-import { DiagnosticsRoute, RestRoute } from 'wpts';
+import { DiagnosticsRoute, RestRoute } from '@amitgurbani/wpts';
 
 @DiagnosticsRoute({ errorOptionSuffix: 'last_capi_error' })
 class MetaPixelDiagnostics {

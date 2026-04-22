@@ -1,5 +1,5 @@
 {
-  "extends": "wpts/tsconfig.json",
+  "extends": "@amitgurbani/wpts/tsconfig.json",
   "compilerOptions": {
     "jsx": "react-jsx",
     "lib": ["ES2022", "DOM"],

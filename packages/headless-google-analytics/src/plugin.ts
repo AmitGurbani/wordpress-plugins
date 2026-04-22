@@ -8,7 +8,7 @@
  * Build: npx wpts build src/plugin.ts -o dist --clean
  */
 
-import { Activate, AdminPage, Deactivate, Plugin, Setting } from 'wpts';
+import { Activate, AdminPage, Deactivate, Plugin, Setting } from '@amitgurbani/wpts';
 import './server-tracking.js';
 import './diagnostics-routes.js';
 

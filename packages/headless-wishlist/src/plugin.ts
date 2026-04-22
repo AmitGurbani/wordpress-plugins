@@ -7,7 +7,7 @@
  * Build: npx wpts build src/plugin.ts -o dist --clean
  */
 
-import { Activate, AdminPage, Plugin } from 'wpts';
+import { Activate, AdminPage, Plugin } from '@amitgurbani/wpts';
 import './wishlist-routes.js';
 import './analytics-routes.js';
 

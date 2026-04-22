@@ -6,7 +6,7 @@
  * Build: npx wpts build src/plugin.ts -o dist --clean
  */
 
-import { Plugin } from 'wpts';
+import { Plugin } from '@amitgurbani/wpts';
 import './order-routes.js';
 
 @Plugin({

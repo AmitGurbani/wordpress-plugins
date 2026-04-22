@@ -4,7 +4,7 @@
  * Provides index status, rebuild trigger, and analytics data.
  */
 
-import { RestRoute } from 'wpts';
+import { RestRoute } from '@amitgurbani/wpts';
 
 class FfAdminRoutes {
   // ── Index Status ────────────────────────────────────────────────────

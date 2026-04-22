@@ -5,7 +5,7 @@
  * for loading the Umami tracking script.
  */
 
-import { RestRoute } from 'wpts';
+import { RestRoute } from '@amitgurbani/wpts';
 
 class UmamiConfig {
   @RestRoute('/config', { method: 'GET', public: true })

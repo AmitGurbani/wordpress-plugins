@@ -4,7 +4,7 @@
  * Daily scheduled tasks for session retention cleanup and orphan auto-close.
  */
 
-import { Action } from 'wpts';
+import { Action } from '@amitgurbani/wpts';
 
 class CronTasks {
   // ── Daily cleanup: delete closed sessions older than retention_days ────

@@ -1,4 +1,4 @@
-import { Action } from 'wpts';
+import { Action } from '@amitgurbani/wpts';
 
 class CleanupHooks {
   // ── Product & Variation: Creation (baseline) ───────────────────────

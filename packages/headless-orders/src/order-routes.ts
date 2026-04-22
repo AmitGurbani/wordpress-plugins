@@ -6,7 +6,7 @@
  * Namespace: headless-orders/v1
  */
 
-import { RestRoute } from 'wpts';
+import { RestRoute } from '@amitgurbani/wpts';
 
 class OrderRoutes {
   formatOrder(order: any): any {

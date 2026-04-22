@@ -4,7 +4,7 @@
  * REST route for username/email + password authentication.
  */
 
-import { RestRoute } from 'wpts';
+import { RestRoute } from '@amitgurbani/wpts';
 
 class LoginRoutes {
   @RestRoute('/auth/login', { method: 'POST', public: true })

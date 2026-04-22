@@ -8,7 +8,15 @@
  * Build: npx wpts build src/plugin.ts -o dist --clean
  */
 
-import { Action, Activate, AdminPage, Deactivate, Filter, Plugin, Setting } from 'wpts';
+import {
+  Action,
+  Activate,
+  AdminPage,
+  Deactivate,
+  Filter,
+  Plugin,
+  Setting,
+} from '@amitgurbani/wpts';
 import './jwt.js';
 import './otp-routes.js';
 import './auth-routes.js';

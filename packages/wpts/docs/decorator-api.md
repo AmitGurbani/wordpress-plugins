@@ -296,7 +296,7 @@ onUninstall(): void {
 Class decorator. Auto-generates a `GET /diagnostics/last-error` admin REST endpoint that returns the value of a stored error option.
 
 ```typescript
-import { DiagnosticsRoute, RestRoute } from 'wpts';
+import { DiagnosticsRoute, RestRoute } from '@amitgurbani/wpts';
 
 @DiagnosticsRoute()
 class MyPluginDiagnostics {
@@ -324,7 +324,7 @@ class MyDiagnostics {}
 Methods without decorators are automatically included in the generated PHP as helper methods. By default they are placed in the public class. If the source class contains any `@RestRoute` decorator, helpers from that class are placed in the REST API class instead.
 
 ```typescript
-import { Filter } from 'wpts';
+import { Filter } from '@amitgurbani/wpts';
 
 class FfSearch {
   @Filter('posts_clauses', { priority: 20, acceptedArgs: 2 })

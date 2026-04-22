@@ -4,7 +4,7 @@
  * REST routes for sending and verifying one-time passwords.
  */
 
-import { RestRoute } from 'wpts';
+import { RestRoute } from '@amitgurbani/wpts';
 
 class OtpRoutes {
   escapeForJson(value: string): string {

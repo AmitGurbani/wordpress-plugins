@@ -63,10 +63,10 @@ Unsupported constructs emit helpful comments in the PHP output, e.g.:
 
 ## WordPress API Types
 
-Importing from `wpts` automatically makes all WordPress functions available as global types in your TypeScript code — no manual `declare function` statements needed.
+Importing from `@amitgurbani/wpts` automatically makes all WordPress functions available as global types in your TypeScript code — no manual `declare function` statements needed.
 
 ```typescript
-import { Plugin, Action, Setting } from 'wpts';
+import { Plugin, Action, Setting } from '@amitgurbani/wpts';
 
 // WordPress functions are available globally:
 const val = getOption('my_key', 'default');

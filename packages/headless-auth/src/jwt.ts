@@ -4,7 +4,7 @@
  * JWT generation helper, CORS handling, and JWT authentication filter.
  */
 
-import { Action, Filter } from 'wpts';
+import { Action, Filter } from '@amitgurbani/wpts';
 
 class JwtAuth {
   // ── JWT Helper via WordPress Filter ───────────────────────────────────
