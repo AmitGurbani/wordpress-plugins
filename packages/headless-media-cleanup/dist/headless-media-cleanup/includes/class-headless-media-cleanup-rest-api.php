@@ -41,7 +41,7 @@ class Headless_Media_Cleanup_Rest_Api {
 	public function get_orphans( $request ) {
 		global $wpdb;
 		if ( ! class_exists( 'WooCommerce' ) ) {
-			return new WP_Error( 'woocommerce_required', 'WooCommerce is not active.', array( 'status' => 503 ) );
+			return new WP_Error( 'woocommerce_required', __( 'WooCommerce is not active.', 'headless-media-cleanup' ), array( 'status' => 503 ) );
 		}
 		$per_page = min( 100, max( 1, intval( $request->get_param( 'per_page' ) ?? '20' ) ) );
 		$page = max( 1, intval( $request->get_param( 'page' ) ?? '1' ) );
@@ -110,7 +110,7 @@ class Headless_Media_Cleanup_Rest_Api {
 	public function cleanup_orphans( $request ) {
 		global $wpdb;
 		if ( ! class_exists( 'WooCommerce' ) ) {
-			return new WP_Error( 'woocommerce_required', 'WooCommerce is not active.', array( 'status' => 503 ) );
+			return new WP_Error( 'woocommerce_required', __( 'WooCommerce is not active.', 'headless-media-cleanup' ), array( 'status' => 503 ) );
 		}
 		$enabled = apply_filters( 'headless_media_cleanup_enabled', true );
 		if ( ! $enabled ) {

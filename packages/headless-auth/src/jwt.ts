@@ -169,7 +169,9 @@ class JwtAuth {
     // first to trigger determine_current_user (which sets the HEADLESS_AUTH_JWT_EXPIRED
     // flag via authenticateWithJwt) before we check it.
     if (!getCurrentUserId() && ($_SERVER.HEADLESS_AUTH_JWT_EXPIRED ?? '') === '1') {
-      return new WP_Error('token_expired', 'Access token has expired.', { status: 401 });
+      return new WP_Error('token_expired', __('Access token has expired.', 'headless-auth'), {
+        status: 401,
+      });
     }
 
     return result;

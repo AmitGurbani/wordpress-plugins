@@ -107,7 +107,7 @@ class Headless_Pos_Sessions_Rest_Api {
 			if ( null === $value ) {
 				return new \WP_Error(
 					'invalid_retention_days',
-					'Invalid value for retention_days.',
+					__( 'Invalid value for retention_days.', 'headless-pos-sessions' ),
 					array( 'status' => 400 )
 				);
 			}
@@ -118,7 +118,7 @@ class Headless_Pos_Sessions_Rest_Api {
 			if ( null === $value ) {
 				return new \WP_Error(
 					'invalid_max_open_sessions',
-					'Invalid value for max_open_sessions.',
+					__( 'Invalid value for max_open_sessions.', 'headless-pos-sessions' ),
 					array( 'status' => 400 )
 				);
 			}
@@ -131,40 +131,40 @@ class Headless_Pos_Sessions_Rest_Api {
 	public function create_session( $request ) {
 		$uuid = sanitize_text_field( $request->get_param( 'session_uuid' ) );
 		if ( ! $uuid ) {
-			return new WP_Error( 'missing_session_uuid', 'session_uuid is required.', array( 'status' => 400 ) );
+			return new WP_Error( 'missing_session_uuid', __( 'session_uuid is required.', 'headless-pos-sessions' ), array( 'status' => 400 ) );
 		}
 		$terminal_id = sanitize_text_field( $request->get_param( 'terminal_id' ) );
 		if ( ! $terminal_id ) {
-			return new WP_Error( 'missing_terminal_id', 'terminal_id is required.', array( 'status' => 400 ) );
+			return new WP_Error( 'missing_terminal_id', __( 'terminal_id is required.', 'headless-pos-sessions' ), array( 'status' => 400 ) );
 		}
 		$opened_at = sanitize_text_field( $request->get_param( 'opened_at' ) );
 		if ( ! $opened_at ) {
-			return new WP_Error( 'missing_opened_at', 'opened_at is required.', array( 'status' => 400 ) );
+			return new WP_Error( 'missing_opened_at', __( 'opened_at is required.', 'headless-pos-sessions' ), array( 'status' => 400 ) );
 		}
 		$opening_balance = floatval( $request->get_param( 'opening_balance' ) );
 		if ( $opening_balance < 0 ) {
-			return new WP_Error( 'invalid_opening_balance', 'opening_balance must be >= 0.', array( 'status' => 400 ) );
+			return new WP_Error( 'invalid_opening_balance', __( 'opening_balance must be >= 0.', 'headless-pos-sessions' ), array( 'status' => 400 ) );
 		}
 		$order_ids_param = $request->get_param( 'order_ids' );
 		if ( $order_ids_param && ! is_array( $order_ids_param ) ) {
-			return new WP_Error( 'invalid_order_ids', 'order_ids must be an array of integers.', array( 'status' => 400 ) );
+			return new WP_Error( 'invalid_order_ids', __( 'order_ids must be an array of integers.', 'headless-pos-sessions' ), array( 'status' => 400 ) );
 		}
 		$existing = get_posts( array( 'post_type' => 'hpss_pos_session', 'post_status' => 'publish', 'meta_key' => '_session_uuid', 'meta_value' => $uuid, 'posts_per_page' => 1, 'fields' => 'ids' ) );
 		if ( count( $existing ) > 0 ) {
-			return new WP_Error( 'duplicate_uuid', 'A session with this session_uuid already exists.', array( 'status' => 409 ) );
+			return new WP_Error( 'duplicate_uuid', __( 'A session with this session_uuid already exists.', 'headless-pos-sessions' ), array( 'status' => 409 ) );
 		}
 		$closed_at = sanitize_text_field( $request->get_param( 'closed_at' ) ?? '' );
 		$status = $closed_at ? 'closed' : 'open';
 		if ( $status === 'open' ) {
 			$max_open = max( 1, intval( get_option( 'headless_pos_sessions_max_open_sessions', 10 ) ) );
-			$open_sessions = get_posts( array( 'post_type' => 'hpss_pos_session', 'post_status' => 'publish', 'meta_key' => '_session_status', 'meta_value' => 'open', 'posts_per_page' => -1, 'fields' => 'ids' ) );
+			$open_sessions = get_posts( array( 'post_type' => 'hpss_pos_session', 'post_status' => 'publish', 'meta_key' => '_session_status', 'meta_value' => 'open', 'posts_per_page' => $max_open, 'fields' => 'ids' ) );
 			if ( count( $open_sessions ) >= $max_open ) {
-				return new WP_Error( 'max_open_exceeded', 'Maximum number of open sessions reached.', array( 'status' => 409 ) );
+				return new WP_Error( 'max_open_exceeded', __( 'Maximum number of open sessions reached.', 'headless-pos-sessions' ), array( 'status' => 409 ) );
 			}
 		}
 		$post_id = wp_insert_post( array( 'post_type' => 'hpss_pos_session', 'post_title' => 'POS Session — ' . $opened_at, 'post_status' => 'publish' ) );
 		if ( is_wp_error( $post_id ) ) {
-			return new WP_Error( 'create_failed', 'Failed to create session.', array( 'status' => 500 ) );
+			return new WP_Error( 'create_failed', __( 'Failed to create session.', 'headless-pos-sessions' ), array( 'status' => 500 ) );
 		}
 		$id = intval( $post_id );
 		update_post_meta( $id, '_session_uuid', $uuid );
@@ -224,7 +224,8 @@ class Headless_Pos_Sessions_Rest_Api {
 		}
 		$query_args['order'] = $sort_dir;
 		$query_args['fields'] = 'ids';
-		$post_ids = get_posts( $query_args );
+		$query = new WP_Query( $query_args );
+		$post_ids = $query->posts;
 		$sessions = array();
 		foreach ( $post_ids as $pid ) {
 			$session = $this->format_session( intval( $pid ) );
@@ -232,13 +233,8 @@ class Headless_Pos_Sessions_Rest_Api {
 				array_push( $sessions, $session );
 			}
 		}
-		$count_args = array( 'post_type' => 'hpss_pos_session', 'post_status' => 'publish', 'posts_per_page' => -1, 'fields' => 'ids' );
-		if ( count( $meta_query ) > 0 ) {
-			$count_args['meta_query'] = $meta_query;
-		}
-		$all_ids = get_posts( $count_args );
-		$total = count( $all_ids );
-		$total_pages = max( 1, ceil( $total / $per_page ) );
+		$total = $query->found_posts;
+		$total_pages = max( 1, $query->max_num_pages );
 		return array( 'data' => $sessions, 'meta' => array( 'total' => $total, 'total_pages' => $total_pages, 'page' => $page, 'per_page' => $per_page ) );
 	}
 
@@ -246,7 +242,7 @@ class Headless_Pos_Sessions_Rest_Api {
 		$post_id = intval( $request->get_param( 'id' ) );
 		$post = get_post( $post_id );
 		if ( ! $post || get_post_type( $post_id ) !== 'hpss_pos_session' ) {
-			return new WP_Error( 'not_found', 'Session not found.', array( 'status' => 404 ) );
+			return new WP_Error( 'not_found', __( 'Session not found.', 'headless-pos-sessions' ), array( 'status' => 404 ) );
 		}
 		return $this->format_session( $post_id );
 	}
@@ -255,7 +251,7 @@ class Headless_Pos_Sessions_Rest_Api {
 		$post_id = intval( $request->get_param( 'id' ) );
 		$post = get_post( $post_id );
 		if ( ! $post || get_post_type( $post_id ) !== 'hpss_pos_session' ) {
-			return new WP_Error( 'not_found', 'Session not found.', array( 'status' => 404 ) );
+			return new WP_Error( 'not_found', __( 'Session not found.', 'headless-pos-sessions' ), array( 'status' => 404 ) );
 		}
 		$params = $request->get_json_params();
 		if ( isset( $params['terminal_id'] ) ) {
@@ -267,9 +263,9 @@ class Headless_Pos_Sessions_Rest_Api {
 				$current_status = get_post_meta( $post_id, '_session_status', true );
 				if ( $current_status !== 'open' ) {
 					$max_open = max( 1, intval( get_option( 'headless_pos_sessions_max_open_sessions', 10 ) ) );
-					$open_sessions = get_posts( array( 'post_type' => 'hpss_pos_session', 'post_status' => 'publish', 'meta_key' => '_session_status', 'meta_value' => 'open', 'posts_per_page' => -1, 'fields' => 'ids' ) );
+					$open_sessions = get_posts( array( 'post_type' => 'hpss_pos_session', 'post_status' => 'publish', 'meta_key' => '_session_status', 'meta_value' => 'open', 'posts_per_page' => $max_open, 'fields' => 'ids' ) );
 					if ( count( $open_sessions ) >= $max_open ) {
-						return new WP_Error( 'max_open_exceeded', 'Maximum number of open sessions reached.', array( 'status' => 409 ) );
+						return new WP_Error( 'max_open_exceeded', __( 'Maximum number of open sessions reached.', 'headless-pos-sessions' ), array( 'status' => 409 ) );
 					}
 				}
 			}
@@ -315,11 +311,11 @@ class Headless_Pos_Sessions_Rest_Api {
 		$post_id = intval( $request->get_param( 'id' ) );
 		$post = get_post( $post_id );
 		if ( ! $post || get_post_type( $post_id ) !== 'hpss_pos_session' ) {
-			return new WP_Error( 'not_found', 'Session not found.', array( 'status' => 404 ) );
+			return new WP_Error( 'not_found', __( 'Session not found.', 'headless-pos-sessions' ), array( 'status' => 404 ) );
 		}
 		$result = wp_delete_post( $post_id, true );
 		if ( ! $result ) {
-			return new WP_Error( 'delete_failed', 'Failed to delete session.', array( 'status' => 500 ) );
+			return new WP_Error( 'delete_failed', __( 'Failed to delete session.', 'headless-pos-sessions' ), array( 'status' => 500 ) );
 		}
 		return array( 'deleted' => true, 'id' => $post_id );
 	}

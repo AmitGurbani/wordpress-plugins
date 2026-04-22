@@ -10,7 +10,7 @@ for (const plugin of PLUGINS) {
       await page.goto(`http://localhost:8889/wp-admin/admin.php?page=${plugin.menuSlug}`);
 
       // Wait for the React app container to be present
-      await expect(page.locator('#wpts-admin-app')).toBeVisible();
+      await expect(page.locator(`#${plugin.slug}-admin-app`)).toBeVisible();
 
       // No JS errors
       expect(errors).toEqual([]);
@@ -19,7 +19,7 @@ for (const plugin of PLUGINS) {
     test('tab navigation works', async ({ page }) => {
       await page.goto(`http://localhost:8889/wp-admin/admin.php?page=${plugin.menuSlug}`);
 
-      await expect(page.locator('#wpts-admin-app')).toBeVisible();
+      await expect(page.locator(`#${plugin.slug}-admin-app`)).toBeVisible();
 
       // Wait for React app to finish loading (spinner disappears, tabs render)
       const firstTab = page.getByRole('tab').first();

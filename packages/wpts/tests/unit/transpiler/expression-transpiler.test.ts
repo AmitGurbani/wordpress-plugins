@@ -764,6 +764,27 @@ describe('transpileExpression', () => {
     it('maps Math.PI', () => {
       expect(transpile('Math.PI')).toBe('M_PI');
     });
+
+    it('transpiles class instance property to arrow operator', () => {
+      const result = transpile(
+        'const query = new WP_Query(); const x = query.found_posts;',
+        'declare class WP_Query { constructor(args?: any); found_posts: number; posts: any[]; max_num_pages: number; }',
+      );
+      expect(result).toContain('$query->found_posts');
+    });
+
+    it('transpiles class .posts property to arrow operator', () => {
+      const result = transpile(
+        'const query = new WP_Query(); const x = query.posts;',
+        'declare class WP_Query { constructor(args?: any); found_posts: number; posts: any[]; max_num_pages: number; }',
+      );
+      expect(result).toContain('$query->posts');
+    });
+
+    it('preserves array key access for non-class typed objects', () => {
+      const result = transpile('obj.key', 'const obj: any = {};');
+      expect(result).toBe("$obj['key']");
+    });
   });
 
   describe('template literals', () => {

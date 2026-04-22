@@ -4,7 +4,11 @@ class CleanupRoutes {
   @RestRoute('/orphans', { method: 'GET', capability: 'manage_options' })
   getOrphans(request: any): any {
     if (!classExists('WooCommerce')) {
-      return new WP_Error('woocommerce_required', 'WooCommerce is not active.', { status: 503 });
+      return new WP_Error(
+        'woocommerce_required',
+        __('WooCommerce is not active.', 'headless-media-cleanup'),
+        { status: 503 },
+      );
     }
 
     const perPage: number = Math.min(
@@ -104,7 +108,11 @@ class CleanupRoutes {
   @RestRoute('/orphans/cleanup', { method: 'POST', capability: 'manage_options' })
   cleanupOrphans(_request: any): any {
     if (!classExists('WooCommerce')) {
-      return new WP_Error('woocommerce_required', 'WooCommerce is not active.', { status: 503 });
+      return new WP_Error(
+        'woocommerce_required',
+        __('WooCommerce is not active.', 'headless-media-cleanup'),
+        { status: 503 },
+      );
     }
 
     // Global kill switch

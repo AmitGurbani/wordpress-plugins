@@ -673,6 +673,15 @@ declare global {
   // ---------------------------------------------------------------------------
   // WordPress Classes
   // ---------------------------------------------------------------------------
+  class WP_Query {
+    constructor(args?: Record<string, any>);
+    posts: any[];
+    found_posts: number;
+    max_num_pages: number;
+    post_count: number;
+    query_vars: Record<string, any>;
+  }
+
   var WP_Error: any;
 }
 

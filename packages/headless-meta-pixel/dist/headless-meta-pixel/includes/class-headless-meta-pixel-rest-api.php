@@ -100,7 +100,7 @@ class Headless_Meta_Pixel_Rest_Api {
 			if ( null === $value ) {
 				return new \WP_Error(
 					'invalid_pixel_id',
-					'Invalid value for pixel_id.',
+					__( 'Invalid value for pixel_id.', 'headless-meta-pixel' ),
 					array( 'status' => 400 )
 				);
 			}
@@ -111,7 +111,7 @@ class Headless_Meta_Pixel_Rest_Api {
 			if ( null === $value ) {
 				return new \WP_Error(
 					'invalid_access_token',
-					'Invalid value for access_token.',
+					__( 'Invalid value for access_token.', 'headless-meta-pixel' ),
 					array( 'status' => 400 )
 				);
 			}
@@ -122,7 +122,7 @@ class Headless_Meta_Pixel_Rest_Api {
 			if ( null === $value ) {
 				return new \WP_Error(
 					'invalid_test_event_code',
-					'Invalid value for test_event_code.',
+					__( 'Invalid value for test_event_code.', 'headless-meta-pixel' ),
 					array( 'status' => 400 )
 				);
 			}
@@ -133,7 +133,7 @@ class Headless_Meta_Pixel_Rest_Api {
 			if ( null === $value ) {
 				return new \WP_Error(
 					'invalid_currency',
-					'Invalid value for currency.',
+					__( 'Invalid value for currency.', 'headless-meta-pixel' ),
 					array( 'status' => 400 )
 				);
 			}
@@ -144,7 +144,7 @@ class Headless_Meta_Pixel_Rest_Api {
 			if ( null === $value ) {
 				return new \WP_Error(
 					'invalid_enable_view_content',
-					'Invalid value for enable_view_content.',
+					__( 'Invalid value for enable_view_content.', 'headless-meta-pixel' ),
 					array( 'status' => 400 )
 				);
 			}
@@ -155,7 +155,7 @@ class Headless_Meta_Pixel_Rest_Api {
 			if ( null === $value ) {
 				return new \WP_Error(
 					'invalid_enable_add_to_cart',
-					'Invalid value for enable_add_to_cart.',
+					__( 'Invalid value for enable_add_to_cart.', 'headless-meta-pixel' ),
 					array( 'status' => 400 )
 				);
 			}
@@ -166,7 +166,7 @@ class Headless_Meta_Pixel_Rest_Api {
 			if ( null === $value ) {
 				return new \WP_Error(
 					'invalid_enable_initiate_checkout',
-					'Invalid value for enable_initiate_checkout.',
+					__( 'Invalid value for enable_initiate_checkout.', 'headless-meta-pixel' ),
 					array( 'status' => 400 )
 				);
 			}
@@ -177,7 +177,7 @@ class Headless_Meta_Pixel_Rest_Api {
 			if ( null === $value ) {
 				return new \WP_Error(
 					'invalid_enable_purchase',
-					'Invalid value for enable_purchase.',
+					__( 'Invalid value for enable_purchase.', 'headless-meta-pixel' ),
 					array( 'status' => 400 )
 				);
 			}
@@ -188,7 +188,7 @@ class Headless_Meta_Pixel_Rest_Api {
 			if ( null === $value ) {
 				return new \WP_Error(
 					'invalid_enable_search',
-					'Invalid value for enable_search.',
+					__( 'Invalid value for enable_search.', 'headless-meta-pixel' ),
 					array( 'status' => 400 )
 				);
 			}
@@ -199,7 +199,7 @@ class Headless_Meta_Pixel_Rest_Api {
 			if ( null === $value ) {
 				return new \WP_Error(
 					'invalid_enable_capi',
-					'Invalid value for enable_capi.',
+					__( 'Invalid value for enable_capi.', 'headless-meta-pixel' ),
 					array( 'status' => 400 )
 				);
 			}
@@ -228,11 +228,11 @@ class Headless_Meta_Pixel_Rest_Api {
 		$rl_key = 'headless_meta_pixel_rl_' . md5( $rl_ip );
 		$rl_count = get_transient( $rl_key );
 		if ( $rl_count && intval( $rl_count ) >= 60 ) {
-			return new WP_Error( 'rate_limited', 'Too many requests. Please try again later.', array( 'status' => 429 ) );
+			return new WP_Error( 'rate_limited', __( 'Too many requests. Please try again later.', 'headless-meta-pixel' ), array( 'status' => 429 ) );
 		}
 		set_transient( $rl_key, strval( $rl_count ? intval( $rl_count ) + 1 : 1 ), 60 );
 		if ( get_option( 'headless_meta_pixel_enable_capi', '1' ) !== '1' ) {
-			return new WP_Error( 'capi_disabled', 'Conversions API is disabled.', array( 'status' => 403 ) );
+			return new WP_Error( 'capi_disabled', __( 'Conversions API is disabled.', 'headless-meta-pixel' ), array( 'status' => 403 ) );
 		}
 		$event_name = sanitize_text_field( $request->get_param( 'event_name' ) );
 		$event_id = sanitize_text_field( $request->get_param( 'event_id' ) );
@@ -253,15 +253,15 @@ class Headless_Meta_Pixel_Rest_Api {
 			unset( $custom_data['content_ids'] );
 		}
 		if ( ! $event_name || ! $event_id ) {
-			return new WP_Error( 'missing_params', 'event_name and event_id are required.', array( 'status' => 400 ) );
+			return new WP_Error( 'missing_params', __( 'event_name and event_id are required.', 'headless-meta-pixel' ), array( 'status' => 400 ) );
 		}
 		$allowed_events = array( 'ViewContent' => 'enable_view_content', 'AddToCart' => 'enable_add_to_cart', 'InitiateCheckout' => 'enable_initiate_checkout', 'Purchase' => 'enable_purchase', 'Search' => 'enable_search' );
 		$setting_key = $allowed_events[$event_name];
 		if ( ! $setting_key ) {
-			return new WP_Error( 'invalid_event', 'Event name is not supported.', array( 'status' => 400 ) );
+			return new WP_Error( 'invalid_event', __( 'Event name is not supported.', 'headless-meta-pixel' ), array( 'status' => 400 ) );
 		}
 		if ( get_option( 'headless_meta_pixel_' . $setting_key, '1' ) !== '1' ) {
-			return new WP_Error( 'event_disabled', 'This event type is disabled.', array( 'status' => 403 ) );
+			return new WP_Error( 'event_disabled', __( 'This event type is disabled.', 'headless-meta-pixel' ), array( 'status' => 403 ) );
 		}
 		$user_data = array();
 		$fbp = sanitize_text_field( $request->get_param( '_fbp' ) );

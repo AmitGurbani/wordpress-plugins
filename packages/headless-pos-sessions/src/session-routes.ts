@@ -44,32 +44,52 @@ class SessionRoutes {
   createSession(request: any): any {
     const uuid: string = sanitizeTextField(request.get_param('session_uuid'));
     if (!uuid) {
-      return new WP_Error('missing_session_uuid', 'session_uuid is required.', { status: 400 });
+      return new WP_Error(
+        'missing_session_uuid',
+        __('session_uuid is required.', 'headless-pos-sessions'),
+        { status: 400 },
+      );
     }
 
     const terminalId: string = sanitizeTextField(request.get_param('terminal_id'));
     if (!terminalId) {
-      return new WP_Error('missing_terminal_id', 'terminal_id is required.', { status: 400 });
+      return new WP_Error(
+        'missing_terminal_id',
+        __('terminal_id is required.', 'headless-pos-sessions'),
+        { status: 400 },
+      );
     }
 
     const openedAt: string = sanitizeTextField(request.get_param('opened_at'));
     if (!openedAt) {
-      return new WP_Error('missing_opened_at', 'opened_at is required.', { status: 400 });
+      return new WP_Error(
+        'missing_opened_at',
+        __('opened_at is required.', 'headless-pos-sessions'),
+        { status: 400 },
+      );
     }
 
     const openingBalance: number = parseFloat(request.get_param('opening_balance'));
     if (openingBalance < 0) {
-      return new WP_Error('invalid_opening_balance', 'opening_balance must be >= 0.', {
-        status: 400,
-      });
+      return new WP_Error(
+        'invalid_opening_balance',
+        __('opening_balance must be >= 0.', 'headless-pos-sessions'),
+        {
+          status: 400,
+        },
+      );
     }
 
     // Validate order_ids format if provided
     const orderIdsParam: any = request.get_param('order_ids');
     if (orderIdsParam && !isArray(orderIdsParam)) {
-      return new WP_Error('invalid_order_ids', 'order_ids must be an array of integers.', {
-        status: 400,
-      });
+      return new WP_Error(
+        'invalid_order_ids',
+        __('order_ids must be an array of integers.', 'headless-pos-sessions'),
+        {
+          status: 400,
+        },
+      );
     }
 
     // Check duplicate UUID
@@ -83,9 +103,13 @@ class SessionRoutes {
     });
 
     if (existing.length > 0) {
-      return new WP_Error('duplicate_uuid', 'A session with this session_uuid already exists.', {
-        status: 409,
-      });
+      return new WP_Error(
+        'duplicate_uuid',
+        __('A session with this session_uuid already exists.', 'headless-pos-sessions'),
+        {
+          status: 409,
+        },
+      );
     }
 
     // Determine status
@@ -103,13 +127,17 @@ class SessionRoutes {
         post_status: 'publish',
         meta_key: '_session_status',
         meta_value: 'open',
-        posts_per_page: -1,
+        posts_per_page: maxOpen,
         fields: 'ids',
       });
       if (openSessions.length >= maxOpen) {
-        return new WP_Error('max_open_exceeded', 'Maximum number of open sessions reached.', {
-          status: 409,
-        });
+        return new WP_Error(
+          'max_open_exceeded',
+          __('Maximum number of open sessions reached.', 'headless-pos-sessions'),
+          {
+            status: 409,
+          },
+        );
       }
     }
 
@@ -121,7 +149,11 @@ class SessionRoutes {
     });
 
     if (isWpError(postId)) {
-      return new WP_Error('create_failed', 'Failed to create session.', { status: 500 });
+      return new WP_Error(
+        'create_failed',
+        __('Failed to create session.', 'headless-pos-sessions'),
+        { status: 500 },
+      );
     }
 
     const id: number = intval(postId);
@@ -216,9 +248,10 @@ class SessionRoutes {
     }
     queryArgs.order = sortDir;
 
-    // Get IDs for the current page
+    // Execute query (WP_Query provides both paginated results and total count)
     queryArgs.fields = 'ids';
-    const postIds: any[] = getPosts(queryArgs);
+    const query = new WP_Query(queryArgs);
+    const postIds: any[] = query.posts;
 
     const sessions: any[] = [];
     for (const pid of postIds) {
@@ -228,19 +261,8 @@ class SessionRoutes {
       }
     }
 
-    // Total count for pagination (all matching IDs, no pagination)
-    const countArgs: Record<string, any> = {
-      post_type: 'hpss_pos_session',
-      post_status: 'publish',
-      posts_per_page: -1,
-      fields: 'ids',
-    };
-    if (metaQuery.length > 0) {
-      countArgs.meta_query = metaQuery;
-    }
-    const allIds: any[] = getPosts(countArgs);
-    const total: number = allIds.length;
-    const totalPages: number = Math.max(1, Math.ceil(total / perPage));
+    const total: number = query.found_posts;
+    const totalPages: number = Math.max(1, query.max_num_pages);
 
     return {
       data: sessions,
@@ -261,7 +283,9 @@ class SessionRoutes {
     const post: any = getPost(postId);
 
     if (!post || getPostType(postId) !== 'hpss_pos_session') {
-      return new WP_Error('not_found', 'Session not found.', { status: 404 });
+      return new WP_Error('not_found', __('Session not found.', 'headless-pos-sessions'), {
+        status: 404,
+      });
     }
 
     return this.formatSession(postId);
@@ -275,7 +299,9 @@ class SessionRoutes {
     const post: any = getPost(postId);
 
     if (!post || getPostType(postId) !== 'hpss_pos_session') {
-      return new WP_Error('not_found', 'Session not found.', { status: 404 });
+      return new WP_Error('not_found', __('Session not found.', 'headless-pos-sessions'), {
+        status: 404,
+      });
     }
 
     const params: any = request.get_json_params();
@@ -297,13 +323,17 @@ class SessionRoutes {
             post_status: 'publish',
             meta_key: '_session_status',
             meta_value: 'open',
-            posts_per_page: -1,
+            posts_per_page: maxOpen,
             fields: 'ids',
           });
           if (openSessions.length >= maxOpen) {
-            return new WP_Error('max_open_exceeded', 'Maximum number of open sessions reached.', {
-              status: 409,
-            });
+            return new WP_Error(
+              'max_open_exceeded',
+              __('Maximum number of open sessions reached.', 'headless-pos-sessions'),
+              {
+                status: 409,
+              },
+            );
           }
         }
       }
@@ -354,12 +384,18 @@ class SessionRoutes {
     const post: any = getPost(postId);
 
     if (!post || getPostType(postId) !== 'hpss_pos_session') {
-      return new WP_Error('not_found', 'Session not found.', { status: 404 });
+      return new WP_Error('not_found', __('Session not found.', 'headless-pos-sessions'), {
+        status: 404,
+      });
     }
 
     const result: any = wpDeletePost(postId, true);
     if (!result) {
-      return new WP_Error('delete_failed', 'Failed to delete session.', { status: 500 });
+      return new WP_Error(
+        'delete_failed',
+        __('Failed to delete session.', 'headless-pos-sessions'),
+        { status: 500 },
+      );
     }
 
     return { deleted: true, id: postId };

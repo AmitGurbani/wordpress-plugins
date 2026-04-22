@@ -114,7 +114,7 @@ class Headless_Auth_Public {
 			return true;
 		}
 		if ( ! get_current_user_id() && ($_SERVER['HEADLESS_AUTH_JWT_EXPIRED'] ?? '') === '1' ) {
-			return new WP_Error( 'token_expired', 'Access token has expired.', array( 'status' => 401 ) );
+			return new WP_Error( 'token_expired', __( 'Access token has expired.', 'headless-auth' ), array( 'status' => 401 ) );
 		}
 		return $result;
 	}

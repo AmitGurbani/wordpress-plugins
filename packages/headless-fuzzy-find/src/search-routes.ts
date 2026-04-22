@@ -15,7 +15,11 @@ class FfSearchRoutes {
   @RestRoute('/search', { method: 'GET', public: true })
   search(request: any): any {
     if (!classExists('WooCommerce')) {
-      return new WP_Error('woocommerce_required', 'WooCommerce is not active.', { status: 400 });
+      return new WP_Error(
+        'woocommerce_required',
+        __('WooCommerce is not active.', 'headless-fuzzy-find'),
+        { status: 400 },
+      );
     }
 
     const query: string = sanitizeTextField(request.get_param('query') ?? '');
@@ -278,12 +282,20 @@ class FfSearchRoutes {
   @RestRoute('/autocomplete', { method: 'GET', public: true })
   autocomplete(request: any): any {
     if (!classExists('WooCommerce')) {
-      return new WP_Error('woocommerce_required', 'WooCommerce is not active.', { status: 400 });
+      return new WP_Error(
+        'woocommerce_required',
+        __('WooCommerce is not active.', 'headless-fuzzy-find'),
+        { status: 400 },
+      );
     }
 
     const autocompleteEnabled: string = getOption('headless_fuzzy_find_autocomplete_enabled', '1');
     if (autocompleteEnabled !== '1') {
-      return new WP_Error('autocomplete_disabled', 'Autocomplete is disabled.', { status: 403 });
+      return new WP_Error(
+        'autocomplete_disabled',
+        __('Autocomplete is disabled.', 'headless-fuzzy-find'),
+        { status: 403 },
+      );
     }
 
     const query: string = sanitizeTextField(request.get_param('query') ?? '');

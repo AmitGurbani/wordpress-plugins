@@ -7,7 +7,7 @@ test.describe('Headless Wishlist — Admin Page', () => {
 
     await page.goto('http://localhost:8889/wp-admin/admin.php?page=headless-wishlist');
 
-    await expect(page.locator('#wpts-admin-app')).toBeVisible();
+    await expect(page.locator('#headless-wishlist-admin-app')).toBeVisible();
 
     expect(errors).toEqual([]);
   });
@@ -15,7 +15,7 @@ test.describe('Headless Wishlist — Admin Page', () => {
   test('analytics content loads', async ({ page }) => {
     await page.goto('http://localhost:8889/wp-admin/admin.php?page=headless-wishlist');
 
-    await expect(page.locator('#wpts-admin-app')).toBeVisible();
+    await expect(page.locator('#headless-wishlist-admin-app')).toBeVisible();
 
     // Wait for React app to finish loading (spinner disappears, content renders)
     await expect(page.getByText('Wishlist Analytics')).toBeVisible({ timeout: 15_000 });

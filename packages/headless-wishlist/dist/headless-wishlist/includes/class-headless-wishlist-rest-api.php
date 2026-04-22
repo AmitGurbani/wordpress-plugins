@@ -94,22 +94,22 @@ class Headless_Wishlist_Rest_Api {
 	public function add_item( $request ) {
 		$product_id = intval( $request->get_param( 'product_id' ) );
 		if ( ! $product_id ) {
-			return new WP_Error( 'missing_product_id', 'product_id is required.', array( 'status' => 400 ) );
+			return new WP_Error( 'missing_product_id', __( 'product_id is required.', 'headless-wishlist' ), array( 'status' => 400 ) );
 		}
 		$post = get_post( $product_id, 'ARRAY_A' );
 		if ( ! $post || $post['post_type'] !== 'product' || $post['post_status'] !== 'publish' ) {
-			return new WP_Error( 'product_not_found', 'Product not found', array( 'status' => 404 ) );
+			return new WP_Error( 'product_not_found', __( 'Product not found', 'headless-wishlist' ), array( 'status' => 404 ) );
 		}
 		$user_id = get_current_user_id();
 		$items = $this->get_wishlist( $user_id );
 		foreach ( $items as $item ) {
 			if ( intval( $item['product_id'] ) === $product_id ) {
-				return new WP_Error( 'already_exists', 'Product already in wishlist', array( 'status' => 409 ) );
+				return new WP_Error( 'already_exists', __( 'Product already in wishlist', 'headless-wishlist' ), array( 'status' => 409 ) );
 			}
 		}
 		$max_items = intval( apply_filters( 'headless_wishlist_max_items', 100 ) );
 		if ( count( $items ) >= $max_items ) {
-			return new WP_Error( 'wishlist_full', 'Wishlist has reached the maximum number of items.', array( 'status' => 400 ) );
+			return new WP_Error( 'wishlist_full', __( 'Wishlist has reached the maximum number of items.', 'headless-wishlist' ), array( 'status' => 400 ) );
 		}
 		$added_at = gmdate( 'c', time() );
 		array_push( $items, array( 'product_id' => $product_id, 'added_at' => $added_at ) );
@@ -133,7 +133,7 @@ class Headless_Wishlist_Rest_Api {
 			}
 		}
 		if ( ! $found ) {
-			return new WP_Error( 'not_found', 'Product not in wishlist', array( 'status' => 404 ) );
+			return new WP_Error( 'not_found', __( 'Product not in wishlist', 'headless-wishlist' ), array( 'status' => 404 ) );
 		}
 		$this->save_wishlist( $user_id, $updated );
 		return array( 'success' => true );

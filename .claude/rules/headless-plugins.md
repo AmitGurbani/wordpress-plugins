@@ -33,7 +33,7 @@ These guardrails apply to all wpts-based headless plugins.
 
 ## Admin UI
 
-- `admin/index.tsx` creates React root on `#wpts-admin-app`
+- `admin/index.tsx` creates React root on `#<text-domain>-admin-app` (e.g. `#headless-auth-admin-app`)
 - `admin/SettingsPage.tsx` composes `useSettings` + `SettingsShell` from `admin-ui` package
 - Tab definitions in `admin/types.ts`
 

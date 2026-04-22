@@ -47,7 +47,11 @@ class FfAdminRoutes {
   @RestRoute('/index/rebuild', { method: 'POST', capability: 'manage_options' })
   rebuildIndex(_request: any): any {
     if (!classExists('WooCommerce')) {
-      return new WP_Error('woocommerce_required', 'WooCommerce is not active.', { status: 400 });
+      return new WP_Error(
+        'woocommerce_required',
+        __('WooCommerce is not active.', 'headless-fuzzy-find'),
+        { status: 400 },
+      );
     }
 
     const isIndexing: string = getOption('headless_fuzzy_find_reindex_in_progress', '');
@@ -55,9 +59,13 @@ class FfAdminRoutes {
       // Allow override if flag is stale (>10 minutes old)
       const flagTime: number = intval(getOption('headless_fuzzy_find_reindex_started', '0'));
       if (flagTime > 0 && time() - flagTime < 600) {
-        return new WP_Error('already_indexing', 'A reindex is already in progress.', {
-          status: 409,
-        });
+        return new WP_Error(
+          'already_indexing',
+          __('A reindex is already in progress.', 'headless-fuzzy-find'),
+          {
+            status: 409,
+          },
+        );
       }
     }
 

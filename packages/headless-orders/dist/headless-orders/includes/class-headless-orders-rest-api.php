@@ -40,7 +40,7 @@ class Headless_Orders_Rest_Api {
 
 	public function list_orders( $request ) {
 		if ( ! class_exists( 'WooCommerce' ) ) {
-			return new WP_Error( 'woocommerce_required', 'WooCommerce is not active.', array( 'status' => 503 ) );
+			return new WP_Error( 'woocommerce_required', __( 'WooCommerce is not active.', 'headless-orders' ), array( 'status' => 503 ) );
 		}
 		$user_id = get_current_user_id();
 		$per_page = min( 100, max( 1, intval( $request->get_param( 'per_page' ) ?? '20' ) ) );
@@ -48,7 +48,7 @@ class Headless_Orders_Rest_Api {
 		$status_param = sanitize_text_field( $request->get_param( 'status' ) ?? '' );
 		$valid_statuses = array( 'pending', 'processing', 'completed', 'cancelled', 'refunded', 'failed', 'on-hold' );
 		if ( $status_param && ! in_array( $status_param, $valid_statuses, true ) ) {
-			return new WP_Error( 'invalid_status', 'Invalid order status.', array( 'status' => 400 ) );
+			return new WP_Error( 'invalid_status', __( 'Invalid order status.', 'headless-orders' ), array( 'status' => 400 ) );
 		}
 		$query_args = array( 'customer' => $user_id, 'limit' => $per_page, 'page' => $page, 'orderby' => 'date', 'order' => 'DESC' );
 		if ( $status_param ) {
@@ -74,16 +74,16 @@ class Headless_Orders_Rest_Api {
 
 	public function get_order( $request ) {
 		if ( ! class_exists( 'WooCommerce' ) ) {
-			return new WP_Error( 'woocommerce_required', 'WooCommerce is not active.', array( 'status' => 503 ) );
+			return new WP_Error( 'woocommerce_required', __( 'WooCommerce is not active.', 'headless-orders' ), array( 'status' => 503 ) );
 		}
 		$user_id = get_current_user_id();
 		$order_id = intval( $request->get_param( 'id' ) );
 		$order = wc_get_order( $order_id );
 		if ( ! $order ) {
-			return new WP_Error( 'order_not_found', 'Order not found.', array( 'status' => 404 ) );
+			return new WP_Error( 'order_not_found', __( 'Order not found.', 'headless-orders' ), array( 'status' => 404 ) );
 		}
 		if ( $order->get_customer_id() !== $user_id ) {
-			return new WP_Error( 'order_not_found', 'Order not found.', array( 'status' => 404 ) );
+			return new WP_Error( 'order_not_found', __( 'Order not found.', 'headless-orders' ), array( 'status' => 404 ) );
 		}
 		return rest_ensure_response( $this->format_order( $order ) );
 	}

@@ -174,7 +174,7 @@ describe('generatePlugin', () => {
     expect(adminClass.content).toContain("'Hello Greeter Settings'");
     expect(adminClass.content).toContain("'hello-greeter-settings'");
     expect(adminClass.content).toContain("'dashicons-format-chat'");
-    expect(adminClass.content).toContain('wpts-admin-app');
+    expect(adminClass.content).toContain('hello-greeter-admin-app');
     expect(adminClass.content).toContain('data-page');
     expect(adminClass.content).toContain('index.asset.php');
     expect(adminClass.content).toContain('wp_enqueue_script');

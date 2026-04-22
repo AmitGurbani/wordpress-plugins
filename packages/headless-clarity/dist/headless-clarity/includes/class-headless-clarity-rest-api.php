@@ -72,7 +72,7 @@ class Headless_Clarity_Rest_Api {
 			if ( null === $value ) {
 				return new \WP_Error(
 					'invalid_project_id',
-					'Invalid value for project_id.',
+					__( 'Invalid value for project_id.', 'headless-clarity' ),
 					array( 'status' => 400 )
 				);
 			}
@@ -83,7 +83,7 @@ class Headless_Clarity_Rest_Api {
 			if ( null === $value ) {
 				return new \WP_Error(
 					'invalid_enable_identify',
-					'Invalid value for enable_identify.',
+					__( 'Invalid value for enable_identify.', 'headless-clarity' ),
 					array( 'status' => 400 )
 				);
 			}

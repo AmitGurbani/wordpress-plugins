@@ -67,7 +67,11 @@ class OrderRoutes {
   @RestRoute('/orders', { method: 'GET', capability: 'read' })
   listOrders(request: any): any {
     if (!classExists('WooCommerce')) {
-      return new WP_Error('woocommerce_required', 'WooCommerce is not active.', { status: 503 });
+      return new WP_Error(
+        'woocommerce_required',
+        __('WooCommerce is not active.', 'headless-orders'),
+        { status: 503 },
+      );
     }
 
     const userId: number = getCurrentUserId();
@@ -90,7 +94,9 @@ class OrderRoutes {
     ];
 
     if (statusParam && !validStatuses.includes(statusParam)) {
-      return new WP_Error('invalid_status', 'Invalid order status.', { status: 400 });
+      return new WP_Error('invalid_status', __('Invalid order status.', 'headless-orders'), {
+        status: 400,
+      });
     }
 
     const queryArgs: Record<string, any> = {
@@ -132,7 +138,11 @@ class OrderRoutes {
   @RestRoute('/orders/(?P<id>\\d+)', { method: 'GET', capability: 'read' })
   getOrder(request: any): any {
     if (!classExists('WooCommerce')) {
-      return new WP_Error('woocommerce_required', 'WooCommerce is not active.', { status: 503 });
+      return new WP_Error(
+        'woocommerce_required',
+        __('WooCommerce is not active.', 'headless-orders'),
+        { status: 503 },
+      );
     }
 
     const userId: number = getCurrentUserId();
@@ -140,11 +150,15 @@ class OrderRoutes {
     const orderId: number = intval(request.get_param('id'));
     const order: any = wcGetOrder(orderId);
     if (!order) {
-      return new WP_Error('order_not_found', 'Order not found.', { status: 404 });
+      return new WP_Error('order_not_found', __('Order not found.', 'headless-orders'), {
+        status: 404,
+      });
     }
 
     if (order.get_customer_id() !== userId) {
-      return new WP_Error('order_not_found', 'Order not found.', { status: 404 });
+      return new WP_Error('order_not_found', __('Order not found.', 'headless-orders'), {
+        status: 404,
+      });
     }
 
     return restEnsureResponse(this.formatOrder(order));

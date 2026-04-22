@@ -130,7 +130,7 @@ class TestPlugin {
 
     // Verify admin class has React integration
     const adminContent = await fs.readFile(adminClass, 'utf-8');
-    expect(adminContent).toContain('wpts-admin-app');
+    expect(adminContent).toContain('test-plugin-admin-app');
     expect(adminContent).toContain('index.asset.php');
     expect(adminContent).toContain('wp_enqueue_script');
 
@@ -139,6 +139,8 @@ class TestPlugin {
     expect(restContent).toContain('register_rest_route');
     expect(restContent).toContain("'greeting'");
     expect(restContent).toContain('manage_options');
+    // Settings validation errors should be translatable
+    expect(restContent).toContain("__( 'Invalid value for greeting.', 'test-plugin' )");
 
     // Verify uninstall
     const uninstall = path.join(outDir, 'test-plugin', 'uninstall.php');

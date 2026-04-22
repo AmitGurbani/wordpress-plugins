@@ -75,7 +75,7 @@ class {{className}}_Rest_Api {
 			if ( null === $value ) {
 				return new \WP_Error(
 					'invalid_{{key}}',
-					'Invalid value for {{key}}.',
+					__( 'Invalid value for {{key}}.', '{{../textDomain}}' ),
 					array( 'status' => 400 )
 				);
 			}

@@ -85,7 +85,7 @@ class Headless_Google_Analytics_Rest_Api {
 			if ( null === $value ) {
 				return new \WP_Error(
 					'invalid_measurement_id',
-					'Invalid value for measurement_id.',
+					__( 'Invalid value for measurement_id.', 'headless-google-analytics' ),
 					array( 'status' => 400 )
 				);
 			}
@@ -96,7 +96,7 @@ class Headless_Google_Analytics_Rest_Api {
 			if ( null === $value ) {
 				return new \WP_Error(
 					'invalid_api_secret',
-					'Invalid value for api_secret.',
+					__( 'Invalid value for api_secret.', 'headless-google-analytics' ),
 					array( 'status' => 400 )
 				);
 			}
@@ -107,7 +107,7 @@ class Headless_Google_Analytics_Rest_Api {
 			if ( null === $value ) {
 				return new \WP_Error(
 					'invalid_currency',
-					'Invalid value for currency.',
+					__( 'Invalid value for currency.', 'headless-google-analytics' ),
 					array( 'status' => 400 )
 				);
 			}
@@ -118,7 +118,7 @@ class Headless_Google_Analytics_Rest_Api {
 			if ( null === $value ) {
 				return new \WP_Error(
 					'invalid_enable_purchase',
-					'Invalid value for enable_purchase.',
+					__( 'Invalid value for enable_purchase.', 'headless-google-analytics' ),
 					array( 'status' => 400 )
 				);
 			}

@@ -133,7 +133,7 @@ class Headless_Fuzzy_Find_Rest_Api {
 			if ( null === $value ) {
 				return new \WP_Error(
 					'invalid_weight_title',
-					'Invalid value for weight_title.',
+					__( 'Invalid value for weight_title.', 'headless-fuzzy-find' ),
 					array( 'status' => 400 )
 				);
 			}
@@ -144,7 +144,7 @@ class Headless_Fuzzy_Find_Rest_Api {
 			if ( null === $value ) {
 				return new \WP_Error(
 					'invalid_weight_sku',
-					'Invalid value for weight_sku.',
+					__( 'Invalid value for weight_sku.', 'headless-fuzzy-find' ),
 					array( 'status' => 400 )
 				);
 			}
@@ -155,7 +155,7 @@ class Headless_Fuzzy_Find_Rest_Api {
 			if ( null === $value ) {
 				return new \WP_Error(
 					'invalid_weight_content',
-					'Invalid value for weight_content.',
+					__( 'Invalid value for weight_content.', 'headless-fuzzy-find' ),
 					array( 'status' => 400 )
 				);
 			}
@@ -166,7 +166,7 @@ class Headless_Fuzzy_Find_Rest_Api {
 			if ( null === $value ) {
 				return new \WP_Error(
 					'invalid_fuzzy_enabled',
-					'Invalid value for fuzzy_enabled.',
+					__( 'Invalid value for fuzzy_enabled.', 'headless-fuzzy-find' ),
 					array( 'status' => 400 )
 				);
 			}
@@ -177,7 +177,7 @@ class Headless_Fuzzy_Find_Rest_Api {
 			if ( null === $value ) {
 				return new \WP_Error(
 					'invalid_autocomplete_enabled',
-					'Invalid value for autocomplete_enabled.',
+					__( 'Invalid value for autocomplete_enabled.', 'headless-fuzzy-find' ),
 					array( 'status' => 400 )
 				);
 			}
@@ -188,7 +188,7 @@ class Headless_Fuzzy_Find_Rest_Api {
 			if ( null === $value ) {
 				return new \WP_Error(
 					'invalid_analytics_enabled',
-					'Invalid value for analytics_enabled.',
+					__( 'Invalid value for analytics_enabled.', 'headless-fuzzy-find' ),
 					array( 'status' => 400 )
 				);
 			}
@@ -199,7 +199,7 @@ class Headless_Fuzzy_Find_Rest_Api {
 			if ( null === $value ) {
 				return new \WP_Error(
 					'invalid_min_query_length',
-					'Invalid value for min_query_length.',
+					__( 'Invalid value for min_query_length.', 'headless-fuzzy-find' ),
 					array( 'status' => 400 )
 				);
 			}
@@ -210,7 +210,7 @@ class Headless_Fuzzy_Find_Rest_Api {
 			if ( null === $value ) {
 				return new \WP_Error(
 					'invalid_autocomplete_limit',
-					'Invalid value for autocomplete_limit.',
+					__( 'Invalid value for autocomplete_limit.', 'headless-fuzzy-find' ),
 					array( 'status' => 400 )
 				);
 			}
@@ -221,7 +221,7 @@ class Headless_Fuzzy_Find_Rest_Api {
 			if ( null === $value ) {
 				return new \WP_Error(
 					'invalid_did_you_mean_threshold',
-					'Invalid value for did_you_mean_threshold.',
+					__( 'Invalid value for did_you_mean_threshold.', 'headless-fuzzy-find' ),
 					array( 'status' => 400 )
 				);
 			}
@@ -232,7 +232,7 @@ class Headless_Fuzzy_Find_Rest_Api {
 			if ( null === $value ) {
 				return new \WP_Error(
 					'invalid_synonyms',
-					'Invalid value for synonyms.',
+					__( 'Invalid value for synonyms.', 'headless-fuzzy-find' ),
 					array( 'status' => 400 )
 				);
 			}
@@ -245,7 +245,7 @@ class Headless_Fuzzy_Find_Rest_Api {
 	public function search( $request ) {
 		global $wpdb;
 		if ( ! class_exists( 'WooCommerce' ) ) {
-			return new WP_Error( 'woocommerce_required', 'WooCommerce is not active.', array( 'status' => 400 ) );
+			return new WP_Error( 'woocommerce_required', __( 'WooCommerce is not active.', 'headless-fuzzy-find' ), array( 'status' => 400 ) );
 		}
 		$query = sanitize_text_field( $request->get_param( 'query' ) ?? '' );
 		$page = intval( $request->get_param( 'page' ) ?? 1 );
@@ -351,11 +351,11 @@ class Headless_Fuzzy_Find_Rest_Api {
 	public function autocomplete( $request ) {
 		global $wpdb;
 		if ( ! class_exists( 'WooCommerce' ) ) {
-			return new WP_Error( 'woocommerce_required', 'WooCommerce is not active.', array( 'status' => 400 ) );
+			return new WP_Error( 'woocommerce_required', __( 'WooCommerce is not active.', 'headless-fuzzy-find' ), array( 'status' => 400 ) );
 		}
 		$autocomplete_enabled = get_option( 'headless_fuzzy_find_autocomplete_enabled', '1' );
 		if ( $autocomplete_enabled !== '1' ) {
-			return new WP_Error( 'autocomplete_disabled', 'Autocomplete is disabled.', array( 'status' => 403 ) );
+			return new WP_Error( 'autocomplete_disabled', __( 'Autocomplete is disabled.', 'headless-fuzzy-find' ), array( 'status' => 403 ) );
 		}
 		$query = sanitize_text_field( $request->get_param( 'query' ) ?? '' );
 		$raw_limit = intval( $request->get_param( 'limit' ) ?? get_option( 'headless_fuzzy_find_autocomplete_limit', 8 ) );
@@ -442,13 +442,13 @@ class Headless_Fuzzy_Find_Rest_Api {
 	public function rebuild_index( $request ) {
 		global $wpdb;
 		if ( ! class_exists( 'WooCommerce' ) ) {
-			return new WP_Error( 'woocommerce_required', 'WooCommerce is not active.', array( 'status' => 400 ) );
+			return new WP_Error( 'woocommerce_required', __( 'WooCommerce is not active.', 'headless-fuzzy-find' ), array( 'status' => 400 ) );
 		}
 		$is_indexing = get_option( 'headless_fuzzy_find_reindex_in_progress', '' );
 		if ( $is_indexing === '1' ) {
 			$flag_time = intval( get_option( 'headless_fuzzy_find_reindex_started', '0' ) );
 			if ( $flag_time > 0 && time() - $flag_time < 600 ) {
-				return new WP_Error( 'already_indexing', 'A reindex is already in progress.', array( 'status' => 409 ) );
+				return new WP_Error( 'already_indexing', __( 'A reindex is already in progress.', 'headless-fuzzy-find' ), array( 'status' => 409 ) );
 			}
 		}
 		update_option( 'headless_fuzzy_find_reindex_in_progress', '1' );

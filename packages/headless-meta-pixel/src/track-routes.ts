@@ -89,14 +89,22 @@ class MetaPixelTrack {
     const rlKey: string = `headless_meta_pixel_rl_${md5(rlIp)}`;
     const rlCount: any = getTransient(rlKey);
     if (rlCount && intval(rlCount) >= 60) {
-      return new WP_Error('rate_limited', 'Too many requests. Please try again later.', {
-        status: 429,
-      });
+      return new WP_Error(
+        'rate_limited',
+        __('Too many requests. Please try again later.', 'headless-meta-pixel'),
+        {
+          status: 429,
+        },
+      );
     }
     setTransient(rlKey, strval(rlCount ? intval(rlCount) + 1 : 1), 60);
 
     if (getOption('headless_meta_pixel_enable_capi', '1') !== '1') {
-      return new WP_Error('capi_disabled', 'Conversions API is disabled.', { status: 403 });
+      return new WP_Error(
+        'capi_disabled',
+        __('Conversions API is disabled.', 'headless-meta-pixel'),
+        { status: 403 },
+      );
     }
 
     const eventName: string = sanitizeTextField(request.get_param('event_name'));
@@ -132,9 +140,13 @@ class MetaPixelTrack {
     }
 
     if (!eventName || !eventId) {
-      return new WP_Error('missing_params', 'event_name and event_id are required.', {
-        status: 400,
-      });
+      return new WP_Error(
+        'missing_params',
+        __('event_name and event_id are required.', 'headless-meta-pixel'),
+        {
+          status: 400,
+        },
+      );
     }
 
     // Validate event_name is allowed
@@ -148,11 +160,19 @@ class MetaPixelTrack {
 
     const settingKey: any = allowedEvents[eventName];
     if (!settingKey) {
-      return new WP_Error('invalid_event', 'Event name is not supported.', { status: 400 });
+      return new WP_Error(
+        'invalid_event',
+        __('Event name is not supported.', 'headless-meta-pixel'),
+        { status: 400 },
+      );
     }
 
     if (getOption(`headless_meta_pixel_${settingKey}`, '1') !== '1') {
-      return new WP_Error('event_disabled', 'This event type is disabled.', { status: 403 });
+      return new WP_Error(
+        'event_disabled',
+        __('This event type is disabled.', 'headless-meta-pixel'),
+        { status: 403 },
+      );
     }
 
     // Build user_data from request

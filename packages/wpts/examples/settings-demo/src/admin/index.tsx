@@ -151,7 +151,7 @@ function SettingsPage() {
   );
 }
 
-const rootElement = document.getElementById('wpts-admin-app');
+const rootElement = document.getElementById('settings-demo-admin-app');
 if (rootElement) {
   createRoot(rootElement).render(<SettingsPage />);
 }

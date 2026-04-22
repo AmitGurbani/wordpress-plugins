@@ -13,26 +13,38 @@ class AuthRoutes {
     const name: string = sanitizeTextField(request.get_param('name'));
 
     if (!regToken || !name) {
-      return new WP_Error('missing_params', 'Registration token and name are required.', {
-        status: 400,
-      });
+      return new WP_Error(
+        'missing_params',
+        __('Registration token and name are required.', 'headless-auth'),
+        {
+          status: 400,
+        },
+      );
     }
 
     // Check if registration is enabled
     const regEnabled: string = getOption('headless_auth_enable_registration', '1');
     if (regEnabled !== '1') {
-      return new WP_Error('registration_disabled', 'New user registration is disabled.', {
-        status: 403,
-      });
+      return new WP_Error(
+        'registration_disabled',
+        __('New user registration is disabled.', 'headless-auth'),
+        {
+          status: 403,
+        },
+      );
     }
 
     const regTokenHash: string = md5(regToken);
     const phone: string = getTransient(`headless_auth_reg_${regTokenHash}`);
 
     if (!phone) {
-      return new WP_Error('invalid_token', 'Registration token is invalid or expired.', {
-        status: 400,
-      });
+      return new WP_Error(
+        'invalid_token',
+        __('Registration token is invalid or expired.', 'headless-auth'),
+        {
+          status: 400,
+        },
+      );
     }
 
     // Check if user already exists (use fields:'ids' to avoid WP_User objects)
@@ -59,9 +71,13 @@ class AuthRoutes {
 
     if (existingIds.length > 0) {
       deleteTransient(`headless_auth_reg_${regTokenHash}`);
-      return new WP_Error('user_exists', 'An account with this phone number already exists.', {
-        status: 409,
-      });
+      return new WP_Error(
+        'user_exists',
+        __('An account with this phone number already exists.', 'headless-auth'),
+        {
+          status: 409,
+        },
+      );
     }
 
     // Generate username from display name
@@ -100,7 +116,11 @@ class AuthRoutes {
     });
 
     if (isWpError(newUserId)) {
-      return new WP_Error('registration_failed', 'Failed to create user account.', { status: 500 });
+      return new WP_Error(
+        'registration_failed',
+        __('Failed to create user account.', 'headless-auth'),
+        { status: 500 },
+      );
     }
 
     const userId: number = intval(newUserId);
@@ -115,7 +135,9 @@ class AuthRoutes {
     // Generate tokens
     const secret: string = getOption('headless_auth_jwt_secret_key', '');
     if (!secret) {
-      return new WP_Error('config_error', 'JWT is not configured.', { status: 403 });
+      return new WP_Error('config_error', __('JWT is not configured.', 'headless-auth'), {
+        status: 403,
+      });
     }
     const accessExpiry: number = intval(getOption('headless_auth_jwt_access_expiry', 3600));
     const refreshExpiry: number = intval(getOption('headless_auth_jwt_refresh_expiry', 604800));
@@ -164,18 +186,24 @@ class AuthRoutes {
     const refreshTokenStr: string = request.get_param('refresh_token');
 
     if (!refreshTokenStr) {
-      return new WP_Error('missing_token', 'Refresh token is required.', { status: 400 });
+      return new WP_Error('missing_token', __('Refresh token is required.', 'headless-auth'), {
+        status: 400,
+      });
     }
 
     const secret: string = getOption('headless_auth_jwt_secret_key', '');
     if (!secret) {
-      return new WP_Error('config_error', 'JWT is not configured.', { status: 403 });
+      return new WP_Error('config_error', __('JWT is not configured.', 'headless-auth'), {
+        status: 403,
+      });
     }
 
     // Verify refresh token JWT
     const tokenParts: string[] = refreshTokenStr.split('.');
     if (tokenParts.length !== 3) {
-      return new WP_Error('invalid_token', 'Invalid refresh token format.', { status: 400 });
+      return new WP_Error('invalid_token', __('Invalid refresh token format.', 'headless-auth'), {
+        status: 400,
+      });
     }
 
     const headerPayload: string = `${tokenParts[0]}.${tokenParts[1]}`;
@@ -186,25 +214,35 @@ class AuthRoutes {
     );
 
     if (!hashEquals(expectedSig, tokenParts[2])) {
-      return new WP_Error('invalid_token', 'Invalid refresh token.', { status: 401 });
+      return new WP_Error('invalid_token', __('Invalid refresh token.', 'headless-auth'), {
+        status: 401,
+      });
     }
 
     const payloadJson: string = base64Decode(strtr(tokenParts[1], '-_', '+/'));
     const payload: any = jsonDecode(payloadJson, true);
 
     if (!payload || payload.type !== 'refresh') {
-      return new WP_Error('invalid_token', 'Token is not a refresh token.', { status: 400 });
+      return new WP_Error('invalid_token', __('Token is not a refresh token.', 'headless-auth'), {
+        status: 400,
+      });
     }
     if (payload.exp < time()) {
-      return new WP_Error('token_expired', 'Refresh token has expired.', { status: 401 });
+      return new WP_Error('token_expired', __('Refresh token has expired.', 'headless-auth'), {
+        status: 401,
+      });
     }
     if (payload.iss !== siteUrl()) {
-      return new WP_Error('invalid_token', 'Token issuer mismatch.', { status: 401 });
+      return new WP_Error('invalid_token', __('Token issuer mismatch.', 'headless-auth'), {
+        status: 401,
+      });
     }
 
     const userId: number = intval(payload.sub);
     if (!userId) {
-      return new WP_Error('invalid_token', 'Invalid user in token.', { status: 400 });
+      return new WP_Error('invalid_token', __('Invalid user in token.', 'headless-auth'), {
+        status: 400,
+      });
     }
 
     // Verify against stored hash
@@ -224,7 +262,9 @@ class AuthRoutes {
           };
         }
       }
-      return new WP_Error('invalid_token', 'Refresh token has been revoked.', { status: 401 });
+      return new WP_Error('invalid_token', __('Refresh token has been revoked.', 'headless-auth'), {
+        status: 401,
+      });
     }
 
     const storedExpiry: number = intval(
@@ -233,7 +273,9 @@ class AuthRoutes {
     if (storedExpiry < time()) {
       deleteUserMeta(userId, 'headless_auth_refresh_token_hash');
       deleteUserMeta(userId, 'headless_auth_refresh_token_expiry');
-      return new WP_Error('token_expired', 'Refresh token has expired.', { status: 401 });
+      return new WP_Error('token_expired', __('Refresh token has expired.', 'headless-auth'), {
+        status: 401,
+      });
     }
 
     // Issue new tokens
@@ -283,7 +325,9 @@ class AuthRoutes {
     const userId: number = getCurrentUserId();
 
     if (!userId) {
-      return new WP_Error('not_authenticated', 'You must be logged in.', { status: 401 });
+      return new WP_Error('not_authenticated', __('You must be logged in.', 'headless-auth'), {
+        status: 401,
+      });
     }
 
     const displayName: string = getTheAuthorMeta('display_name', userId);
@@ -311,14 +355,20 @@ class AuthRoutes {
     const userId: number = getCurrentUserId();
 
     if (!userId) {
-      return new WP_Error('not_authenticated', 'You must be logged in.', { status: 401 });
+      return new WP_Error('not_authenticated', __('You must be logged in.', 'headless-auth'), {
+        status: 401,
+      });
     }
 
     // Defense-in-depth: edit_user meta capability allows self-editing via map_meta_cap()
     if (!currentUserCan('edit_user', userId)) {
-      return new WP_Error('cannot_edit', 'You are not allowed to edit this profile.', {
-        status: 403,
-      });
+      return new WP_Error(
+        'cannot_edit',
+        __('You are not allowed to edit this profile.', 'headless-auth'),
+        {
+          status: 403,
+        },
+      );
     }
 
     // Read optional fields from request (profile data only — credential changes
@@ -359,13 +409,19 @@ class AuthRoutes {
     }
 
     if (!hasCoreUpdates) {
-      return new WP_Error('no_changes', 'No valid fields provided for update.', { status: 400 });
+      return new WP_Error(
+        'no_changes',
+        __('No valid fields provided for update.', 'headless-auth'),
+        { status: 400 },
+      );
     }
 
     // Update core WP user fields
     const result: any = wpUpdateUser(userData);
     if (isWpError(result)) {
-      return new WP_Error('update_failed', 'Failed to update profile.', { status: 500 });
+      return new WP_Error('update_failed', __('Failed to update profile.', 'headless-auth'), {
+        status: 500,
+      });
     }
 
     // Sync WooCommerce billing name meta

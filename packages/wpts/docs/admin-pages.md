@@ -60,7 +60,7 @@ function SettingsPage() {
   );
 }
 
-const rootElement = document.getElementById('wpts-admin-app');
+const rootElement = document.getElementById('my-plugin-admin-app');
 if (rootElement) {
   createRoot(rootElement).render(<SettingsPage />);
 }
@@ -69,7 +69,7 @@ if (rootElement) {
 ## What the Generated PHP Does
 
 The generated PHP admin class automatically:
-- Registers the page with a `<div id="wpts-admin-app">` container
+- Registers the page with a `<div id="my-plugin-admin-app">` container
 - Enqueues the React bundle from `admin/js/build/index.js`
 - Loads `wp-components` styles
 

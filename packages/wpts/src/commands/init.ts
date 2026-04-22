@@ -124,7 +124,7 @@ function SettingsPage() {
   );
 }
 
-const rootElement = document.getElementById('wpts-admin-app');
+const rootElement = document.getElementById('${options.slug ?? 'my-plugin'}-admin-app');
 if (rootElement) {
   createRoot(rootElement).render(<SettingsPage />);
 }

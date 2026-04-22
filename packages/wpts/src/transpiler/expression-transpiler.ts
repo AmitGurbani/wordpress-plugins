@@ -676,6 +676,11 @@ function transpilePropertyAccess(
     return `$wpdb->${prop}`;
   }
 
+  // Class instance property access -> arrow operator (not array key)
+  if (isClassType(node.expression, typeChecker)) {
+    return `${obj}->${prop}`;
+  }
+
   // General property access -> array key access (WordPress convention)
   return `${obj}['${prop}']`;
 }
@@ -842,6 +847,19 @@ function transpileTypeOf(node: ts.TypeOfExpression, typeChecker: ts.TypeChecker)
 function phpCall(name: string, args: string[]): string {
   if (args.length === 0) return `${name}()`;
   return `${name}( ${args.join(', ')} )`;
+}
+
+/**
+ * Check if an expression's TypeScript type is a class instance.
+ * Used to emit -> (arrow) property access instead of ['key'] (bracket).
+ */
+function isClassType(node: ts.Expression, typeChecker: ts.TypeChecker): boolean {
+  try {
+    const type = typeChecker.getTypeAtLocation(node);
+    return !!(type.symbol && type.symbol.flags & ts.SymbolFlags.Class);
+  } catch {
+    return false;
+  }
 }
 
 /**

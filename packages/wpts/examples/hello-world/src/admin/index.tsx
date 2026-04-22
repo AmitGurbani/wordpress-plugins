@@ -64,7 +64,7 @@ function SettingsPage() {
   );
 }
 
-const rootElement = document.getElementById('wpts-admin-app');
+const rootElement = document.getElementById('hello-world-admin-app');
 if (rootElement) {
   createRoot(rootElement).render(<SettingsPage />);
 }

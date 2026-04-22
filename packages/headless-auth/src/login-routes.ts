@@ -12,7 +12,9 @@ class LoginRoutes {
     // Check if password login is enabled
     const enabled: string = getOption('headless_auth_enable_password_login', '1');
     if (enabled !== '1') {
-      return new WP_Error('login_disabled', 'Password login is disabled.', { status: 403 });
+      return new WP_Error('login_disabled', __('Password login is disabled.', 'headless-auth'), {
+        status: 403,
+      });
     }
 
     const login: string = sanitizeTextField(request.get_param('username'));
@@ -20,9 +22,13 @@ class LoginRoutes {
     const password: string = request.get_param('password');
 
     if (!login || !password) {
-      return new WP_Error('missing_params', 'Username/email and password are required.', {
-        status: 400,
-      });
+      return new WP_Error(
+        'missing_params',
+        __('Username/email and password are required.', 'headless-auth'),
+        {
+          status: 400,
+        },
+      );
     }
 
     // Rate limiting by login hash
@@ -39,9 +45,13 @@ class LoginRoutes {
     );
 
     if (currentAttempts && intval(currentAttempts) >= maxAttempts) {
-      return new WP_Error('too_many_attempts', 'Too many login attempts. Please try again later.', {
-        status: 429,
-      });
+      return new WP_Error(
+        'too_many_attempts',
+        __('Too many login attempts. Please try again later.', 'headless-auth'),
+        {
+          status: 429,
+        },
+      );
     }
 
     // Authenticate with WordPress (accepts both username and email since WP 4.5.0)
@@ -51,9 +61,13 @@ class LoginRoutes {
       // Increment failed attempts — generic error prevents user enumeration
       const newAttempts: number = currentAttempts ? intval(currentAttempts) + 1 : 1;
       setTransient(attemptsKey, strval(newAttempts), rateLimitWindow);
-      return new WP_Error('invalid_credentials', 'Invalid username/email or password.', {
-        status: 401,
-      });
+      return new WP_Error(
+        'invalid_credentials',
+        __('Invalid username/email or password.', 'headless-auth'),
+        {
+          status: 401,
+        },
+      );
     }
 
     // Success — clear rate limiting
@@ -68,7 +82,9 @@ class LoginRoutes {
     }
     const secret: string = getOption('headless_auth_jwt_secret_key', '');
     if (!secret) {
-      return new WP_Error('config_error', 'JWT is not configured.', { status: 403 });
+      return new WP_Error('config_error', __('JWT is not configured.', 'headless-auth'), {
+        status: 403,
+      });
     }
     const accessExpiry: number = intval(getOption('headless_auth_jwt_access_expiry', 3600));
     const refreshExpiry: number = intval(getOption('headless_auth_jwt_refresh_expiry', 604800));

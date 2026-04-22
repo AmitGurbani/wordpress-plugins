@@ -29,7 +29,7 @@ class Headless_Pos_Sessions_Admin {
 	public function render_admin_page() {
 		$screen = get_current_screen();
 		$page   = $screen ? $screen->id : '';
-		echo '<div id="wpts-admin-app" data-page="' . esc_attr( $page ) . '"></div>';
+		echo '<div id="headless-pos-sessions-admin-app" data-page="' . esc_attr( $page ) . '"></div>';
 	}
 
 	public function enqueue_admin_assets( $hook_suffix ) {

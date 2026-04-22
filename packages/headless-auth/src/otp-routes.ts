@@ -21,7 +21,9 @@ class OtpRoutes {
     const phone: string = sanitizeTextField(request.get_param('phone'));
 
     if (!phone) {
-      return new WP_Error('missing_phone', 'Phone number is required.', { status: 400 });
+      return new WP_Error('missing_phone', __('Phone number is required.', 'headless-auth'), {
+        status: 400,
+      });
     }
 
     // Rate limiting
@@ -31,9 +33,13 @@ class OtpRoutes {
     const maxAttempts: number = Math.max(1, intval(getOption('headless_auth_max_otp_attempts', 3)));
 
     if (currentAttempts && intval(currentAttempts) >= maxAttempts) {
-      return new WP_Error('too_many_attempts', 'Too many OTP requests. Please try again later.', {
-        status: 429,
-      });
+      return new WP_Error(
+        'too_many_attempts',
+        __('Too many OTP requests. Please try again later.', 'headless-auth'),
+        {
+          status: 429,
+        },
+      );
     }
 
     // Resend cooldown
@@ -41,10 +47,14 @@ class OtpRoutes {
     const cooldownExpiry: any = getTransient(cooldownKey);
     if (cooldownExpiry) {
       const retryAfter: number = Math.max(0, intval(cooldownExpiry) - time());
-      return new WP_Error('cooldown_active', 'Please wait before requesting another OTP.', {
-        status: 429,
-        retry_after: retryAfter,
-      });
+      return new WP_Error(
+        'cooldown_active',
+        __('Please wait before requesting another OTP.', 'headless-auth'),
+        {
+          status: 429,
+          retry_after: retryAfter,
+        },
+      );
     }
 
     // Generate OTP
@@ -92,7 +102,11 @@ class OtpRoutes {
     // Validate OTP server is configured
     const serverUrl: string = getOption('headless_auth_otp_server_url', '');
     if (!serverUrl) {
-      return new WP_Error('otp_not_configured', 'OTP delivery is not configured.', { status: 500 });
+      return new WP_Error(
+        'otp_not_configured',
+        __('OTP delivery is not configured.', 'headless-auth'),
+        { status: 500 },
+      );
     }
 
     // Send OTP via external server — generic template-based request
@@ -131,14 +145,20 @@ class OtpRoutes {
     });
 
     if (isWpError(response)) {
-      return new WP_Error('otp_send_failed', 'Failed to send OTP.', { status: 500 });
+      return new WP_Error('otp_send_failed', __('Failed to send OTP.', 'headless-auth'), {
+        status: 500,
+      });
     }
 
     const responseCode: number = intval(wpRemoteRetrieveResponseCode(response));
     if (responseCode < 200 || responseCode >= 300) {
-      return new WP_Error('otp_send_failed', 'OTP delivery server returned an error.', {
-        status: 502,
-      });
+      return new WP_Error(
+        'otp_send_failed',
+        __('OTP delivery server returned an error.', 'headless-auth'),
+        {
+          status: 502,
+        },
+      );
     }
 
     return { success: true, message: 'OTP sent successfully.' };
@@ -150,14 +170,22 @@ class OtpRoutes {
     const otp: string = sanitizeTextField(request.get_param('otp'));
 
     if (!phone || !otp) {
-      return new WP_Error('missing_params', 'Phone number and OTP are required.', { status: 400 });
+      return new WP_Error(
+        'missing_params',
+        __('Phone number and OTP are required.', 'headless-auth'),
+        { status: 400 },
+      );
     }
 
     const phoneHash: string = md5(phone);
     const storedOtpHash: any = getTransient(`headless_auth_otp_${phoneHash}`);
 
     if (!storedOtpHash) {
-      return new WP_Error('otp_expired', 'OTP has expired or was not requested.', { status: 400 });
+      return new WP_Error(
+        'otp_expired',
+        __('OTP has expired or was not requested.', 'headless-auth'),
+        { status: 400 },
+      );
     }
 
     // Brute-force protection: limit wrong verify attempts
@@ -172,7 +200,7 @@ class OtpRoutes {
       deleteTransient(`headless_auth_otp_${phoneHash}`);
       return new WP_Error(
         'too_many_verify_attempts',
-        'Too many failed attempts. Please request a new OTP.',
+        __('Too many failed attempts. Please request a new OTP.', 'headless-auth'),
         { status: 429 },
       );
     }
@@ -184,7 +212,7 @@ class OtpRoutes {
         intval(getOption('headless_auth_rate_limit_window', 900)),
       );
       setTransient(verifyKey, strval(newVerify), verifyExpiry);
-      return new WP_Error('invalid_otp', 'Invalid OTP.', { status: 400 });
+      return new WP_Error('invalid_otp', __('Invalid OTP.', 'headless-auth'), { status: 400 });
     }
 
     // OTP valid — clear transients
@@ -219,7 +247,9 @@ class OtpRoutes {
       const existingUserId: number = intval(userIds[0]);
       const secret: string = getOption('headless_auth_jwt_secret_key', '');
       if (!secret) {
-        return new WP_Error('config_error', 'JWT is not configured.', { status: 403 });
+        return new WP_Error('config_error', __('JWT is not configured.', 'headless-auth'), {
+          status: 403,
+        });
       }
       const accessExpiry: number = intval(getOption('headless_auth_jwt_access_expiry', 3600));
       const refreshExpiry: number = intval(getOption('headless_auth_jwt_refresh_expiry', 604800));

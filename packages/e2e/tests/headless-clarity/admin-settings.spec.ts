@@ -18,7 +18,7 @@ test.describe('Headless Clarity — Admin Settings UI', () => {
     });
 
     await page.goto('http://localhost:8889/wp-admin/admin.php?page=headless-clarity-settings');
-    await expect(page.locator('#wpts-admin-app')).toBeVisible();
+    await expect(page.locator('#headless-clarity-admin-app')).toBeVisible();
 
     // Fill in project ID
     const projectIdInput = page.getByLabel('Clarity Project ID');
@@ -38,7 +38,7 @@ test.describe('Headless Clarity — Admin Settings UI', () => {
 
     // Reload and verify persistence
     await page.reload();
-    await expect(page.locator('#wpts-admin-app')).toBeVisible();
+    await expect(page.locator('#headless-clarity-admin-app')).toBeVisible();
 
     await expect(page.getByLabel('Clarity Project ID')).toHaveValue('test123456');
     await expect(page.getByLabel('Enable user identification')).not.toBeChecked();

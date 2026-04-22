@@ -20,7 +20,7 @@ test.describe('Headless Fuzzy Find — Admin Settings UI', () => {
     });
 
     await page.goto('http://localhost:8889/wp-admin/admin.php?page=headless-fuzzy-find-settings');
-    await expect(page.locator('#wpts-admin-app')).toBeVisible();
+    await expect(page.locator('#headless-fuzzy-find-admin-app')).toBeVisible();
 
     // Change title weight
     const titleWeightInput = page.getByLabel('Title Weight');
@@ -32,7 +32,7 @@ test.describe('Headless Fuzzy Find — Admin Settings UI', () => {
 
     // Reload and verify persistence
     await page.reload();
-    await expect(page.locator('#wpts-admin-app')).toBeVisible();
+    await expect(page.locator('#headless-fuzzy-find-admin-app')).toBeVisible();
 
     await expect(page.getByLabel('Title Weight')).toHaveValue('7');
   });

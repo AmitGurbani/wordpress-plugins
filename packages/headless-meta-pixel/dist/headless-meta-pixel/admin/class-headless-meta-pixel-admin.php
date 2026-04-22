@@ -29,7 +29,7 @@ class Headless_Meta_Pixel_Admin {
 	public function render_admin_page() {
 		$screen = get_current_screen();
 		$page   = $screen ? $screen->id : '';
-		echo '<div id="wpts-admin-app" data-page="' . esc_attr( $page ) . '"></div>';
+		echo '<div id="headless-meta-pixel-admin-app" data-page="' . esc_attr( $page ) . '"></div>';
 	}
 
 	public function enqueue_admin_assets( $hook_suffix ) {

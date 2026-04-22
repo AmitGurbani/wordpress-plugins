@@ -84,7 +84,7 @@ class Headless_Umami_Rest_Api {
 			if ( null === $value ) {
 				return new \WP_Error(
 					'invalid_umami_url',
-					'Invalid value for umami_url.',
+					__( 'Invalid value for umami_url.', 'headless-umami' ),
 					array( 'status' => 400 )
 				);
 			}
@@ -95,7 +95,7 @@ class Headless_Umami_Rest_Api {
 			if ( null === $value ) {
 				return new \WP_Error(
 					'invalid_website_id',
-					'Invalid value for website_id.',
+					__( 'Invalid value for website_id.', 'headless-umami' ),
 					array( 'status' => 400 )
 				);
 			}
@@ -106,7 +106,7 @@ class Headless_Umami_Rest_Api {
 			if ( null === $value ) {
 				return new \WP_Error(
 					'invalid_enable_purchase',
-					'Invalid value for enable_purchase.',
+					__( 'Invalid value for enable_purchase.', 'headless-umami' ),
 					array( 'status' => 400 )
 				);
 			}

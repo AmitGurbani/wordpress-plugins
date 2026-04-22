@@ -60,12 +60,18 @@ class WishlistRoutes {
   addItem(request: any): any {
     const productId: number = intval(request.get_param('product_id'));
     if (!productId) {
-      return new WP_Error('missing_product_id', 'product_id is required.', { status: 400 });
+      return new WP_Error(
+        'missing_product_id',
+        __('product_id is required.', 'headless-wishlist'),
+        { status: 400 },
+      );
     }
 
     const post: any = getPost(productId, 'ARRAY_A');
     if (!post || post.post_type !== 'product' || post.post_status !== 'publish') {
-      return new WP_Error('product_not_found', 'Product not found', { status: 404 });
+      return new WP_Error('product_not_found', __('Product not found', 'headless-wishlist'), {
+        status: 404,
+      });
     }
 
     const userId: number = getCurrentUserId();
@@ -74,16 +80,24 @@ class WishlistRoutes {
     // Check duplicate
     for (const item of items) {
       if (intval(item.product_id) === productId) {
-        return new WP_Error('already_exists', 'Product already in wishlist', { status: 409 });
+        return new WP_Error(
+          'already_exists',
+          __('Product already in wishlist', 'headless-wishlist'),
+          { status: 409 },
+        );
       }
     }
 
     // Check max items
     const maxItems: number = intval(applyFilters('headless_wishlist_max_items', 100));
     if (items.length >= maxItems) {
-      return new WP_Error('wishlist_full', 'Wishlist has reached the maximum number of items.', {
-        status: 400,
-      });
+      return new WP_Error(
+        'wishlist_full',
+        __('Wishlist has reached the maximum number of items.', 'headless-wishlist'),
+        {
+          status: 400,
+        },
+      );
     }
 
     const addedAt: string = gmdate('c', time());
@@ -121,7 +135,9 @@ class WishlistRoutes {
     }
 
     if (!found) {
-      return new WP_Error('not_found', 'Product not in wishlist', { status: 404 });
+      return new WP_Error('not_found', __('Product not in wishlist', 'headless-wishlist'), {
+        status: 404,
+      });
     }
 
     this.saveWishlist(userId, updated);
