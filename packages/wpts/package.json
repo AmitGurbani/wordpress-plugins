@@ -52,7 +52,7 @@
     "url": "https://github.com/AmitGurbani/wordpress-plugins/issues"
   },
   "engines": {
-    "node": ">=20.0.0"
+    "node": ">=22.0.0"
   },
   "dependencies": {
     "archiver": "^7.0.1",
