@@ -226,6 +226,7 @@ class Headless_Pos_Sessions_Rest_Api {
 		$query_args['fields'] = 'ids';
 		$query = new WP_Query( $query_args );
 		$post_ids = $query->posts;
+		update_postmeta_cache( $post_ids );
 		$sessions = array();
 		foreach ( $post_ids as $pid ) {
 			$session = $this->format_session( intval( $pid ) );
@@ -293,7 +294,8 @@ class Headless_Pos_Sessions_Rest_Api {
 			update_post_meta( $post_id, '_cash_out', strval( floatval( $params['cash_out'] ) ) );
 		}
 		if ( isset( $params['order_ids'] ) ) {
-			update_post_meta( $post_id, '_order_ids', wp_json_encode( $params['order_ids'] ) );
+			$valid_order_ids = array_map( function( $id ) { return intval( $id ); }, $params['order_ids'] );
+			update_post_meta( $post_id, '_order_ids', wp_json_encode( $valid_order_ids ) );
 		}
 		if ( isset( $params['order_count'] ) ) {
 			update_post_meta( $post_id, '_order_count', strval( intval( $params['order_count'] ) ) );

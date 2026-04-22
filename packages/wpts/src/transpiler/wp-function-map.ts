@@ -250,6 +250,7 @@ export const WP_FUNCTION_MAP: Record<string, string> = {
   wpUpdatePost: 'wp_update_post',
   wpDeletePost: 'wp_delete_post',
   wpCountPosts: 'wp_count_posts',
+  updatePostmetaCache: 'update_postmeta_cache',
 
   // Database
   dbDelta: 'dbDelta',

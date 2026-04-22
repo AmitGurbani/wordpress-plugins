@@ -253,6 +253,9 @@ class SessionRoutes {
     const query = new WP_Query(queryArgs);
     const postIds: any[] = query.posts;
 
+    // Prime meta cache in a single query for all posts on this page
+    updatePostmetaCache(postIds);
+
     const sessions: any[] = [];
     for (const pid of postIds) {
       const session: any = this.formatSession(intval(pid));
@@ -361,7 +364,8 @@ class SessionRoutes {
       updatePostMeta(postId, '_cash_out', strval(parseFloat(params.cash_out)));
     }
     if (params.order_ids !== undefined) {
-      updatePostMeta(postId, '_order_ids', jsonEncode(params.order_ids));
+      const validOrderIds: any[] = params.order_ids.map((id: any) => intval(id));
+      updatePostMeta(postId, '_order_ids', jsonEncode(validOrderIds));
     }
     if (params.order_count !== undefined) {
       updatePostMeta(postId, '_order_count', strval(intval(params.order_count)));

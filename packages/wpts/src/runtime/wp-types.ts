@@ -673,6 +673,8 @@ declare global {
   // ---------------------------------------------------------------------------
   // WordPress Classes
   // ---------------------------------------------------------------------------
+  function updatePostmetaCache(ids: any[]): any;
+
   class WP_Query {
     constructor(args?: Record<string, any>);
     posts: any[];
