@@ -44,7 +44,7 @@
   "author": "Amit Gurbani",
   "repository": {
     "type": "git",
-    "url": "https://github.com/AmitGurbani/wordpress-plugins.git",
+    "url": "git+https://github.com/AmitGurbani/wordpress-plugins.git",
     "directory": "packages/wpts"
   },
   "homepage": "https://github.com/AmitGurbani/wordpress-plugins/tree/main/packages/wpts#readme",
