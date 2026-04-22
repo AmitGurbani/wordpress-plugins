@@ -46,6 +46,7 @@ To add a new WordPress function mapping:
 - Settings auto-sanitize: string→sanitize_text_field, number→absint, boolean→rest_sanitize_boolean
 - REST API sanitize null guard: returns `WP_Error` with 400 when sanitize callback returns null
 - Admin template: `get_current_screen()` null-guarded with ternary
+- `@AdminPage({ parentSlug })`: creates a submenu page via `add_submenu_page()` instead of `add_menu_page()`. Hook suffix for `admin_enqueue_scripts` is computed by `computeAdminHookSuffix()` in `pipeline.ts` — maps built-in WP parents (e.g., `options-general.php` → `settings_page_`, `tools.php` → `tools_page_`) via `PARENT_HOOK_MAP`; custom parents fall back to `{textDomain}_page_`.
 - Admin auto-build: pipeline runs `pnpm exec wp-scripts build` from the plugin directory using workspace-level `@wordpress/scripts`
 - Integration tests use `skipAdminBuild: true` to avoid timeouts
 - Decorators: @Plugin, @Action, @Filter, @Setting, @AdminPage, @Shortcode, @Activate, @Deactivate, @Uninstall, @CustomPostType, @CustomTaxonomy, @RestRoute, @AjaxHandler, @DiagnosticsRoute

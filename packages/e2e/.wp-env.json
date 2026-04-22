@@ -12,6 +12,7 @@
     "../headless-wishlist/dist/headless-wishlist",
     "../headless-orders/dist/headless-orders",
     "../headless-media-cleanup/dist/headless-media-cleanup",
+    "../headless-storefront/dist/headless-storefront",
     "https://downloads.wordpress.org/plugin/woocommerce.latest-stable.zip"
   ],
   "config": {

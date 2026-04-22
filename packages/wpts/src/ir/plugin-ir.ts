@@ -94,6 +94,7 @@ export interface AdminPageIR {
   iconUrl: string;
   position: number | null;
   parentSlug: string | null;
+  hookSuffix: string;
 }
 
 export interface ShortcodeIR {

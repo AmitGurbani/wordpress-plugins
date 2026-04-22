@@ -48,11 +48,7 @@ class {{className}}_Admin {
 	public function enqueue_admin_assets( $hook_suffix ) {
 		$admin_pages = array(
 			{{#each adminPages}}
-			{{#if parentSlug}}
-			'{{../textDomain}}_page_{{menuSlug}}',
-			{{else}}
-			'toplevel_page_{{menuSlug}}',
-			{{/if}}
+			'{{hookSuffix}}',
 			{{/each}}
 		);
 

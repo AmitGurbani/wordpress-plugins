@@ -1,0 +1,5 @@
+# Track generated plugin output (un-ignore dist from root rule)
+!dist/
+
+# Exclude non-plugin artifacts
+dist/*.zip

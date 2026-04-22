@@ -44,6 +44,7 @@ async function globalSetup(config: FullConfig) {
     'headless-wishlist',
     'headless-orders',
     'headless-media-cleanup',
+    'headless-storefront',
   ];
   for (let attempt = 0; attempt < 3; attempt++) {
     wpCli(`plugin activate ${allPlugins.join(' ')}`);
@@ -81,13 +82,16 @@ async function globalSetup(config: FullConfig) {
   wpCli('eval "activate_headless_fuzzy_find();"');
   wpCli('eval "activate_headless_pos_sessions();"');
 
-  // 8. Trigger fuzzy-find reindex so search tests have data ready
+  // 8. Ensure storefront DB table exists
+  wpCli('eval "activate_headless_storefront();"');
+
+  // 9. Trigger fuzzy-find reindex so search tests have data ready
   wpCli('eval "do_action(\'headless_fuzzy_find_do_reindex\');"');
 
-  // 9. Enable auth test mode
+  // 10. Enable auth test mode
   wpCli('option update headless_auth_otp_test_mode 1');
 
-  // 10. Flush rewrite rules
+  // 11. Flush rewrite rules
   wpCli('rewrite flush');
 }
 

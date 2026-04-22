@@ -1,0 +1,27 @@
+{
+  "name": "headless-storefront",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Headless storefront branding and configuration for headless WordPress with WooCommerce",
+  "scripts": {
+    "build": "wpts build src/plugin.ts -o dist --clean --zip",
+    "dev": "wpts watch src/plugin.ts -o dist",
+    "wp-env:start": "wp-env start",
+    "wp-env:stop": "wp-env stop",
+    "wp-env:clean": "wp-env clean all",
+    "lint": "biome lint src/",
+    "check": "biome check src/"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.1",
+    "@types/react-dom": "^18.3.1",
+    "@wordpress/api-fetch": "^7.40.0",
+    "@wordpress/components": "^32.2.0",
+    "@wordpress/element": "^6.40.0",
+    "@wordpress/env": "^10.0.0",
+    "@wordpress/i18n": "^6.13.0",
+    "@wordpress/scripts": "^31.5.0",
+    "admin-ui": "workspace:*",
+    "@amitgurbani/wpts": "workspace:*"
+  }
+}

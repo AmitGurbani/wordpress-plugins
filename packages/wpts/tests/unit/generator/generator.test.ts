@@ -86,6 +86,7 @@ function createTestIR(): PluginIR {
         iconUrl: 'dashicons-format-chat',
         position: null,
         parentSlug: null,
+        hookSuffix: 'toplevel_page_hello-greeter-settings',
       },
     ],
     shortcodes: [
@@ -340,6 +341,7 @@ describe('generatePlugin', () => {
       iconUrl: 'dashicons-admin-generic',
       position: null,
       parentSlug: 'hello-greeter-settings',
+      hookSuffix: 'hello-greeter_page_hello-greeter-advanced',
     });
     const files = generatePlugin(ir);
     const adminClass = files.find(
@@ -353,6 +355,32 @@ describe('generatePlugin', () => {
     expect(adminClass.content).toContain('toplevel_page_hello-greeter-settings');
     expect(adminClass.content).toContain('hello-greeter_page_hello-greeter-advanced');
     expect(adminClass.content).toContain('in_array');
+  });
+
+  it('generates correct hook suffix for built-in WP parent slug', () => {
+    const ir = createTestIR();
+    ir.adminPages = [
+      {
+        pageTitle: 'My Plugin Settings',
+        menuTitle: 'My Plugin',
+        capability: 'manage_options',
+        menuSlug: 'my-plugin-settings',
+        iconUrl: 'dashicons-admin-generic',
+        position: null,
+        parentSlug: 'options-general.php',
+        hookSuffix: 'settings_page_my-plugin-settings',
+      },
+    ];
+    const files = generatePlugin(ir);
+    const adminClass = files.find(
+      (f) => f.relativePath === 'hello-greeter/admin/class-hello-greeter-admin.php',
+    )!;
+
+    expect(adminClass.content).toContain('add_submenu_page(');
+    expect(adminClass.content).toContain("'options-general.php'");
+    expect(adminClass.content).toContain("'settings_page_my-plugin-settings'");
+    expect(adminClass.content).not.toContain('toplevel_page_');
+    expect(adminClass.content).not.toContain('add_menu_page(');
   });
 
   it('generates custom post type registration in public class', () => {
@@ -743,6 +771,7 @@ describe('generatePlugin', () => {
       iconUrl: 'dashicons-admin-generic',
       position: null,
       parentSlug: 'hello-greeter-settings',
+      hookSuffix: 'hello-greeter_page_hello-greeter-sub',
     });
     const files = generatePlugin(ir);
     const mainClass = files.find(

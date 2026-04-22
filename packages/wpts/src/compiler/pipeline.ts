@@ -130,6 +130,46 @@ export async function build(options: BuildOptions): Promise<BuildResult> {
 }
 
 /**
+ * Compute the WordPress admin page hook suffix.
+ *
+ * For top-level pages: `toplevel_page_{menu_slug}`
+ * For submenu pages: `{parent_hook_prefix}_page_{menu_slug}`
+ *
+ * The parent hook prefix is derived from the WordPress admin_page_hooks mapping
+ * that WordPress core populates for built-in menu pages.
+ */
+function computeAdminHookSuffix(
+  menuSlug: string,
+  parentSlug: string | null,
+  textDomain: string,
+): string {
+  if (!parentSlug) {
+    return `toplevel_page_${menuSlug}`;
+  }
+
+  // WordPress built-in parent slug → hook prefix mapping
+  // See: wp-admin/menu.php and get_plugin_page_hookname() in wp-admin/includes/plugin.php
+  const PARENT_HOOK_MAP: Record<string, string> = {
+    'index.php': 'dashboard',
+    'edit.php': 'posts',
+    'upload.php': 'media',
+    'link-manager.php': 'links',
+    'edit-comments.php': 'comments',
+    'themes.php': 'appearance',
+    'plugins.php': 'plugins',
+    'users.php': 'users',
+    'tools.php': 'tools',
+    'options-general.php': 'settings',
+  };
+
+  // For built-in WP parents, use the known mapping.
+  // For custom parents (typically from the same plugin), fall back to textDomain
+  // which matches WordPress's sanitize_title() of the parent menu title.
+  const prefix = PARENT_HOOK_MAP[parentSlug] ?? textDomain;
+  return `${prefix}_page_${menuSlug}`;
+}
+
+/**
  * Build the full PluginIR from raw extracted data.
  */
 function buildIR(
@@ -229,6 +269,7 @@ function buildIR(
       iconUrl: p.iconUrl ?? 'dashicons-admin-generic',
       position: p.position ?? null,
       parentSlug: p.parentSlug ?? null,
+      hookSuffix: computeAdminHookSuffix(p.menuSlug, p.parentSlug ?? null, metadata.textDomain),
     })),
     shortcodes: rawData.shortcodes.map((s) => ({
       tag: s.tag,
