@@ -1,4 +1,4 @@
-import { Button, SelectControl, TextareaControl, TextControl } from '@wordpress/components';
+import { Button, TextareaControl, TextControl } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import { FormSection } from 'admin-ui';
 import type { TabProps } from '../types';
@@ -91,17 +91,6 @@ export function StoreIdentityTab({ settings, update }: TabProps) {
           )}
         </div>
       </div>
-
-      <SelectControl
-        label={__('Font Family', 'headless-storefront')}
-        help={__('Must match a font loaded in the frontend build.', 'headless-storefront')}
-        value={settings.font_family}
-        options={[
-          { label: 'Inter', value: 'Inter' },
-          { label: 'DM Sans', value: 'DM Sans' },
-        ]}
-        onChange={(v: string) => update('font_family', v)}
-      />
     </FormSection>
   );
 }

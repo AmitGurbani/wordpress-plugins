@@ -1,9 +1,8 @@
 import { __ } from '@wordpress/i18n';
 import { SettingsShell, useSettings } from 'admin-ui';
+import { AppearanceTab } from './tabs/AppearanceTab';
 import { CacheSettingsTab } from './tabs/CacheSettingsTab';
-import { ColorsTab } from './tabs/ColorsTab';
 import { ContactSocialTab } from './tabs/ContactSocialTab';
-import { DesignTokensTab } from './tabs/DesignTokensTab';
 import { FooterContentTab } from './tabs/FooterContentTab';
 import { PopularSearchesTab } from './tabs/PopularSearchesTab';
 import { ProductPageTab } from './tabs/ProductPageTab';
@@ -29,16 +28,14 @@ export function SettingsPage() {
         switch (tab.name) {
           case 'identity':
             return <StoreIdentityTab {...tabProps} />;
+          case 'appearance':
+            return <AppearanceTab {...tabProps} />;
           case 'contact':
             return <ContactSocialTab {...tabProps} />;
           case 'footer':
             return <FooterContentTab {...tabProps} />;
           case 'product':
             return <ProductPageTab {...tabProps} />;
-          case 'colors':
-            return <ColorsTab {...tabProps} />;
-          case 'tokens':
-            return <DesignTokensTab {...tabProps} />;
           case 'searches':
             return <PopularSearchesTab {...tabProps} />;
           case 'cache':

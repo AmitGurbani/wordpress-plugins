@@ -86,8 +86,8 @@ export const DEFAULTS: Settings = {
   delivery_badge: '',
   colors: {
     primary: '#6366f1',
-    secondary: '',
-    accent: '',
+    secondary: '#64748b',
+    accent: '#94a3b8',
   },
   tokens: {
     section_gap: '2rem',
@@ -107,11 +107,10 @@ export const DEFAULTS: Settings = {
 
 export const TABS = [
   { name: 'identity', title: __('Store Identity', 'headless-storefront') },
+  { name: 'appearance', title: __('Appearance', 'headless-storefront') },
   { name: 'contact', title: __('Contact & Social', 'headless-storefront') },
   { name: 'footer', title: __('Footer Content', 'headless-storefront') },
   { name: 'product', title: __('Product Page', 'headless-storefront') },
-  { name: 'colors', title: __('Colors', 'headless-storefront') },
-  { name: 'tokens', title: __('Design Tokens', 'headless-storefront') },
   { name: 'searches', title: __('Popular Searches', 'headless-storefront') },
   { name: 'cache', title: __('Cache Settings', 'headless-storefront') },
 ];

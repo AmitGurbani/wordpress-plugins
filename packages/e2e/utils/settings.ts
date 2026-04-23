@@ -251,7 +251,7 @@ export const PLUGINS: PluginConfig[] = [
       return_policy:
         'Easy returns within 7 days of delivery. Items must be unused and in original packaging.',
       delivery_badge: '',
-      colors: { primary: '#6366f1', secondary: '', accent: '' },
+      colors: { primary: '#6366f1', secondary: '#64748b', accent: '#94a3b8' },
       tokens: {
         section_gap: '2rem',
         card_padding: '0.75rem',

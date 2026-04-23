@@ -128,7 +128,12 @@ test.describe('Headless Storefront — Config API', () => {
     await ctx.dispose();
   });
 
-  test('GET /config returns null for empty optional colors', async () => {
+  test('GET /config returns null for empty optional colors', async ({ restApi }) => {
+    // Explicitly clear optional colors (fresh install seeds slate defaults)
+    await restApi.updateSettings(SLUG, {
+      colors: { primary: '#6366f1', secondary: '', accent: '' },
+    });
+
     const ctx = await playwrightRequest.newContext();
     const res = await ctx.get(`${BASE}/config`);
     const data = await res.json();
