@@ -34,6 +34,7 @@ Skills (`.claude/skills/`):
 - `/wp-plugin-review [plugin-name]` — Full review of generated PHP dist output
 - `/commit` — Conventional commit with emoji prefix
 - `/add-wp-function [category]` — Add WordPress function mappings to wpts transpiler
+- `/check-website-sync [plugin-slug]` — Audit `packages/website` for drift against headless plugin sources (missing entries, endpoint/name mismatches, missing code examples)
 
 Path-scoped rules (`.claude/rules/`):
 - `headless-plugins.md` — Shared plugin authoring guardrails, loads for `packages/headless-*/src/**`
