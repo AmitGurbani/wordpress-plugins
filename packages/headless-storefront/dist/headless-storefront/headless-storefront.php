@@ -3,7 +3,7 @@
  * Plugin Name:       Headless Storefront
  * Plugin URI:        https://github.com/AmitGurbani/wordpress-plugins
  * Description:       Store branding and configuration REST API for headless WordPress with WooCommerce.
- * Version:           1.0.0
+ * Version:           1.1.0
  * Author:            Amit Gurbani
  * Author URI:        https://github.com/AmitGurbani
  * License:           GPL-2.0+
@@ -19,7 +19,7 @@ if ( ! defined( 'WPINC' ) ) {
 	die;
 }
 
-define( 'HEADLESS_STOREFRONT_VERSION', '1.0.0' );
+define( 'HEADLESS_STOREFRONT_VERSION', '1.1.0' );
 define( 'HEADLESS_STOREFRONT_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'HEADLESS_STOREFRONT_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
 

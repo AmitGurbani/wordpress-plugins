@@ -15,7 +15,7 @@ import './search-tracking.js';
   name: 'Headless Storefront',
   uri: 'https://github.com/AmitGurbani/wordpress-plugins',
   description: 'Store branding and configuration REST API for headless WordPress with WooCommerce.',
-  version: '1.0.0',
+  version: '1.1.0',
   author: 'Amit Gurbani',
   authorUri: 'https://github.com/AmitGurbani',
   license: 'GPL-2.0+',
