@@ -106,6 +106,101 @@ const response = await fetch(
     },
   },
   {
+    slug: 'headless-orders',
+    label: 'Orders',
+    request: {
+      lang: 'bash',
+      code: `# List authenticated customer's orders (pagination via X-WP-Total headers)
+curl -i "https://store.example.com/wp-json/headless-orders/v1/orders?per_page=10&status=processing" \\
+  -H "Authorization: Bearer eyJhbGci..."
+
+# Fetch a single order
+curl https://store.example.com/wp-json/headless-orders/v1/orders/4821 \\
+  -H "Authorization: Bearer eyJhbGci..."`,
+    },
+    response: {
+      lang: 'json',
+      code: `[
+  {
+    "id": 4821,
+    "order_number": "4821",
+    "status": "processing",
+    "created_at": "2026-04-20T14:32:00+00:00",
+    "updated_at": "2026-04-20T14:35:00+00:00",
+    "total": "1499.00",
+    "shipping_total": "0.00",
+    "currency": "INR",
+    "payment_method": "cod",
+    "customer_note": "",
+    "billing": {
+      "first_name": "Priya",
+      "last_name": "Sharma",
+      "email": "priya@example.com",
+      "phone": "+919876543210"
+    },
+    "shipping": {
+      "first_name": "Priya",
+      "last_name": "Sharma",
+      "city": "Mumbai",
+      "country": "IN"
+    },
+    "items": [
+      {
+        "product_id": 156,
+        "variation_id": 0,
+        "name": "Classic Cotton Shirt",
+        "quantity": 1,
+        "subtotal": "1499.00",
+        "total": "1499.00"
+      }
+    ]
+  }
+]`,
+    },
+  },
+  {
+    slug: 'headless-pos-sessions',
+    label: 'POS Sessions',
+    request: {
+      lang: 'bash',
+      code: `# Open a register session (idempotent — retrying with the same session_uuid returns 409 Conflict)
+curl -X POST https://store.example.com/wp-json/headless-pos-sessions/v1/sessions \\
+  -H "Authorization: Bearer eyJhbGci..." \\
+  -H "Content-Type: application/json" \\
+  -d '{
+    "session_uuid": "c1a8b0de-2c3e-4a1d-9f7b-7e2a3c4d5e6f",
+    "terminal_id": "TERM-01",
+    "opened_at": "2026-04-23T09:00:00Z",
+    "opening_balance": 500.00
+  }'
+
+# Fetch the created session by id
+curl https://store.example.com/wp-json/headless-pos-sessions/v1/sessions/9214 \\
+  -H "Authorization: Bearer eyJhbGci..."`,
+    },
+    response: {
+      lang: 'json',
+      code: `{
+  "id": 9214,
+  "session_uuid": "c1a8b0de-2c3e-4a1d-9f7b-7e2a3c4d5e6f",
+  "terminal_id": "TERM-01",
+  "status": "open",
+  "opened_at": "2026-04-23T09:00:00Z",
+  "closed_at": "",
+  "opening_balance": 500.00,
+  "closing_balance": 0,
+  "expected_balance": 0,
+  "cash_in": 0,
+  "cash_out": 0,
+  "order_count": 0,
+  "order_ids": [],
+  "notes": "",
+  "cashier_id": 42,
+  "created_at": "2026-04-23 09:00:00"
+}`,
+    },
+  },
+  {
     slug: 'headless-wishlist',
     label: 'Wishlist',
     request: {

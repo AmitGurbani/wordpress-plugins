@@ -370,6 +370,67 @@ export const plugins: Plugin[] = [
       },
     ],
   },
+  {
+    slug: 'headless-storefront',
+    name: 'Headless Storefront',
+    tagline: 'Store branding and configuration REST API',
+    description:
+      'Store branding and configuration REST API for headless WordPress with WooCommerce. All settings live in a single option and are exposed via a public /config endpoint with automatic WordPress and WooCommerce fallbacks.',
+    category: 'ecommerce',
+    wooCommerce: 'required',
+    namespace: 'headless-storefront/v1',
+    githubPath: `${REPO}/tree/main/packages/headless-storefront`,
+    features: [
+      'Public /config endpoint with full store branding and configuration',
+      'Automatic WP/WC fallbacks (blogname, tagline, email, etc.)',
+      '8-tab admin UI: Store Identity, Contact, Footer, Product Page, Colors, Design Tokens, Popular Searches, Cache',
+      'Cache revalidation webhook fires on option update',
+      'WooCommerce Store API search tracking with weekly cleanup',
+      'Single JSON option \u2014 no @Setting decorator sprawl',
+    ],
+    endpoints: [
+      { method: 'GET', path: '/config', description: 'Full branding config with WP/WC fallbacks' },
+    ],
+    faqs: [
+      {
+        question: 'Why a single /config endpoint instead of per-setting routes?',
+        answer:
+          'Headless frontends typically need the full branding config in one request at boot time. A single /config response with sensible WP/WC fallbacks minimizes round-trips and lets the frontend stay in sync with a single cache key.',
+      },
+    ],
+  },
+  {
+    slug: 'headless-media-cleanup',
+    name: 'Headless Media Cleanup',
+    tagline: 'Auto-delete orphaned WooCommerce media',
+    description:
+      'Automatically delete media from the WordPress Media Library when images are removed from WooCommerce products, variations, or taxonomy terms \u2014 but only if the image is not used anywhere else. Zero configuration; extensible via filters.',
+    category: 'ecommerce',
+    wooCommerce: 'required',
+    namespace: 'headless-media-cleanup/v1',
+    githubPath: `${REPO}/tree/main/packages/headless-media-cleanup`,
+    features: [
+      'Covers product featured images, gallery images, and variation images',
+      'Covers category, tag, and brand thumbnails',
+      'Orphan check \u2014 deletes only images with zero remaining WooCommerce references',
+      'Image-only guard \u2014 never touches downloadable files or other attachments',
+      'Global and per-attachment disable filters',
+      'Permanent delete \u2014 skips trash and removes physical files',
+    ],
+    endpoints: [],
+    faqs: [
+      {
+        question: 'Will it delete images used by blog posts?',
+        answer:
+          'The orphan check only covers WooCommerce entities (products, variations, categories, tags, brands). Images embedded in post content via <img> tags are not tracked. Use the `headless_media_cleanup_should_delete` filter to add custom checks.',
+      },
+      {
+        question: 'Can I disable it temporarily?',
+        answer:
+          "Yes. Add `add_filter( 'headless_media_cleanup_enabled', '__return_false' );` to your theme or a mu-plugin.",
+      },
+    ],
+  },
 ];
 
 export const categories = {
