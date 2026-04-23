@@ -25,8 +25,8 @@ import './search-tracking.js';
   wooNotice: 'required',
 })
 @AdminPage({
-  pageTitle: 'Headless Branding Settings',
-  menuTitle: 'Headless Branding',
+  pageTitle: 'Headless Storefront Settings',
+  menuTitle: 'Headless Storefront',
   capability: 'manage_options',
   menuSlug: 'headless-storefront-settings',
   parentSlug: 'options-general.php',

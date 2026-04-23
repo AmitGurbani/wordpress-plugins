@@ -8,7 +8,7 @@ export function CacheSettingsTab({ settings, update }: TabProps) {
     <FormSection>
       <p style={{ color: '#666', marginBottom: '16px' }}>
         {__(
-          'When branding settings are saved, a POST request is sent to your frontend to bust its cache. Both fields must be configured for the webhook to fire.',
+          'When storefront settings are saved, a POST request is sent to your frontend to bust its cache. Both fields must be configured for the webhook to fire.',
           'headless-storefront',
         )}
       </p>

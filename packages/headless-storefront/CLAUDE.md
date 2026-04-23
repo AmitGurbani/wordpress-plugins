@@ -23,7 +23,7 @@ Multi-file wpts plugin with 3 source files:
 - **Single option**: All settings stored in `headless_storefront_config` as JSON (no @Setting decorators)
 - **Custom REST routes**: /config (public, nested response with WP/WC fallbacks) and /settings (admin, flat option read/write)
 - **Search tracking**: Custom table `{prefix}_headless_search_queries` with aggregated counts, weekly cleanup of entries older than 90 days
-- **Cache invalidation**: `update_option_headless_storefront_config` hook fires POST to frontend `/api/revalidate`
+- **Cache invalidation**: `update_option_headless_storefront_config` hook fires `POST {frontend_url}/api/revalidate` with body `{ "type": "storefront" }` and header `x-revalidate-secret: <secret>`. Uses `wp_safe_remote_post` (SSRF protection) with `blocking: false` and `timeout: 5` — fire-and-forget. Frontend handler must accept `type: "storefront"`.
 
 ## REST API
 
@@ -43,4 +43,4 @@ Namespace: `headless-storefront/v1`
 - **Database table**: `{prefix}_headless_search_queries` — aggregated search query counts
 - **Cron hook**: `headless_storefront_search_cleanup` — weekly, prunes entries older than 90 days
 - **WP/WC fallbacks** (in /config only): `app_name` → `blogname`, `tagline` → `blogdescription`, `contact.email` → `woocommerce_email_from_address`
-- **Admin page**: Settings > Headless Branding (submenu under Settings via `parentSlug: 'options-general.php'`)
+- **Admin page**: Settings > Headless Storefront (submenu under Settings via `parentSlug: 'options-general.php'`)

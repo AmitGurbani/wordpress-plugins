@@ -319,7 +319,7 @@ class ConfigRoutes {
     // Fire-and-forget: blocking: false means WP dispatches the request
     // without waiting for a response, so no error handling is possible.
     wpSafeRemotePost(`${frontendUrl}/api/revalidate`, {
-      body: jsonEncode({ type: 'branding' }),
+      body: jsonEncode({ type: 'storefront' }),
       headers: {
         'Content-Type': 'application/json',
         'x-revalidate-secret': secret,

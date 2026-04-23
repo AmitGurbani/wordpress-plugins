@@ -17,8 +17,8 @@ class Headless_Storefront_Admin {
 	public function register_admin_pages() {
 		add_submenu_page(
 			'options-general.php',
-			'Headless Branding Settings',
-			'Headless Branding',
+			'Headless Storefront Settings',
+			'Headless Storefront',
 			'manage_options',
 			'headless-storefront-settings',
 			array( $this, 'render_admin_page' )

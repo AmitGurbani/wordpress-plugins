@@ -20,7 +20,7 @@ export function SettingsPage() {
 
   return (
     <SettingsShell
-      title={__('Headless Branding', 'headless-storefront')}
+      title={__('Headless Storefront', 'headless-storefront')}
       textDomain="headless-storefront"
       tabs={TABS}
       settingsState={state}
