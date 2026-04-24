@@ -104,7 +104,7 @@ All functions are written in camelCase in TypeScript and transpiled to snake_cas
 | **REST API** | `restEnsureResponse` |
 | **Utility** | `wpRand` |
 | **PHP Built-ins** | `classExists`, `functionExists`, `defined`, `errorLog`, `isArray`, `jsonEncode`, `jsonDecode`, `base64Encode`, `base64Decode`, `hashHmac`, `hashEquals`, `hash`, `md5`, `uniqid`, `numberFormat`, `intval`, `strval`, `strtolower`, `strtr`, `rtrim`, `time`, `gmdate`, `getallheaders`, `header`, `levenshtein`, `arrayUnique`, `arrayValues`, `requireOnce` · JS built-in `parseFloat()` → PHP `floatval()` |
-| **Misc** | `wpDie`, `wpRedirect`, `wpSafeRedirect`, `absint`, `wpUnslash`, `echo`, `ABSPATH`, `WP_DEBUG_LOG` |
+| **Misc** | `wpDie`, `wpRedirect`, `wpSafeRedirect`, `absint`, `wpUnslash`, `echo`, `ABSPATH`, `WP_DEBUG_LOG`, `WP_CLI` |
 | **Content** | `wpStripAllTags` |
 | **Media** | `wpGetAttachmentImageSrc`, `wpGetAttachmentUrl`, `wpDeleteAttachment` |
 | **Cron** | `wpScheduleSingleEvent`, `wpScheduleEvent`, `wpNextScheduled`, `wpUnscheduleEvent`, `wpClearScheduledHook` |

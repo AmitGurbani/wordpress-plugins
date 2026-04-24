@@ -586,6 +586,9 @@ declare global {
   /** WordPress WP_DEBUG_LOG constant — whether debug logging is enabled. */
   const WP_DEBUG_LOG: boolean;
 
+  /** WordPress WP_CLI constant — `true` when running under WP-CLI, otherwise undefined. Guard with `defined('WP_CLI')` first. */
+  const WP_CLI: boolean;
+
   /** WordPress database object ($wpdb). Use wpdb.prepare(), wpdb.query(), wpdb.getResults(), etc. */
   var wpdb: {
     prefix: string;

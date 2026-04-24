@@ -1,11 +1,16 @@
 /**
  * Headless Storefront Config Routes
  *
- * Public /config endpoint for the frontend, admin /settings endpoints,
- * and cache invalidation webhook on option update.
+ * Public /config + /config/popular-searches endpoints, admin /settings
+ * endpoints, and the manual /admin/revalidate endpoint used by the
+ * "Re-push storefront config" button.
+ *
+ * Option-update hooks that automatically fire the revalidation webhook
+ * live in `revalidate-hooks.ts` (kept separate so the shared helper lands
+ * in the same PHP class as the action handlers).
  */
 
-import { Action, RestRoute } from '@amitgurbani/wpts';
+import { RestRoute } from '@amitgurbani/wpts';
 
 class ConfigRoutes {
   // ── GET /config (public) ───────────────────────────────────────────
@@ -40,22 +45,6 @@ class ConfigRoutes {
           });
         }
       }
-    }
-
-    // ── Popular searches ──
-    const overrides: any = config.popular_searches_override ?? [];
-    const maxResults: number = intval(config.popular_searches_max ?? 12);
-    let popularSearches: any[];
-
-    if (isArray(overrides) && !empty(overrides)) {
-      popularSearches = arrayMap('sanitize_text_field', overrides);
-    } else {
-      const table: string = `${wpdb.prefix}headless_search_queries`;
-      const rows: any[] =
-        wpdb.getResults(
-          wpdb.prepare('SELECT `query` FROM %i ORDER BY count DESC LIMIT %d', table, maxResults),
-        ) ?? [];
-      popularSearches = wpListPluck(rows, 'query');
     }
 
     // ── Colors (empty → null for optional) ──
@@ -110,7 +99,6 @@ class ConfigRoutes {
         whatsapp: whatsapp,
       },
       social: social,
-      popular_searches: popularSearches,
       cities: cities,
       trust_signals: trustSignals,
       delivery_message: sanitizeTextField(
@@ -141,6 +129,29 @@ class ConfigRoutes {
       logo_url: rawLogoUrl ? rawLogoUrl : null,
       font_family: sanitizeTextField(config.font_family ?? 'Inter'),
     });
+  }
+
+  // ── GET /config/popular-searches (public) ──────────────────────────
+
+  @RestRoute('/config/popular-searches', { method: 'GET', public: true })
+  getPopularSearchesConfig(_request: any): any {
+    const config: any = getOption('headless_storefront_config', []);
+    const overrides: any = config.popular_searches_override ?? [];
+    const maxResults: number = intval(config.popular_searches_max ?? 12);
+    let items: string[];
+
+    if (isArray(overrides) && !empty(overrides)) {
+      items = arrayMap('sanitize_text_field', overrides);
+    } else {
+      const table: string = `${wpdb.prefix}headless_search_queries`;
+      const rows: any[] =
+        wpdb.getResults(
+          wpdb.prepare('SELECT `query` FROM %i ORDER BY count DESC LIMIT %d', table, maxResults),
+        ) ?? [];
+      items = wpListPluck(rows, 'query');
+    }
+
+    return restEnsureResponse({ items: items });
   }
 
   // ── GET /settings (admin) ──────────────────────────────────────────
@@ -305,19 +316,34 @@ class ConfigRoutes {
     return restEnsureResponse(sanitized);
   }
 
-  // ── Cache invalidation webhook ─────────────────────────────────────
+  // ── POST /admin/revalidate (admin) — manual re-push ────────────────
 
-  @Action('update_option_headless_storefront_config', { priority: 10, acceptedArgs: 2 })
-  onConfigUpdate(_oldValue: any, newValue: any): void {
-    const frontendUrl: string = newValue.frontend_url ?? '';
-    const secret: string = newValue.revalidate_secret ?? '';
+  @RestRoute('/admin/revalidate', { method: 'POST', capability: 'manage_options' })
+  manualRevalidate(_request: any): any {
+    const dispatched: boolean = this.dispatchRevalidate();
+    return restEnsureResponse({ dispatched: dispatched });
+  }
 
-    if (!frontendUrl || !secret) {
-      return;
+  // ── Helper: dispatch revalidation webhook ──────────────────────────
+  //
+  // Mirrored in `revalidate-hooks.ts`. Both copies exist because wpts
+  // places a given source class's helper into a single PHP class (REST
+  // here, Public there), so action handlers and REST routes each need
+  // their own reachable copy.
+
+  dispatchRevalidate(): boolean {
+    if (defined('WP_CLI') && WP_CLI) {
+      return false;
     }
 
-    // Fire-and-forget: blocking: false means WP dispatches the request
-    // without waiting for a response, so no error handling is possible.
+    const config: any = getOption('headless_storefront_config', []);
+    const frontendUrl: string = config.frontend_url ?? '';
+    const secret: string = config.revalidate_secret ?? '';
+
+    if (!frontendUrl || !secret) {
+      return false;
+    }
+
     wpSafeRemotePost(`${frontendUrl}/api/revalidate`, {
       body: jsonEncode({ type: 'storefront' }),
       headers: {
@@ -327,5 +353,11 @@ class ConfigRoutes {
       blocking: false,
       timeout: 5,
     });
+
+    if (defined('WP_DEBUG_LOG') && WP_DEBUG_LOG) {
+      errorLog(`[headless-storefront] revalidate dispatched to ${frontendUrl}/api/revalidate`);
+    }
+
+    return true;
   }
 }

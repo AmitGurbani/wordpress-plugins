@@ -9,6 +9,7 @@
 
 import { Activate, AdminPage, Deactivate, Plugin, Uninstall } from '@amitgurbani/wpts';
 import './config-routes.js';
+import './revalidate-hooks.js';
 import './search-tracking.js';
 
 @Plugin({

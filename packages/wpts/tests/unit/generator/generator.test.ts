@@ -684,6 +684,55 @@ describe('generatePlugin', () => {
     );
   });
 
+  it('update_settings preserves sensitive fields when client re-submits the mask', () => {
+    const ir = createTestIR();
+    ir.settings = [
+      {
+        propertyName: 'siteName',
+        key: 'site_name',
+        optionName: 'hello_greeter_site_name',
+        type: 'string',
+        default: '',
+        label: 'Site Name',
+        description: '',
+        sanitize: 'sanitize_text_field',
+        sensitive: false,
+        exposeInConfig: false,
+        wooCurrencyDefault: false,
+      },
+      {
+        propertyName: 'apiKey',
+        key: 'api_key',
+        optionName: 'hello_greeter_api_key',
+        type: 'string',
+        default: '',
+        label: 'API Key',
+        description: '',
+        sanitize: 'sanitize_text_field',
+        sensitive: true,
+        exposeInConfig: false,
+        wooCurrencyDefault: false,
+      },
+    ];
+    const files = generatePlugin(ir);
+    const restApi = files.find(
+      (f) => f.relativePath === 'hello-greeter/includes/class-hello-greeter-rest-api.php',
+    )!;
+
+    // Sensitive field: update wrapped in mask guard to preserve existing value
+    // when the admin UI re-submits '********'.
+    expect(restApi.content).toMatch(
+      /if\s*\(\s*'\*{8}'\s*!==\s*\$value\s*\)\s*\{\s*update_option\(\s*'hello_greeter_api_key'/,
+    );
+
+    // Non-sensitive field: unconditional update, no mask guard.
+    const siteNameUpdate = restApi.content.match(
+      /\$value = sanitize_text_field\( \$params\['site_name'\] \);[\s\S]*?update_option\(\s*'hello_greeter_site_name'/,
+    );
+    expect(siteNameUpdate).not.toBeNull();
+    expect(siteNameUpdate![0]).not.toContain("'********' !== $value");
+  });
+
   describe('@Plugin({ githubRepo }) — auto-updater', () => {
     it('does not emit updater file or Update URI header when githubRepo is unset', () => {
       const ir = createTestIR();

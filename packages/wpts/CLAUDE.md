@@ -50,10 +50,10 @@ To add a new WordPress function mapping:
 - Admin auto-build: pipeline runs `pnpm exec wp-scripts build` from the plugin directory using workspace-level `@wordpress/scripts`
 - Integration tests use `skipAdminBuild: true` to avoid timeouts
 - Decorators: @Plugin, @Action, @Filter, @Setting, @AdminPage, @Shortcode, @Activate, @Deactivate, @Uninstall, @CustomPostType, @CustomTaxonomy, @RestRoute, @AjaxHandler, @DiagnosticsRoute
-- Helper methods: non-decorated class methods are auto-captured; placed in public class by default, or REST API class if the class has @RestRoute
+- Helper methods: non-decorated class methods are auto-captured; placed in public class by default, or REST API class if the class has @RestRoute. Gotcha: a single TS class mixing @RestRoute + @Action lands the helper in the REST class only, so @Action handlers calling `this.helper()` fatal at runtime — split into separate TS classes (one per generated PHP class) and duplicate the helper if shared.
 - `global $wpdb;`: auto-injected by `injectGlobalWpdb()` in `function-transpiler.ts` when transpiled PHP contains `$wpdb`
 - Action parameters: extracted same as filter parameters; `acceptedArgs` defaults to method parameter count
-- `@Setting({ sensitive: true })`: masks value in auto-generated GET /settings response — returns `'********'` if set, `''` if empty. The raw value is still stored and used server-side; only the REST GET response is masked.
+- `@Setting({ sensitive: true })`: masks value in auto-generated GET /settings response — returns `'********'` if set, `''` if empty. The raw value is still stored and used server-side; only the REST GET response is masked. The generated `update_settings` handler also guards against the "client re-submits the mask" case: if an admin saves the form without editing the sensitive field, the UI POSTs `'********'` back and the handler skips `update_option` for that key, preserving the real value.
 - `@Plugin({ wooNotice: 'recommended' | 'required' })`: auto-generates an `admin_notices` action with a WooCommerce dependency notice. `'recommended'` → `notice-warning`, `'required'` → `notice-error`.
 - `@Setting({ exposeInConfig: true })`: includes the setting in an auto-generated public `GET /config` REST route. Skipped if a manual `@RestRoute('/config', ...)` exists.
 - `@Setting({ wooCurrencyDefault: true })`: auto-generates a `default_option_{optionName}` filter that returns the WooCommerce currency when WooCommerce is active.

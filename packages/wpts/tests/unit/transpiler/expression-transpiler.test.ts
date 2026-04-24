@@ -59,6 +59,10 @@ describe('transpileExpression', () => {
     it('emits ABSPATH as PHP constant (not $abspath)', () => {
       expect(transpile('ABSPATH')).toBe('ABSPATH');
     });
+
+    it('emits WP_CLI as PHP constant (not $wp_cli)', () => {
+      expect(transpile('WP_CLI')).toBe('WP_CLI');
+    });
   });
 
   describe('binary expressions', () => {

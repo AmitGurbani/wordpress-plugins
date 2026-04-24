@@ -381,15 +381,33 @@ export const plugins: Plugin[] = [
     namespace: 'headless-storefront/v1',
     githubPath: `${REPO}/tree/main/packages/headless-storefront`,
     features: [
-      'Public /config endpoint with full store branding and configuration',
+      'Public /config endpoint with full store branding (excludes popular searches)',
+      'Separate /config/popular-searches endpoint so branding can cache forever',
       'Automatic WP/WC fallbacks (blogname, tagline, email, etc.)',
-      '8-tab admin UI: Store Identity, Contact, Footer, Product Page, Colors, Design Tokens, Popular Searches, Cache',
-      'Cache revalidation webhook fires on option update',
+      '7-tab admin UI: Store Identity, Appearance, Contact & Social, Footer Content, Product Page, Popular Searches, Cache Settings',
+      'Revalidation webhook fires on plugin option, blogname, blogdescription, or WC from-email change',
+      'Manual "Re-push storefront config" button for debugging',
       'WooCommerce Store API search tracking with weekly cleanup',
       'Single JSON option \u2014 no @Setting decorator sprawl',
     ],
     endpoints: [
-      { method: 'GET', path: '/config', description: 'Full branding config with WP/WC fallbacks' },
+      {
+        method: 'GET',
+        path: '/config',
+        description: 'Branding config (excludes popular searches) with WP/WC fallbacks',
+      },
+      {
+        method: 'GET',
+        path: '/config/popular-searches',
+        description:
+          'Returns { items: string[] } \u2014 admin overrides or live query from tracking table',
+      },
+      {
+        method: 'POST',
+        path: '/admin/revalidate',
+        description:
+          'manage_options \u2014 manually fires the revalidation webhook; returns { dispatched: boolean }',
+      },
     ],
     faqs: [
       {

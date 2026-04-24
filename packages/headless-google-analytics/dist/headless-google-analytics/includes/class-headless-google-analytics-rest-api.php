@@ -100,7 +100,11 @@ class Headless_Google_Analytics_Rest_Api {
 					array( 'status' => 400 )
 				);
 			}
-			update_option( 'headless_google_analytics_api_secret', $value );
+			// GET /settings masks this field as '********'; if the client re-submits
+			// the mask (user did not edit it), preserve the existing stored value.
+			if ( '********' !== $value ) {
+				update_option( 'headless_google_analytics_api_secret', $value );
+			}
 		}
 		if ( isset( $params['currency'] ) ) {
 			$value = sanitize_text_field( $params['currency'] );

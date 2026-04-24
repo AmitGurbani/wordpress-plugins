@@ -115,7 +115,11 @@ class Headless_Meta_Pixel_Rest_Api {
 					array( 'status' => 400 )
 				);
 			}
-			update_option( 'headless_meta_pixel_access_token', $value );
+			// GET /settings masks this field as '********'; if the client re-submits
+			// the mask (user did not edit it), preserve the existing stored value.
+			if ( '********' !== $value ) {
+				update_option( 'headless_meta_pixel_access_token', $value );
+			}
 		}
 		if ( isset( $params['test_event_code'] ) ) {
 			$value = sanitize_text_field( $params['test_event_code'] );

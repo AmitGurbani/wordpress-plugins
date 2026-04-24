@@ -12,6 +12,7 @@ These guardrails apply to all wpts-based headless plugins.
 - Route/feature files are imported via side-effect: `import './feature-name.js'` (filenames vary per plugin: config-routes, diagnostics-routes, track-routes, etc.)
 - Import extensions must be `.js` (not `.ts`) — ESM resolution in transpiled output
 - Check each plugin's own CLAUDE.md for its specific option key prefix, data model, and API flow
+- Shared helpers between `@RestRoute` and `@Action`/`@Filter` methods must live in **separate TS classes** (one per generated PHP class). wpts places a class's non-decorated helpers into a single PHP class — REST API class if the TS class has any `@RestRoute`, otherwise Public. Mixing decorator types in one class leaves `@Action` handlers unable to call `this.helper()`. When the helper is genuinely needed on both sides, duplicate it into each TS class (see `headless-storefront/src/config-routes.ts` + `revalidate-hooks.ts`).
 
 ## Decorator Patterns
 

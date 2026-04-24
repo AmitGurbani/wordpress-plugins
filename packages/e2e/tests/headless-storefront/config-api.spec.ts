@@ -61,7 +61,6 @@ test.describe('Headless Storefront — Config API', () => {
     expect(data).toHaveProperty('description');
     expect(data).toHaveProperty('contact');
     expect(data).toHaveProperty('social');
-    expect(data).toHaveProperty('popular_searches');
     expect(data).toHaveProperty('cities');
     expect(data).toHaveProperty('trust_signals');
     expect(data).toHaveProperty('delivery_message');
@@ -76,7 +75,6 @@ test.describe('Headless Storefront — Config API', () => {
     expect(data.font_family).toBe('Inter');
     expect(data.delivery_badge).toBe('');
     expect(Array.isArray(data.social)).toBe(true);
-    expect(Array.isArray(data.popular_searches)).toBe(true);
     expect(Array.isArray(data.cities)).toBe(true);
     expect(Array.isArray(data.trust_signals)).toBe(true);
     expect(data.trust_signals).toEqual([
@@ -97,6 +95,7 @@ test.describe('Headless Storefront — Config API', () => {
     // Admin-only fields must NOT be present
     expect(data).not.toHaveProperty('frontend_url');
     expect(data).not.toHaveProperty('revalidate_secret');
+    expect(data).not.toHaveProperty('popular_searches');
     expect(data).not.toHaveProperty('popular_searches_override');
     expect(data).not.toHaveProperty('popular_searches_max');
     expect(data).not.toHaveProperty('_fallbacks');
@@ -199,9 +198,76 @@ test.describe('Headless Storefront — Config API', () => {
     expect(data.colors.primary).toBe('#ff0000');
     expect(data.colors.secondary).toBe('#00ff00');
     expect(data.colors.accent).toBeNull();
-    expect(data.popular_searches).toEqual(['tea', 'coffee']);
 
     await ctx.dispose();
+  });
+
+  test('GET /config/popular-searches is publicly accessible', async () => {
+    const ctx = await playwrightRequest.newContext();
+    const res = await ctx.get(`${BASE}/config/popular-searches`);
+    expect(res.status()).toBe(200);
+    await ctx.dispose();
+  });
+
+  test('GET /config/popular-searches returns { items } with overrides', async ({ restApi }) => {
+    await restApi.updateSettings(SLUG, {
+      popular_searches_override: ['tea', 'coffee'],
+      popular_searches_max: 5,
+    });
+
+    const ctx = await playwrightRequest.newContext();
+    const res = await ctx.get(`${BASE}/config/popular-searches`);
+    const data = await res.json();
+
+    expect(data).toHaveProperty('items');
+    expect(Array.isArray(data.items)).toBe(true);
+    expect(data.items).toEqual(['tea', 'coffee']);
+
+    await ctx.dispose();
+  });
+
+  test('GET /config/popular-searches returns empty items when no data', async ({ restApi }) => {
+    await restApi.updateSettings(SLUG, { popular_searches_override: [] });
+    // Note: the tracking table may have entries from other tests; we only assert shape here.
+    const ctx = await playwrightRequest.newContext();
+    const res = await ctx.get(`${BASE}/config/popular-searches`);
+    const data = await res.json();
+
+    expect(data).toHaveProperty('items');
+    expect(Array.isArray(data.items)).toBe(true);
+
+    await ctx.dispose();
+  });
+
+  test('POST /admin/revalidate requires authentication', async () => {
+    const ctx = await playwrightRequest.newContext();
+    const res = await ctx.post(`${BASE}/admin/revalidate`);
+    expect(res.status()).toBe(401);
+    await ctx.dispose();
+  });
+
+  test('POST /admin/revalidate returns dispatched:false when frontend_url empty', async ({
+    restApi,
+  }) => {
+    await restApi.updateSettings(SLUG, { frontend_url: '', revalidate_secret: '' });
+
+    const { status, data } = await restApi.post(`${SLUG}/v1/admin/revalidate`);
+    expect(status).toBe(200);
+    expect(data).toEqual({ dispatched: false });
+  });
+
+  test('POST /admin/revalidate returns dispatched:true when config is set', async ({ restApi }) => {
+    // Config is set; dispatched:true reflects the helper firing wp_safe_remote_post (which
+    // itself may reject private URLs via SSRF guard, but that's fire-and-forget and not
+    // observable here).
+    await restApi.updateSettings(SLUG, {
+      frontend_url: 'https://example.com',
+      revalidate_secret: 'test-secret',
+    });
+
+    const { status, data } = await restApi.post(`${SLUG}/v1/admin/revalidate`);
+    expect(status).toBe(200);
+    expect(data).toEqual({ dispatched: true });
   });
 
   test('GET /settings includes _fallbacks', async ({ restApi }) => {

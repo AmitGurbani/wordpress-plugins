@@ -78,6 +78,27 @@ for (const plugin of PLUGINS) {
           expect(data[key]).toBe('********');
         }
       });
+
+      test('sensitive field preserved when client re-submits the mask', async ({
+        restApi,
+        wpCli,
+      }) => {
+        // Regression guard for the wpts class-rest-api.hbs preserve-on-mask fix:
+        // the admin UI re-sends '********' as the current value for sensitive fields
+        // the user did not edit; the server must preserve the real stored value.
+        const optionPrefix = plugin.slug.replace(/-/g, '_');
+        for (const key of plugin.sensitiveKeys) {
+          const originalValue = `original_preserve_value_${key}_${Date.now()}`;
+          const optionName = `${optionPrefix}_${key}`;
+
+          await restApi.updateSettings(plugin.slug, { [key]: originalValue });
+          await restApi.updateSettings(plugin.slug, { [key]: '********' });
+
+          // Raw stored value must still be the original, not the mask string.
+          const stored = wpCli(`option get ${optionName}`);
+          expect(stored).toBe(originalValue);
+        }
+      });
     }
 
     test('POST /settings requires authentication', async () => {

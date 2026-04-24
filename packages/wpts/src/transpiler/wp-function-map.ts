@@ -343,6 +343,7 @@ export const WP_FUNCTION_MAP: Record<string, string> = {
 export const WP_CONST_MAP: Record<string, string> = {
   ABSPATH: 'ABSPATH',
   WP_DEBUG_LOG: 'WP_DEBUG_LOG',
+  WP_CLI: 'WP_CLI',
 };
 
 /**

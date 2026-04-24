@@ -60,7 +60,7 @@ greeting: string = 'Hello!';
 | `label` | `string` | Yes | Display label |
 | `description` | `string` | No | Setting description |
 | `sanitize` | `string` | No | PHP sanitization function |
-| `sensitive` | `boolean` | No | Mask value in GET /settings response (returns `'********'` when set, `''` when empty) |
+| `sensitive` | `boolean` | No | Mask value in GET /settings response (returns `'********'` when set, `''` when empty). POST /settings also skips `update_option` when the incoming value is `'********'`, so a form re-submit that echoes the mask preserves the real stored value. |
 | `exposeInConfig` | `boolean` | No | Include this setting in an auto-generated public `GET /config` endpoint |
 | `wooCurrencyDefault` | `boolean` | No | Auto-generate a `default_option` filter that returns the WooCommerce currency when active |
 

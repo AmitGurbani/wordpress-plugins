@@ -37,7 +37,10 @@ class Headless_Storefront {
 
 	private function define_public_hooks() {
 		$public = new Headless_Storefront_Public( $this->plugin_name, $this->version );
-		$this->loader->add_action( 'update_option_headless_storefront_config', $public, 'on_config_update', 10, 2 );
+		$this->loader->add_action( 'update_option_headless_storefront_config', $public, 'on_config_update', 10, 1 );
+		$this->loader->add_action( 'update_option_blogname', $public, 'on_blog_name_update', 10, 1 );
+		$this->loader->add_action( 'update_option_blogdescription', $public, 'on_blog_description_update', 10, 1 );
+		$this->loader->add_action( 'update_option_woocommerce_email_from_address', $public, 'on_woo_email_update', 10, 1 );
 		$this->loader->add_action( 'headless_storefront_search_cleanup', $public, 'cleanup_old_searches', 10, 0 );
 		$this->loader->add_filter( 'rest_pre_dispatch', $public, 'track_search', 10, 3 );
 	}

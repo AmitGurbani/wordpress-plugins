@@ -82,7 +82,15 @@ class {{className}}_Rest_Api {
 			{{else}}
 			$value = $params['{{key}}'];
 			{{/if}}
+			{{#if sensitive}}
+			// GET /settings masks this field as '********'; if the client re-submits
+			// the mask (user did not edit it), preserve the existing stored value.
+			if ( '********' !== $value ) {
+				update_option( '{{../functionPrefix}}{{key}}', $value );
+			}
+			{{else}}
 			update_option( '{{../functionPrefix}}{{key}}', $value );
+			{{/if}}
 		}
 		{{/each}}
 
