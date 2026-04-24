@@ -64,11 +64,6 @@ jobs:
           # Fail if tests, examples, or .turbo leak in
           npm pack --dry-run 2>&1 | grep -E '(tests/|\.turbo/|examples/)' && exit 1 || true
 
-      - name: Publish to npm
-        run: |
-          cd packages/wpts
-          npm publish --provenance --access public
-
       - name: Commit and tag
         env:
           TAG: ${{ steps.bump.outputs.tag }}
@@ -78,9 +73,37 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add packages/wpts/package.json
           git commit -m "release(wpts): v${VERSION}"
-          git tag "$TAG" -m "wpts v${VERSION}"
-          git push origin HEAD
-          git push origin "$TAG"
+
+          # Retry with rebase to handle concurrent pushes from sibling release runs.
+          # wpts release touches only packages/wpts/package.json; plugin releases touch
+          # only packages/<plugin>/, so rebases are conflict-free.
+          # Tag is created after a successful branch push to avoid orphan tags on push failure.
+          for attempt in 1 2 3 4 5; do
+            git fetch origin main
+            git rebase origin/main || { git rebase --abort; exit 1; }
+            if git push origin HEAD; then
+              git tag "$TAG" -m "wpts v${VERSION}"
+              git push origin "$TAG"
+              exit 0
+            fi
+            sleep $((RANDOM % 5 + 2))
+          done
+          echo "Failed to push after 5 attempts"
+          exit 1
+
+      - name: Publish to npm
+        env:
+          VERSION: ${{ steps.bump.outputs.version }}
+        run: |
+          # Idempotent: skip if this version is already on npm (recovery from a prior
+          # partial run where the publish step ran but a later step failed).
+          PUBLISHED=$(npm view "@amitgurbani/wpts@${VERSION}" version 2>/dev/null || true)
+          if [ -n "$PUBLISHED" ]; then
+            echo "@amitgurbani/wpts@${VERSION} already on npm, skipping publish."
+            exit 0
+          fi
+          cd packages/wpts
+          npm publish --provenance --access public
 
       - name: Generate changelog
         run: |

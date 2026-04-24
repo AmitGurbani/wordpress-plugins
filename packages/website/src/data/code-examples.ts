@@ -38,6 +38,25 @@ curl -X POST https://store.example.com/wp-json/headless-auth/v1/otp/verify \\
     },
   },
   {
+    slug: 'headless-clarity',
+    label: 'Clarity',
+    request: {
+      lang: 'bash',
+      code: `# Fetch Clarity config (public endpoint — optional user identity for logged-in requests)
+curl https://store.example.com/wp-json/headless-clarity/v1/config`,
+    },
+    response: {
+      lang: 'json',
+      code: `{
+  "project_id": "abcdefghij",
+  "user": {
+    "id": "42",
+    "display_name": "Priya Sharma"
+  }
+}`,
+    },
+  },
+  {
     slug: 'headless-fuzzy-find',
     label: 'Search',
     request: {
@@ -69,6 +88,21 @@ curl "https://store.example.com/wp-json/headless-fuzzy-find/v1/search?q=shrt&per
   "total": 12,
   "pages": 4,
   "suggestion": "shirt"
+}`,
+    },
+  },
+  {
+    slug: 'headless-google-analytics',
+    label: 'Google Analytics',
+    request: {
+      lang: 'bash',
+      code: `# Fetch GA4 config (auto-generated from @Setting({ exposeInConfig: true }))
+curl https://store.example.com/wp-json/headless-google-analytics/v1/config`,
+    },
+    response: {
+      lang: 'json',
+      code: `{
+  "measurement_id": "G-XXXXXXXX"
 }`,
     },
   },
@@ -197,6 +231,71 @@ curl https://store.example.com/wp-json/headless-pos-sessions/v1/sessions/9214 \\
   "notes": "",
   "cashier_id": 42,
   "created_at": "2026-04-23 09:00:00"
+}`,
+    },
+  },
+  {
+    slug: 'headless-storefront',
+    label: 'Storefront',
+    request: {
+      lang: 'bash',
+      code: `# Fetch branding config (public — excludes popular searches, caches forever)
+curl https://store.example.com/wp-json/headless-storefront/v1/config
+
+# Fetch popular searches separately (public — changes as queries accumulate)
+curl https://store.example.com/wp-json/headless-storefront/v1/config/popular-searches`,
+    },
+    response: {
+      lang: 'json',
+      code: `{
+  "app_name": "Acme Store",
+  "short_name": "Acme",
+  "tagline": "Fast delivery across India",
+  "title_tagline": "",
+  "description": "",
+  "contact": {
+    "phone": "+919876543210",
+    "phone_href": "tel:+919876543210",
+    "email": "support@acme.example.com",
+    "whatsapp": { "number": "+919876543210", "label": "Chat with us" }
+  },
+  "social": [
+    { "platform": "instagram", "href": "https://instagram.com/acme", "label": "@acme" }
+  ],
+  "cities": ["Mumbai", "Bangalore", "Delhi"],
+  "trust_signals": ["Genuine Products", "Easy Returns", "Secure Payment", "Fast Delivery"],
+  "delivery_message": "Delivery in 1–2 business days",
+  "return_policy": "Easy returns within 7 days of delivery.",
+  "delivery_badge": "",
+  "colors": { "primary": "#6366f1", "secondary": null, "accent": null },
+  "tokens": {
+    "section_gap": "2rem",
+    "card_padding": "0.75rem",
+    "card_radius": "0.75rem",
+    "button_radius": "0.5rem",
+    "image_radius": "0.5rem",
+    "card_shadow": "none",
+    "card_hover_shadow": "0 4px 12px oklch(0 0 0 / 0.1)",
+    "hover_duration": "150ms"
+  },
+  "logo_url": "https://store.example.com/wp-content/uploads/logo.png",
+  "font_family": "Inter"
+}`,
+    },
+  },
+  {
+    slug: 'headless-umami',
+    label: 'Umami',
+    request: {
+      lang: 'bash',
+      code: `# Fetch Umami config (public endpoint — Umami Cloud or self-hosted URL)
+curl https://store.example.com/wp-json/headless-umami/v1/config`,
+    },
+    response: {
+      lang: 'json',
+      code: `{
+  "umami_url": "https://analytics.example.com",
+  "website_id": "c1a8b0de-2c3e-4a1d-9f7b-7e2a3c4d5e6f"
 }`,
     },
   },
