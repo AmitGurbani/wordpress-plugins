@@ -1,6 +1,6 @@
 {
   "name": "@amitgurbani/wpts",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "description": "TypeScript-to-WordPress-Plugin transpiler",
   "type": "module",
   "main": "dist/src/index.js",
