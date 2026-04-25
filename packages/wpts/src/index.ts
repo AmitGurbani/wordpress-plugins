@@ -43,6 +43,7 @@ export {
   RestRoute,
   Setting,
   Shortcode,
+  Uninstall,
 } from './decorators/index.js';
 // IR types
 export type {

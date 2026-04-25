@@ -7,10 +7,9 @@
  * Build: npx wpts build src/plugin.ts -o dist --clean
  */
 
-import { Activate, AdminPage, Deactivate, Plugin, Uninstall } from '@amitgurbani/wpts';
+import { Activate, AdminPage, Plugin } from '@amitgurbani/wpts';
 import './config-routes.js';
 import './revalidate-hooks.js';
-import './search-tracking.js';
 
 @Plugin({
   name: 'Headless Storefront',
@@ -35,27 +34,6 @@ import './search-tracking.js';
 class HeadlessStorefront {
   @Activate()
   onActivation(): void {
-    requireOnce(`${ABSPATH}wp-admin/includes/upgrade.php`);
-
-    const charsetCollate: string = wpdb.getCharsetCollate();
-    const table: string = `${wpdb.prefix}headless_search_queries`;
-
-    const sql: string =
-      'CREATE TABLE ' +
-      table +
-      ' (' +
-      'id bigint(20) unsigned NOT NULL AUTO_INCREMENT, ' +
-      '`query` varchar(255) NOT NULL, ' +
-      'count int unsigned NOT NULL DEFAULT 1, ' +
-      'last_searched datetime NOT NULL, ' +
-      'PRIMARY KEY  (id), ' +
-      'UNIQUE KEY query_unique (`query`)' +
-      ') ENGINE=InnoDB ' +
-      charsetCollate +
-      ';';
-
-    dbDelta(sql);
-
     // Seed the Default theme preset (colors + font + tokens).
     // Other fields (app_name, contact, etc.) remain unset until the user configures them.
     addOption('headless_storefront_config', {
@@ -72,20 +50,5 @@ class HeadlessStorefront {
         hover_duration: '150ms',
       },
     });
-
-    if (!wpNextScheduled('headless_storefront_search_cleanup')) {
-      wpScheduleEvent(time(), 'weekly', 'headless_storefront_search_cleanup');
-    }
-  }
-
-  @Deactivate()
-  onDeactivation(): void {
-    wpClearScheduledHook('headless_storefront_search_cleanup');
-  }
-
-  @Uninstall()
-  onUninstall(): void {
-    wpdb.query(`DROP TABLE IF EXISTS ${wpdb.prefix}headless_search_queries`);
-    wpClearScheduledHook('headless_storefront_search_cleanup');
   }
 }

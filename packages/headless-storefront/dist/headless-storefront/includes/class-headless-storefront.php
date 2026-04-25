@@ -41,8 +41,6 @@ class Headless_Storefront {
 		$this->loader->add_action( 'update_option_blogname', $public, 'on_blog_name_update', 10, 1 );
 		$this->loader->add_action( 'update_option_blogdescription', $public, 'on_blog_description_update', 10, 1 );
 		$this->loader->add_action( 'update_option_woocommerce_email_from_address', $public, 'on_woo_email_update', 10, 1 );
-		$this->loader->add_action( 'headless_storefront_search_cleanup', $public, 'cleanup_old_searches', 10, 0 );
-		$this->loader->add_filter( 'rest_pre_dispatch', $public, 'track_search', 10, 3 );
 	}
 
 	public function run() {

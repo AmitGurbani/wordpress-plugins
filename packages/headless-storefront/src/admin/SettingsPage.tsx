@@ -4,7 +4,6 @@ import { AppearanceTab } from './tabs/AppearanceTab';
 import { CacheSettingsTab } from './tabs/CacheSettingsTab';
 import { ContactSocialTab } from './tabs/ContactSocialTab';
 import { FooterContentTab } from './tabs/FooterContentTab';
-import { PopularSearchesTab } from './tabs/PopularSearchesTab';
 import { ProductPageTab } from './tabs/ProductPageTab';
 import { StoreIdentityTab } from './tabs/StoreIdentityTab';
 import type { Settings } from './types';
@@ -36,8 +35,6 @@ export function SettingsPage() {
             return <FooterContentTab {...tabProps} />;
           case 'product':
             return <ProductPageTab {...tabProps} />;
-          case 'searches':
-            return <PopularSearchesTab {...tabProps} />;
           case 'cache':
             return <CacheSettingsTab {...tabProps} />;
           default:

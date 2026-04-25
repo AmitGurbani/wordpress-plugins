@@ -43,8 +43,6 @@ export interface Settings {
     card_hover_shadow: string;
     hover_duration: string;
   };
-  popular_searches_override: string[];
-  popular_searches_max: number;
   frontend_url: string;
   revalidate_secret: string;
   _fallbacks?: {
@@ -55,12 +53,6 @@ export interface Settings {
 }
 
 export type TabProps = GenericTabProps<Settings>;
-
-export interface SearchQuery {
-  query: string;
-  count: number;
-  last_searched: string;
-}
 
 export const DEFAULTS: Settings = {
   app_name: '',
@@ -99,8 +91,6 @@ export const DEFAULTS: Settings = {
     card_hover_shadow: '0 4px 12px oklch(0 0 0 / 0.1)',
     hover_duration: '150ms',
   },
-  popular_searches_override: [],
-  popular_searches_max: 12,
   frontend_url: '',
   revalidate_secret: '',
 };
@@ -111,6 +101,5 @@ export const TABS = [
   { name: 'contact', title: __('Contact & Social', 'headless-storefront') },
   { name: 'footer', title: __('Footer Content', 'headless-storefront') },
   { name: 'product', title: __('Product Page', 'headless-storefront') },
-  { name: 'searches', title: __('Popular Searches', 'headless-storefront') },
   { name: 'cache', title: __('Cache Settings', 'headless-storefront') },
 ];

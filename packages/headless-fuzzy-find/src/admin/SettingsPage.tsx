@@ -30,7 +30,7 @@ export function SettingsPage() {
           case 'index':
             return <IndexTab />;
           case 'analytics':
-            return <AnalyticsTab />;
+            return <AnalyticsTab {...tabProps} />;
           default:
             return null;
         }

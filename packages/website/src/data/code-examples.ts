@@ -62,7 +62,10 @@ curl https://store.example.com/wp-json/headless-clarity/v1/config`,
     request: {
       lang: 'bash',
       code: `# Fuzzy search (handles typos)
-curl "https://store.example.com/wp-json/headless-fuzzy-find/v1/search?q=shrt&per_page=3"`,
+curl "https://store.example.com/wp-json/headless-fuzzy-find/v1/search?q=shrt&per_page=3"
+
+# Trending searches for storefront UI (admin overrides or top tracked queries)
+curl "https://store.example.com/wp-json/headless-fuzzy-find/v1/popular-searches?limit=8"`,
     },
     response: {
       lang: 'json',
@@ -239,11 +242,8 @@ curl https://store.example.com/wp-json/headless-pos-sessions/v1/sessions/9214 \\
     label: 'Storefront',
     request: {
       lang: 'bash',
-      code: `# Fetch branding config (public — excludes popular searches, caches forever)
-curl https://store.example.com/wp-json/headless-storefront/v1/config
-
-# Fetch popular searches separately (public — changes as queries accumulate)
-curl https://store.example.com/wp-json/headless-storefront/v1/config/popular-searches`,
+      code: `# Fetch branding config (public — caches forever)
+curl https://store.example.com/wp-json/headless-storefront/v1/config`,
     },
     response: {
       lang: 'json',

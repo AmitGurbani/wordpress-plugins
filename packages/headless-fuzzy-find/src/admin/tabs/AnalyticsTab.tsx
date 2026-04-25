@@ -1,11 +1,16 @@
 import apiFetch from '@wordpress/api-fetch';
-import { Button, Spinner } from '@wordpress/components';
+import {
+  Button,
+  __experimentalNumberControl as NumberControl,
+  Spinner,
+  TextareaControl,
+} from '@wordpress/components';
 import { useEffect, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { FormSection } from 'admin-ui';
-import type { AnalyticsData } from '../types';
+import type { AnalyticsData, TabProps } from '../types';
 
-export function AnalyticsTab() {
+export function AnalyticsTab({ settings, update }: TabProps) {
   const [data, setData] = useState<AnalyticsData | null>(null);
   const [loading, setLoading] = useState(true);
   const [clearing, setClearing] = useState(false);
@@ -97,9 +102,43 @@ export function AnalyticsTab() {
         </p>
       )}
 
-      <Button variant="secondary" isDestructive onClick={handleClear} isBusy={clearing}>
+      <Button
+        variant="secondary"
+        isDestructive
+        onClick={handleClear}
+        isBusy={clearing}
+        style={{ marginBottom: '24px' }}
+      >
         {clearing ? <Spinner /> : __('Clear Analytics', 'headless-fuzzy-find')}
       </Button>
+
+      <h3>{__('Public Popular Searches Endpoint', 'headless-fuzzy-find')}</h3>
+      <p style={{ color: '#666', marginTop: 0 }}>
+        {__(
+          'Configures GET /wp-json/headless-fuzzy-find/v1/popular-searches — returns trending search terms for storefront UIs.',
+          'headless-fuzzy-find',
+        )}
+      </p>
+      <TextareaControl
+        label={__('Manual Overrides', 'headless-fuzzy-find')}
+        help={__(
+          'One search term per line. When set, these replace auto-tracked searches in the public endpoint.',
+          'headless-fuzzy-find',
+        )}
+        value={settings.popular_searches_override}
+        onChange={(v: string) => update('popular_searches_override', v)}
+        rows={5}
+      />
+      <NumberControl
+        label={__('Max Results', 'headless-fuzzy-find')}
+        help={__('Maximum number of popular searches returned. Default: 12', 'headless-fuzzy-find')}
+        value={settings.popular_searches_max}
+        onChange={(v: string | undefined) =>
+          update('popular_searches_max', v ? parseInt(v, 10) : 12)
+        }
+        min={1}
+        max={50}
+      />
     </FormSection>
   );
 }

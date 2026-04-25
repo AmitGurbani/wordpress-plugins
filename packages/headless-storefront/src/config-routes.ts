@@ -1,9 +1,8 @@
 /**
  * Headless Storefront Config Routes
  *
- * Public /config + /config/popular-searches endpoints, admin /settings
- * endpoints, and the manual /admin/revalidate endpoint used by the
- * "Re-push storefront config" button.
+ * Public /config endpoint, admin /settings endpoints, and the manual
+ * /admin/revalidate endpoint used by the "Re-push storefront config" button.
  *
  * Option-update hooks that automatically fire the revalidation webhook
  * live in `revalidate-hooks.ts` (kept separate so the shared helper lands
@@ -131,29 +130,6 @@ class ConfigRoutes {
     });
   }
 
-  // ── GET /config/popular-searches (public) ──────────────────────────
-
-  @RestRoute('/config/popular-searches', { method: 'GET', public: true })
-  getPopularSearchesConfig(_request: any): any {
-    const config: any = getOption('headless_storefront_config', []);
-    const overrides: any = config.popular_searches_override ?? [];
-    const maxResults: number = intval(config.popular_searches_max ?? 12);
-    let items: string[];
-
-    if (isArray(overrides) && !empty(overrides)) {
-      items = arrayMap('sanitize_text_field', overrides);
-    } else {
-      const table: string = `${wpdb.prefix}headless_search_queries`;
-      const rows: any[] =
-        wpdb.getResults(
-          wpdb.prepare('SELECT `query` FROM %i ORDER BY count DESC LIMIT %d', table, maxResults),
-        ) ?? [];
-      items = wpListPluck(rows, 'query');
-    }
-
-    return restEnsureResponse({ items: items });
-  }
-
   // ── GET /settings (admin) ──────────────────────────────────────────
 
   @RestRoute('/settings', { method: 'GET', capability: 'manage_options' })
@@ -204,10 +180,6 @@ class ConfigRoutes {
         card_hover_shadow: tokens.card_hover_shadow ?? '0 4px 12px oklch(0 0 0 / 0.1)',
         hover_duration: tokens.hover_duration ?? '150ms',
       },
-      popular_searches_override: isArray(config.popular_searches_override ?? [])
-        ? config.popular_searches_override
-        : [],
-      popular_searches_max: intval(config.popular_searches_max ?? 12),
       frontend_url: config.frontend_url ?? '',
       revalidate_secret: config.revalidate_secret ?? '',
       _fallbacks: {
@@ -283,11 +255,6 @@ class ConfigRoutes {
       ? arrayMap('sanitize_text_field', rawTrustSignals)
       : [];
 
-    const rawOverrides: any = data.popular_searches_override ?? [];
-    const overrides: any = isArray(rawOverrides)
-      ? arrayMap('sanitize_text_field', rawOverrides)
-      : [];
-
     const sanitized: any = {
       app_name: sanitizeTextField(data.app_name ?? ''),
       short_name: sanitizeTextField(data.short_name ?? ''),
@@ -305,8 +272,6 @@ class ConfigRoutes {
       delivery_badge: sanitizeTextField(data.delivery_badge ?? ''),
       colors: colors,
       tokens: tokens,
-      popular_searches_override: overrides,
-      popular_searches_max: absint(data.popular_searches_max ?? 12),
       frontend_url: escUrlRaw(data.frontend_url ?? ''),
       revalidate_secret: sanitizeTextField(data.revalidate_secret ?? ''),
     };

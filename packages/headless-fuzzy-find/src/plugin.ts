@@ -129,6 +129,28 @@ class FuzzyFind {
   })
   synonyms: string = '';
 
+  // ── Popular Searches Settings ───────────────────────────────────────
+
+  @Setting({
+    key: 'popular_searches_override',
+    type: 'string',
+    default: '',
+    label: 'Popular Searches Overrides',
+    description:
+      'Admin-curated trending search terms, one per line. When set, these replace auto-tracked searches in the public /popular-searches endpoint.',
+    sanitize: 'sanitize_textarea_field',
+  })
+  popularSearchesOverride: string = '';
+
+  @Setting({
+    key: 'popular_searches_max',
+    type: 'number',
+    default: 12,
+    label: 'Popular Searches Max Results',
+    description: 'Maximum number of popular searches returned by the public endpoint (1-50).',
+  })
+  popularSearchesMax: number = 12;
+
   // ── Lifecycle ───────────────────────────────────────────────────────
 
   @Activate()

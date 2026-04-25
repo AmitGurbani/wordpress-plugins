@@ -36,6 +36,7 @@ To build the admin JavaScript from source, clone the repository and run:
 * Autocomplete endpoint for search-as-you-type UIs
 * "Did you mean" suggestions when results are few or zero
 * Search analytics — track popular searches and zero-result queries
+* Public popular-searches endpoint with admin-curated overrides for trending search UIs
 * Automatic index updates when products are created, updated, or deleted
 
 == Requirements ==

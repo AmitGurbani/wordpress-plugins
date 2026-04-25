@@ -160,6 +160,24 @@ class Headless_Fuzzy_Find_Admin {
 				'sanitize_callback' => 'sanitize_textarea_field',
 			)
 		);
+		register_setting(
+			'headless-fuzzy-find_options',
+			'headless_fuzzy_find_popular_searches_override',
+			array(
+				'type'    => 'string',
+				'default' => '',
+				'sanitize_callback' => 'sanitize_textarea_field',
+			)
+		);
+		register_setting(
+			'headless-fuzzy-find_options',
+			'headless_fuzzy_find_popular_searches_max',
+			array(
+				'type'    => 'number',
+				'default' => 12,
+				'sanitize_callback' => 'absint',
+			)
+		);
 	}
 
 	public function woo_notice() {

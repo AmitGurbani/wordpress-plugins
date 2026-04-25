@@ -12,6 +12,8 @@ export interface Settings {
   autocomplete_limit: number;
   did_you_mean_threshold: number;
   synonyms: string;
+  popular_searches_override: string;
+  popular_searches_max: number;
 }
 
 export type TabProps = GenericTabProps<Settings>;
@@ -44,6 +46,8 @@ export const DEFAULTS: Settings = {
   autocomplete_limit: 8,
   did_you_mean_threshold: 3,
   synonyms: '',
+  popular_searches_override: '',
+  popular_searches_max: 12,
 };
 
 export const TABS = [

@@ -13,8 +13,8 @@ Weighted, fuzzy WooCommerce product search with autocomplete and analytics. Buil
 
 Multi-file wpts plugin with 4 source files:
 
-- `src/plugin.ts` — Entry file: @Plugin(`wooNotice: 'required'`), @AdminPage, 10 @Settings, @Activate/@Deactivate
-- `src/search-routes.ts` — GET /search (public, paginated), GET /autocomplete (public). Boolean query builder, Levenshtein fuzzy correction, "Did You Mean" suggestions, analytics logging
+- `src/plugin.ts` — Entry file: @Plugin(`wooNotice: 'required'`), @AdminPage, 12 @Settings, @Activate/@Deactivate
+- `src/search-routes.ts` — GET /search (public, paginated), GET /autocomplete (public), GET /popular-searches (public). Boolean query builder, Levenshtein fuzzy correction, "Did You Mean" suggestions, analytics logging
 - `src/indexer.ts` — Real-time product indexing via WooCommerce hooks, batch reindex via `headless_fuzzy_find_do_reindex` action
 - `src/admin-routes.ts` — Admin REST endpoints: index status/rebuild/delete, analytics retrieval/clear
 - `src/admin/index.tsx` — React settings page (Weights, Features, Index, Analytics tabs)
@@ -35,6 +35,7 @@ Namespace: `headless-fuzzy-find/v1`
 |--------|-------|-----------|---------|
 | GET | `/search` | public | Paginated search with weighted scoring, fuzzy correction, synonyms |
 | GET | `/autocomplete` | public | Search-as-you-type suggestions |
+| GET | `/popular-searches` | public | `{ items: string[] }` — admin overrides if set, else top queries from analytics log (`result_count > 0`). Optional `?limit=N` (1-50) |
 | GET | `/settings` | manage_options | Fetch settings |
 | POST | `/settings` | manage_options | Update settings |
 | GET | `/admin/index-status` | manage_options | Index stats (count, last indexed, reindex status) |
@@ -45,7 +46,7 @@ Namespace: `headless-fuzzy-find/v1`
 
 ## Conventions
 
-- **Option keys**: `headless_fuzzy_find_*` prefix. e.g., `headless_fuzzy_find_weight_title`, `headless_fuzzy_find_fuzzy_enabled`, `headless_fuzzy_find_synonyms`, `headless_fuzzy_find_index_table`, `headless_fuzzy_find_log_table`, `headless_fuzzy_find_db_version`, `headless_fuzzy_find_last_indexed`, `headless_fuzzy_find_reindex_in_progress`, `headless_fuzzy_find_reindex_started`
+- **Option keys**: `headless_fuzzy_find_*` prefix. e.g., `headless_fuzzy_find_weight_title`, `headless_fuzzy_find_fuzzy_enabled`, `headless_fuzzy_find_synonyms`, `headless_fuzzy_find_popular_searches_override` (newline-separated), `headless_fuzzy_find_popular_searches_max`, `headless_fuzzy_find_index_table`, `headless_fuzzy_find_log_table`, `headless_fuzzy_find_db_version`, `headless_fuzzy_find_last_indexed`, `headless_fuzzy_find_reindex_in_progress`, `headless_fuzzy_find_reindex_started`
 - **Database tables**: `{prefix}headless_fuzzy_find_search_index` (FULLTEXT index), `{prefix}headless_fuzzy_find_search_log` (analytics). Created on activation, table names stored in options
 - **Index sync hooks**: `woocommerce_new_product` (priority 20), `woocommerce_update_product` (priority 20), `woocommerce_new_product_variation`, `woocommerce_update_product_variation`, `before_delete_post`, `wp_trash_post`, `untrashed_post`. Skips unpublished, hidden, or catalog-only products
 - **Custom action**: `headless_fuzzy_find_do_reindex` — batch reindex all published products. Fired synchronously for ≤500 products, scheduled via `wp_schedule_single_event` for larger stores

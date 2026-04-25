@@ -34,8 +34,6 @@ test.describe('Headless Storefront — Config API', () => {
         card_hover_shadow: '0 4px 12px oklch(0 0 0 / 0.1)',
         hover_duration: '150ms',
       },
-      popular_searches_override: [],
-      popular_searches_max: 12,
       frontend_url: '',
       revalidate_secret: '',
     });
@@ -95,9 +93,6 @@ test.describe('Headless Storefront — Config API', () => {
     // Admin-only fields must NOT be present
     expect(data).not.toHaveProperty('frontend_url');
     expect(data).not.toHaveProperty('revalidate_secret');
-    expect(data).not.toHaveProperty('popular_searches');
-    expect(data).not.toHaveProperty('popular_searches_override');
-    expect(data).not.toHaveProperty('popular_searches_max');
     expect(data).not.toHaveProperty('_fallbacks');
 
     await ctx.dispose();
@@ -178,8 +173,6 @@ test.describe('Headless Storefront — Config API', () => {
       social: [{ platform: 'facebook', href: 'https://facebook.com/test', label: 'Facebook' }],
       cities: ['Pune', 'Goa'],
       colors: { primary: '#ff0000', secondary: '#00ff00', accent: '' },
-      popular_searches_override: ['tea', 'coffee'],
-      popular_searches_max: 5,
     });
 
     const ctx = await playwrightRequest.newContext();
@@ -198,43 +191,6 @@ test.describe('Headless Storefront — Config API', () => {
     expect(data.colors.primary).toBe('#ff0000');
     expect(data.colors.secondary).toBe('#00ff00');
     expect(data.colors.accent).toBeNull();
-
-    await ctx.dispose();
-  });
-
-  test('GET /config/popular-searches is publicly accessible', async () => {
-    const ctx = await playwrightRequest.newContext();
-    const res = await ctx.get(`${BASE}/config/popular-searches`);
-    expect(res.status()).toBe(200);
-    await ctx.dispose();
-  });
-
-  test('GET /config/popular-searches returns { items } with overrides', async ({ restApi }) => {
-    await restApi.updateSettings(SLUG, {
-      popular_searches_override: ['tea', 'coffee'],
-      popular_searches_max: 5,
-    });
-
-    const ctx = await playwrightRequest.newContext();
-    const res = await ctx.get(`${BASE}/config/popular-searches`);
-    const data = await res.json();
-
-    expect(data).toHaveProperty('items');
-    expect(Array.isArray(data.items)).toBe(true);
-    expect(data.items).toEqual(['tea', 'coffee']);
-
-    await ctx.dispose();
-  });
-
-  test('GET /config/popular-searches returns empty items when no data', async ({ restApi }) => {
-    await restApi.updateSettings(SLUG, { popular_searches_override: [] });
-    // Note: the tracking table may have entries from other tests; we only assert shape here.
-    const ctx = await playwrightRequest.newContext();
-    const res = await ctx.get(`${BASE}/config/popular-searches`);
-    const data = await res.json();
-
-    expect(data).toHaveProperty('items');
-    expect(Array.isArray(data.items)).toBe(true);
 
     await ctx.dispose();
   });

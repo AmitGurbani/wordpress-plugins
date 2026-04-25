@@ -49,6 +49,15 @@ class Headless_Fuzzy_Find_Rest_Api {
 		);
 		register_rest_route(
 			$this->namespace,
+			'/popular-searches',
+			array(
+				'methods'             => 'GET',
+				'callback'            => array( $this, 'popular_searches' ),
+				'permission_callback' => '__return_true',
+			)
+		);
+		register_rest_route(
+			$this->namespace,
 			'/index/status',
 			array(
 				'methods'             => 'GET',
@@ -120,6 +129,8 @@ class Headless_Fuzzy_Find_Rest_Api {
 			'autocomplete_limit' => get_option( 'headless_fuzzy_find_autocomplete_limit', 8 ),
 			'did_you_mean_threshold' => get_option( 'headless_fuzzy_find_did_you_mean_threshold', 3 ),
 			'synonyms' => get_option( 'headless_fuzzy_find_synonyms', '' ),
+			'popular_searches_override' => get_option( 'headless_fuzzy_find_popular_searches_override', '' ),
+			'popular_searches_max' => get_option( 'headless_fuzzy_find_popular_searches_max', 12 ),
 		);
 
 		return rest_ensure_response( $settings );
@@ -237,6 +248,28 @@ class Headless_Fuzzy_Find_Rest_Api {
 				);
 			}
 			update_option( 'headless_fuzzy_find_synonyms', $value );
+		}
+		if ( isset( $params['popular_searches_override'] ) ) {
+			$value = sanitize_textarea_field( $params['popular_searches_override'] );
+			if ( null === $value ) {
+				return new \WP_Error(
+					'invalid_popular_searches_override',
+					__( 'Invalid value for popular_searches_override.', 'headless-fuzzy-find' ),
+					array( 'status' => 400 )
+				);
+			}
+			update_option( 'headless_fuzzy_find_popular_searches_override', $value );
+		}
+		if ( isset( $params['popular_searches_max'] ) ) {
+			$value = absint( $params['popular_searches_max'] );
+			if ( null === $value ) {
+				return new \WP_Error(
+					'invalid_popular_searches_max',
+					__( 'Invalid value for popular_searches_max.', 'headless-fuzzy-find' ),
+					array( 'status' => 400 )
+				);
+			}
+			update_option( 'headless_fuzzy_find_popular_searches_max', $value );
 		}
 
 		return rest_ensure_response( array( 'success' => true ) );
@@ -417,6 +450,36 @@ class Headless_Fuzzy_Find_Rest_Api {
 			$did_you_mean = $this->get_did_you_mean_suggestions( $query, $table_name );
 		}
 		return rest_ensure_response( array( 'results' => $suggestions, 'did_you_mean' => $did_you_mean ) );
+	}
+
+	public function popular_searches( $request ) {
+		global $wpdb;
+		$overrides_raw = get_option( 'headless_fuzzy_find_popular_searches_override', '' );
+		$max_results = intval( get_option( 'headless_fuzzy_find_popular_searches_max', 12 ) );
+		$raw_limit = intval( $request->get_param( 'limit' ) ?? $max_results );
+		$limit = $raw_limit > 50 ? 50 : ($raw_limit < 1 ? 1 : $raw_limit);
+		$items = array();
+		if ( strlen( trim( $overrides_raw ) ) > 0 ) {
+			$lines = explode( '
+', $overrides_raw );
+			foreach ( $lines as $line ) {
+				$trimmed = sanitize_text_field( trim( $line ) );
+				if ( strlen( $trimmed ) > 0 ) {
+					array_push( $items, $trimmed );
+				}
+				if ( count( $items ) >= $limit ) {
+					break;
+				}
+			}
+			return rest_ensure_response( array( 'items' => $items ) );
+		}
+		$log_table = get_option( 'headless_fuzzy_find_log_table', '' );
+		if ( ! $log_table ) {
+			return rest_ensure_response( array( 'items' => array() ) );
+		}
+		$rows = $wpdb->get_results( $wpdb->prepare( 'SELECT query FROM %i WHERE result_count > 0 ORDER BY search_count DESC LIMIT %d', $log_table, $limit ) ) ?? array();
+		$items = wp_list_pluck( $rows, 'query' );
+		return rest_ensure_response( array( 'items' => $items ) );
 	}
 
 	public function get_index_status( $request ) {

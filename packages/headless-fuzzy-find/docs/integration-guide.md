@@ -4,12 +4,13 @@ Headless Fuzzy Find provides custom REST API endpoints for WooCommerce product s
 
 ## Overview
 
-Headless Fuzzy Find provides two public REST endpoints:
+Headless Fuzzy Find provides three public REST endpoints:
 
 1. **Search** — paginated product search with weighted relevance scoring, fuzzy correction, and "did you mean" suggestions.
 2. **Autocomplete** — lightweight product suggestions for search-as-you-type UIs.
+3. **Popular Searches** — trending search terms (admin-curated overrides or top tracked queries) for storefront UIs.
 
-Both endpoints query a FULLTEXT index directly — they do not hook into WP_Query or modify default WooCommerce search behavior.
+The search and autocomplete endpoints query a FULLTEXT index directly — they do not hook into WP_Query or modify default WooCommerce search behavior. The popular-searches endpoint reads from the analytics log (or admin overrides if set).
 
 **Base URL:** `https://your-site.com/wp-json/headless-fuzzy-find/v1`
 
@@ -130,14 +131,59 @@ curl "https://your-site.com/wp-json/headless-fuzzy-find/v1/autocomplete?query=sh
 | `results[].image` | string | Thumbnail image URL (empty string if no image) |
 | `did_you_mean` | array | Suggested product titles when results are few or zero |
 
+## Popular Searches Endpoint
+
+Returns trending search terms for storefront UIs (search page chips, autocomplete empty state, etc.). When admin overrides are set, they take precedence; otherwise the top tracked queries from the analytics log are returned.
+
+### Request
+
+```http
+GET /wp-json/headless-fuzzy-find/v1/popular-searches?limit=8
+```
+
+```bash
+curl "https://your-site.com/wp-json/headless-fuzzy-find/v1/popular-searches?limit=8"
+```
+
+### Parameters
+
+| Param | Type | Default | Description |
+| ----- | ---- | ------- | ----------- |
+| `limit` | number | `popular_searches_max` setting (12) | Maximum number of items to return (clamped to 1-50) |
+
+### Response
+
+```json
+{
+  "items": ["shirt", "blue shirt", "oxford", "linen", "polo"]
+}
+```
+
+| Field | Type | Description |
+| ----- | ---- | ----------- |
+| `items` | string[] | Trending search terms — admin overrides if set, otherwise top tracked queries with at least one result |
+
+### Caching
+
+This endpoint is cheap and changes slowly — cache it on the frontend for ~5 minutes. Unlike `/search`, it doesn't return WooCommerce product data, just strings.
+
+### Source of Truth
+
+- **If `popular_searches_override` is set** in admin (one term per line): items are the overrides, in order, capped at `limit`.
+- **Otherwise:** items come from the analytics log (`headless_fuzzy_find_search_log`), filtering for queries that returned at least one result, ordered by `search_count` DESC.
+
+The endpoint returns `{ "items": [] }` when both the overrides are empty and the analytics log has no qualifying entries.
+
 ## Error Responses
 
-Both endpoints return standard WordPress REST API errors:
+The search and autocomplete endpoints return standard WordPress REST API errors:
 
 | Code | Status | Condition |
 | ---- | ------ | --------- |
 | `woocommerce_required` | 400 | WooCommerce is not active |
 | `autocomplete_disabled` | 403 | Autocomplete is turned off in admin settings (autocomplete only) |
+
+The popular-searches endpoint always returns 200 with `{ items: string[] }` — it does not require WooCommerce and does not error on empty data.
 
 Error format:
 

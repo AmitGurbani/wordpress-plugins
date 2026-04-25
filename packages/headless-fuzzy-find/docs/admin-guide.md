@@ -33,6 +33,7 @@ Headless Fuzzy Find provides custom REST endpoints for search:
 
 - **Search** — `GET /wp-json/headless-fuzzy-find/v1/search?query=...` (public, paginated, weighted relevance scoring)
 - **Autocomplete** — `GET /wp-json/headless-fuzzy-find/v1/autocomplete?query=...` (public, lightweight suggestions for search-as-you-type)
+- **Popular Searches** — `GET /wp-json/headless-fuzzy-find/v1/popular-searches?limit=12` (public, trending terms for storefront UIs)
 
 See the [Integration Guide](./integration-guide.md) for full endpoint documentation and frontend examples.
 
@@ -126,6 +127,32 @@ Click **Clear Analytics** to reset all search data. This is useful when:
 - You've made significant changes to your product catalog
 - You want to start fresh after tuning search weights
 - You're testing and want clean data
+
+## Popular Searches Endpoint
+
+The plugin exposes a public `GET /wp-json/headless-fuzzy-find/v1/popular-searches` endpoint that returns trending search terms for your storefront UI (search page chips, autocomplete empty state, etc.).
+
+### How It Works
+
+By default, the endpoint returns the top tracked queries from your analytics log (queries that returned at least one result, sorted by search count). When admins set **Manual Overrides**, those terms take precedence — useful when you want to feature seasonal terms, promotions, or curated suggestions.
+
+### Settings
+
+Both controls live at the bottom of the **Analytics** tab:
+
+| Setting | Default | Description |
+| ------- | ------- | ----------- |
+| Manual Overrides | (empty) | One search term per line. When set, replaces auto-tracked terms in the public endpoint |
+| Max Results | 12 | Maximum number of items returned (1-50). Frontend `?limit=N` param can override on a per-request basis |
+
+### When to Use Overrides
+
+- **Featured campaigns** — pin "valentine's day", "summer sale" during promotions
+- **New product launches** — promote searches you want to drive traffic to
+- **Catalog gaps** — direct customers toward terms you actually have stock for
+- **Cold start** — populate trending terms before you have real analytics data
+
+To revert to auto-tracked queries, just clear the overrides field.
 
 ## Troubleshooting
 

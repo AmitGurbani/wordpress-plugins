@@ -420,6 +420,51 @@ class FfSearchRoutes {
     });
   }
 
+  // ── Popular Searches Endpoint ────────────────────────────────────────
+
+  @RestRoute('/popular-searches', { method: 'GET', public: true })
+  popularSearches(request: any): any {
+    const overridesRaw: string = getOption('headless_fuzzy_find_popular_searches_override', '');
+    const maxResults: number = intval(getOption('headless_fuzzy_find_popular_searches_max', 12));
+    const rawLimit: number = intval(request.get_param('limit') ?? maxResults);
+    const limit: number = rawLimit > 50 ? 50 : rawLimit < 1 ? 1 : rawLimit;
+
+    let items: string[] = [];
+
+    // Admin-curated overrides take precedence
+    if (overridesRaw.trim().length > 0) {
+      const lines: string[] = overridesRaw.split('\n');
+      for (const line of lines) {
+        const trimmed: string = sanitizeTextField(line.trim());
+        if (trimmed.length > 0) {
+          items.push(trimmed);
+        }
+        if (items.length >= limit) {
+          break;
+        }
+      }
+      return restEnsureResponse({ items: items });
+    }
+
+    // Auto-tracked from search log
+    const logTable: string = getOption('headless_fuzzy_find_log_table', '');
+    if (!logTable) {
+      return restEnsureResponse({ items: [] });
+    }
+
+    const rows: any[] =
+      wpdb.getResults(
+        wpdb.prepare(
+          'SELECT query FROM %i WHERE result_count > 0 ORDER BY search_count DESC LIMIT %d',
+          logTable,
+          limit,
+        ),
+      ) ?? [];
+
+    items = wpListPluck(rows, 'query');
+    return restEnsureResponse({ items: items });
+  }
+
   // ── Levenshtein Word Correction ──────────────────────────────────────
 
   correctWords(searchTerm: string, tableName: string): any {

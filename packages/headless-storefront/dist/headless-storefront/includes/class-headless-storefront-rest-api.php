@@ -24,15 +24,6 @@ class Headless_Storefront_Rest_Api {
 		);
 		register_rest_route(
 			$this->namespace,
-			'/config/popular-searches',
-			array(
-				'methods'             => 'GET',
-				'callback'            => array( $this, 'get_popular_searches_config' ),
-				'permission_callback' => '__return_true',
-			)
-		);
-		register_rest_route(
-			$this->namespace,
 			'/settings',
 			array(
 				'methods'             => 'GET',
@@ -59,28 +50,6 @@ class Headless_Storefront_Rest_Api {
 			array(
 				'methods'             => 'POST',
 				'callback'            => array( $this, 'manual_revalidate' ),
-				'permission_callback' => function() {
-					return current_user_can( 'manage_options' );
-				},
-			)
-		);
-		register_rest_route(
-			$this->namespace,
-			'/admin/popular-searches',
-			array(
-				'methods'             => 'GET',
-				'callback'            => array( $this, 'get_popular_searches' ),
-				'permission_callback' => function() {
-					return current_user_can( 'manage_options' );
-				},
-			)
-		);
-		register_rest_route(
-			$this->namespace,
-			'/admin/clear-searches',
-			array(
-				'methods'             => 'POST',
-				'callback'            => array( $this, 'clear_searches' ),
 				'permission_callback' => function() {
 					return current_user_can( 'manage_options' );
 				},
@@ -128,28 +97,12 @@ class Headless_Storefront_Rest_Api {
 		return rest_ensure_response( array( 'app_name' => $app_name, 'short_name' => $short_name, 'tagline' => $tagline, 'title_tagline' => sanitize_text_field( $config['title_tagline'] ?? '' ), 'description' => sanitize_textarea_field( $config['description'] ?? '' ), 'contact' => array( 'phone' => $contact_phone, 'phone_href' => $contact_phone_href, 'email' => $contact_email, 'whatsapp' => $whatsapp ), 'social' => $social, 'cities' => $cities, 'trust_signals' => $trust_signals, 'delivery_message' => sanitize_text_field( $config['delivery_message'] ?? 'Delivery in 1–2 business days' ), 'return_policy' => sanitize_textarea_field( $config['return_policy'] ?? 'Easy returns within 7 days of delivery. Items must be unused and in original packaging.' ), 'delivery_badge' => sanitize_text_field( $config['delivery_badge'] ?? '' ), 'colors' => array( 'primary' => $primary_color, 'secondary' => $secondary_raw ? $secondary_raw : null, 'accent' => $accent_raw ? $accent_raw : null ), 'tokens' => array( 'section_gap' => sanitize_text_field( $tokens['section_gap'] ?? '2rem' ), 'card_padding' => sanitize_text_field( $tokens['card_padding'] ?? '0.75rem' ), 'card_radius' => sanitize_text_field( $tokens['card_radius'] ?? '0.75rem' ), 'button_radius' => sanitize_text_field( $tokens['button_radius'] ?? '0.5rem' ), 'image_radius' => sanitize_text_field( $tokens['image_radius'] ?? '0.5rem' ), 'card_shadow' => sanitize_text_field( $tokens['card_shadow'] ?? 'none' ), 'card_hover_shadow' => sanitize_text_field( $tokens['card_hover_shadow'] ?? '0 4px 12px oklch(0 0 0 / 0.1)' ), 'hover_duration' => sanitize_text_field( $tokens['hover_duration'] ?? '150ms' ) ), 'logo_url' => $raw_logo_url ? $raw_logo_url : null, 'font_family' => sanitize_text_field( $config['font_family'] ?? 'Inter' ) ) );
 	}
 
-	public function get_popular_searches_config( $request ) {
-		global $wpdb;
-		$config = get_option( 'headless_storefront_config', array() );
-		$overrides = $config['popular_searches_override'] ?? array();
-		$max_results = intval( $config['popular_searches_max'] ?? 12 );
-		$items = null;
-		if ( is_array( $overrides ) && ! empty( $overrides ) ) {
-			$items = array_map( 'sanitize_text_field', $overrides );
-		} else {
-			$table = $wpdb->prefix . 'headless_search_queries';
-			$rows = $wpdb->get_results( $wpdb->prepare( 'SELECT `query` FROM %i ORDER BY count DESC LIMIT %d', $table, $max_results ) ) ?? array();
-			$items = wp_list_pluck( $rows, 'query' );
-		}
-		return rest_ensure_response( array( 'items' => $items ) );
-	}
-
 	public function get_settings( $request ) {
 		$config = get_option( 'headless_storefront_config', array() );
 		$contact = $config['contact'] ?? array();
 		$colors = $config['colors'] ?? array();
 		$tokens = $config['tokens'] ?? array();
-		return rest_ensure_response( array( 'app_name' => $config['app_name'] ?? '', 'short_name' => $config['short_name'] ?? '', 'tagline' => $config['tagline'] ?? '', 'title_tagline' => $config['title_tagline'] ?? '', 'description' => $config['description'] ?? '', 'logo_url' => $config['logo_url'] ?? '', 'font_family' => $config['font_family'] ?? 'Inter', 'contact' => array( 'phone' => $contact['phone'] ?? '', 'phone_href' => $contact['phone_href'] ?? '', 'email' => $contact['email'] ?? '', 'whatsapp_number' => $contact['whatsapp_number'] ?? '', 'whatsapp_label' => $contact['whatsapp_label'] ?? '' ), 'social' => is_array( $config['social'] ?? array() ) ? $config['social'] : array(), 'cities' => is_array( $config['cities'] ?? array() ) ? $config['cities'] : array(), 'trust_signals' => is_array( $config['trust_signals'] ?? array() ) ? $config['trust_signals'] : array( 'Genuine Products', 'Easy Returns', 'Secure Payment', 'Fast Delivery' ), 'delivery_message' => $config['delivery_message'] ?? 'Delivery in 1–2 business days', 'return_policy' => $config['return_policy'] ?? 'Easy returns within 7 days of delivery. Items must be unused and in original packaging.', 'delivery_badge' => $config['delivery_badge'] ?? '', 'colors' => array( 'primary' => $colors['primary'] ?? '#6366f1', 'secondary' => $colors['secondary'] ?? '', 'accent' => $colors['accent'] ?? '' ), 'tokens' => array( 'section_gap' => $tokens['section_gap'] ?? '2rem', 'card_padding' => $tokens['card_padding'] ?? '0.75rem', 'card_radius' => $tokens['card_radius'] ?? '0.75rem', 'button_radius' => $tokens['button_radius'] ?? '0.5rem', 'image_radius' => $tokens['image_radius'] ?? '0.5rem', 'card_shadow' => $tokens['card_shadow'] ?? 'none', 'card_hover_shadow' => $tokens['card_hover_shadow'] ?? '0 4px 12px oklch(0 0 0 / 0.1)', 'hover_duration' => $tokens['hover_duration'] ?? '150ms' ), 'popular_searches_override' => is_array( $config['popular_searches_override'] ?? array() ) ? $config['popular_searches_override'] : array(), 'popular_searches_max' => intval( $config['popular_searches_max'] ?? 12 ), 'frontend_url' => $config['frontend_url'] ?? '', 'revalidate_secret' => $config['revalidate_secret'] ?? '', '_fallbacks' => array( 'app_name' => get_option( 'blogname', '' ), 'tagline' => get_option( 'blogdescription', '' ), 'contact_email' => get_option( 'woocommerce_email_from_address', '' ) ) ) );
+		return rest_ensure_response( array( 'app_name' => $config['app_name'] ?? '', 'short_name' => $config['short_name'] ?? '', 'tagline' => $config['tagline'] ?? '', 'title_tagline' => $config['title_tagline'] ?? '', 'description' => $config['description'] ?? '', 'logo_url' => $config['logo_url'] ?? '', 'font_family' => $config['font_family'] ?? 'Inter', 'contact' => array( 'phone' => $contact['phone'] ?? '', 'phone_href' => $contact['phone_href'] ?? '', 'email' => $contact['email'] ?? '', 'whatsapp_number' => $contact['whatsapp_number'] ?? '', 'whatsapp_label' => $contact['whatsapp_label'] ?? '' ), 'social' => is_array( $config['social'] ?? array() ) ? $config['social'] : array(), 'cities' => is_array( $config['cities'] ?? array() ) ? $config['cities'] : array(), 'trust_signals' => is_array( $config['trust_signals'] ?? array() ) ? $config['trust_signals'] : array( 'Genuine Products', 'Easy Returns', 'Secure Payment', 'Fast Delivery' ), 'delivery_message' => $config['delivery_message'] ?? 'Delivery in 1–2 business days', 'return_policy' => $config['return_policy'] ?? 'Easy returns within 7 days of delivery. Items must be unused and in original packaging.', 'delivery_badge' => $config['delivery_badge'] ?? '', 'colors' => array( 'primary' => $colors['primary'] ?? '#6366f1', 'secondary' => $colors['secondary'] ?? '', 'accent' => $colors['accent'] ?? '' ), 'tokens' => array( 'section_gap' => $tokens['section_gap'] ?? '2rem', 'card_padding' => $tokens['card_padding'] ?? '0.75rem', 'card_radius' => $tokens['card_radius'] ?? '0.75rem', 'button_radius' => $tokens['button_radius'] ?? '0.5rem', 'image_radius' => $tokens['image_radius'] ?? '0.5rem', 'card_shadow' => $tokens['card_shadow'] ?? 'none', 'card_hover_shadow' => $tokens['card_hover_shadow'] ?? '0 4px 12px oklch(0 0 0 / 0.1)', 'hover_duration' => $tokens['hover_duration'] ?? '150ms' ), 'frontend_url' => $config['frontend_url'] ?? '', 'revalidate_secret' => $config['revalidate_secret'] ?? '', '_fallbacks' => array( 'app_name' => get_option( 'blogname', '' ), 'tagline' => get_option( 'blogdescription', '' ), 'contact_email' => get_option( 'woocommerce_email_from_address', '' ) ) ) );
 	}
 
 	public function save_settings( $request ) {
@@ -175,9 +128,7 @@ class Headless_Storefront_Rest_Api {
 		$cities = is_array( $raw_cities ) ? array_map( 'sanitize_text_field', $raw_cities ) : array();
 		$raw_trust_signals = $data['trust_signals'] ?? array();
 		$trust_signals = is_array( $raw_trust_signals ) ? array_map( 'sanitize_text_field', $raw_trust_signals ) : array();
-		$raw_overrides = $data['popular_searches_override'] ?? array();
-		$overrides = is_array( $raw_overrides ) ? array_map( 'sanitize_text_field', $raw_overrides ) : array();
-		$sanitized = array( 'app_name' => sanitize_text_field( $data['app_name'] ?? '' ), 'short_name' => sanitize_text_field( $data['short_name'] ?? '' ), 'tagline' => sanitize_text_field( $data['tagline'] ?? '' ), 'title_tagline' => sanitize_text_field( $data['title_tagline'] ?? '' ), 'description' => sanitize_textarea_field( $data['description'] ?? '' ), 'logo_url' => esc_url_raw( $data['logo_url'] ?? '' ), 'font_family' => sanitize_text_field( $data['font_family'] ?? 'Inter' ), 'contact' => $contact, 'social' => $social, 'cities' => $cities, 'trust_signals' => $trust_signals, 'delivery_message' => sanitize_text_field( $data['delivery_message'] ?? '' ), 'return_policy' => sanitize_textarea_field( $data['return_policy'] ?? '' ), 'delivery_badge' => sanitize_text_field( $data['delivery_badge'] ?? '' ), 'colors' => $colors, 'tokens' => $tokens, 'popular_searches_override' => $overrides, 'popular_searches_max' => absint( $data['popular_searches_max'] ?? 12 ), 'frontend_url' => esc_url_raw( $data['frontend_url'] ?? '' ), 'revalidate_secret' => sanitize_text_field( $data['revalidate_secret'] ?? '' ) );
+		$sanitized = array( 'app_name' => sanitize_text_field( $data['app_name'] ?? '' ), 'short_name' => sanitize_text_field( $data['short_name'] ?? '' ), 'tagline' => sanitize_text_field( $data['tagline'] ?? '' ), 'title_tagline' => sanitize_text_field( $data['title_tagline'] ?? '' ), 'description' => sanitize_textarea_field( $data['description'] ?? '' ), 'logo_url' => esc_url_raw( $data['logo_url'] ?? '' ), 'font_family' => sanitize_text_field( $data['font_family'] ?? 'Inter' ), 'contact' => $contact, 'social' => $social, 'cities' => $cities, 'trust_signals' => $trust_signals, 'delivery_message' => sanitize_text_field( $data['delivery_message'] ?? '' ), 'return_policy' => sanitize_textarea_field( $data['return_policy'] ?? '' ), 'delivery_badge' => sanitize_text_field( $data['delivery_badge'] ?? '' ), 'colors' => $colors, 'tokens' => $tokens, 'frontend_url' => esc_url_raw( $data['frontend_url'] ?? '' ), 'revalidate_secret' => sanitize_text_field( $data['revalidate_secret'] ?? '' ) );
 		update_option( 'headless_storefront_config', $sanitized );
 		return rest_ensure_response( $sanitized );
 	}
@@ -185,20 +136,6 @@ class Headless_Storefront_Rest_Api {
 	public function manual_revalidate( $request ) {
 		$dispatched = $this->dispatch_revalidate();
 		return rest_ensure_response( array( 'dispatched' => $dispatched ) );
-	}
-
-	public function get_popular_searches( $request ) {
-		global $wpdb;
-		$table = $wpdb->prefix . 'headless_search_queries';
-		$rows = $wpdb->get_results( $wpdb->prepare( 'SELECT `query`, count, last_searched FROM %i ORDER BY count DESC LIMIT 50', $table ) ) ?? array();
-		return rest_ensure_response( $rows );
-	}
-
-	public function clear_searches( $request ) {
-		global $wpdb;
-		$table = $wpdb->prefix . 'headless_search_queries';
-		$wpdb->query( $wpdb->prepare( 'TRUNCATE TABLE %i', $table ) );
-		return rest_ensure_response( array( 'success' => true ) );
 	}
 
 	public function dispatch_revalidate(  ) {

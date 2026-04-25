@@ -33,6 +33,7 @@ On activation the plugin creates two database tables (`wp_headless_fuzzy_find_se
 - **Synonym support** — configurable synonym groups for search term expansion
 - **"Did you mean" suggestions** — suggests alternatives when results are few
 - **Search analytics** — tracks popular searches and zero-result queries
+- **Public popular-searches endpoint** — admin-curated overrides or top tracked queries for trending search UIs
 - **Admin settings page** — React UI for configuring weights, feature toggles, and viewing analytics
 
 ## Architecture
@@ -69,6 +70,13 @@ All settings are managed via the admin page and REST API.
 | Autocomplete Limit | 8 | Max autocomplete suggestions |
 | "Did You Mean" Threshold | 3 | Show suggestions when results fewer than this |
 
+### Popular Searches
+
+| Setting | Default | Description |
+| ------- | ------- | ----------- |
+| Popular Searches Overrides | (empty) | Admin-curated trending terms, one per line. When set, replaces auto-tracked searches in the public endpoint |
+| Popular Searches Max Results | 12 | Maximum number of items returned by `/popular-searches` (1-50) |
+
 ## REST Endpoints
 
 All endpoints are under `/headless-fuzzy-find/v1`.
@@ -77,6 +85,7 @@ All endpoints are under `/headless-fuzzy-find/v1`.
 | -------- | ------ | ---- | ----------- |
 | `/search?query=...&page=1&per_page=10&orderby=relevance` | GET | Public | Paginated product search with relevance scoring |
 | `/autocomplete?query=...&limit=8` | GET | Public | Search-as-you-type suggestions |
+| `/popular-searches?limit=12` | GET | Public | `{ items: string[] }` — admin overrides if set, else top tracked queries |
 | `/settings` | GET | `manage_options` | Read all settings |
 | `/settings` | POST | `manage_options` | Update settings |
 | `/index/status` | GET | `manage_options` | Index stats (total indexed, last indexed) |
