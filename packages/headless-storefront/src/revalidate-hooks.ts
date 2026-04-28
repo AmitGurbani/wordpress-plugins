@@ -49,6 +49,12 @@ class RevalidateHooks {
       return false;
     }
 
+    // Record "last attempted" before firing. Dispatch is fire-and-forget so
+    // success isn't observable; this answers "did the hook ever fire?" for
+    // admins. Stored in a separate option to avoid re-entering the
+    // update_option_headless_storefront_config action.
+    updateOption('headless_storefront_last_revalidate_at', gmdate('c', time()));
+
     // Fire-and-forget: blocking: false means WP dispatches the request
     // without waiting for a response, so status is not observable here.
     wpSafeRemotePost(`${frontendUrl}/api/revalidate`, {

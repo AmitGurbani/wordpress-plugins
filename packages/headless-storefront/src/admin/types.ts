@@ -50,6 +50,7 @@ export interface Settings {
     tagline: string;
     contact_email: string;
   };
+  _last_revalidate_at?: string | null;
 }
 
 export type TabProps = GenericTabProps<Settings>;

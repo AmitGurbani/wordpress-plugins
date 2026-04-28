@@ -40,6 +40,7 @@ class Headless_Storefront_Public {
 		if ( ! $frontend_url || ! $secret ) {
 			return false;
 		}
+		update_option( 'headless_storefront_last_revalidate_at', gmdate( 'c', time() ) );
 		wp_safe_remote_post( $frontend_url . '/api/revalidate', array( 'body' => wp_json_encode( array( 'type' => 'storefront' ) ), 'headers' => array( 'Content-Type' => 'application/json', 'x-revalidate-secret' => $secret ), 'blocking' => false, 'timeout' => 5 ) );
 		if ( defined( 'WP_DEBUG_LOG' ) && WP_DEBUG_LOG ) {
 			error_log( '[headless-storefront] revalidate dispatched to ' . $frontend_url . '/api/revalidate' );

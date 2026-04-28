@@ -55,6 +55,17 @@ class Headless_Storefront_Rest_Api {
 				},
 			)
 		);
+		register_rest_route(
+			$this->namespace,
+			'/diagnostics/test-revalidate',
+			array(
+				'methods'             => 'POST',
+				'callback'            => array( $this, 'test_revalidate' ),
+				'permission_callback' => function() {
+					return current_user_can( 'manage_options' );
+				},
+			)
+		);
 	}
 
 
@@ -102,7 +113,7 @@ class Headless_Storefront_Rest_Api {
 		$contact = $config['contact'] ?? array();
 		$colors = $config['colors'] ?? array();
 		$tokens = $config['tokens'] ?? array();
-		return rest_ensure_response( array( 'app_name' => $config['app_name'] ?? '', 'short_name' => $config['short_name'] ?? '', 'tagline' => $config['tagline'] ?? '', 'title_tagline' => $config['title_tagline'] ?? '', 'description' => $config['description'] ?? '', 'logo_url' => $config['logo_url'] ?? '', 'font_family' => $config['font_family'] ?? 'Inter', 'contact' => array( 'phone' => $contact['phone'] ?? '', 'phone_href' => $contact['phone_href'] ?? '', 'email' => $contact['email'] ?? '', 'whatsapp_number' => $contact['whatsapp_number'] ?? '', 'whatsapp_label' => $contact['whatsapp_label'] ?? '' ), 'social' => is_array( $config['social'] ?? array() ) ? $config['social'] : array(), 'cities' => is_array( $config['cities'] ?? array() ) ? $config['cities'] : array(), 'trust_signals' => is_array( $config['trust_signals'] ?? array() ) ? $config['trust_signals'] : array( 'Genuine Products', 'Easy Returns', 'Secure Payment', 'Fast Delivery' ), 'delivery_message' => $config['delivery_message'] ?? 'Delivery in 1–2 business days', 'return_policy' => $config['return_policy'] ?? 'Easy returns within 7 days of delivery. Items must be unused and in original packaging.', 'delivery_badge' => $config['delivery_badge'] ?? '', 'colors' => array( 'primary' => $colors['primary'] ?? '#6366f1', 'secondary' => $colors['secondary'] ?? '', 'accent' => $colors['accent'] ?? '' ), 'tokens' => array( 'section_gap' => $tokens['section_gap'] ?? '2rem', 'card_padding' => $tokens['card_padding'] ?? '0.75rem', 'card_radius' => $tokens['card_radius'] ?? '0.75rem', 'button_radius' => $tokens['button_radius'] ?? '0.5rem', 'image_radius' => $tokens['image_radius'] ?? '0.5rem', 'card_shadow' => $tokens['card_shadow'] ?? 'none', 'card_hover_shadow' => $tokens['card_hover_shadow'] ?? '0 4px 12px oklch(0 0 0 / 0.1)', 'hover_duration' => $tokens['hover_duration'] ?? '150ms' ), 'frontend_url' => $config['frontend_url'] ?? '', 'revalidate_secret' => $config['revalidate_secret'] ?? '', '_fallbacks' => array( 'app_name' => get_option( 'blogname', '' ), 'tagline' => get_option( 'blogdescription', '' ), 'contact_email' => get_option( 'woocommerce_email_from_address', '' ) ) ) );
+		return rest_ensure_response( array( 'app_name' => $config['app_name'] ?? '', 'short_name' => $config['short_name'] ?? '', 'tagline' => $config['tagline'] ?? '', 'title_tagline' => $config['title_tagline'] ?? '', 'description' => $config['description'] ?? '', 'logo_url' => $config['logo_url'] ?? '', 'font_family' => $config['font_family'] ?? 'Inter', 'contact' => array( 'phone' => $contact['phone'] ?? '', 'phone_href' => $contact['phone_href'] ?? '', 'email' => $contact['email'] ?? '', 'whatsapp_number' => $contact['whatsapp_number'] ?? '', 'whatsapp_label' => $contact['whatsapp_label'] ?? '' ), 'social' => is_array( $config['social'] ?? array() ) ? $config['social'] : array(), 'cities' => is_array( $config['cities'] ?? array() ) ? $config['cities'] : array(), 'trust_signals' => is_array( $config['trust_signals'] ?? array() ) ? $config['trust_signals'] : array( 'Genuine Products', 'Easy Returns', 'Secure Payment', 'Fast Delivery' ), 'delivery_message' => $config['delivery_message'] ?? 'Delivery in 1–2 business days', 'return_policy' => $config['return_policy'] ?? 'Easy returns within 7 days of delivery. Items must be unused and in original packaging.', 'delivery_badge' => $config['delivery_badge'] ?? '', 'colors' => array( 'primary' => $colors['primary'] ?? '#6366f1', 'secondary' => $colors['secondary'] ?? '', 'accent' => $colors['accent'] ?? '' ), 'tokens' => array( 'section_gap' => $tokens['section_gap'] ?? '2rem', 'card_padding' => $tokens['card_padding'] ?? '0.75rem', 'card_radius' => $tokens['card_radius'] ?? '0.75rem', 'button_radius' => $tokens['button_radius'] ?? '0.5rem', 'image_radius' => $tokens['image_radius'] ?? '0.5rem', 'card_shadow' => $tokens['card_shadow'] ?? 'none', 'card_hover_shadow' => $tokens['card_hover_shadow'] ?? '0 4px 12px oklch(0 0 0 / 0.1)', 'hover_duration' => $tokens['hover_duration'] ?? '150ms' ), 'frontend_url' => $config['frontend_url'] ?? '', 'revalidate_secret' => $config['revalidate_secret'] ?? '', '_fallbacks' => array( 'app_name' => get_option( 'blogname', '' ), 'tagline' => get_option( 'blogdescription', '' ), 'contact_email' => get_option( 'woocommerce_email_from_address', '' ) ), '_last_revalidate_at' => get_option( 'headless_storefront_last_revalidate_at', '' ) ? get_option( 'headless_storefront_last_revalidate_at', '' ) : null ) );
 	}
 
 	public function save_settings( $request ) {
@@ -138,6 +149,32 @@ class Headless_Storefront_Rest_Api {
 		return rest_ensure_response( array( 'dispatched' => $dispatched ) );
 	}
 
+	public function test_revalidate( $request ) {
+		$config = get_option( 'headless_storefront_config', array() );
+		$frontend_url = $config['frontend_url'] ?? '';
+		$secret = $config['revalidate_secret'] ?? '';
+		if ( ! $frontend_url || ! $secret ) {
+			return rest_ensure_response( array( 'success' => false, 'code' => 'not_configured', 'message' => 'Frontend URL or Revalidate Secret is empty.', 'http_code' => null ) );
+		}
+		$response = wp_safe_remote_post( $frontend_url . '/api/revalidate', array( 'body' => wp_json_encode( array( 'type' => 'storefront' ) ), 'headers' => array( 'Content-Type' => 'application/json', 'x-revalidate-secret' => $secret ), 'timeout' => 10 ) );
+		if ( is_wp_error( $response ) ) {
+			return rest_ensure_response( array( 'success' => false, 'code' => 'connection_failed', 'message' => $response->get_error_message(), 'http_code' => null ) );
+		}
+		$http_code = intval( wp_remote_retrieve_response_code( $response ) );
+		if ( $http_code >= 200 && $http_code < 300 ) {
+			return rest_ensure_response( array( 'success' => true, 'code' => 'ok', 'message' => 'Webhook configured correctly.', 'http_code' => $http_code ) );
+		}
+		$hint = 'Unexpected response from frontend.';
+		if ( $http_code === 401 || $http_code === 403 ) {
+			$hint = 'Secret doesn\'t match.';
+		} elseif ( $http_code === 404 ) {
+			$hint = 'Check Frontend URL path — /api/revalidate not found.';
+		} elseif ( $http_code >= 500 ) {
+			$hint = 'Frontend returned an error.';
+		}
+		return rest_ensure_response( array( 'success' => false, 'code' => 'http_error', 'message' => $hint, 'http_code' => $http_code ) );
+	}
+
 	public function dispatch_revalidate(  ) {
 		if ( defined( 'WP_CLI' ) && WP_CLI ) {
 			return false;
@@ -148,6 +185,7 @@ class Headless_Storefront_Rest_Api {
 		if ( ! $frontend_url || ! $secret ) {
 			return false;
 		}
+		update_option( 'headless_storefront_last_revalidate_at', gmdate( 'c', time() ) );
 		wp_safe_remote_post( $frontend_url . '/api/revalidate', array( 'body' => wp_json_encode( array( 'type' => 'storefront' ) ), 'headers' => array( 'Content-Type' => 'application/json', 'x-revalidate-secret' => $secret ), 'blocking' => false, 'timeout' => 5 ) );
 		if ( defined( 'WP_DEBUG_LOG' ) && WP_DEBUG_LOG ) {
 			error_log( '[headless-storefront] revalidate dispatched to ' . $frontend_url . '/api/revalidate' );

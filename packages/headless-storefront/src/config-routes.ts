@@ -187,6 +187,9 @@ class ConfigRoutes {
         tagline: getOption('blogdescription', ''),
         contact_email: getOption('woocommerce_email_from_address', ''),
       },
+      _last_revalidate_at: getOption('headless_storefront_last_revalidate_at', '')
+        ? getOption('headless_storefront_last_revalidate_at', '')
+        : null,
     });
   }
 
@@ -308,6 +311,11 @@ class ConfigRoutes {
     if (!frontendUrl || !secret) {
       return false;
     }
+
+    // Record "last attempted" timestamp before firing. Mirrors the helper
+    // copy in revalidate-hooks.ts so manual re-pushes via this REST route
+    // and auto-fires from option-update hooks both update the surface.
+    updateOption('headless_storefront_last_revalidate_at', gmdate('c', time()));
 
     wpSafeRemotePost(`${frontendUrl}/api/revalidate`, {
       body: jsonEncode({ type: 'storefront' }),

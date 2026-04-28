@@ -1,11 +1,14 @@
 import { request as playwrightRequest } from '@playwright/test';
-import { expect, test } from '../../fixtures/wordpress';
+import { expect, test, wpCli } from '../../fixtures/wordpress';
 
 const SLUG = 'headless-storefront';
 const BASE = `http://localhost:8889/wp-json/${SLUG}/v1`;
 
 test.describe('Headless Storefront — Config API', () => {
   test.afterAll(async ({ restApi }) => {
+    // The "dispatched:true" test below populates the last-revalidate option;
+    // delete it so the option doesn't leak across test runs.
+    wpCli('option delete headless_storefront_last_revalidate_at');
     // Reset config to empty (defaults)
     await restApi.updateSettings(SLUG, {
       app_name: '',

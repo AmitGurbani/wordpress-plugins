@@ -9,6 +9,7 @@
 
 import { Activate, AdminPage, Plugin } from '@amitgurbani/wpts';
 import './config-routes.js';
+import './diagnostics-routes.js';
 import './revalidate-hooks.js';
 
 @Plugin({
@@ -50,5 +51,8 @@ class HeadlessStorefront {
         hover_duration: '150ms',
       },
     });
+    // Seed empty so wpts auto-cleans this option on uninstall via
+    // extractActivationOptions (regexes add_option/update_option in @Activate).
+    addOption('headless_storefront_last_revalidate_at', '');
   }
 }
