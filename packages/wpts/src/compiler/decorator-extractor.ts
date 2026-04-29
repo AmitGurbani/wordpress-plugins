@@ -841,7 +841,7 @@ function extractRestRouteDecorator(
   if (!httpMethod) {
     diagnostics.error(
       'WPTS093',
-      '@RestRoute requires a "method" property (GET, POST, PUT, DELETE).',
+      '@RestRoute requires a "method" property (GET, POST, PUT, PATCH, DELETE).',
       getLocation(decorator, sourceFile),
     );
     return null;

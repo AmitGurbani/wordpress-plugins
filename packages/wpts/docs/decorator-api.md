@@ -216,7 +216,7 @@ listProducts(request: any): any {
 
 | Option | Type | Default | Description |
 |--------|------|---------|-------------|
-| `method` | `'GET' \| 'POST' \| 'PUT' \| 'DELETE'` | **required** | HTTP method |
+| `method` | `'GET' \| 'POST' \| 'PUT' \| 'PATCH' \| 'DELETE'` | **required** | HTTP method |
 | `capability` | `string` | `'manage_options'` | Required user capability |
 
 ## `@AjaxHandler(action, options?)`
