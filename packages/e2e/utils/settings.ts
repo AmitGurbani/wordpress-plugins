@@ -217,6 +217,8 @@ export const PLUGINS: PluginConfig[] = [
       delivery_message: 'E2E delivery message',
       return_policy: 'E2E return policy',
       delivery_badge: 'Fast',
+      hours_text: 'Mon–Sat 9 am – 9 pm',
+      delivery_area_text: 'Within 5 km of Bandra West, Mumbai',
       colors: { primary: '#e8622a', secondary: '#d4a017', accent: '#2d9f3f' },
       tokens: {
         section_gap: '3rem',
@@ -253,6 +255,8 @@ export const PLUGINS: PluginConfig[] = [
       return_policy:
         'Easy returns within 7 days of delivery. Items must be unused and in original packaging.',
       delivery_badge: '',
+      hours_text: '',
+      delivery_area_text: '',
       colors: { primary: '#6366f1', secondary: '#64748b', accent: '#94a3b8' },
       tokens: {
         section_gap: '2rem',

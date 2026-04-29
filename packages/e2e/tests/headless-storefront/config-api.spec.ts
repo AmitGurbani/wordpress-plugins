@@ -26,6 +26,8 @@ test.describe('Headless Storefront — Config API', () => {
       return_policy:
         'Easy returns within 7 days of delivery. Items must be unused and in original packaging.',
       delivery_badge: '',
+      hours_text: '',
+      delivery_area_text: '',
       colors: { primary: '#6366f1', secondary: '', accent: '' },
       tokens: {
         section_gap: '2rem',
@@ -67,6 +69,8 @@ test.describe('Headless Storefront — Config API', () => {
     expect(data).toHaveProperty('delivery_message');
     expect(data).toHaveProperty('return_policy');
     expect(data).toHaveProperty('delivery_badge');
+    expect(data).toHaveProperty('hours_text');
+    expect(data).toHaveProperty('delivery_area_text');
     expect(data).toHaveProperty('colors');
     expect(data).toHaveProperty('tokens');
     expect(data).toHaveProperty('logo_url');
@@ -252,5 +256,82 @@ test.describe('Headless Storefront — Config API', () => {
     const platforms = settings.social.map((s: any) => s.platform);
     expect(platforms).toContain('instagram');
     expect(platforms).not.toContain('invalid_platform');
+  });
+
+  test('GET /config returns hours_text and delivery_area_text', async ({ restApi }) => {
+    await restApi.updateSettings(SLUG, {
+      hours_text: 'Mon–Sat 9–9',
+      delivery_area_text: 'Within 5 km of Bandra',
+    });
+
+    const ctx = await playwrightRequest.newContext();
+    const res = await ctx.get(`${BASE}/config`);
+    const data = await res.json();
+    expect(data.hours_text).toBe('Mon–Sat 9–9');
+    expect(data.delivery_area_text).toBe('Within 5 km of Bandra');
+    await ctx.dispose();
+  });
+
+  test('PATCH /settings requires authentication', async () => {
+    const ctx = await playwrightRequest.newContext();
+    const res = await ctx.patch(`${BASE}/settings`, { data: { app_name: 'No Auth' } });
+    expect(res.status()).toBe(401);
+    await ctx.dispose();
+  });
+
+  test('PATCH /settings updates only the provided keys', async ({ restApi }) => {
+    // Seed a known full state
+    await restApi.updateSettings(SLUG, {
+      app_name: 'Patch Base',
+      tagline: 'Patch base tagline',
+      hours_text: '',
+      delivery_area_text: '',
+    });
+
+    // Patch a single field
+    const { status, data } = await restApi.patch(`${SLUG}/v1/settings`, {
+      app_name: 'Patch Updated',
+    });
+    expect(status).toBe(200);
+    expect(data.app_name).toBe('Patch Updated');
+    // Other fields untouched
+    expect(data.tagline).toBe('Patch base tagline');
+  });
+
+  test('PATCH /settings shallow-merges nested objects', async ({ restApi }) => {
+    await restApi.updateSettings(SLUG, {
+      colors: { primary: '#111111', secondary: '#222222', accent: '#333333' },
+    });
+
+    // Patch only colors.secondary
+    const { data } = await restApi.patch(`${SLUG}/v1/settings`, {
+      colors: { secondary: '#aabbcc' },
+    });
+
+    expect(data.colors.primary).toBe('#111111');
+    expect(data.colors.secondary).toBe('#aabbcc');
+    expect(data.colors.accent).toBe('#333333');
+  });
+
+  test('PATCH /settings clears with empty string', async ({ restApi }) => {
+    await restApi.updateSettings(SLUG, { hours_text: 'Mon–Sat 9–9' });
+
+    const { data } = await restApi.patch(`${SLUG}/v1/settings`, { hours_text: '' });
+    expect(data.hours_text).toBe('');
+  });
+
+  test('PATCH /settings treats null as absent (no-op)', async ({ restApi }) => {
+    await restApi.updateSettings(SLUG, { tagline: 'Keep me' });
+
+    // null is treated like "key absent" — see docs in config-routes.ts patchSettings
+    const { data } = await restApi.patch(`${SLUG}/v1/settings`, { tagline: null });
+    expect(data.tagline).toBe('Keep me');
+  });
+
+  test('PATCH /settings replaces arrays wholesale when present', async ({ restApi }) => {
+    await restApi.updateSettings(SLUG, { cities: ['Mumbai', 'Delhi', 'Bengaluru'] });
+
+    const { data } = await restApi.patch(`${SLUG}/v1/settings`, { cities: ['Pune'] });
+    expect(data.cities).toEqual(['Pune']);
   });
 });

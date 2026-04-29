@@ -108,6 +108,8 @@ class ConfigRoutes {
           'Easy returns within 7 days of delivery. Items must be unused and in original packaging.',
       ),
       delivery_badge: sanitizeTextField(config.delivery_badge ?? ''),
+      hours_text: sanitizeTextareaField(config.hours_text ?? ''),
+      delivery_area_text: sanitizeTextareaField(config.delivery_area_text ?? ''),
       colors: {
         primary: primaryColor,
         secondary: secondaryRaw ? secondaryRaw : null,
@@ -165,6 +167,8 @@ class ConfigRoutes {
         config.return_policy ??
         'Easy returns within 7 days of delivery. Items must be unused and in original packaging.',
       delivery_badge: config.delivery_badge ?? '',
+      hours_text: config.hours_text ?? '',
+      delivery_area_text: config.delivery_area_text ?? '',
       colors: {
         primary: colors.primary ?? '#6366f1',
         secondary: colors.secondary ?? '',
@@ -193,94 +197,33 @@ class ConfigRoutes {
     });
   }
 
-  // ── POST /settings (admin) ─────────────────────────────────────────
+  // ── POST /settings (admin) — full replace ──────────────────────────
 
   @RestRoute('/settings', { method: 'POST', capability: 'manage_options' })
   saveSettings(request: any): any {
-    const data: any = request.get_json_params();
-
-    // Sanitize contact
-    const rawContact: any = data.contact ?? {};
-    const contact: any = {
-      phone: sanitizeTextField(rawContact.phone ?? ''),
-      phone_href: sanitizeTextField(rawContact.phone_href ?? ''),
-      email: sanitizeEmail(rawContact.email ?? ''),
-      whatsapp_number: sanitizeTextField(rawContact.whatsapp_number ?? ''),
-      whatsapp_label: sanitizeTextField(rawContact.whatsapp_label ?? ''),
-    };
-
-    // Sanitize social links
-    const rawSocial: any = data.social ?? [];
-    const validPlatforms: string[] = ['instagram', 'facebook', 'twitter', 'youtube', 'linkedin'];
-    const social: any[] = [];
-    if (isArray(rawSocial)) {
-      for (const item of rawSocial) {
-        const platform: string = sanitizeTextField(item.platform ?? '');
-        if (inArray(platform, validPlatforms)) {
-          social.push({
-            platform: platform,
-            href: escUrlRaw(item.href ?? ''),
-            label: sanitizeTextField(item.label ?? ''),
-          });
-        }
-      }
-    }
-
-    // Sanitize colors
-    const rawColors: any = data.colors ?? {};
-    const colors: any = {
-      primary: sanitizeHexColor(rawColors.primary ?? '#6366f1') ?? '#6366f1',
-      secondary: sanitizeHexColor(rawColors.secondary ?? '') ?? '',
-      accent: sanitizeHexColor(rawColors.accent ?? '') ?? '',
-    };
-
-    // Sanitize tokens
-    const rawTokens: any = data.tokens ?? {};
-    const tokens: any = {
-      section_gap: sanitizeTextField(rawTokens.section_gap ?? '2rem'),
-      card_padding: sanitizeTextField(rawTokens.card_padding ?? '0.75rem'),
-      card_radius: sanitizeTextField(rawTokens.card_radius ?? '0.75rem'),
-      button_radius: sanitizeTextField(rawTokens.button_radius ?? '0.5rem'),
-      image_radius: sanitizeTextField(rawTokens.image_radius ?? '0.5rem'),
-      card_shadow: sanitizeTextField(rawTokens.card_shadow ?? 'none'),
-      card_hover_shadow: sanitizeTextField(
-        rawTokens.card_hover_shadow ?? '0 4px 12px oklch(0 0 0 / 0.1)',
-      ),
-      hover_duration: sanitizeTextField(rawTokens.hover_duration ?? '150ms'),
-    };
-
-    // Sanitize arrays
-    const rawCities: any = data.cities ?? [];
-    const cities: any = isArray(rawCities) ? arrayMap('sanitize_text_field', rawCities) : [];
-
-    const rawTrustSignals: any = data.trust_signals ?? [];
-    const trustSignals: any = isArray(rawTrustSignals)
-      ? arrayMap('sanitize_text_field', rawTrustSignals)
-      : [];
-
-    const sanitized: any = {
-      app_name: sanitizeTextField(data.app_name ?? ''),
-      short_name: sanitizeTextField(data.short_name ?? ''),
-      tagline: sanitizeTextField(data.tagline ?? ''),
-      title_tagline: sanitizeTextField(data.title_tagline ?? ''),
-      description: sanitizeTextareaField(data.description ?? ''),
-      logo_url: escUrlRaw(data.logo_url ?? ''),
-      font_family: sanitizeTextField(data.font_family ?? 'Inter'),
-      contact: contact,
-      social: social,
-      cities: cities,
-      trust_signals: trustSignals,
-      delivery_message: sanitizeTextField(data.delivery_message ?? ''),
-      return_policy: sanitizeTextareaField(data.return_policy ?? ''),
-      delivery_badge: sanitizeTextField(data.delivery_badge ?? ''),
-      colors: colors,
-      tokens: tokens,
-      frontend_url: escUrlRaw(data.frontend_url ?? ''),
-      revalidate_secret: sanitizeTextField(data.revalidate_secret ?? ''),
-    };
-
+    const sanitized: any = this.sanitizePayload(request.get_json_params());
     updateOption('headless_storefront_config', sanitized);
+    return restEnsureResponse(sanitized);
+  }
 
+  // ── PATCH /settings (admin) — partial update ───────────────────────
+  //
+  // Merge semantics: keys present in the body override existing values;
+  // omitted keys leave existing values unchanged. Note that `null` is
+  // treated the same as "absent" (PHP `isset()` semantics) — to clear a
+  // field, send `""` (string), `[]` (array), or `false` (boolean).
+  // Top-level objects (contact, colors, tokens) are shallow-merged so
+  // `{"colors": {"secondary": ""}}` only touches `colors.secondary`.
+  // Arrays (social, cities, trust_signals) are replaced wholesale when
+  // present.
+
+  @RestRoute('/settings', { method: 'PATCH', capability: 'manage_options' })
+  patchSettings(request: any): any {
+    const patch: any = request.get_json_params();
+    const existing: any = getOption('headless_storefront_config', []);
+    const merged: any = this.mergePatch(existing, patch);
+    const sanitized: any = this.sanitizePayload(merged);
+    updateOption('headless_storefront_config', sanitized);
     return restEnsureResponse(sanitized);
   }
 
@@ -332,5 +275,204 @@ class ConfigRoutes {
     }
 
     return true;
+  }
+
+  // ── Helper: sanitize a full settings payload ───────────────────────
+  //
+  // Shared by POST /settings and PATCH /settings. The PATCH route merges
+  // first (via mergePatch) and then runs the merged object through here,
+  // so the persisted shape and validation rules stay identical for both.
+
+  sanitizePayload(data: any): any {
+    const rawContact: any = data.contact ?? {};
+    const contact: any = {
+      phone: sanitizeTextField(rawContact.phone ?? ''),
+      phone_href: sanitizeTextField(rawContact.phone_href ?? ''),
+      email: sanitizeEmail(rawContact.email ?? ''),
+      whatsapp_number: sanitizeTextField(rawContact.whatsapp_number ?? ''),
+      whatsapp_label: sanitizeTextField(rawContact.whatsapp_label ?? ''),
+    };
+
+    const rawSocial: any = data.social ?? [];
+    const validPlatforms: string[] = ['instagram', 'facebook', 'twitter', 'youtube', 'linkedin'];
+    const social: any[] = [];
+    if (isArray(rawSocial)) {
+      for (const item of rawSocial) {
+        const platform: string = sanitizeTextField(item.platform ?? '');
+        if (inArray(platform, validPlatforms)) {
+          social.push({
+            platform: platform,
+            href: escUrlRaw(item.href ?? ''),
+            label: sanitizeTextField(item.label ?? ''),
+          });
+        }
+      }
+    }
+
+    const rawColors: any = data.colors ?? {};
+    const colors: any = {
+      primary: sanitizeHexColor(rawColors.primary ?? '#6366f1') ?? '#6366f1',
+      secondary: sanitizeHexColor(rawColors.secondary ?? '') ?? '',
+      accent: sanitizeHexColor(rawColors.accent ?? '') ?? '',
+    };
+
+    const rawTokens: any = data.tokens ?? {};
+    const tokens: any = {
+      section_gap: sanitizeTextField(rawTokens.section_gap ?? '2rem'),
+      card_padding: sanitizeTextField(rawTokens.card_padding ?? '0.75rem'),
+      card_radius: sanitizeTextField(rawTokens.card_radius ?? '0.75rem'),
+      button_radius: sanitizeTextField(rawTokens.button_radius ?? '0.5rem'),
+      image_radius: sanitizeTextField(rawTokens.image_radius ?? '0.5rem'),
+      card_shadow: sanitizeTextField(rawTokens.card_shadow ?? 'none'),
+      card_hover_shadow: sanitizeTextField(
+        rawTokens.card_hover_shadow ?? '0 4px 12px oklch(0 0 0 / 0.1)',
+      ),
+      hover_duration: sanitizeTextField(rawTokens.hover_duration ?? '150ms'),
+    };
+
+    const rawCities: any = data.cities ?? [];
+    const cities: any = isArray(rawCities) ? arrayMap('sanitize_text_field', rawCities) : [];
+
+    const rawTrustSignals: any = data.trust_signals ?? [];
+    const trustSignals: any = isArray(rawTrustSignals)
+      ? arrayMap('sanitize_text_field', rawTrustSignals)
+      : [];
+
+    return {
+      app_name: sanitizeTextField(data.app_name ?? ''),
+      short_name: sanitizeTextField(data.short_name ?? ''),
+      tagline: sanitizeTextField(data.tagline ?? ''),
+      title_tagline: sanitizeTextField(data.title_tagline ?? ''),
+      description: sanitizeTextareaField(data.description ?? ''),
+      logo_url: escUrlRaw(data.logo_url ?? ''),
+      font_family: sanitizeTextField(data.font_family ?? 'Inter'),
+      contact: contact,
+      social: social,
+      cities: cities,
+      trust_signals: trustSignals,
+      delivery_message: sanitizeTextField(data.delivery_message ?? ''),
+      return_policy: sanitizeTextareaField(data.return_policy ?? ''),
+      delivery_badge: sanitizeTextField(data.delivery_badge ?? ''),
+      hours_text: sanitizeTextareaField(data.hours_text ?? ''),
+      delivery_area_text: sanitizeTextareaField(data.delivery_area_text ?? ''),
+      colors: colors,
+      tokens: tokens,
+      frontend_url: escUrlRaw(data.frontend_url ?? ''),
+      revalidate_secret: sanitizeTextField(data.revalidate_secret ?? ''),
+    };
+  }
+
+  // ── Helper: merge a PATCH body onto the existing config ────────────
+  //
+  // For each schema key, if the patch has it (PHP isset semantics: present
+  // and non-null), use the patch value; otherwise carry forward the
+  // existing value. Nested objects (contact, colors, tokens) are shallow-
+  // merged at the inner level so a partial subobject only updates its own
+  // keys. Arrays are replaced wholesale when the array key is present.
+
+  mergePatch(existing: any, patch: any): any {
+    const base: any = existing ? existing : {};
+    const result: any = {};
+
+    // Top-level scalars
+    result.app_name = patch.app_name !== undefined ? patch.app_name : (base.app_name ?? '');
+    result.short_name = patch.short_name !== undefined ? patch.short_name : (base.short_name ?? '');
+    result.tagline = patch.tagline !== undefined ? patch.tagline : (base.tagline ?? '');
+    result.title_tagline =
+      patch.title_tagline !== undefined ? patch.title_tagline : (base.title_tagline ?? '');
+    result.description =
+      patch.description !== undefined ? patch.description : (base.description ?? '');
+    result.logo_url = patch.logo_url !== undefined ? patch.logo_url : (base.logo_url ?? '');
+    result.font_family =
+      patch.font_family !== undefined ? patch.font_family : (base.font_family ?? 'Inter');
+    result.delivery_message =
+      patch.delivery_message !== undefined ? patch.delivery_message : (base.delivery_message ?? '');
+    result.return_policy =
+      patch.return_policy !== undefined ? patch.return_policy : (base.return_policy ?? '');
+    result.delivery_badge =
+      patch.delivery_badge !== undefined ? patch.delivery_badge : (base.delivery_badge ?? '');
+    result.hours_text = patch.hours_text !== undefined ? patch.hours_text : (base.hours_text ?? '');
+    result.delivery_area_text =
+      patch.delivery_area_text !== undefined
+        ? patch.delivery_area_text
+        : (base.delivery_area_text ?? '');
+    result.frontend_url =
+      patch.frontend_url !== undefined ? patch.frontend_url : (base.frontend_url ?? '');
+    result.revalidate_secret =
+      patch.revalidate_secret !== undefined
+        ? patch.revalidate_secret
+        : (base.revalidate_secret ?? '');
+
+    // Nested: contact (shallow merge)
+    const baseContact: any = base.contact ?? {};
+    if (patch.contact !== undefined) {
+      const pc: any = patch.contact;
+      result.contact = {
+        phone: pc.phone !== undefined ? pc.phone : (baseContact.phone ?? ''),
+        phone_href: pc.phone_href !== undefined ? pc.phone_href : (baseContact.phone_href ?? ''),
+        email: pc.email !== undefined ? pc.email : (baseContact.email ?? ''),
+        whatsapp_number:
+          pc.whatsapp_number !== undefined
+            ? pc.whatsapp_number
+            : (baseContact.whatsapp_number ?? ''),
+        whatsapp_label:
+          pc.whatsapp_label !== undefined ? pc.whatsapp_label : (baseContact.whatsapp_label ?? ''),
+      };
+    } else {
+      result.contact = baseContact;
+    }
+
+    // Nested: colors (shallow merge)
+    const baseColors: any = base.colors ?? {};
+    if (patch.colors !== undefined) {
+      const pc: any = patch.colors;
+      result.colors = {
+        primary: pc.primary !== undefined ? pc.primary : (baseColors.primary ?? '#6366f1'),
+        secondary: pc.secondary !== undefined ? pc.secondary : (baseColors.secondary ?? ''),
+        accent: pc.accent !== undefined ? pc.accent : (baseColors.accent ?? ''),
+      };
+    } else {
+      result.colors = baseColors;
+    }
+
+    // Nested: tokens (shallow merge)
+    const baseTokens: any = base.tokens ?? {};
+    if (patch.tokens !== undefined) {
+      const pt: any = patch.tokens;
+      result.tokens = {
+        section_gap:
+          pt.section_gap !== undefined ? pt.section_gap : (baseTokens.section_gap ?? '2rem'),
+        card_padding:
+          pt.card_padding !== undefined ? pt.card_padding : (baseTokens.card_padding ?? '0.75rem'),
+        card_radius:
+          pt.card_radius !== undefined ? pt.card_radius : (baseTokens.card_radius ?? '0.75rem'),
+        button_radius:
+          pt.button_radius !== undefined
+            ? pt.button_radius
+            : (baseTokens.button_radius ?? '0.5rem'),
+        image_radius:
+          pt.image_radius !== undefined ? pt.image_radius : (baseTokens.image_radius ?? '0.5rem'),
+        card_shadow:
+          pt.card_shadow !== undefined ? pt.card_shadow : (baseTokens.card_shadow ?? 'none'),
+        card_hover_shadow:
+          pt.card_hover_shadow !== undefined
+            ? pt.card_hover_shadow
+            : (baseTokens.card_hover_shadow ?? '0 4px 12px oklch(0 0 0 / 0.1)'),
+        hover_duration:
+          pt.hover_duration !== undefined
+            ? pt.hover_duration
+            : (baseTokens.hover_duration ?? '150ms'),
+      };
+    } else {
+      result.tokens = baseTokens;
+    }
+
+    // Arrays — replaced wholesale when key is present
+    result.social = patch.social !== undefined ? patch.social : (base.social ?? []);
+    result.cities = patch.cities !== undefined ? patch.cities : (base.cities ?? []);
+    result.trust_signals =
+      patch.trust_signals !== undefined ? patch.trust_signals : (base.trust_signals ?? []);
+
+    return result;
   }
 }

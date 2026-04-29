@@ -1,4 +1,4 @@
-import { TextControl } from '@wordpress/components';
+import { TextareaControl, TextControl } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import { FormSection } from 'admin-ui';
 import type { TabProps } from '../types';
@@ -22,6 +22,26 @@ export function FooterContentTab({ settings, update }: TabProps) {
 
   return (
     <FormSection>
+      <TextareaControl
+        label={__('Store Hours', 'headless-storefront')}
+        help={__(
+          'Freeform store hours shown in the footer (e.g., "Mon–Sat 8 am – 10 pm · Sun 9 am – 8 pm"). Leave empty to hide the section.',
+          'headless-storefront',
+        )}
+        value={settings.hours_text}
+        onChange={(v: string) => update('hours_text', v)}
+        rows={2}
+      />
+      <TextareaControl
+        label={__('Delivery Area', 'headless-storefront')}
+        help={__(
+          'Freeform delivery coverage description (e.g., "Within 3 km of Sector 14, Gurgaon"). Leave empty to hide.',
+          'headless-storefront',
+        )}
+        value={settings.delivery_area_text}
+        onChange={(v: string) => update('delivery_area_text', v)}
+        rows={2}
+      />
       <TextControl
         label={__('Cities', 'headless-storefront')}
         help={__('Comma-separated delivery coverage cities.', 'headless-storefront')}

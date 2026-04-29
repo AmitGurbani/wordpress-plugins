@@ -267,6 +267,8 @@ curl https://store.example.com/wp-json/headless-storefront/v1/config`,
   "delivery_message": "Delivery in 1–2 business days",
   "return_policy": "Easy returns within 7 days of delivery.",
   "delivery_badge": "",
+  "hours_text": "Mon–Sat 8 am – 10 pm · Sun 9 am – 8 pm",
+  "delivery_area_text": "Within 3 km of Sector 14, Gurgaon",
   "colors": { "primary": "#6366f1", "secondary": null, "accent": null },
   "tokens": {
     "section_gap": "2rem",

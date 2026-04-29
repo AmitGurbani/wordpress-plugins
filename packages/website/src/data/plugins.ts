@@ -1,5 +1,5 @@
 export interface Endpoint {
-  method: 'GET' | 'POST' | 'PUT' | 'DELETE';
+  method: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
   path: string;
   description: string;
 }
@@ -390,6 +390,7 @@ export const plugins: Plugin[] = [
       'Public /config endpoint with full store branding',
       'Automatic WP/WC fallbacks (blogname, tagline, email, etc.)',
       '6-tab admin UI: Store Identity, Appearance, Contact & Social, Footer Content, Product Page, Cache Settings',
+      'PATCH /settings for partial updates from external dashboards (JWT-compatible via headless-auth)',
       'Revalidation webhook fires on plugin option, blogname, blogdescription, or WC from-email change',
       'Manual "Re-push storefront config" button for debugging',
       'Single JSON option \u2014 no @Setting decorator sprawl',
@@ -399,6 +400,17 @@ export const plugins: Plugin[] = [
         method: 'GET',
         path: '/config',
         description: 'Branding config with WP/WC fallbacks',
+      },
+      {
+        method: 'POST',
+        path: '/settings',
+        description: 'manage_options \u2014 full-replace settings save',
+      },
+      {
+        method: 'PATCH',
+        path: '/settings',
+        description:
+          'manage_options \u2014 partial settings update; nested objects shallow-merge, arrays replace wholesale, null is treated as absent',
       },
       {
         method: 'POST',

@@ -60,6 +60,13 @@ export class RestApiClient {
     });
     return { status: res.status(), data: await res.json() };
   }
+
+  async patch(path: string, data?: Record<string, unknown>) {
+    const res = await this.request.patch(`${this.baseURL}/wp-json/${path}`, {
+      data,
+    });
+    return { status: res.status(), data: await res.json() };
+  }
 }
 
 type WpFixtures = {
@@ -67,14 +74,17 @@ type WpFixtures = {
   restApi: RestApiClient;
 };
 
+// biome-ignore lint/complexity/noBannedTypes: Playwright fixture API requires {} as the no-test-fixtures generic
 export const test = base.extend<{}, WpFixtures>({
   wpCli: [
+    // biome-ignore lint/correctness/noEmptyPattern: Playwright fixture signature requires destructuring even when no fixtures are consumed
     async ({}, use) => {
       await use(wpCli);
     },
     { scope: 'worker' },
   ],
   restApi: [
+    // biome-ignore lint/correctness/noEmptyPattern: Playwright fixture signature requires destructuring even when no fixtures are consumed
     async ({}, use) => {
       // Read the nonce from storage state — WordPress REST API requires
       // X-WP-Nonce header for cookie-authenticated POST/PUT/DELETE requests
