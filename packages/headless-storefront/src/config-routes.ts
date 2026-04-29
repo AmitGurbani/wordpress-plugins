@@ -137,6 +137,7 @@ class ConfigRoutes {
   @RestRoute('/settings', { method: 'GET', capability: 'manage_options' })
   getSettings(_request: any): any {
     const config: any = getOption('headless_storefront_config', []);
+    const lastAt: string = getOption('headless_storefront_last_revalidate_at', '');
 
     const contact: any = config.contact ?? {};
     const colors: any = config.colors ?? {};
@@ -185,15 +186,20 @@ class ConfigRoutes {
         hover_duration: tokens.hover_duration ?? '150ms',
       },
       frontend_url: config.frontend_url ?? '',
-      revalidate_secret: config.revalidate_secret ?? '',
+      // Mask the shared secret. Anyone with manage_options can already read
+      // the raw value via `wp option get headless_storefront_config`, but
+      // the REST surface is reachable from JWT-authenticated dashboards on
+      // separate origins — masking limits the blast radius if the network
+      // path is logged or proxied. The admin UI re-submits '********' when
+      // the user does not edit the field; saveSettings/patchSettings detect
+      // that sentinel and preserve the existing value.
+      revalidate_secret: config.revalidate_secret ? '********' : '',
       _fallbacks: {
         app_name: getOption('blogname', ''),
         tagline: getOption('blogdescription', ''),
         contact_email: getOption('woocommerce_email_from_address', ''),
       },
-      _last_revalidate_at: getOption('headless_storefront_last_revalidate_at', '')
-        ? getOption('headless_storefront_last_revalidate_at', '')
-        : null,
+      _last_revalidate_at: lastAt ? lastAt : null,
     });
   }
 
@@ -201,9 +207,10 @@ class ConfigRoutes {
 
   @RestRoute('/settings', { method: 'POST', capability: 'manage_options' })
   saveSettings(request: any): any {
-    const sanitized: any = this.sanitizePayload(request.get_json_params());
+    const data: any = this.preserveSecretOnMask(request.get_json_params());
+    const sanitized: any = this.sanitizePayload(data);
     updateOption('headless_storefront_config', sanitized);
-    return restEnsureResponse(sanitized);
+    return restEnsureResponse(this.maskResponse(sanitized));
   }
 
   // ── PATCH /settings (admin) — partial update ───────────────────────
@@ -219,12 +226,12 @@ class ConfigRoutes {
 
   @RestRoute('/settings', { method: 'PATCH', capability: 'manage_options' })
   patchSettings(request: any): any {
-    const patch: any = request.get_json_params();
+    const patch: any = this.preserveSecretOnMask(request.get_json_params());
     const existing: any = getOption('headless_storefront_config', []);
     const merged: any = this.mergePatch(existing, patch);
     const sanitized: any = this.sanitizePayload(merged);
     updateOption('headless_storefront_config', sanitized);
-    return restEnsureResponse(sanitized);
+    return restEnsureResponse(this.maskResponse(sanitized));
   }
 
   // ── POST /admin/revalidate (admin) — manual re-push ────────────────
@@ -299,7 +306,10 @@ class ConfigRoutes {
     if (isArray(rawSocial)) {
       for (const item of rawSocial) {
         const platform: string = sanitizeTextField(item.platform ?? '');
-        if (inArray(platform, validPlatforms)) {
+        // Pass `true` for strict comparison (in_array's third arg) — defends
+        // against PHP's loose-comparison foot-gun (e.g. in_array(0, ['x'])
+        // returning true on PHP < 8.0).
+        if (inArray(platform, validPlatforms, true)) {
           social.push({
             platform: platform,
             href: escUrlRaw(item.href ?? ''),
@@ -474,5 +484,35 @@ class ConfigRoutes {
       patch.trust_signals !== undefined ? patch.trust_signals : (base.trust_signals ?? []);
 
     return result;
+  }
+
+  // ── Helper: preserve secret when client re-submits the mask ────────
+  //
+  // GET /settings returns `revalidate_secret` as `'********'` when set.
+  // The admin UI then re-POSTs whatever the user sees — including the
+  // mask, when they did not edit the field. Detect that case and replace
+  // the mask with the existing stored value before sanitization runs, so
+  // the real secret is preserved across saves. Mirrors the wpts
+  // class-rest-api.hbs preserve-on-mask pattern used by @Setting decorators.
+
+  preserveSecretOnMask(data: any): any {
+    if (data.revalidate_secret === '********') {
+      const existing: any = getOption('headless_storefront_config', []);
+      data.revalidate_secret = existing.revalidate_secret ?? '';
+    }
+    return data;
+  }
+
+  // ── Helper: mask the secret in REST responses ──────────────────────
+  //
+  // Returns a copy of the sanitized config with `revalidate_secret`
+  // replaced by `'********'` (or `''` if unset). Used by GET/POST/PATCH
+  // responses so the raw secret never leaves the server over REST.
+
+  maskResponse(config: any): any {
+    return {
+      ...config,
+      revalidate_secret: config.revalidate_secret ? '********' : '',
+    };
   }
 }

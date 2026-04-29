@@ -334,4 +334,58 @@ test.describe('Headless Storefront — Config API', () => {
     const { data } = await restApi.patch(`${SLUG}/v1/settings`, { cities: ['Pune'] });
     expect(data.cities).toEqual(['Pune']);
   });
+
+  test('GET /settings masks revalidate_secret when set', async ({ restApi }) => {
+    await restApi.updateSettings(SLUG, { revalidate_secret: 'real-secret-abc' });
+    const { data } = await restApi.getSettings(SLUG);
+    expect(data.revalidate_secret).toBe('********');
+  });
+
+  test('GET /settings returns empty revalidate_secret when unset', async ({ restApi }) => {
+    await restApi.updateSettings(SLUG, { revalidate_secret: '' });
+    const { data } = await restApi.getSettings(SLUG);
+    expect(data.revalidate_secret).toBe('');
+  });
+
+  test('POST /settings preserves real secret when client re-submits mask', async ({
+    restApi,
+    wpCli,
+  }) => {
+    const originalSecret = `original-${Date.now()}`;
+    await restApi.updateSettings(SLUG, { revalidate_secret: originalSecret });
+
+    // Client re-submits the mask (user did not edit the field).
+    await restApi.updateSettings(SLUG, { revalidate_secret: '********' });
+
+    // Real value preserved server-side.
+    const stored = wpCli('option get headless_storefront_config --format=json');
+    const parsed = JSON.parse(stored);
+    expect(parsed.revalidate_secret).toBe(originalSecret);
+  });
+
+  test('PATCH /settings preserves real secret when client re-submits mask', async ({
+    restApi,
+    wpCli,
+  }) => {
+    const originalSecret = `patch-original-${Date.now()}`;
+    await restApi.updateSettings(SLUG, { revalidate_secret: originalSecret });
+
+    await restApi.patch(`${SLUG}/v1/settings`, { revalidate_secret: '********' });
+
+    const stored = wpCli('option get headless_storefront_config --format=json');
+    const parsed = JSON.parse(stored);
+    expect(parsed.revalidate_secret).toBe(originalSecret);
+  });
+
+  test('POST/PATCH responses mask revalidate_secret', async ({ restApi }) => {
+    const { data: postData } = await restApi.updateSettings(SLUG, {
+      revalidate_secret: 'response-mask-test',
+    });
+    expect(postData.revalidate_secret).toBe('********');
+
+    const { data: patchData } = await restApi.patch(`${SLUG}/v1/settings`, {
+      revalidate_secret: 'patch-response-mask',
+    });
+    expect(patchData.revalidate_secret).toBe('********');
+  });
 });

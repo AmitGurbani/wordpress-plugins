@@ -121,25 +121,27 @@ class Headless_Storefront_Rest_Api {
 
 	public function get_settings( $request ) {
 		$config = get_option( 'headless_storefront_config', array() );
+		$last_at = get_option( 'headless_storefront_last_revalidate_at', '' );
 		$contact = $config['contact'] ?? array();
 		$colors = $config['colors'] ?? array();
 		$tokens = $config['tokens'] ?? array();
-		return rest_ensure_response( array( 'app_name' => $config['app_name'] ?? '', 'short_name' => $config['short_name'] ?? '', 'tagline' => $config['tagline'] ?? '', 'title_tagline' => $config['title_tagline'] ?? '', 'description' => $config['description'] ?? '', 'logo_url' => $config['logo_url'] ?? '', 'font_family' => $config['font_family'] ?? 'Inter', 'contact' => array( 'phone' => $contact['phone'] ?? '', 'phone_href' => $contact['phone_href'] ?? '', 'email' => $contact['email'] ?? '', 'whatsapp_number' => $contact['whatsapp_number'] ?? '', 'whatsapp_label' => $contact['whatsapp_label'] ?? '' ), 'social' => is_array( $config['social'] ?? array() ) ? $config['social'] : array(), 'cities' => is_array( $config['cities'] ?? array() ) ? $config['cities'] : array(), 'trust_signals' => is_array( $config['trust_signals'] ?? array() ) ? $config['trust_signals'] : array( 'Genuine Products', 'Easy Returns', 'Secure Payment', 'Fast Delivery' ), 'delivery_message' => $config['delivery_message'] ?? 'Delivery in 1–2 business days', 'return_policy' => $config['return_policy'] ?? 'Easy returns within 7 days of delivery. Items must be unused and in original packaging.', 'delivery_badge' => $config['delivery_badge'] ?? '', 'hours_text' => $config['hours_text'] ?? '', 'delivery_area_text' => $config['delivery_area_text'] ?? '', 'colors' => array( 'primary' => $colors['primary'] ?? '#6366f1', 'secondary' => $colors['secondary'] ?? '', 'accent' => $colors['accent'] ?? '' ), 'tokens' => array( 'section_gap' => $tokens['section_gap'] ?? '2rem', 'card_padding' => $tokens['card_padding'] ?? '0.75rem', 'card_radius' => $tokens['card_radius'] ?? '0.75rem', 'button_radius' => $tokens['button_radius'] ?? '0.5rem', 'image_radius' => $tokens['image_radius'] ?? '0.5rem', 'card_shadow' => $tokens['card_shadow'] ?? 'none', 'card_hover_shadow' => $tokens['card_hover_shadow'] ?? '0 4px 12px oklch(0 0 0 / 0.1)', 'hover_duration' => $tokens['hover_duration'] ?? '150ms' ), 'frontend_url' => $config['frontend_url'] ?? '', 'revalidate_secret' => $config['revalidate_secret'] ?? '', '_fallbacks' => array( 'app_name' => get_option( 'blogname', '' ), 'tagline' => get_option( 'blogdescription', '' ), 'contact_email' => get_option( 'woocommerce_email_from_address', '' ) ), '_last_revalidate_at' => get_option( 'headless_storefront_last_revalidate_at', '' ) ? get_option( 'headless_storefront_last_revalidate_at', '' ) : null ) );
+		return rest_ensure_response( array( 'app_name' => $config['app_name'] ?? '', 'short_name' => $config['short_name'] ?? '', 'tagline' => $config['tagline'] ?? '', 'title_tagline' => $config['title_tagline'] ?? '', 'description' => $config['description'] ?? '', 'logo_url' => $config['logo_url'] ?? '', 'font_family' => $config['font_family'] ?? 'Inter', 'contact' => array( 'phone' => $contact['phone'] ?? '', 'phone_href' => $contact['phone_href'] ?? '', 'email' => $contact['email'] ?? '', 'whatsapp_number' => $contact['whatsapp_number'] ?? '', 'whatsapp_label' => $contact['whatsapp_label'] ?? '' ), 'social' => is_array( $config['social'] ?? array() ) ? $config['social'] : array(), 'cities' => is_array( $config['cities'] ?? array() ) ? $config['cities'] : array(), 'trust_signals' => is_array( $config['trust_signals'] ?? array() ) ? $config['trust_signals'] : array( 'Genuine Products', 'Easy Returns', 'Secure Payment', 'Fast Delivery' ), 'delivery_message' => $config['delivery_message'] ?? 'Delivery in 1–2 business days', 'return_policy' => $config['return_policy'] ?? 'Easy returns within 7 days of delivery. Items must be unused and in original packaging.', 'delivery_badge' => $config['delivery_badge'] ?? '', 'hours_text' => $config['hours_text'] ?? '', 'delivery_area_text' => $config['delivery_area_text'] ?? '', 'colors' => array( 'primary' => $colors['primary'] ?? '#6366f1', 'secondary' => $colors['secondary'] ?? '', 'accent' => $colors['accent'] ?? '' ), 'tokens' => array( 'section_gap' => $tokens['section_gap'] ?? '2rem', 'card_padding' => $tokens['card_padding'] ?? '0.75rem', 'card_radius' => $tokens['card_radius'] ?? '0.75rem', 'button_radius' => $tokens['button_radius'] ?? '0.5rem', 'image_radius' => $tokens['image_radius'] ?? '0.5rem', 'card_shadow' => $tokens['card_shadow'] ?? 'none', 'card_hover_shadow' => $tokens['card_hover_shadow'] ?? '0 4px 12px oklch(0 0 0 / 0.1)', 'hover_duration' => $tokens['hover_duration'] ?? '150ms' ), 'frontend_url' => $config['frontend_url'] ?? '', 'revalidate_secret' => $config['revalidate_secret'] ? '********' : '', '_fallbacks' => array( 'app_name' => get_option( 'blogname', '' ), 'tagline' => get_option( 'blogdescription', '' ), 'contact_email' => get_option( 'woocommerce_email_from_address', '' ) ), '_last_revalidate_at' => $last_at ? $last_at : null ) );
 	}
 
 	public function save_settings( $request ) {
-		$sanitized = $this->sanitize_payload( $request->get_json_params() );
+		$data = $this->preserve_secret_on_mask( $request->get_json_params() );
+		$sanitized = $this->sanitize_payload( $data );
 		update_option( 'headless_storefront_config', $sanitized );
-		return rest_ensure_response( $sanitized );
+		return rest_ensure_response( $this->mask_response( $sanitized ) );
 	}
 
 	public function patch_settings( $request ) {
-		$patch = $request->get_json_params();
+		$patch = $this->preserve_secret_on_mask( $request->get_json_params() );
 		$existing = get_option( 'headless_storefront_config', array() );
 		$merged = $this->merge_patch( $existing, $patch );
 		$sanitized = $this->sanitize_payload( $merged );
 		update_option( 'headless_storefront_config', $sanitized );
-		return rest_ensure_response( $sanitized );
+		return rest_ensure_response( $this->mask_response( $sanitized ) );
 	}
 
 	public function manual_revalidate( $request ) {
@@ -200,7 +202,7 @@ class Headless_Storefront_Rest_Api {
 		if ( is_array( $raw_social ) ) {
 			foreach ( $raw_social as $item ) {
 				$platform = sanitize_text_field( $item['platform'] ?? '' );
-				if ( in_array( $platform, $valid_platforms ) ) {
+				if ( in_array( $platform, $valid_platforms, true ) ) {
 					array_push( $social, array( 'platform' => $platform, 'href' => esc_url_raw( $item['href'] ?? '' ), 'label' => sanitize_text_field( $item['label'] ?? '' ) ) );
 				}
 			}
@@ -258,6 +260,18 @@ class Headless_Storefront_Rest_Api {
 		$result['cities'] = isset( $patch['cities'] ) ? $patch['cities'] : ($base['cities'] ?? array());
 		$result['trust_signals'] = isset( $patch['trust_signals'] ) ? $patch['trust_signals'] : ($base['trust_signals'] ?? array());
 		return $result;
+	}
+
+	public function preserve_secret_on_mask( $data ) {
+		if ( $data['revalidate_secret'] === '********' ) {
+			$existing = get_option( 'headless_storefront_config', array() );
+			$data['revalidate_secret'] = $existing['revalidate_secret'] ?? '';
+		}
+		return $data;
+	}
+
+	public function mask_response( $config ) {
+		return array_merge( $config, array( 'revalidate_secret' => $config['revalidate_secret'] ? '********' : '' ) );
 	}
 
 }
