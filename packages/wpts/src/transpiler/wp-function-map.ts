@@ -332,6 +332,7 @@ export const WP_FUNCTION_MAP: Record<string, string> = {
   wpSendJsonSuccess: 'wp_send_json_success',
   wpSendJsonError: 'wp_send_json_error',
   absint: 'absint',
+  restSanitizeBoolean: 'rest_sanitize_boolean',
   wpUnslash: 'wp_unslash',
 };
 

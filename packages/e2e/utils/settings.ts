@@ -232,6 +232,20 @@ export const PLUGINS: PluginConfig[] = [
       },
       frontend_url: '',
       revalidate_secret: '',
+      // v1.8 additive fields
+      fssai_license: '12345678901234',
+      estd_line: 'Since 1987',
+      owner_name: 'E2E Owner',
+      mov: 200,
+      delivery_fee: 25,
+      delivery_areas: ['Sector 14', 'Sector 15'],
+      template: 'kirana',
+      template_config: {
+        bakery: { occasions: [], eggless_default: false },
+        quickcommerce: { eta_band_minutes: { min: 10, max: 20 }, cod_enabled: true },
+        fooddelivery: { veg_only: false, jain_filter_enabled: false },
+        ecommerce: { returns_window_days: 7, exchange_enabled: false },
+      },
     },
     defaults: {
       app_name: '',
@@ -270,6 +284,21 @@ export const PLUGINS: PluginConfig[] = [
       },
       frontend_url: '',
       revalidate_secret: '',
+      // v1.8 additive fields. Strings/numbers default to '' (unset);
+      // template_config is the fully-shaped admin form skeleton.
+      fssai_license: '',
+      estd_line: '',
+      owner_name: '',
+      mov: '',
+      delivery_fee: '',
+      delivery_areas: [],
+      template: '',
+      template_config: {
+        bakery: { occasions: [], eggless_default: false },
+        quickcommerce: { eta_band_minutes: { min: 0, max: 0 }, cod_enabled: false },
+        fooddelivery: { veg_only: false, jain_filter_enabled: false },
+        ecommerce: { returns_window_days: 0, exchange_enabled: false },
+      },
     },
     sensitiveKeys: [],
   },

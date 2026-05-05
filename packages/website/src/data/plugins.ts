@@ -389,10 +389,13 @@ export const plugins: Plugin[] = [
     features: [
       'Public /config endpoint with full store branding',
       'Automatic WP/WC fallbacks (blogname, tagline, email, etc.)',
-      '6-tab admin UI: Store Identity, Appearance, Contact & Social, Footer Content, Product Page, Cache Settings',
+      '8-tab admin UI: Store Identity, Appearance, Contact & Social, Footer Content, Product Page, Operations, Template, Cache Settings',
+      'Merchant-policy fields: minimum order value, delivery fee, delivery areas, FSSAI license, owner name, established line',
+      'Template selector + namespaced template_config for vertical-specific settings (kirana, megamart, bakery, quickcommerce, ecommerce, fooddelivery)',
       'PATCH /settings for partial updates from external dashboards (JWT-compatible via headless-auth)',
       'Revalidation webhook fires on plugin option, blogname, blogdescription, or WC from-email change',
       'Manual "Re-push storefront config" button for debugging',
+      'headless_storefront_config_response filter for extending the public response without owning the option blob',
       'Single JSON option \u2014 no @Setting decorator sprawl',
     ],
     endpoints: [
@@ -424,6 +427,21 @@ export const plugins: Plugin[] = [
         question: 'Why a single /config endpoint instead of per-setting routes?',
         answer:
           'Headless frontends typically need the full branding config in one request at boot time. A single /config response with sensible WP/WC fallbacks minimizes round-trips and lets the frontend stay in sync with a single cache key.',
+      },
+      {
+        question: 'Why does template_config namespace per-vertical settings?',
+        answer:
+          'Different storefront templates (kirana, bakery, quickcommerce, etc.) need different config — bakery occasions, quickcommerce ETA bands, food-delivery filters. Namespacing keeps these from leaking across templates: a bakery merchant doesn’t see quickcommerce fields in the admin UI, and the public /config response only includes sections that hold meaningful values.',
+      },
+      {
+        question: 'How do I add a custom field without forking the plugin?',
+        answer:
+          'Use the headless_storefront_config_response filter. The plugin assembles the response, then runs apply_filters right before returning, so add_filter callbacks can inject or mutate fields without owning the option blob. For known verticals, prefer template_config so the admin UI manages the field for you.',
+      },
+      {
+        question: 'Why is mov: 0 different from mov unset?',
+        answer:
+          '0 is a valid policy meaning "no minimum order" or "free delivery". Storefronts need to distinguish that from "no policy configured at all" so they can fall back appropriately. The plugin persists empty inputs as "" and the /config endpoint echoes unset numerics as null; explicit 0 round-trips as the integer 0.',
       },
     ],
   },

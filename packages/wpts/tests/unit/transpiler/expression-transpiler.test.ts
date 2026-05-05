@@ -634,6 +634,15 @@ describe('transpileExpression', () => {
       ).toBe('esc_url_raw( $url )');
     });
 
+    it('maps restSanitizeBoolean for boolean coercion', () => {
+      expect(
+        transpile(
+          'restSanitizeBoolean(value)',
+          'declare function restSanitizeBoolean(v: any): boolean; const value: any = "";',
+        ),
+      ).toBe('rest_sanitize_boolean( $value )');
+    });
+
     it('maps hash and uniqid built-in functions', () => {
       expect(
         transpile(

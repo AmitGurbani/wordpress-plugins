@@ -281,7 +281,23 @@ curl https://store.example.com/wp-json/headless-storefront/v1/config`,
     "hover_duration": "150ms"
   },
   "logo_url": "https://store.example.com/wp-content/uploads/logo.png",
-  "font_family": "Inter"
+  "font_family": "Inter",
+  "fssai_license": "12345678901234",
+  "estd_line": "Since 1987",
+  "owner_name": "Acme Family",
+  "mov": 200,
+  "delivery_fee": 25,
+  "delivery_areas": ["Sector 14", "Sector 15", "DLF Phase 2"],
+  "template": "bakery",
+  "template_config": {
+    "bakery": {
+      "occasions": [
+        { "id": "birthday", "label": "Birthday" },
+        { "id": "wedding", "label": "Wedding" }
+      ],
+      "eggless_default": true
+    }
+  }
 }`,
     },
   },

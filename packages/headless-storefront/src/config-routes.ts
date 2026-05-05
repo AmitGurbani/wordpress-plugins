@@ -85,7 +85,40 @@ class ConfigRoutes {
     // ── Logo URL (empty → null) ──
     const rawLogoUrl: string = escUrl(config.logo_url ?? '');
 
-    return restEnsureResponse({
+    // ── Operations / merchant policy fields (v1.8) ──
+    // Output `null` when unset so storefronts can distinguish "not configured"
+    // from "explicit zero" — relevant for mov / delivery_fee where 0 is a
+    // valid policy ("no minimum", "free delivery").
+    const rawMov: any = config.mov ?? null;
+    const mov: any = rawMov === null || rawMov === '' ? null : absint(rawMov);
+    const rawDeliveryFee: any = config.delivery_fee ?? null;
+    const deliveryFee: any =
+      rawDeliveryFee === null || rawDeliveryFee === '' ? null : absint(rawDeliveryFee);
+    const rawDeliveryAreas: any = config.delivery_areas ?? [];
+    const deliveryAreas: any = isArray(rawDeliveryAreas)
+      ? arrayMap('sanitize_text_field', rawDeliveryAreas)
+      : [];
+    const rawOwnerName: string = sanitizeTextField(config.owner_name ?? '');
+    const rawFssaiLicense: string = sanitizeTextField(config.fssai_license ?? '');
+    const rawEstdLine: string = sanitizeTextField(config.estd_line ?? '');
+
+    // ── Template selector + per-vertical config (v1.8) ──
+    // Allowlist declared inline (wpts doesn't carry module-level consts
+    // into generated PHP class methods).
+    const validTemplates: string[] = [
+      'kirana',
+      'megamart',
+      'bakery',
+      'quickcommerce',
+      'ecommerce',
+      'fooddelivery',
+    ];
+    const rawTemplate: string = sanitizeTextField(config.template ?? '');
+    const template: any = inArray(rawTemplate, validTemplates, true) ? rawTemplate : null;
+
+    const templateConfig: any = this.publicTemplateConfig(config.template_config ?? {});
+
+    const response: any = {
       app_name: appName,
       short_name: shortName,
       tagline: tagline,
@@ -101,7 +134,7 @@ class ConfigRoutes {
       cities: cities,
       trust_signals: trustSignals,
       delivery_message: sanitizeTextField(
-        config.delivery_message ?? 'Delivery in 1\u20132 business days',
+        config.delivery_message ?? 'Delivery in 1–2 business days',
       ),
       return_policy: sanitizeTextareaField(
         config.return_policy ??
@@ -129,7 +162,25 @@ class ConfigRoutes {
       },
       logo_url: rawLogoUrl ? rawLogoUrl : null,
       font_family: sanitizeTextField(config.font_family ?? 'Inter'),
-    });
+      // v1.8 additive fields. Strings normalize empty → null so storefronts
+      // can `field ?? defaultLabel` without an extra empty-string check.
+      fssai_license: rawFssaiLicense ? rawFssaiLicense : null,
+      estd_line: rawEstdLine ? rawEstdLine : null,
+      owner_name: rawOwnerName ? rawOwnerName : null,
+      mov: mov,
+      delivery_fee: deliveryFee,
+      delivery_areas: deliveryAreas,
+      template: template,
+      template_config: templateConfig,
+    };
+
+    // Filter hook: lets sibling plugins or theme code mutate the public
+    // /config response without owning the option blob. Documented in README
+    // under "Extending". Applied last so filters see the fully assembled
+    // shape including v1.8 additions.
+    const filtered: any = applyFilters('headless_storefront_config_response', response);
+
+    return restEnsureResponse(filtered);
   }
 
   // ── GET /settings (admin) ──────────────────────────────────────────
@@ -163,7 +214,7 @@ class ConfigRoutes {
       trust_signals: isArray(config.trust_signals ?? [])
         ? config.trust_signals
         : ['Genuine Products', 'Easy Returns', 'Secure Payment', 'Fast Delivery'],
-      delivery_message: config.delivery_message ?? 'Delivery in 1\u20132 business days',
+      delivery_message: config.delivery_message ?? 'Delivery in 1–2 business days',
       return_policy:
         config.return_policy ??
         'Easy returns within 7 days of delivery. Items must be unused and in original packaging.',
@@ -194,6 +245,17 @@ class ConfigRoutes {
       // the user does not edit the field; saveSettings/patchSettings detect
       // that sentinel and preserve the existing value.
       revalidate_secret: config.revalidate_secret ? '********' : '',
+      // v1.8 additive fields — raw shapes for the admin form. Numeric fields
+      // are surfaced as strings to preserve the "unset" state in the form
+      // (an empty input box) vs. an explicit 0.
+      fssai_license: config.fssai_license ?? '',
+      estd_line: config.estd_line ?? '',
+      owner_name: config.owner_name ?? '',
+      mov: config.mov ?? '',
+      delivery_fee: config.delivery_fee ?? '',
+      delivery_areas: isArray(config.delivery_areas ?? []) ? config.delivery_areas : [],
+      template: config.template ?? '',
+      template_config: this.adminTemplateConfig(config.template_config ?? {}),
       _fallbacks: {
         app_name: getOption('blogname', ''),
         tagline: getOption('blogdescription', ''),
@@ -219,10 +281,14 @@ class ConfigRoutes {
   // omitted keys leave existing values unchanged. Note that `null` is
   // treated the same as "absent" (PHP `isset()` semantics) — to clear a
   // field, send `""` (string), `[]` (array), or `false` (boolean).
-  // Top-level objects (contact, colors, tokens) are shallow-merged so
-  // `{"colors": {"secondary": ""}}` only touches `colors.secondary`.
-  // Arrays (social, cities, trust_signals) are replaced wholesale when
-  // present.
+  // Top-level objects (contact, colors, tokens, template_config) are
+  // shallow-merged so `{"colors": {"secondary": ""}}` only touches
+  // `colors.secondary`. `template_config` merges per-vertical sub-objects
+  // shallowly as well — sending `{"template_config":{"bakery":{"eggless_default":true}}}`
+  // updates only that one nested key without disturbing other verticals
+  // or other bakery fields.
+  // Arrays (social, cities, trust_signals, delivery_areas, occasions) are
+  // replaced wholesale when present.
 
   @RestRoute('/settings', { method: 'PATCH', capability: 'manage_options' })
   patchSettings(request: any): any {
@@ -348,6 +414,34 @@ class ConfigRoutes {
       ? arrayMap('sanitize_text_field', rawTrustSignals)
       : [];
 
+    const rawDeliveryAreas: any = data.delivery_areas ?? [];
+    const deliveryAreas: any = isArray(rawDeliveryAreas)
+      ? arrayMap('sanitize_text_field', rawDeliveryAreas)
+      : [];
+
+    // Numeric policy fields. Empty string / null = "unset"; persist as ''
+    // so /config can echo it back as `null` (vs. an explicit 0, which is a
+    // valid policy meaning "free / no minimum"). absint guards against
+    // negative values and stringy junk for the explicit case.
+    const rawMov: any = data.mov ?? '';
+    const mov: any = rawMov === '' || rawMov === null ? '' : absint(rawMov);
+    const rawDeliveryFee: any = data.delivery_fee ?? '';
+    const deliveryFee: any =
+      rawDeliveryFee === '' || rawDeliveryFee === null ? '' : absint(rawDeliveryFee);
+
+    // Template selector — allowlist enum, empty string means "unset".
+    // Inline allowlist (wpts doesn't carry module-level consts into PHP).
+    const validTemplates: string[] = [
+      'kirana',
+      'megamart',
+      'bakery',
+      'quickcommerce',
+      'ecommerce',
+      'fooddelivery',
+    ];
+    const rawTemplate: string = sanitizeTextField(data.template ?? '');
+    const template: string = inArray(rawTemplate, validTemplates, true) ? rawTemplate : '';
+
     return {
       app_name: sanitizeTextField(data.app_name ?? ''),
       short_name: sanitizeTextField(data.short_name ?? ''),
@@ -369,6 +463,178 @@ class ConfigRoutes {
       tokens: tokens,
       frontend_url: escUrlRaw(data.frontend_url ?? ''),
       revalidate_secret: sanitizeTextField(data.revalidate_secret ?? ''),
+      fssai_license: sanitizeTextField(data.fssai_license ?? ''),
+      estd_line: sanitizeTextField(data.estd_line ?? ''),
+      owner_name: sanitizeTextField(data.owner_name ?? ''),
+      mov: mov,
+      delivery_fee: deliveryFee,
+      delivery_areas: deliveryAreas,
+      template: template,
+      template_config: this.sanitizeTemplateConfig(data.template_config ?? {}),
+    };
+  }
+
+  // ── Helper: sanitize the namespaced template_config blob ───────────
+  //
+  // Returns a fully-shaped object with one entry per known vertical, even
+  // if the input only touched one of them. Unknown verticals are dropped.
+  // Per-field sanitization mirrors the rest of the plugin (sanitizeTextField,
+  // absint, restSanitizeBoolean).
+
+  sanitizeTemplateConfig(input: any): any {
+    const tc: any = input ?? {};
+
+    const bakeryIn: any = tc.bakery ?? {};
+    const occasionsIn: any = bakeryIn.occasions ?? [];
+    const occasions: any[] = [];
+    if (isArray(occasionsIn)) {
+      for (const o of occasionsIn) {
+        const id: string = sanitizeTextField(o.id ?? '');
+        const label: string = sanitizeTextField(o.label ?? '');
+        if (id && label) {
+          occasions.push({ id: id, label: label });
+        }
+      }
+    }
+    const bakery: any = {
+      occasions: occasions,
+      eggless_default: restSanitizeBoolean(bakeryIn.eggless_default ?? false),
+    };
+
+    const qcIn: any = tc.quickcommerce ?? {};
+    const etaIn: any = qcIn.eta_band_minutes ?? {};
+    const quickcommerce: any = {
+      eta_band_minutes: {
+        min: absint(etaIn.min ?? 0),
+        max: absint(etaIn.max ?? 0),
+      },
+      cod_enabled: restSanitizeBoolean(qcIn.cod_enabled ?? false),
+    };
+
+    const fdIn: any = tc.fooddelivery ?? {};
+    const fooddelivery: any = {
+      veg_only: restSanitizeBoolean(fdIn.veg_only ?? false),
+      jain_filter_enabled: restSanitizeBoolean(fdIn.jain_filter_enabled ?? false),
+    };
+
+    const ecIn: any = tc.ecommerce ?? {};
+    const ecommerce: any = {
+      returns_window_days: absint(ecIn.returns_window_days ?? 0),
+      exchange_enabled: restSanitizeBoolean(ecIn.exchange_enabled ?? false),
+    };
+
+    return {
+      bakery: bakery,
+      quickcommerce: quickcommerce,
+      fooddelivery: fooddelivery,
+      ecommerce: ecommerce,
+    };
+  }
+
+  // ── Helper: shape template_config for the public /config response ──
+  //
+  // Returns sections only when they hold meaningful values, so a fresh
+  // install doesn't pollute the response with empty per-vertical objects.
+  // /config does NOT filter by the active `template` — every populated
+  // section is returned so a misconfigured tenant still gets useful data.
+
+  publicTemplateConfig(input: any): any {
+    const tc: any = input ?? {};
+    const out: any = {};
+
+    const bakeryIn: any = tc.bakery ?? {};
+    const occasionsIn: any = bakeryIn.occasions ?? [];
+    const occasions: any[] = [];
+    if (isArray(occasionsIn)) {
+      for (const o of occasionsIn) {
+        const id: string = sanitizeTextField(o.id ?? '');
+        const label: string = sanitizeTextField(o.label ?? '');
+        if (id && label) {
+          occasions.push({ id: id, label: label });
+        }
+      }
+    }
+    const egglessDefault: boolean = restSanitizeBoolean(bakeryIn.eggless_default ?? false);
+    if (!empty(occasions) || egglessDefault) {
+      out.bakery = {
+        occasions: occasions,
+        eggless_default: egglessDefault,
+      };
+    }
+
+    const qcIn: any = tc.quickcommerce ?? {};
+    const etaIn: any = qcIn.eta_band_minutes ?? {};
+    const etaMin: number = absint(etaIn.min ?? 0);
+    const etaMax: number = absint(etaIn.max ?? 0);
+    const codEnabled: boolean = restSanitizeBoolean(qcIn.cod_enabled ?? false);
+    if (etaMin || etaMax || codEnabled) {
+      out.quickcommerce = {
+        eta_band_minutes: { min: etaMin, max: etaMax },
+        cod_enabled: codEnabled,
+      };
+    }
+
+    const fdIn: any = tc.fooddelivery ?? {};
+    const vegOnly: boolean = restSanitizeBoolean(fdIn.veg_only ?? false);
+    const jainEnabled: boolean = restSanitizeBoolean(fdIn.jain_filter_enabled ?? false);
+    if (vegOnly || jainEnabled) {
+      out.fooddelivery = {
+        veg_only: vegOnly,
+        jain_filter_enabled: jainEnabled,
+      };
+    }
+
+    const ecIn: any = tc.ecommerce ?? {};
+    const returnsWindow: number = absint(ecIn.returns_window_days ?? 0);
+    const exchangeEnabled: boolean = restSanitizeBoolean(ecIn.exchange_enabled ?? false);
+    if (returnsWindow || exchangeEnabled) {
+      out.ecommerce = {
+        returns_window_days: returnsWindow,
+        exchange_enabled: exchangeEnabled,
+      };
+    }
+
+    return out;
+  }
+
+  // ── Helper: shape template_config for the admin /settings response ─
+  //
+  // Always returns every vertical with default-zero values, so the admin
+  // form has stable controlled inputs even before any data has been saved.
+
+  adminTemplateConfig(input: any): any {
+    const tc: any = input ?? {};
+
+    const bakeryIn: any = tc.bakery ?? {};
+    const occasionsIn: any = bakeryIn.occasions ?? [];
+    const occasions: any = isArray(occasionsIn) ? occasionsIn : [];
+
+    const qcIn: any = tc.quickcommerce ?? {};
+    const etaIn: any = qcIn.eta_band_minutes ?? {};
+
+    const fdIn: any = tc.fooddelivery ?? {};
+    const ecIn: any = tc.ecommerce ?? {};
+
+    return {
+      bakery: {
+        occasions: occasions,
+        eggless_default: !!(bakeryIn.eggless_default ?? false),
+      },
+      quickcommerce: {
+        eta_band_minutes: {
+          min: etaIn.min ?? 0,
+          max: etaIn.max ?? 0,
+        },
+        cod_enabled: !!(qcIn.cod_enabled ?? false),
+      },
+      fooddelivery: {
+        veg_only: !!(fdIn.veg_only ?? false),
+        jain_filter_enabled: !!(fdIn.jain_filter_enabled ?? false),
+      },
+      ecommerce: {
+        returns_window_days: ecIn.returns_window_days ?? 0,
+        exchange_enabled: !!(ecIn.exchange_enabled ?? false),
+      },
     };
   }
 
@@ -376,9 +642,10 @@ class ConfigRoutes {
   //
   // For each schema key, if the patch has it (PHP isset semantics: present
   // and non-null), use the patch value; otherwise carry forward the
-  // existing value. Nested objects (contact, colors, tokens) are shallow-
-  // merged at the inner level so a partial subobject only updates its own
-  // keys. Arrays are replaced wholesale when the array key is present.
+  // existing value. Nested objects (contact, colors, tokens, template_config)
+  // are shallow-merged at the inner level so a partial subobject only
+  // updates its own keys. Arrays are replaced wholesale when the array key
+  // is present.
 
   mergePatch(existing: any, patch: any): any {
     const base: any = existing ? existing : {};
@@ -412,6 +679,16 @@ class ConfigRoutes {
       patch.revalidate_secret !== undefined
         ? patch.revalidate_secret
         : (base.revalidate_secret ?? '');
+
+    // v1.8 top-level scalars
+    result.fssai_license =
+      patch.fssai_license !== undefined ? patch.fssai_license : (base.fssai_license ?? '');
+    result.estd_line = patch.estd_line !== undefined ? patch.estd_line : (base.estd_line ?? '');
+    result.owner_name = patch.owner_name !== undefined ? patch.owner_name : (base.owner_name ?? '');
+    result.mov = patch.mov !== undefined ? patch.mov : (base.mov ?? '');
+    result.delivery_fee =
+      patch.delivery_fee !== undefined ? patch.delivery_fee : (base.delivery_fee ?? '');
+    result.template = patch.template !== undefined ? patch.template : (base.template ?? '');
 
     // Nested: contact (shallow merge)
     const baseContact: any = base.contact ?? {};
@@ -482,6 +759,95 @@ class ConfigRoutes {
     result.cities = patch.cities !== undefined ? patch.cities : (base.cities ?? []);
     result.trust_signals =
       patch.trust_signals !== undefined ? patch.trust_signals : (base.trust_signals ?? []);
+    result.delivery_areas =
+      patch.delivery_areas !== undefined ? patch.delivery_areas : (base.delivery_areas ?? []);
+
+    // Nested: template_config (shallow merge per vertical, then per field
+    // within each vertical). A patch that touches one nested key inside
+    // one vertical preserves every other vertical and every other field
+    // within that vertical. Guard the access so the helper doesn't have
+    // to deal with PHP 8 "undefined array key" warnings.
+    if (patch.template_config !== undefined) {
+      result.template_config = this.mergeTemplateConfig(
+        base.template_config ?? {},
+        patch.template_config,
+      );
+    } else {
+      result.template_config = base.template_config ?? {};
+    }
+
+    return result;
+  }
+
+  // ── Helper: shallow-merge per vertical inside template_config ──────
+
+  mergeTemplateConfig(baseTc: any, patchTc: any): any {
+    if (patchTc === null) {
+      return baseTc;
+    }
+    const result: any = {
+      bakery: baseTc.bakery ?? {},
+      quickcommerce: baseTc.quickcommerce ?? {},
+      fooddelivery: baseTc.fooddelivery ?? {},
+      ecommerce: baseTc.ecommerce ?? {},
+    };
+
+    // bakery
+    if (patchTc.bakery !== undefined) {
+      const pb: any = patchTc.bakery;
+      const bb: any = result.bakery;
+      result.bakery = {
+        occasions: pb.occasions !== undefined ? pb.occasions : (bb.occasions ?? []),
+        eggless_default:
+          pb.eggless_default !== undefined ? pb.eggless_default : (bb.eggless_default ?? false),
+      };
+    }
+
+    // quickcommerce
+    if (patchTc.quickcommerce !== undefined) {
+      const pq: any = patchTc.quickcommerce;
+      const bq: any = result.quickcommerce;
+      const baseEta: any = bq.eta_band_minutes ?? {};
+      let mergedEta: any = baseEta;
+      if (pq.eta_band_minutes !== undefined) {
+        const pe: any = pq.eta_band_minutes;
+        mergedEta = {
+          min: pe.min !== undefined ? pe.min : (baseEta.min ?? 0),
+          max: pe.max !== undefined ? pe.max : (baseEta.max ?? 0),
+        };
+      }
+      result.quickcommerce = {
+        eta_band_minutes: mergedEta,
+        cod_enabled: pq.cod_enabled !== undefined ? pq.cod_enabled : (bq.cod_enabled ?? false),
+      };
+    }
+
+    // fooddelivery
+    if (patchTc.fooddelivery !== undefined) {
+      const pf: any = patchTc.fooddelivery;
+      const bf: any = result.fooddelivery;
+      result.fooddelivery = {
+        veg_only: pf.veg_only !== undefined ? pf.veg_only : (bf.veg_only ?? false),
+        jain_filter_enabled:
+          pf.jain_filter_enabled !== undefined
+            ? pf.jain_filter_enabled
+            : (bf.jain_filter_enabled ?? false),
+      };
+    }
+
+    // ecommerce
+    if (patchTc.ecommerce !== undefined) {
+      const pe: any = patchTc.ecommerce;
+      const be: any = result.ecommerce;
+      result.ecommerce = {
+        returns_window_days:
+          pe.returns_window_days !== undefined
+            ? pe.returns_window_days
+            : (be.returns_window_days ?? 0),
+        exchange_enabled:
+          pe.exchange_enabled !== undefined ? pe.exchange_enabled : (be.exchange_enabled ?? false),
+      };
+    }
 
     return result;
   }

@@ -41,6 +41,20 @@ test.describe('Headless Storefront — Config API', () => {
       },
       frontend_url: '',
       revalidate_secret: '',
+      // v1.8 — reset to defaults
+      fssai_license: '',
+      estd_line: '',
+      owner_name: '',
+      mov: '',
+      delivery_fee: '',
+      delivery_areas: [],
+      template: '',
+      template_config: {
+        bakery: { occasions: [], eggless_default: false },
+        quickcommerce: { eta_band_minutes: { min: 0, max: 0 }, cod_enabled: false },
+        fooddelivery: { veg_only: false, jain_filter_enabled: false },
+        ecommerce: { returns_window_days: 0, exchange_enabled: false },
+      },
     });
   });
 
@@ -387,5 +401,139 @@ test.describe('Headless Storefront — Config API', () => {
       revalidate_secret: 'patch-response-mask',
     });
     expect(patchData.revalidate_secret).toBe('********');
+  });
+
+  // ── v1.8 — merchant policy + template_config + filter hook ─────────
+
+  test('GET /config returns null for unset numeric policy fields', async ({ restApi }) => {
+    await restApi.updateSettings(SLUG, { mov: '', delivery_fee: '' });
+
+    const ctx = await playwrightRequest.newContext();
+    const res = await ctx.get(`${BASE}/config`);
+    const data = await res.json();
+
+    // Unset must be null (not 0) so storefronts can distinguish "no policy"
+    // from explicit "free / no minimum".
+    expect(data.mov).toBeNull();
+    expect(data.delivery_fee).toBeNull();
+    await ctx.dispose();
+  });
+
+  test('GET /config returns 0 for explicit zero policy fields', async ({ restApi }) => {
+    // 0 is a legitimate value: free delivery, no minimum order. Must
+    // round-trip as the integer 0, not get coerced to null.
+    await restApi.updateSettings(SLUG, { mov: 0, delivery_fee: 0 });
+
+    const ctx = await playwrightRequest.newContext();
+    const res = await ctx.get(`${BASE}/config`);
+    const data = await res.json();
+
+    expect(data.mov).toBe(0);
+    expect(data.delivery_fee).toBe(0);
+    await ctx.dispose();
+  });
+
+  test('GET /config omits empty template_config sections', async ({ restApi }) => {
+    // Reset so no vertical has meaningful values.
+    await restApi.updateSettings(SLUG, {
+      template_config: {
+        bakery: { occasions: [], eggless_default: false },
+        quickcommerce: { eta_band_minutes: { min: 0, max: 0 }, cod_enabled: false },
+        fooddelivery: { veg_only: false, jain_filter_enabled: false },
+        ecommerce: { returns_window_days: 0, exchange_enabled: false },
+      },
+    });
+
+    const ctx = await playwrightRequest.newContext();
+    const res = await ctx.get(`${BASE}/config`);
+    const data = await res.json();
+    expect(data.template_config).toEqual({});
+    await ctx.dispose();
+  });
+
+  test('GET /config includes only populated template_config sections', async ({ restApi }) => {
+    // Populate bakery only — quickcommerce/fooddelivery/ecommerce should
+    // remain absent from the public response.
+    await restApi.updateSettings(SLUG, {
+      template_config: {
+        bakery: {
+          occasions: [{ id: 'birthday', label: 'Birthday' }],
+          eggless_default: true,
+        },
+        quickcommerce: { eta_band_minutes: { min: 0, max: 0 }, cod_enabled: false },
+        fooddelivery: { veg_only: false, jain_filter_enabled: false },
+        ecommerce: { returns_window_days: 0, exchange_enabled: false },
+      },
+    });
+
+    const ctx = await playwrightRequest.newContext();
+    const res = await ctx.get(`${BASE}/config`);
+    const data = await res.json();
+    expect(data.template_config.bakery).toEqual({
+      occasions: [{ id: 'birthday', label: 'Birthday' }],
+      eggless_default: true,
+    });
+    expect(data.template_config).not.toHaveProperty('quickcommerce');
+    expect(data.template_config).not.toHaveProperty('fooddelivery');
+    expect(data.template_config).not.toHaveProperty('ecommerce');
+    await ctx.dispose();
+  });
+
+  test('PATCH /settings shallow-merges template_config per vertical and per field', async ({
+    restApi,
+  }) => {
+    // Seed with values across multiple verticals.
+    await restApi.updateSettings(SLUG, {
+      template_config: {
+        bakery: {
+          occasions: [{ id: 'wedding', label: 'Wedding' }],
+          eggless_default: false,
+        },
+        quickcommerce: { eta_band_minutes: { min: 10, max: 20 }, cod_enabled: true },
+        fooddelivery: { veg_only: true, jain_filter_enabled: false },
+        ecommerce: { returns_window_days: 7, exchange_enabled: false },
+      },
+    });
+
+    // Patch a single nested field inside one vertical.
+    const { data } = await restApi.patch(`${SLUG}/v1/settings`, {
+      template_config: { bakery: { eggless_default: true } },
+    });
+
+    // The patched field changed.
+    expect(data.template_config.bakery.eggless_default).toBe(true);
+    // Other field within the same vertical is preserved.
+    expect(data.template_config.bakery.occasions).toEqual([{ id: 'wedding', label: 'Wedding' }]);
+    // Other verticals are preserved untouched.
+    expect(data.template_config.quickcommerce.eta_band_minutes).toEqual({ min: 10, max: 20 });
+    expect(data.template_config.quickcommerce.cod_enabled).toBe(true);
+    expect(data.template_config.fooddelivery.veg_only).toBe(true);
+    expect(data.template_config.ecommerce.returns_window_days).toBe(7);
+  });
+
+  test('headless_storefront_config_response filter mutates /config', async ({ wpCli }) => {
+    // Install a mu-plugin that adds a sentinel field via the filter hook,
+    // verify it appears in /config, then remove it. Mu-plugins are loaded
+    // automatically and don't require activation.
+    const muPluginPhp = `<?php
+add_filter( 'headless_storefront_config_response', function ( $response ) {
+  $response['e2e_filter_marker'] = 'e2e-filter-applied';
+  return $response;
+} );
+`;
+    // wp eval runs PHP inside the WP container so WPMU_PLUGIN_DIR resolves
+    // to the right path; wp_mkdir_p is idempotent.
+    const writeCmd = `eval "wp_mkdir_p(WPMU_PLUGIN_DIR); file_put_contents(WPMU_PLUGIN_DIR . '/e2e-storefront-filter.php', base64_decode('${Buffer.from(muPluginPhp).toString('base64')}'));"`;
+    wpCli(writeCmd);
+
+    try {
+      const ctx = await playwrightRequest.newContext();
+      const res = await ctx.get(`${BASE}/config`);
+      const data = await res.json();
+      expect(data.e2e_filter_marker).toBe('e2e-filter-applied');
+      await ctx.dispose();
+    } finally {
+      wpCli(`eval "@unlink(WPMU_PLUGIN_DIR . '/e2e-storefront-filter.php');"`);
+    }
   });
 });

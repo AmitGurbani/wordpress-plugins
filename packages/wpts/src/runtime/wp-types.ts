@@ -560,6 +560,7 @@ declare global {
   function wpSendJsonSuccess(data?: any, statusCode?: number): never;
   function wpSendJsonError(data?: any, statusCode?: number): never;
   function absint(value: any): number;
+  function restSanitizeBoolean(value: any): boolean;
   function wpUnslash(value: string | string[]): string | string[];
 
   // ---------------------------------------------------------------------------

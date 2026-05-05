@@ -116,7 +116,22 @@ class Headless_Storefront_Rest_Api {
 		$raw_cities = $config['cities'] ?? array();
 		$cities = is_array( $raw_cities ) ? array_map( 'sanitize_text_field', $raw_cities ) : array();
 		$raw_logo_url = esc_url( $config['logo_url'] ?? '' );
-		return rest_ensure_response( array( 'app_name' => $app_name, 'short_name' => $short_name, 'tagline' => $tagline, 'title_tagline' => sanitize_text_field( $config['title_tagline'] ?? '' ), 'description' => sanitize_textarea_field( $config['description'] ?? '' ), 'contact' => array( 'phone' => $contact_phone, 'phone_href' => $contact_phone_href, 'email' => $contact_email, 'whatsapp' => $whatsapp ), 'social' => $social, 'cities' => $cities, 'trust_signals' => $trust_signals, 'delivery_message' => sanitize_text_field( $config['delivery_message'] ?? 'Delivery in 1–2 business days' ), 'return_policy' => sanitize_textarea_field( $config['return_policy'] ?? 'Easy returns within 7 days of delivery. Items must be unused and in original packaging.' ), 'delivery_badge' => sanitize_text_field( $config['delivery_badge'] ?? '' ), 'hours_text' => sanitize_textarea_field( $config['hours_text'] ?? '' ), 'delivery_area_text' => sanitize_textarea_field( $config['delivery_area_text'] ?? '' ), 'colors' => array( 'primary' => $primary_color, 'secondary' => $secondary_raw ? $secondary_raw : null, 'accent' => $accent_raw ? $accent_raw : null ), 'tokens' => array( 'section_gap' => sanitize_text_field( $tokens['section_gap'] ?? '2rem' ), 'card_padding' => sanitize_text_field( $tokens['card_padding'] ?? '0.75rem' ), 'card_radius' => sanitize_text_field( $tokens['card_radius'] ?? '0.75rem' ), 'button_radius' => sanitize_text_field( $tokens['button_radius'] ?? '0.5rem' ), 'image_radius' => sanitize_text_field( $tokens['image_radius'] ?? '0.5rem' ), 'card_shadow' => sanitize_text_field( $tokens['card_shadow'] ?? 'none' ), 'card_hover_shadow' => sanitize_text_field( $tokens['card_hover_shadow'] ?? '0 4px 12px oklch(0 0 0 / 0.1)' ), 'hover_duration' => sanitize_text_field( $tokens['hover_duration'] ?? '150ms' ) ), 'logo_url' => $raw_logo_url ? $raw_logo_url : null, 'font_family' => sanitize_text_field( $config['font_family'] ?? 'Inter' ) ) );
+		$raw_mov = $config['mov'] ?? null;
+		$mov = $raw_mov === null || $raw_mov === '' ? null : absint( $raw_mov );
+		$raw_delivery_fee = $config['delivery_fee'] ?? null;
+		$delivery_fee = $raw_delivery_fee === null || $raw_delivery_fee === '' ? null : absint( $raw_delivery_fee );
+		$raw_delivery_areas = $config['delivery_areas'] ?? array();
+		$delivery_areas = is_array( $raw_delivery_areas ) ? array_map( 'sanitize_text_field', $raw_delivery_areas ) : array();
+		$raw_owner_name = sanitize_text_field( $config['owner_name'] ?? '' );
+		$raw_fssai_license = sanitize_text_field( $config['fssai_license'] ?? '' );
+		$raw_estd_line = sanitize_text_field( $config['estd_line'] ?? '' );
+		$valid_templates = array( 'kirana', 'megamart', 'bakery', 'quickcommerce', 'ecommerce', 'fooddelivery' );
+		$raw_template = sanitize_text_field( $config['template'] ?? '' );
+		$template = in_array( $raw_template, $valid_templates, true ) ? $raw_template : null;
+		$template_config = $this->public_template_config( $config['template_config'] ?? array() );
+		$response = array( 'app_name' => $app_name, 'short_name' => $short_name, 'tagline' => $tagline, 'title_tagline' => sanitize_text_field( $config['title_tagline'] ?? '' ), 'description' => sanitize_textarea_field( $config['description'] ?? '' ), 'contact' => array( 'phone' => $contact_phone, 'phone_href' => $contact_phone_href, 'email' => $contact_email, 'whatsapp' => $whatsapp ), 'social' => $social, 'cities' => $cities, 'trust_signals' => $trust_signals, 'delivery_message' => sanitize_text_field( $config['delivery_message'] ?? 'Delivery in 1–2 business days' ), 'return_policy' => sanitize_textarea_field( $config['return_policy'] ?? 'Easy returns within 7 days of delivery. Items must be unused and in original packaging.' ), 'delivery_badge' => sanitize_text_field( $config['delivery_badge'] ?? '' ), 'hours_text' => sanitize_textarea_field( $config['hours_text'] ?? '' ), 'delivery_area_text' => sanitize_textarea_field( $config['delivery_area_text'] ?? '' ), 'colors' => array( 'primary' => $primary_color, 'secondary' => $secondary_raw ? $secondary_raw : null, 'accent' => $accent_raw ? $accent_raw : null ), 'tokens' => array( 'section_gap' => sanitize_text_field( $tokens['section_gap'] ?? '2rem' ), 'card_padding' => sanitize_text_field( $tokens['card_padding'] ?? '0.75rem' ), 'card_radius' => sanitize_text_field( $tokens['card_radius'] ?? '0.75rem' ), 'button_radius' => sanitize_text_field( $tokens['button_radius'] ?? '0.5rem' ), 'image_radius' => sanitize_text_field( $tokens['image_radius'] ?? '0.5rem' ), 'card_shadow' => sanitize_text_field( $tokens['card_shadow'] ?? 'none' ), 'card_hover_shadow' => sanitize_text_field( $tokens['card_hover_shadow'] ?? '0 4px 12px oklch(0 0 0 / 0.1)' ), 'hover_duration' => sanitize_text_field( $tokens['hover_duration'] ?? '150ms' ) ), 'logo_url' => $raw_logo_url ? $raw_logo_url : null, 'font_family' => sanitize_text_field( $config['font_family'] ?? 'Inter' ), 'fssai_license' => $raw_fssai_license ? $raw_fssai_license : null, 'estd_line' => $raw_estd_line ? $raw_estd_line : null, 'owner_name' => $raw_owner_name ? $raw_owner_name : null, 'mov' => $mov, 'delivery_fee' => $delivery_fee, 'delivery_areas' => $delivery_areas, 'template' => $template, 'template_config' => $template_config );
+		$filtered = apply_filters( 'headless_storefront_config_response', $response );
+		return rest_ensure_response( $filtered );
 	}
 
 	public function get_settings( $request ) {
@@ -125,7 +140,7 @@ class Headless_Storefront_Rest_Api {
 		$contact = $config['contact'] ?? array();
 		$colors = $config['colors'] ?? array();
 		$tokens = $config['tokens'] ?? array();
-		return rest_ensure_response( array( 'app_name' => $config['app_name'] ?? '', 'short_name' => $config['short_name'] ?? '', 'tagline' => $config['tagline'] ?? '', 'title_tagline' => $config['title_tagline'] ?? '', 'description' => $config['description'] ?? '', 'logo_url' => $config['logo_url'] ?? '', 'font_family' => $config['font_family'] ?? 'Inter', 'contact' => array( 'phone' => $contact['phone'] ?? '', 'phone_href' => $contact['phone_href'] ?? '', 'email' => $contact['email'] ?? '', 'whatsapp_number' => $contact['whatsapp_number'] ?? '', 'whatsapp_label' => $contact['whatsapp_label'] ?? '' ), 'social' => is_array( $config['social'] ?? array() ) ? $config['social'] : array(), 'cities' => is_array( $config['cities'] ?? array() ) ? $config['cities'] : array(), 'trust_signals' => is_array( $config['trust_signals'] ?? array() ) ? $config['trust_signals'] : array( 'Genuine Products', 'Easy Returns', 'Secure Payment', 'Fast Delivery' ), 'delivery_message' => $config['delivery_message'] ?? 'Delivery in 1–2 business days', 'return_policy' => $config['return_policy'] ?? 'Easy returns within 7 days of delivery. Items must be unused and in original packaging.', 'delivery_badge' => $config['delivery_badge'] ?? '', 'hours_text' => $config['hours_text'] ?? '', 'delivery_area_text' => $config['delivery_area_text'] ?? '', 'colors' => array( 'primary' => $colors['primary'] ?? '#6366f1', 'secondary' => $colors['secondary'] ?? '', 'accent' => $colors['accent'] ?? '' ), 'tokens' => array( 'section_gap' => $tokens['section_gap'] ?? '2rem', 'card_padding' => $tokens['card_padding'] ?? '0.75rem', 'card_radius' => $tokens['card_radius'] ?? '0.75rem', 'button_radius' => $tokens['button_radius'] ?? '0.5rem', 'image_radius' => $tokens['image_radius'] ?? '0.5rem', 'card_shadow' => $tokens['card_shadow'] ?? 'none', 'card_hover_shadow' => $tokens['card_hover_shadow'] ?? '0 4px 12px oklch(0 0 0 / 0.1)', 'hover_duration' => $tokens['hover_duration'] ?? '150ms' ), 'frontend_url' => $config['frontend_url'] ?? '', 'revalidate_secret' => $config['revalidate_secret'] ? '********' : '', '_fallbacks' => array( 'app_name' => get_option( 'blogname', '' ), 'tagline' => get_option( 'blogdescription', '' ), 'contact_email' => get_option( 'woocommerce_email_from_address', '' ) ), '_last_revalidate_at' => $last_at ? $last_at : null ) );
+		return rest_ensure_response( array( 'app_name' => $config['app_name'] ?? '', 'short_name' => $config['short_name'] ?? '', 'tagline' => $config['tagline'] ?? '', 'title_tagline' => $config['title_tagline'] ?? '', 'description' => $config['description'] ?? '', 'logo_url' => $config['logo_url'] ?? '', 'font_family' => $config['font_family'] ?? 'Inter', 'contact' => array( 'phone' => $contact['phone'] ?? '', 'phone_href' => $contact['phone_href'] ?? '', 'email' => $contact['email'] ?? '', 'whatsapp_number' => $contact['whatsapp_number'] ?? '', 'whatsapp_label' => $contact['whatsapp_label'] ?? '' ), 'social' => is_array( $config['social'] ?? array() ) ? $config['social'] : array(), 'cities' => is_array( $config['cities'] ?? array() ) ? $config['cities'] : array(), 'trust_signals' => is_array( $config['trust_signals'] ?? array() ) ? $config['trust_signals'] : array( 'Genuine Products', 'Easy Returns', 'Secure Payment', 'Fast Delivery' ), 'delivery_message' => $config['delivery_message'] ?? 'Delivery in 1–2 business days', 'return_policy' => $config['return_policy'] ?? 'Easy returns within 7 days of delivery. Items must be unused and in original packaging.', 'delivery_badge' => $config['delivery_badge'] ?? '', 'hours_text' => $config['hours_text'] ?? '', 'delivery_area_text' => $config['delivery_area_text'] ?? '', 'colors' => array( 'primary' => $colors['primary'] ?? '#6366f1', 'secondary' => $colors['secondary'] ?? '', 'accent' => $colors['accent'] ?? '' ), 'tokens' => array( 'section_gap' => $tokens['section_gap'] ?? '2rem', 'card_padding' => $tokens['card_padding'] ?? '0.75rem', 'card_radius' => $tokens['card_radius'] ?? '0.75rem', 'button_radius' => $tokens['button_radius'] ?? '0.5rem', 'image_radius' => $tokens['image_radius'] ?? '0.5rem', 'card_shadow' => $tokens['card_shadow'] ?? 'none', 'card_hover_shadow' => $tokens['card_hover_shadow'] ?? '0 4px 12px oklch(0 0 0 / 0.1)', 'hover_duration' => $tokens['hover_duration'] ?? '150ms' ), 'frontend_url' => $config['frontend_url'] ?? '', 'revalidate_secret' => $config['revalidate_secret'] ? '********' : '', 'fssai_license' => $config['fssai_license'] ?? '', 'estd_line' => $config['estd_line'] ?? '', 'owner_name' => $config['owner_name'] ?? '', 'mov' => $config['mov'] ?? '', 'delivery_fee' => $config['delivery_fee'] ?? '', 'delivery_areas' => is_array( $config['delivery_areas'] ?? array() ) ? $config['delivery_areas'] : array(), 'template' => $config['template'] ?? '', 'template_config' => $this->admin_template_config( $config['template_config'] ?? array() ), '_fallbacks' => array( 'app_name' => get_option( 'blogname', '' ), 'tagline' => get_option( 'blogdescription', '' ), 'contact_email' => get_option( 'woocommerce_email_from_address', '' ) ), '_last_revalidate_at' => $last_at ? $last_at : null ) );
 	}
 
 	public function save_settings( $request ) {
@@ -215,7 +230,95 @@ class Headless_Storefront_Rest_Api {
 		$cities = is_array( $raw_cities ) ? array_map( 'sanitize_text_field', $raw_cities ) : array();
 		$raw_trust_signals = $data['trust_signals'] ?? array();
 		$trust_signals = is_array( $raw_trust_signals ) ? array_map( 'sanitize_text_field', $raw_trust_signals ) : array();
-		return array( 'app_name' => sanitize_text_field( $data['app_name'] ?? '' ), 'short_name' => sanitize_text_field( $data['short_name'] ?? '' ), 'tagline' => sanitize_text_field( $data['tagline'] ?? '' ), 'title_tagline' => sanitize_text_field( $data['title_tagline'] ?? '' ), 'description' => sanitize_textarea_field( $data['description'] ?? '' ), 'logo_url' => esc_url_raw( $data['logo_url'] ?? '' ), 'font_family' => sanitize_text_field( $data['font_family'] ?? 'Inter' ), 'contact' => $contact, 'social' => $social, 'cities' => $cities, 'trust_signals' => $trust_signals, 'delivery_message' => sanitize_text_field( $data['delivery_message'] ?? '' ), 'return_policy' => sanitize_textarea_field( $data['return_policy'] ?? '' ), 'delivery_badge' => sanitize_text_field( $data['delivery_badge'] ?? '' ), 'hours_text' => sanitize_textarea_field( $data['hours_text'] ?? '' ), 'delivery_area_text' => sanitize_textarea_field( $data['delivery_area_text'] ?? '' ), 'colors' => $colors, 'tokens' => $tokens, 'frontend_url' => esc_url_raw( $data['frontend_url'] ?? '' ), 'revalidate_secret' => sanitize_text_field( $data['revalidate_secret'] ?? '' ) );
+		$raw_delivery_areas = $data['delivery_areas'] ?? array();
+		$delivery_areas = is_array( $raw_delivery_areas ) ? array_map( 'sanitize_text_field', $raw_delivery_areas ) : array();
+		$raw_mov = $data['mov'] ?? '';
+		$mov = $raw_mov === '' || $raw_mov === null ? '' : absint( $raw_mov );
+		$raw_delivery_fee = $data['delivery_fee'] ?? '';
+		$delivery_fee = $raw_delivery_fee === '' || $raw_delivery_fee === null ? '' : absint( $raw_delivery_fee );
+		$valid_templates = array( 'kirana', 'megamart', 'bakery', 'quickcommerce', 'ecommerce', 'fooddelivery' );
+		$raw_template = sanitize_text_field( $data['template'] ?? '' );
+		$template = in_array( $raw_template, $valid_templates, true ) ? $raw_template : '';
+		return array( 'app_name' => sanitize_text_field( $data['app_name'] ?? '' ), 'short_name' => sanitize_text_field( $data['short_name'] ?? '' ), 'tagline' => sanitize_text_field( $data['tagline'] ?? '' ), 'title_tagline' => sanitize_text_field( $data['title_tagline'] ?? '' ), 'description' => sanitize_textarea_field( $data['description'] ?? '' ), 'logo_url' => esc_url_raw( $data['logo_url'] ?? '' ), 'font_family' => sanitize_text_field( $data['font_family'] ?? 'Inter' ), 'contact' => $contact, 'social' => $social, 'cities' => $cities, 'trust_signals' => $trust_signals, 'delivery_message' => sanitize_text_field( $data['delivery_message'] ?? '' ), 'return_policy' => sanitize_textarea_field( $data['return_policy'] ?? '' ), 'delivery_badge' => sanitize_text_field( $data['delivery_badge'] ?? '' ), 'hours_text' => sanitize_textarea_field( $data['hours_text'] ?? '' ), 'delivery_area_text' => sanitize_textarea_field( $data['delivery_area_text'] ?? '' ), 'colors' => $colors, 'tokens' => $tokens, 'frontend_url' => esc_url_raw( $data['frontend_url'] ?? '' ), 'revalidate_secret' => sanitize_text_field( $data['revalidate_secret'] ?? '' ), 'fssai_license' => sanitize_text_field( $data['fssai_license'] ?? '' ), 'estd_line' => sanitize_text_field( $data['estd_line'] ?? '' ), 'owner_name' => sanitize_text_field( $data['owner_name'] ?? '' ), 'mov' => $mov, 'delivery_fee' => $delivery_fee, 'delivery_areas' => $delivery_areas, 'template' => $template, 'template_config' => $this->sanitize_template_config( $data['template_config'] ?? array() ) );
+	}
+
+	public function sanitize_template_config( $input ) {
+		$tc = $input ?? array();
+		$bakery_in = $tc['bakery'] ?? array();
+		$occasions_in = $bakery_in['occasions'] ?? array();
+		$occasions = array();
+		if ( is_array( $occasions_in ) ) {
+			foreach ( $occasions_in as $o ) {
+				$id = sanitize_text_field( $o['id'] ?? '' );
+				$label = sanitize_text_field( $o['label'] ?? '' );
+				if ( $id && $label ) {
+					array_push( $occasions, array( 'id' => $id, 'label' => $label ) );
+				}
+			}
+		}
+		$bakery = array( 'occasions' => $occasions, 'eggless_default' => rest_sanitize_boolean( $bakery_in['eggless_default'] ?? false ) );
+		$qc_in = $tc['quickcommerce'] ?? array();
+		$eta_in = $qc_in['eta_band_minutes'] ?? array();
+		$quickcommerce = array( 'eta_band_minutes' => array( 'min' => absint( $eta_in['min'] ?? 0 ), 'max' => absint( $eta_in['max'] ?? 0 ) ), 'cod_enabled' => rest_sanitize_boolean( $qc_in['cod_enabled'] ?? false ) );
+		$fd_in = $tc['fooddelivery'] ?? array();
+		$fooddelivery = array( 'veg_only' => rest_sanitize_boolean( $fd_in['veg_only'] ?? false ), 'jain_filter_enabled' => rest_sanitize_boolean( $fd_in['jain_filter_enabled'] ?? false ) );
+		$ec_in = $tc['ecommerce'] ?? array();
+		$ecommerce = array( 'returns_window_days' => absint( $ec_in['returns_window_days'] ?? 0 ), 'exchange_enabled' => rest_sanitize_boolean( $ec_in['exchange_enabled'] ?? false ) );
+		return array( 'bakery' => $bakery, 'quickcommerce' => $quickcommerce, 'fooddelivery' => $fooddelivery, 'ecommerce' => $ecommerce );
+	}
+
+	public function public_template_config( $input ) {
+		$tc = $input ?? array();
+		$out = array();
+		$bakery_in = $tc['bakery'] ?? array();
+		$occasions_in = $bakery_in['occasions'] ?? array();
+		$occasions = array();
+		if ( is_array( $occasions_in ) ) {
+			foreach ( $occasions_in as $o ) {
+				$id = sanitize_text_field( $o['id'] ?? '' );
+				$label = sanitize_text_field( $o['label'] ?? '' );
+				if ( $id && $label ) {
+					array_push( $occasions, array( 'id' => $id, 'label' => $label ) );
+				}
+			}
+		}
+		$eggless_default = rest_sanitize_boolean( $bakery_in['eggless_default'] ?? false );
+		if ( ! empty( $occasions ) || $eggless_default ) {
+			$out['bakery'] = array( 'occasions' => $occasions, 'eggless_default' => $eggless_default );
+		}
+		$qc_in = $tc['quickcommerce'] ?? array();
+		$eta_in = $qc_in['eta_band_minutes'] ?? array();
+		$eta_min = absint( $eta_in['min'] ?? 0 );
+		$eta_max = absint( $eta_in['max'] ?? 0 );
+		$cod_enabled = rest_sanitize_boolean( $qc_in['cod_enabled'] ?? false );
+		if ( $eta_min || $eta_max || $cod_enabled ) {
+			$out['quickcommerce'] = array( 'eta_band_minutes' => array( 'min' => $eta_min, 'max' => $eta_max ), 'cod_enabled' => $cod_enabled );
+		}
+		$fd_in = $tc['fooddelivery'] ?? array();
+		$veg_only = rest_sanitize_boolean( $fd_in['veg_only'] ?? false );
+		$jain_enabled = rest_sanitize_boolean( $fd_in['jain_filter_enabled'] ?? false );
+		if ( $veg_only || $jain_enabled ) {
+			$out['fooddelivery'] = array( 'veg_only' => $veg_only, 'jain_filter_enabled' => $jain_enabled );
+		}
+		$ec_in = $tc['ecommerce'] ?? array();
+		$returns_window = absint( $ec_in['returns_window_days'] ?? 0 );
+		$exchange_enabled = rest_sanitize_boolean( $ec_in['exchange_enabled'] ?? false );
+		if ( $returns_window || $exchange_enabled ) {
+			$out['ecommerce'] = array( 'returns_window_days' => $returns_window, 'exchange_enabled' => $exchange_enabled );
+		}
+		return $out;
+	}
+
+	public function admin_template_config( $input ) {
+		$tc = $input ?? array();
+		$bakery_in = $tc['bakery'] ?? array();
+		$occasions_in = $bakery_in['occasions'] ?? array();
+		$occasions = is_array( $occasions_in ) ? $occasions_in : array();
+		$qc_in = $tc['quickcommerce'] ?? array();
+		$eta_in = $qc_in['eta_band_minutes'] ?? array();
+		$fd_in = $tc['fooddelivery'] ?? array();
+		$ec_in = $tc['ecommerce'] ?? array();
+		return array( 'bakery' => array( 'occasions' => $occasions, 'eggless_default' => ! ! ($bakery_in['eggless_default'] ?? false) ), 'quickcommerce' => array( 'eta_band_minutes' => array( 'min' => $eta_in['min'] ?? 0, 'max' => $eta_in['max'] ?? 0 ), 'cod_enabled' => ! ! ($qc_in['cod_enabled'] ?? false) ), 'fooddelivery' => array( 'veg_only' => ! ! ($fd_in['veg_only'] ?? false), 'jain_filter_enabled' => ! ! ($fd_in['jain_filter_enabled'] ?? false) ), 'ecommerce' => array( 'returns_window_days' => $ec_in['returns_window_days'] ?? 0, 'exchange_enabled' => ! ! ($ec_in['exchange_enabled'] ?? false) ) );
 	}
 
 	public function merge_patch( $existing, $patch ) {
@@ -235,6 +338,12 @@ class Headless_Storefront_Rest_Api {
 		$result['delivery_area_text'] = isset( $patch['delivery_area_text'] ) ? $patch['delivery_area_text'] : ($base['delivery_area_text'] ?? '');
 		$result['frontend_url'] = isset( $patch['frontend_url'] ) ? $patch['frontend_url'] : ($base['frontend_url'] ?? '');
 		$result['revalidate_secret'] = isset( $patch['revalidate_secret'] ) ? $patch['revalidate_secret'] : ($base['revalidate_secret'] ?? '');
+		$result['fssai_license'] = isset( $patch['fssai_license'] ) ? $patch['fssai_license'] : ($base['fssai_license'] ?? '');
+		$result['estd_line'] = isset( $patch['estd_line'] ) ? $patch['estd_line'] : ($base['estd_line'] ?? '');
+		$result['owner_name'] = isset( $patch['owner_name'] ) ? $patch['owner_name'] : ($base['owner_name'] ?? '');
+		$result['mov'] = isset( $patch['mov'] ) ? $patch['mov'] : ($base['mov'] ?? '');
+		$result['delivery_fee'] = isset( $patch['delivery_fee'] ) ? $patch['delivery_fee'] : ($base['delivery_fee'] ?? '');
+		$result['template'] = isset( $patch['template'] ) ? $patch['template'] : ($base['template'] ?? '');
 		$base_contact = $base['contact'] ?? array();
 		if ( isset( $patch['contact'] ) ) {
 			$pc = $patch['contact'];
@@ -259,6 +368,46 @@ class Headless_Storefront_Rest_Api {
 		$result['social'] = isset( $patch['social'] ) ? $patch['social'] : ($base['social'] ?? array());
 		$result['cities'] = isset( $patch['cities'] ) ? $patch['cities'] : ($base['cities'] ?? array());
 		$result['trust_signals'] = isset( $patch['trust_signals'] ) ? $patch['trust_signals'] : ($base['trust_signals'] ?? array());
+		$result['delivery_areas'] = isset( $patch['delivery_areas'] ) ? $patch['delivery_areas'] : ($base['delivery_areas'] ?? array());
+		if ( isset( $patch['template_config'] ) ) {
+			$result['template_config'] = $this->merge_template_config( $base['template_config'] ?? array(), $patch['template_config'] );
+		} else {
+			$result['template_config'] = $base['template_config'] ?? array();
+		}
+		return $result;
+	}
+
+	public function merge_template_config( $base_tc, $patch_tc ) {
+		if ( $patch_tc === null ) {
+			return $base_tc;
+		}
+		$result = array( 'bakery' => $base_tc['bakery'] ?? array(), 'quickcommerce' => $base_tc['quickcommerce'] ?? array(), 'fooddelivery' => $base_tc['fooddelivery'] ?? array(), 'ecommerce' => $base_tc['ecommerce'] ?? array() );
+		if ( isset( $patch_tc['bakery'] ) ) {
+			$pb = $patch_tc['bakery'];
+			$bb = $result['bakery'];
+			$result['bakery'] = array( 'occasions' => isset( $pb['occasions'] ) ? $pb['occasions'] : ($bb['occasions'] ?? array()), 'eggless_default' => isset( $pb['eggless_default'] ) ? $pb['eggless_default'] : ($bb['eggless_default'] ?? false) );
+		}
+		if ( isset( $patch_tc['quickcommerce'] ) ) {
+			$pq = $patch_tc['quickcommerce'];
+			$bq = $result['quickcommerce'];
+			$base_eta = $bq['eta_band_minutes'] ?? array();
+			$merged_eta = $base_eta;
+			if ( isset( $pq['eta_band_minutes'] ) ) {
+				$pe = $pq['eta_band_minutes'];
+				$merged_eta = array( 'min' => isset( $pe['min'] ) ? $pe['min'] : ($base_eta['min'] ?? 0), 'max' => isset( $pe['max'] ) ? $pe['max'] : ($base_eta['max'] ?? 0) );
+			}
+			$result['quickcommerce'] = array( 'eta_band_minutes' => $merged_eta, 'cod_enabled' => isset( $pq['cod_enabled'] ) ? $pq['cod_enabled'] : ($bq['cod_enabled'] ?? false) );
+		}
+		if ( isset( $patch_tc['fooddelivery'] ) ) {
+			$pf = $patch_tc['fooddelivery'];
+			$bf = $result['fooddelivery'];
+			$result['fooddelivery'] = array( 'veg_only' => isset( $pf['veg_only'] ) ? $pf['veg_only'] : ($bf['veg_only'] ?? false), 'jain_filter_enabled' => isset( $pf['jain_filter_enabled'] ) ? $pf['jain_filter_enabled'] : ($bf['jain_filter_enabled'] ?? false) );
+		}
+		if ( isset( $patch_tc['ecommerce'] ) ) {
+			$pe = $patch_tc['ecommerce'];
+			$be = $result['ecommerce'];
+			$result['ecommerce'] = array( 'returns_window_days' => isset( $pe['returns_window_days'] ) ? $pe['returns_window_days'] : ($be['returns_window_days'] ?? 0), 'exchange_enabled' => isset( $pe['exchange_enabled'] ) ? $pe['exchange_enabled'] : ($be['exchange_enabled'] ?? false) );
+		}
 		return $result;
 	}
 
